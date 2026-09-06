@@ -1,0 +1,53 @@
+services:
+  - name: CardiAtlas
+    repository: Virelion-Biotech/Virelion-CardiAtlas
+    capabilities: [atlas.context, atlas.search]
+    endpoint: ${CARDIATLAS_URL}
+  - name: CardiBench
+    repository: Virelion-Biotech/Virelion-CardiBench
+    capabilities: [benchmark.resolve]
+    endpoint: ${CARDIBENCH_URL}
+  - name: CardiEval
+    repository: Virelion-Biotech/Virelion-CardiEval
+    capabilities: [evaluation.run]
+    endpoint: ${CARDIEVAL_URL}
+  - name: ElectroTrace
+    repository: Virelion-Biotech/Virelion-ElectroTrace
+    capabilities: [electrical.analyze]
+    endpoint: ${ELECTROTRACE_URL}
+  - name: MyoTrace
+    repository: Virelion-Biotech/Virelion-MyoTrace
+    capabilities: [mechanical.analyze]
+    endpoint: ${MYOTRACE_URL}
+  - name: OptiCell
+    repository: Virelion-Biotech/Virelion-OptiCell
+    capabilities: [imaging.qc]
+    endpoint: ${OPTICELL_URL}
+  - name: CardioScore
+    repository: Virelion-Biotech/Virelion-CardioScore
+    capabilities: [safety.score]
+    endpoint: ${CARDIOSCORE_URL}
+  - name: CardiLearn
+    repository: Virelion-Biotech/Virelion-CardiLearn
+    capabilities: [learn.infer, learn.predict]
+    endpoint: ${CARDILEARN_URL}
+  - name: CardiSim
+    repository: Virelion-Biotech/Virelion-CardiSim
+    capabilities: [simulation.run]
+    endpoint: ${CARDISIM_URL}
+  - name: CardiTrace
+    repository: Virelion-Biotech/Virelion-CardiTrace
+    capabilities: [trace.record]
+    endpoint: ${CARDITRACE_URL}
+  - name: CardiBridge
+    repository: Virelion-Biotech/Virelion-CardiBridge
+    capabilities: [bridge.validate]
+    endpoint: ${CARDIBRIDGE_URL}
+  - name: CardiAgent
+    repository: Virelion-Biotech/Virelion-CardiAgent
+    capabilities: [agent.challenge]
+    endpoint: ${CARDIAGENT_URL}
+  - name: CardiVex
+    repository: Virelion-Biotech/Virelion-CardiVex
+    capabilities: [vex.observe]
+    endpoint: ${CARDIVEX_URL}
