@@ -1,118 +1,67 @@
 # Virelion-HeartTwin
 
-**One front door for the Virelion cardiac research stack.**
+HeartTwin is the orchestration and integration layer for the Virelion cardiac research software stack. It provides one API/CLI for discovering available services, invoking specialist analyses, exchanging typed state objects, and composing research workflows.
 
-HeartTwin is the orchestration layer and future digital-twin runtime. It composes the specialist Virelion repositories rather than copying their algorithms. A researcher should be able to install HeartTwin, connect the available Virelion services, and use one API/CLI to move from raw observations to a unified cardiac state, learning, simulation, benchmarking, evaluation, and provenance.
+HeartTwin does not duplicate the algorithms implemented by the specialist repositories.
 
-## Integrated ecosystem
+## Integrated services
 
-```text
-Research data / experiments
-          |
-          v
-      HeartTwin
-          |
-  +-------+------------------------------------------------+
-  |       |        |        |        |        |             |
-Atlas  Electro  MyoTrace OptiCell CardioScore Learn       Sim
-  |     Trace      |        |        |        |            |
-  +-------+--------+--------+--------+--------+------------+
-                          |
-                  Unified Cardiac State
-                          |
-              +-----------+-----------+
-              |                       |
-           CardiBench              CardiEval
-              |                       |
-              +-----------+-----------+
-                          |
-                      CardiTrace
-                          |
-                     Research run
-```
+| Service | Role |
+|---|---|
+| CardiAtlas | biomedical metadata and evidence context |
+| CardiBench | benchmark definitions and dataset policies |
+| CardiEval | independent evaluation |
+| ElectroTrace | ECG/electrophysiology analysis |
+| MyoTrace | video-based mechanical analysis |
+| OptiCell | microscopy QC and cell analysis |
+| CardioScore | MEA-based cardiac safety scoring |
+| CardiLearn | molecular-state learning |
+| CardiSim | synthetic cardiac trajectories |
+| CardiTrace | provenance and reproducibility |
+| CardiBridge | typed interoperability |
+| CardiAgent | challenge generation |
+| CardiVex | challenge evaluation |
 
-### Services exposed through the gateway
+Service availability is configuration-dependent. An unavailable service is reported as unavailable; HeartTwin does not substitute a fabricated result.
 
-- **CardiAtlas** — evidence, datasets, biological context
-- **CardiBench** — benchmark registry and leakage-aware benchmark packages
-- **CardiEval** — independent metrics, uncertainty, robustness and statistical comparison
-- **ElectroTrace** — electrical/ECG analysis
-- **MyoTrace** — contractility/mechanical analysis
-- **OptiCell** — microscopy QC and cellular image features
-- **CardioScore** — MEA/CiPA-oriented cardiac safety scoring
-- **CardiLearn** — molecular-state representation learning and prediction
-- **CardiSim** — simulation and scenario generation
-- **CardiTrace** — provenance/reproducibility lineage
-- **CardiBridge** — typed protocol and compatibility boundary
-- **CardiAgent** — challenge generation
-- **CardiVex** — challenge/observation characterization
-
-The current public Virelion repositories confirm these roles; for example CardiLearn is a molecular-state learning layer, CardiBench is the benchmark registry, CardiEval independently evaluates submissions, and CardiBridge provides typed/versioned interoperability. fileciteturn7file0 fileciteturn9file0 fileciteturn10file0 fileciteturn8file0
-
-## 0 → 100 roadmap
-
-### 0–20: foundation — implemented in this commit
-
-- strict Pydantic cardiac-state contract
-- provenance and deterministic SHA-256 fingerprints
-- capability registry
-- service health/availability discovery
-- HTTP and local-command adapters
-- unified Python facade
-- unified CLI
-- service configuration for the full Virelion stack
-- explicit unavailable/error states
-- initial tests and JSON Schema
-
-### 20–40: real adapters
-
-Add native adapters for the actual public interfaces of each repository. These adapters must consume/emit the repository's real contracts rather than guessing endpoint names. Where a repository currently has only a CLI/library interface, HeartTwin will use that interface until a formal service API exists.
-
-### 40–60: state fusion
-
-Implement modality-specific normalizers and a real `CardiacStateAssembler`:
+## Architecture
 
 ```text
-molecular ─┐
-electrical ├─> normalized observations ─> state vector + missingness mask
-mechanical ┤
-imaging ───┤
-safety ────┘
+inputs / experiments
+        ↓
+     HeartTwin
+        ↓
+service registry + adapters
+        ↓
+CardiAtlas / ElectroTrace / MyoTrace / OptiCell / CardioScore
+        ↓
+CardiacState contracts
+        ↓
+CardiLearn / CardiSim
+        ↓
+CardiBench / CardiEval
+        ↓
+CardiTrace
 ```
 
-Observed, inferred and simulated values remain separate.
+CardiBridge defines cross-service protocol contracts. CardiTrace records provenance. CardiEval remains an independent evaluation boundary.
 
-### 60–75: learning + simulation
+## Current implementation
 
-- CardiLearn representation ingestion
-- CardiSim scenario execution
-- temporal state/trajectory objects
-- uncertainty propagation
-- counterfactual research scenarios
-- cross-modal consistency checks
+The repository currently includes:
 
-### 75–90: validation + provenance
+- typed cardiac-state contracts;
+- observation and provenance records;
+- service capability registry;
+- health/availability discovery;
+- HTTP and local-command adapters;
+- unified Python facade;
+- CLI;
+- service configuration for the Virelion repositories;
+- JSON Schemas;
+- initial orchestration and contract tests.
 
-- CardiBench benchmark resolution
-- CardiEval submission/evaluation handoff
-- CardiTrace run graph
-- reproducible run manifests
-- dataset/model/service fingerprints
-- external-study validation reports
-
-### 90–100: production research platform
-
-- async job execution
-- persistent run store
-- artifact store
-- authentication/authorization
-- service version compatibility gates
-- web UI/API
-- experiment workspace
-- multimodal cardiac-state explorer
-- reproducible export bundle
-
-**Important:** 100% here means a complete software platform, not a clinically validated digital twin. Biological validity remains an empirical question.
+Native adapters are added only after the target repository's actual CLI/library/API contract is inspected.
 
 ## Quick start
 
@@ -123,13 +72,13 @@ hearttwin doctor
 hearttwin demo --output outputs/demo-state.json
 ```
 
-To obtain the current Virelion service repositories locally:
+To obtain local copies of configured Virelion services:
 
 ```bash
 bash scripts/bootstrap_services.sh
 ```
 
-Then configure service endpoints in `configs/services.yaml` using environment variables such as `CARDILEARN_URL` and `CARDISIM_URL`.
+Configure service endpoints in `configs/services.yaml` using the documented environment variables.
 
 ## Python API
 
@@ -137,8 +86,6 @@ Then configure service endpoints in `configs/services.yaml` using environment va
 from hearttwin import VirelionServices, load_registry
 
 v = VirelionServices(load_registry())
-
-# Specialist services through one object
 v.electrical("sample-001", input_path="ecg.csv")
 v.mechanical("sample-001", input_path="video.mp4")
 v.imaging("sample-001", input_path="images/")
@@ -146,15 +93,31 @@ v.safety("sample-001", input_path="mea.csv")
 v.learn("sample-001", features={})
 v.simulate("sample-001", scenario={})
 v.evaluate("sample-001", submission={})
-
-# Orchestrate a complete run
-run = v.run_twin("sample-001", context={"species": "human"})
 ```
 
-## Architecture rule
+## Cardiac state model
 
-HeartTwin is the **front door**, not the place where every Virelion algorithm is duplicated. Specialist repositories remain independently versioned. CardiBridge is the protocol boundary; HeartTwin is the orchestration/runtime boundary; CardiTrace is the lineage boundary; CardiEval remains independent from model-producing code.
+HeartTwin distinguishes observed, inferred, and simulated values. Missing modalities are represented explicitly rather than interpreted as negative findings. The state contract is intended to become the common integration representation across Virelion services.
 
-## Scientific safety
+## Roadmap
 
-HeartTwin is research infrastructure. It does not diagnose patients, prescribe treatment, or establish clinical safety/effectiveness. Missing data are not interpreted as negative findings. Predictions are not causal claims. Service availability is never treated as scientific validity.
+1. Native adapters for each service.
+2. Multimodal state assembly and normalization.
+3. CardiLearn/CardiSim orchestration and temporal state objects.
+4. CardiBench/CardiEval evaluation handoffs.
+5. CardiTrace run and artifact lineage.
+6. Persistent jobs/artifacts, compatibility gates, API, and research UI.
+
+A complete software integration is not equivalent to a clinically validated digital twin.
+
+## Scientific limitations
+
+HeartTwin is research infrastructure. It does not diagnose patients or prescribe treatment. Predictions are not causal claims, service availability is not scientific validation, and model outputs require the validation performed by the underlying specialist repository and study design.
+
+## License
+
+GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See `LICENSE`.
+
+## Citation
+
+Cite the HeartTwin release and the individual Virelion service releases used in a workflow.
