@@ -51,3 +51,11 @@ services:
     repository: Virelion-Biotech/Virelion-CardiVex
     capabilities: [vex.observe]
     endpoint: ${CARDIVEX_URL}
+  - name: CardiStudio
+    repository: Virelion-Biotech/Virelion-CardiStudio
+    capabilities: [design.generate, population.generate, design.validate, power.plan]
+    endpoint: ${CARDISTUDIO_URL}
+  - name: DCCP
+    repository: Virelion-Biotech/Virelion-DCCP
+    capabilities: [challenge.validate, challenge.assess, challenge.materialize, recovery.score, host.map]
+    endpoint: ${DCCP_URL}
