@@ -5,8 +5,10 @@ from .provenance import new_run_id, sha256
 from .service_registry import ServiceRegistry
 
 DEFAULT_CAPABILITIES = [
-    "atlas.context", "atlas.search", "electrical.analyze", "mechanical.analyze",
-    "imaging.qc", "safety.score", "learn.infer", "learn.predict",
+    "atlas.context", "atlas.search", "design.generate", "population.generate",
+    "design.validate", "power.plan", "challenge.validate", "challenge.assess",
+    "challenge.materialize", "recovery.score", "host.map", "electrical.analyze",
+    "mechanical.analyze", "imaging.qc", "safety.score", "learn.infer", "learn.predict",
     "simulation.run", "benchmark.resolve", "evaluation.run", "trace.record",
     "agent.challenge", "vex.observe"
 ]
