@@ -17,6 +17,8 @@ HeartTwin does not duplicate the algorithms implemented by the specialist reposi
 | CardioScore | MEA-based cardiac safety scoring |
 | CardiLearn | molecular-state learning |
 | CardiSim | synthetic cardiac trajectories |
+| CardiStudio | experimental design, synthetic populations, constraints, and power planning |
+| DCCP | defensive challenge scenarios, OOD assessment, and recovery scoring |
 | CardiTrace | provenance and reproducibility |
 | CardiBridge | typed interoperability |
 | CardiAgent | challenge generation |
@@ -33,7 +35,9 @@ inputs / experiments
         ↓
 service registry + adapters
         ↓
-CardiAtlas / ElectroTrace / MyoTrace / OptiCell / CardioScore
+CardiStudio / DCCP / CardiAtlas
+        ↓
+ElectroTrace / MyoTrace / OptiCell / CardioScore
         ↓
 CardiacState contracts
         ↓
@@ -57,7 +61,7 @@ The repository currently includes:
 - HTTP and local-command adapters;
 - unified Python facade;
 - CLI;
-- service configuration for the Virelion repositories;
+- service configuration;
 - JSON Schemas;
 - initial orchestration and contract tests.
 
@@ -72,7 +76,7 @@ hearttwin doctor
 hearttwin demo --output outputs/demo-state.json
 ```
 
-To obtain local copies of configured Virelion services:
+To obtain local copies of configured services:
 
 ```bash
 bash scripts/bootstrap_services.sh
@@ -86,6 +90,9 @@ Configure service endpoints in `configs/services.yaml` using the documented envi
 from hearttwin import VirelionServices, load_registry
 
 v = VirelionServices(load_registry())
+v.design("study-001", specification={})
+v.population("study-001", specification={})
+v.challenge_assess("study-001", scenario={})
 v.electrical("sample-001", input_path="ecg.csv")
 v.mechanical("sample-001", input_path="video.mp4")
 v.imaging("sample-001", input_path="images/")
@@ -103,10 +110,11 @@ HeartTwin distinguishes observed, inferred, and simulated values. Missing modali
 
 1. Native adapters for each service.
 2. Multimodal state assembly and normalization.
-3. CardiLearn/CardiSim orchestration and temporal state objects.
-4. CardiBench/CardiEval evaluation handoffs.
-5. CardiTrace run and artifact lineage.
-6. Persistent jobs/artifacts, compatibility gates, API, and research UI.
+3. Experimental-design and challenge-state orchestration.
+4. CardiLearn/CardiSim orchestration and temporal state objects.
+5. CardiBench/CardiEval evaluation handoffs.
+6. CardiTrace run and artifact lineage.
+7. Persistent jobs/artifacts, compatibility gates, API, and research UI.
 
 A complete software integration is not equivalent to a clinically validated digital twin.
 
@@ -120,4 +128,4 @@ GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See `LICENS
 
 ## Citation
 
-Cite the HeartTwin release and the individual Virelion service releases used in a workflow.
+Cite the HeartTwin release and the individual service releases used in a workflow.
