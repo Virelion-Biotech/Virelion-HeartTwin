@@ -14,7 +14,7 @@ services:
   - name: ElectroTrace
     repository: Virelion-Biotech/Virelion-ElectroTrace
     capabilities: [electrical.analyze]
-    endpoint: ${ELECTROTRACE_URL}
+    command: electrotrace-hearttwin
   - name: MyoTrace
     repository: Virelion-Biotech/Virelion-MyoTrace
     capabilities: [mechanical.analyze]
@@ -22,11 +22,11 @@ services:
   - name: OptiCell
     repository: Virelion-Biotech/Virelion-OptiCell
     capabilities: [imaging.qc]
-    endpoint: ${OPTICELL_URL}
+    command: opticell-hearttwin
   - name: CardioScore
     repository: Virelion-Biotech/Virelion-CardioScore
     capabilities: [safety.score]
-    endpoint: ${CARDIOSCORE_URL}
+    command: cardioscore-hearttwin
   - name: CardiLearn
     repository: Virelion-Biotech/Virelion-CardiLearn
     capabilities: [learn.infer, learn.predict]
@@ -47,7 +47,7 @@ services:
   - name: CardiAgent
     repository: Virelion-Biotech/Virelion-CardiAgent
     capabilities: [agent.challenge]
-    endpoint: ${CARDIAGENT_URL}
+    command: cardiagent-hearttwin
   - name: CardiVex
     repository: Virelion-Biotech/Virelion-CardiVex
     capabilities: [vex.observe]
