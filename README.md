@@ -6,23 +6,25 @@ HeartTwin does not duplicate the algorithms implemented by the specialist reposi
 
 ## Integrated services
 
-| Service | Role |
-|---|---|
-| CardiAtlas | biomedical metadata and evidence context |
-| CardiBench | benchmark definitions and dataset policies |
-| CardiEval | independent evaluation |
-| ElectroTrace | ECG/electrophysiology analysis |
-| MyoTrace | video-based mechanical analysis |
-| OptiCell | microscopy QC and cell analysis |
-| CardioScore | MEA-based cardiac safety scoring |
-| CardiLearn | molecular-state learning |
-| CardiSim | synthetic cardiac trajectories |
-| CardiStudio | experimental design, synthetic populations, constraints, and power planning |
-| DCCP | defensive challenge scenarios, OOD assessment, and recovery scoring |
-| CardiTrace | provenance and reproducibility |
-| CardiBridge | typed interoperability |
-| CardiAgent | challenge generation |
-| CardiVex | challenge evaluation |
+| Service | Role | Status |
+|---|---|---|
+| CardiAtlas | biomedical metadata and evidence context | Registered — no adapter yet |
+| CardiBench | benchmark definitions and dataset policies | Registered — no adapter yet |
+| CardiEval | independent evaluation | Registered — no adapter yet |
+| ElectroTrace | ECG/electrophysiology analysis | Registered — no adapter yet |
+| MyoTrace | video-based mechanical analysis | Registered — no adapter yet |
+| OptiCell | microscopy QC and cell analysis | Registered — no adapter yet |
+| CardioScore | MEA-based cardiac safety scoring | Registered — no adapter yet |
+| CardiLearn | molecular-state learning | Registered — no adapter yet |
+| CardiSim | synthetic cardiac trajectories | Registered — no adapter yet |
+| CardiStudio | experimental design, synthetic populations, constraints, and power planning | Registered — no adapter yet |
+| DCCP | defensive challenge scenarios, OOD assessment, and recovery scoring | Registered — no adapter yet |
+| CardiTrace | provenance and reproducibility | Registered — no adapter yet |
+| CardiBridge | typed interoperability | Registered — no adapter yet |
+| CardiAgent | challenge generation | Registered — no adapter yet |
+| CardiVex | challenge evaluation | Registered — no adapter yet |
+
+Registration in `configs/services.yaml` reflects service discovery configuration only; see `docs/INTEGRATION.md` for what “integrated” requires.
 
 Service availability is configuration-dependent. An unavailable service is reported as unavailable; HeartTwin does not substitute a fabricated result.
 
