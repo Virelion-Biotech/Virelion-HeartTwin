@@ -38,7 +38,7 @@ services:
   - name: CardiTrace
     repository: Virelion-Biotech/Virelion-CardiTrace
     capabilities: [trace.record]
-    endpoint: ${CARDITRACE_URL}
+    command: carditrace-hearttwin
   - name: CardiBridge
     repository: Virelion-Biotech/Virelion-CardiBridge
     capabilities: [bridge.validate]
