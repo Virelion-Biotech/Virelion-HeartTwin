@@ -18,7 +18,7 @@ services:
   - name: MyoTrace
     repository: Virelion-Biotech/Virelion-MyoTrace
     capabilities: [mechanical.analyze]
-    endpoint: ${MYOTRACE_URL}
+    command: myotrace-hearttwin
   - name: OptiCell
     repository: Virelion-Biotech/Virelion-OptiCell
     capabilities: [imaging.qc]
@@ -43,6 +43,7 @@ services:
     repository: Virelion-Biotech/Virelion-CardiBridge
     capabilities: [bridge.validate]
     endpoint: ${CARDIBRIDGE_URL}
+    path_template: /v1/{capability_leaf}
   - name: CardiAgent
     repository: Virelion-Biotech/Virelion-CardiAgent
     capabilities: [agent.challenge]
