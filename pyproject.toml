@@ -1,9 +1,9 @@
 [project]
 name = "virelion-hearttwin"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unified orchestration and cardiac digital-twin gateway for the Virelion ecosystem"
 requires-python = ">=3.10"
-dependencies = ["pydantic>=2.6,<3", "PyYAML>=6.0,<7"]
+dependencies = ["pydantic>=2.6,<3", "PyYAML>=6.0,<7", "numpy>=1.26,<3"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
