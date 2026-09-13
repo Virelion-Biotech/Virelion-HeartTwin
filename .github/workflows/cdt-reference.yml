@@ -1,0 +1,93 @@
+name: CDT numerical equivalence
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject:
+        description: Upstream subject to use for the deterministic forward fixture
+        required: true
+        default: DTI004
+      run_full_personalisation:
+        description: Also run the upstream stochastic personalization workflow
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    - cron: "17 3 * * 6"
+
+jobs:
+  forward-equivalence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native test dependencies
+        run: python -m pip install --upgrade pip numpy pytest
+      - name: Fetch published CDT data
+        run: python scripts/fetch_cdt_zenodo.py --record 14034739 --output .cdt_reference/data
+      - name: Checkout pinned upstream CDT
+        run: |
+          git clone --no-checkout https://github.com/juliacamps/Cardiac-Digital-Twin.git .cdt_reference/upstream
+          cd .cdt_reference/upstream
+          git fetch --depth 1 origin 816d51fab0837cfe9e20c7d3a318429e9acf0733
+          git checkout --detach 816d51fab0837cfe9e20c7d3a318429e9acf0733
+      - name: Build upstream forward fixture
+        env:
+          SUBJECT: ${{ github.event.inputs.subject || 'DTI004' }}
+        run: |
+          DATA_ROOT="$(cat .cdt_reference/data/reference_root.txt)"
+          PYTHONPATH=. python scripts/build_cdt_forward_fixture.py \
+            --upstream .cdt_reference/upstream \
+            --data-root "$DATA_ROOT" \
+            --subject "$SUBJECT" \
+            --output .cdt_reference/reference.npz
+      - name: Build native result from identical fixture
+        run: |
+          PYTHONPATH=. python scripts/build_native_from_cdt_fixture.py \
+            --reference .cdt_reference/reference.npz \
+            --output .cdt_reference/native.npz
+      - name: Compare LAT outputs
+        run: |
+          python scripts/compare_cdt_lat.py \
+            --reference .cdt_reference/reference.npz \
+            --native .cdt_reference/native.npz \
+            --output .cdt_reference/comparison.json \
+            --max-abs-tol 0 \
+            --rmse-tol 0 \
+            --mismatch-fraction-tol 0
+      - name: Upload equivalence artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdt-forward-equivalence
+          path: .cdt_reference/
+          retention-days: 14
+
+  full-personalisation:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_personalisation == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Fetch published CDT data
+        run: python scripts/fetch_cdt_zenodo.py --record 14034739 --output .cdt_reference/data
+      - name: Run pinned upstream personalization workflow
+        run: |
+          DATA_ROOT="$(cat .cdt_reference/data/reference_root.txt)"
+          PYTHONPATH=. python scripts/run_cdt_reference.py \
+            --data-root "$DATA_ROOT" \
+            --workdir .cdt_reference/full_reference \
+            --subject "${{ github.event.inputs.subject || 'DTI004' }}"
+      - name: Upload personalization artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdt-full-personalisation
+          path: .cdt_reference/full_reference/
+          retention-days: 14
