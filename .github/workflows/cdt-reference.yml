@@ -30,7 +30,7 @@ jobs:
         run: python scripts/fetch_cdt_zenodo.py --record 14034739 --output .cdt_reference/data
       - name: Checkout pinned upstream CDT
         run: |
-          git clone --depth 1 https://github.com/juliacamps/Cardiac-Digital-Twin.git .cdt_reference/upstream
+          git clone --no-checkout https://github.com/juliacamps/Cardiac-Digital-Twin.git .cdt_reference/upstream
           cd .cdt_reference/upstream
           git fetch --depth 1 origin 816d51fab0837cfe9e20c7d3a318429e9acf0733
           git checkout --detach 816d51fab0837cfe9e20c7d3a318429e9acf0733
@@ -38,9 +38,10 @@ jobs:
         env:
           SUBJECT: ${{ github.event.inputs.subject || 'DTI004' }}
         run: |
-          python scripts/build_cdt_forward_fixture.py \
+          DATA_ROOT="$(cat .cdt_reference/data/reference_root.txt)"
+          PYTHONPATH=. python scripts/build_cdt_forward_fixture.py \
             --upstream .cdt_reference/upstream \
-            --data-root .cdt_reference/data/extracted \
+            --data-root "$DATA_ROOT" \
             --subject "$SUBJECT" \
             --output .cdt_reference/reference.npz
       - name: Build native result from identical fixture
@@ -74,11 +75,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Fetch published CDT data
+        run: python scripts/fetch_cdt_zenodo.py --record 14034739 --output .cdt_reference/data
       - name: Run pinned upstream personalization workflow
         run: |
-          python scripts/fetch_cdt_zenodo.py --record 14034739 --output .cdt_reference/data
+          DATA_ROOT="$(cat .cdt_reference/data/reference_root.txt)"
           PYTHONPATH=. python scripts/run_cdt_reference.py \
-            --data-root .cdt_reference/data/extracted \
+            --data-root "$DATA_ROOT" \
             --workdir .cdt_reference/full_reference \
             --subject "${{ github.event.inputs.subject || 'DTI004' }}"
       - name: Upload personalization artifacts
