@@ -35,6 +35,10 @@ services:
     repository: Virelion-Biotech/Virelion-CardiSim
     capabilities: [simulation.run]
     endpoint: ${CARDISIM_URL}
+  - name: CardiSimNative
+    repository: Virelion-Biotech/Virelion-HeartTwin
+    capabilities: [simulation.cardiac_twin]
+    builtin: cardiac_digital_twin
   - name: CardiTrace
     repository: Virelion-Biotech/Virelion-CardiTrace
     capabilities: [trace.record]
