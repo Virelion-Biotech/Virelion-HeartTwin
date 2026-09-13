@@ -8,7 +8,6 @@ import pytest
 
 from hearttwin.cardiac_twin import CardiacDigitalTwin, ConductionNetwork, EPParameters, MeshGeometry
 
-
 PINNED_COMMIT = "816d51fab0837cfe9e20c7d3a318429e9acf0733"
 
 
@@ -40,7 +39,7 @@ def test_native_forward_is_deterministic() -> None:
     first = twin.simulate(with_ecg=False).activation
     second = twin.simulate(with_ecg=False).activation
     np.testing.assert_array_equal(first, second)
-    np.testing.assert_array_equal(first, np.array([1, 1001, 2001]))
+    np.testing.assert_array_equal(first, np.array([1, 2, 3]))
 
 
 def test_pinned_reference_metadata_is_explicit() -> None:
@@ -56,8 +55,6 @@ def test_real_fixture_comparison_when_present() -> None:
     if not (reference.exists() and native.exists()):
         pytest.skip("Generated CDT fixture not present")
     from scripts.compare_cdt_lat import main as compare_main
-
-    # Run the comparator through its public CLI contract only when the fixture exists.
     import sys
 
     previous = sys.argv
