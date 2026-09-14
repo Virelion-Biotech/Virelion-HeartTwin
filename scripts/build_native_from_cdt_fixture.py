@@ -39,6 +39,8 @@ def main() -> None:
         tetrahedra=ref["tetrahedra"],
         edge_nodes=ref["edge_nodes"],
         edge_fibre_sheet_normal=ref["edge_fibre_sheet_normal"],
+        dense_endocardial=ref["dense_endocardial"],
+        sparse_endocardial=ref["sparse_endocardial"],
     )
     twin = CardiacDigitalTwin(
         geometry=geometry,

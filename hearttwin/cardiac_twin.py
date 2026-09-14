@@ -73,6 +73,8 @@ class MeshGeometry:
     normal: np.ndarray | None = None
     edge_nodes: np.ndarray | None = None
     edge_fibre_sheet_normal: np.ndarray | None = None
+    dense_endocardial: np.ndarray | None = None
+    sparse_endocardial: np.ndarray | None = None
     scar: ScarMap | None = None
 
     def __post_init__(self) -> None:
@@ -109,6 +111,32 @@ class MeshGeometry:
             if self.edge_nodes is not None and len(basis) != len(self.edge_nodes):
                 raise ValueError("edge basis count must match edge_nodes")
             object.__setattr__(self, "edge_fibre_sheet_normal", basis)
+
+        if self.dense_endocardial is not None or self.sparse_endocardial is not None:
+            if self.edge_nodes is None:
+                raise ValueError(
+                    "Endocardial edge classes require explicit edge_nodes ordering"
+                )
+            edge_count = len(self.edge_nodes)
+            for name in ("dense_endocardial", "sparse_endocardial"):
+                value = getattr(self, name)
+                if value is None:
+                    continue
+                arr = np.asarray(value, dtype=bool)
+                if arr.ndim != 1 or len(arr) != edge_count:
+                    raise ValueError(
+                        f"{name} must have shape ({edge_count},)"
+                    )
+                object.__setattr__(self, name, arr)
+            if (
+                self.dense_endocardial is not None
+                and self.sparse_endocardial is not None
+                and np.any(self.dense_endocardial & self.sparse_endocardial)
+            ):
+                raise ValueError(
+                    "dense_endocardial and sparse_endocardial edge classes overlap"
+                )
+
         if self.scar is not None and len(self.scar.labels) != len(xyz):
             raise ValueError("scar labels must match mesh node count")
         object.__setattr__(self, "node_xyz", xyz)
@@ -191,35 +219,106 @@ class EikonalPropagator:
     def __init__(self, legacy_output: bool = False):
         self.legacy_output = legacy_output
 
-    def _edge_cost(self, geometry: MeshGeometry, edge_index: int, u: int, v: int, params: EPParameters, tissue: np.ndarray) -> float:
+    def _edge_cost(
+        self,
+        geometry: MeshGeometry,
+        edge_index: int,
+        u: int,
+        v: int,
+        params: EPParameters,
+        tissue: np.ndarray,
+    ) -> float:
+        """Return upstream-compatible Eikonal propagation cost.
+
+        The published Cardiac-Digital-Twin implementation has three edge
+        regimes:
+
+        1. dense endocardial: Euclidean distance / endo_dense_speed
+        2. sparse endocardial: Euclidean distance / endo_sparse_speed
+        3. ventricular: anisotropic Eikonal metric using edge fibre/sheet/normal
+
+        The native scar/tissue modifier is retained after the base cost.
+        """
         delta = geometry.node_xyz[v] - geometry.node_xyz[u]
+
         if not np.all(np.isfinite(delta)):
             raise ValueError("Mesh contains non-finite coordinates")
-        basis = geometry.edge_fibre_sheet_normal
-        if basis is not None:
-            g = np.diag([params.fibre_speed**2, params.sheet_speed**2, params.normal_speed**2])
-            metric = basis[edge_index] @ g @ basis[edge_index].T
-            try:
-                inverse = np.linalg.inv(metric)
-            except np.linalg.LinAlgError as exc:
-                raise ValueError(f"Singular fibre metric on edge {edge_index}") from exc
-            value = float(delta @ inverse @ delta.T)
-            if value < 0 and value > -1e-10:
-                value = 0.0
-            if value < 0:
-                raise ValueError(f"Negative Eikonal metric on edge {edge_index}")
-            base_cost = math.sqrt(value)
-        else:
+
+        dense = geometry.dense_endocardial
+        sparse = geometry.sparse_endocardial
+
+        # Dense endocardial edges use isotropic conduction.
+        if dense is not None and dense[edge_index]:
             length = float(np.linalg.norm(delta))
-            if length == 0:
+            if length == 0.0:
                 return math.inf
-            if geometry.fibre is None:
-                velocity = params.normal_speed
+            base_cost = length / params.endo_dense_speed
+
+        # Sparse endocardial edges use isotropic conduction.
+        elif sparse is not None and sparse[edge_index]:
+            length = float(np.linalg.norm(delta))
+            if length == 0.0:
+                return math.inf
+            base_cost = length / params.endo_sparse_speed
+
+        # Ventricular edges use the anisotropic Eikonal metric.
+        else:
+            basis = geometry.edge_fibre_sheet_normal
+
+            if basis is not None:
+                g = np.diag(
+                    [
+                        params.fibre_speed**2,
+                        params.sheet_speed**2,
+                        params.normal_speed**2,
+                    ]
+                )
+
+                metric = basis[edge_index] @ g @ basis[edge_index].T
+
+                try:
+                    inverse = np.linalg.inv(metric)
+                except np.linalg.LinAlgError as exc:
+                    raise ValueError(
+                        f"Singular fibre metric on edge {edge_index}"
+                    ) from exc
+
+                value = float(delta @ inverse @ delta.T)
+
+                if value < 0 and value > -1e-10:
+                    value = 0.0
+
+                if value < 0:
+                    raise ValueError(
+                        f"Negative Eikonal metric on edge {edge_index}"
+                    )
+
+                base_cost = math.sqrt(value)
+
             else:
-                alignment = abs(float(np.dot(delta / length, geometry.fibre[u])))
-                velocity = params.fibre_speed * alignment + params.sheet_speed * (1.0 - alignment)
-            base_cost = length / max(velocity, 1e-12)
-        return base_cost / max(0.5 * (tissue[u] + tissue[v]), 1e-12)
+                # Existing generic fallback for meshes without an edge basis.
+                length = float(np.linalg.norm(delta))
+
+                if length == 0.0:
+                    return math.inf
+
+                if geometry.fibre is None:
+                    velocity = params.normal_speed
+                else:
+                    alignment = abs(
+                        float(np.dot(delta / length, geometry.fibre[u]))
+                    )
+                    velocity = (
+                        params.fibre_speed * alignment
+                        + params.sheet_speed * (1.0 - alignment)
+                    )
+
+                base_cost = length / max(velocity, 1e-12)
+
+        return base_cost / max(
+            0.5 * (tissue[u] + tissue[v]),
+            1e-12,
+        )
 
     def simulate(self, geometry: MeshGeometry, conduction: ConductionNetwork, params: EPParameters) -> EikonalResult:
         params.validate()
