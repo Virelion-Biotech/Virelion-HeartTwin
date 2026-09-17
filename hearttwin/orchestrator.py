@@ -16,6 +16,12 @@ DEFAULT_CAPABILITIES = [
     "agent.challenge", "vex.observe"
 ]
 
+TYPED_STATE_CAPABILITIES = {
+    "atlas.context", "benchmark.resolve", "learn.infer", "learn.predict",
+    "simulation.run", "evaluation.run", "agent.challenge", "vex.observe",
+    "bridge.publish", "trace.record",
+}
+
 
 class HeartTwin:
     def __init__(self, registry: ServiceRegistry):
@@ -93,10 +99,10 @@ class HeartTwin:
                 results.append(result)
                 try:
                     store.reduce_service_result(result)
-                except CardiacStateValidationError:
-                    # Low-level HeartTwin.run remains compatible with legacy service payloads.
-                    # The explicit multimodal workflow is strict and validates every stage.
-                    pass
+                except CardiacStateValidationError as exc:
+                    if capability in TYPED_STATE_CAPABILITIES:
+                        raise exc
+                    # Specialist legacy adapters are still retained as raw ServiceResult.data.
             except Exception as exc:
                 results.append(
                     ServiceResult(
