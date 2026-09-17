@@ -44,7 +44,7 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
         predictions=[LearningPredictionPayload(sample_id="s1", y_true=1, y_pred=1, score=0.9)],
         dataset_fingerprint="b" * 64,
     )
-    store.record_learning(learning, learning_prov)
+    store.record_learning(learning, learning_prov, capability="learn.predict")
 
     simulation_prov = provenance("CardiSim", "sim-1")
     simulation = SimulationResultPayload(
@@ -80,6 +80,7 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
     assert snapshot.contract_version == "1.1.0"
     assert snapshot.state_phase == "validated"
     assert len(snapshot.prediction_artifacts) == 1
+    assert snapshot.predictions[0]["capability"] == "learn.predict"
     assert len(snapshot.simulation_artifacts) == 1
     assert len(snapshot.evaluation_artifacts) == 1
     assert snapshot.state_fingerprint
@@ -127,3 +128,20 @@ def test_dangling_provenance_is_rejected():
     )
     with pytest.raises(CardiacStateValidationError, match="Dangling HeartTwin provenance"):
         store.validate()
+
+
+def test_snapshot_fingerprint_detects_tampering():
+    store = CardiacStateStore.new("subject-1")
+    snapshot = store.snapshot()
+    snapshot.biological_context["changed"] = True
+    tampered = CardiacStateStore.from_snapshot(snapshot, verify=False)
+    with pytest.raises(CardiacStateValidationError, match="fingerprint mismatch"):
+        tampered.verify_fingerprint()
+
+
+def test_from_snapshot_rejects_invalid_embedded_fingerprint():
+    store = CardiacStateStore.new("subject-1")
+    snapshot = store.snapshot()
+    snapshot.state_fingerprint = "0" * 64
+    with pytest.raises(CardiacStateValidationError, match="fingerprint mismatch"):
+        CardiacStateStore.from_snapshot(snapshot)
