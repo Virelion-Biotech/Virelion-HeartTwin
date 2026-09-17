@@ -2,14 +2,17 @@ services:
   - name: CardiAtlas
     repository: Virelion-Biotech/Virelion-CardiAtlas
     capabilities: [atlas.context, atlas.search]
+    builtin: cardiatlas
     endpoint: ${CARDIATLAS_URL}
   - name: CardiBench
     repository: Virelion-Biotech/Virelion-CardiBench
     capabilities: [benchmark.resolve]
+    builtin: cardibench
     endpoint: ${CARDIBENCH_URL}
   - name: CardiEval
     repository: Virelion-Biotech/Virelion-CardiEval
     capabilities: [evaluation.run]
+    builtin: cardieval
     endpoint: ${CARDIEVAL_URL}
   - name: ElectroTrace
     repository: Virelion-Biotech/Virelion-ElectroTrace
@@ -30,10 +33,12 @@ services:
   - name: CardiLearn
     repository: Virelion-Biotech/Virelion-CardiLearn
     capabilities: [learn.infer, learn.predict]
+    builtin: cardilearn
     endpoint: ${CARDILEARN_URL}
   - name: CardiSim
     repository: Virelion-Biotech/Virelion-CardiSim
     capabilities: [simulation.run]
+    builtin: cardisim
     endpoint: ${CARDISIM_URL}
   - name: CardiSimNative
     repository: Virelion-Biotech/Virelion-HeartTwin
@@ -56,12 +61,15 @@ services:
   - name: CardiVex
     repository: Virelion-Biotech/Virelion-CardiVex
     capabilities: [vex.observe]
+    builtin: cardivex
     endpoint: ${CARDIVEX_URL}
   - name: CardiStudio
     repository: Virelion-Biotech/Virelion-CardiStudio
     capabilities: [design.generate, population.generate, design.validate, power.plan]
+    builtin: cardistudio
     endpoint: ${CARDISTUDIO_URL}
   - name: DCCP
     repository: Virelion-Biotech/Virelion-DCCP
     capabilities: [challenge.validate, challenge.assess, challenge.materialize, recovery.score, host.map]
+    builtin: dccp
     endpoint: ${DCCP_URL}
