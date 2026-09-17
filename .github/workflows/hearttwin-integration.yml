@@ -1,0 +1,77 @@
+name: HeartTwin integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Python ${{ matrix.python-version }} · full Virelion stack
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout HeartTwin
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Upgrade packaging tools
+        run: python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install HeartTwin
+        run: python -m pip install -e '.[dev]'
+
+      - name: Install native service repositories
+        run: |
+          set -euxo pipefail
+          repos=(
+            Virelion-CardiAtlas
+            Virelion-CardiBench
+            Virelion-CardiEval
+            Virelion-CardiLearn
+            Virelion-CardiSim
+            Virelion-CardiVex
+            Virelion-CardiStudio
+            Virelion-DCCP
+          )
+          for repo in "${repos[@]}"; do
+            python -m pip install "git+https://github.com/Virelion-Biotech/${repo}.git@main"
+          done
+
+      - name: Install adapter repositories
+        run: |
+          set -euxo pipefail
+          repos=(
+            Virelion-ElectroTrace
+            Virelion-MyoTrace
+            Virelion-OptiCell
+            Virelion-CardioScore
+            Virelion-CardiTrace
+            Virelion-CardiBridge
+            Virelion-CardiAgent
+          )
+          for repo in "${repos[@]}"; do
+            python -m pip install "git+https://github.com/Virelion-Biotech/${repo}.git@main"
+          done
+
+      - name: Validate registry
+        run: hearttwin doctor
+
+      - name: Run HeartTwin integration tests
+        run: python -m pytest -q tests/test_native_service_connections.py tests/test_multimodal_workflow.py
+
+      - name: Run full HeartTwin test suite
+        run: python -m pytest -q
