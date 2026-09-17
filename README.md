@@ -35,13 +35,14 @@ observations / experiment data
             ▼
         HeartTwin
             │
-   typed workflow state
+            ▼
+      CardiacState  ◄── canonical typed state
             │
-     ┌──────┼─────────┐
-     ▼      ▼         ▼
- CardiAtlas CardiLearn CardiStudio
-     │      │         │
-     └──────┼─────────┘
+   ┌────────┼──────────────────┐
+   ▼        ▼                  ▼
+CardiAtlas CardiLearn       modality adapters
+   │        │                  │
+   └────────┼──────────────────┘
             ▼
         CardiBench
             │
@@ -50,22 +51,32 @@ observations / experiment data
             │
       ┌─────┴─────┐
       ▼           ▼
- ElectroTrace  MyoTrace / OptiCell / CardioScore
+ CardiAgent     specialist analyses
       │           │
       └─────┬─────┘
             ▼
-        CardiacState
+        CardiBridge ─────► CardiVex
             │
-      ┌─────┼───────────┐
-      ▼     ▼           ▼
- CardiAgent CardiVex   CardiEval
-      │                   │
-      └──────► CardiBridge│
-                           ▼
-                       CardiTrace
+            ▼
+        CardiEval
+            │
+            ▼
+        CardiTrace
 ```
 
-The low-level `HeartTwin.run()` API remains backward compatible. `hearttwin.workflow.run_multimodal_workflow()` is the explicit dependency graph: each service result is validated into a versioned typed contract before it becomes downstream workflow state.
+`CardiacState` is the canonical biological/computational state object. `WorkflowState` is the execution view and carries stage-specific typed payloads alongside a `cardiac_state` reference. The low-level `HeartTwin.run()` API remains backward compatible and reduces any recognized typed service results into the canonical state.
+
+## Canonical CardiacState
+
+The current state contract is version `1.1.0`. It provides typed collections for observations, Atlas context, benchmark resolutions, modality analyses, derived state variables, simulations, predictions, evaluations, challenges, CardiVex observations, bridge publications, phase transitions, trace records, and HeartTwin provenance.
+
+Each `StateValue` can carry a domain, variable, value, unit, anatomical region, temporal information, observed/inferred/simulated status, confidence, structured uncertainty, method, and provenance links. Simulation, prediction, and evaluation results have dedicated artifact models rather than requiring arbitrary dictionaries.
+
+The old `inferred_state`, `simulations`, `predictions`, and `validation` dictionary fields remain as compatibility mirrors. New code should use the typed collections.
+
+`CardiacStateStore` is the reducer/validator for the canonical state. It enforces unique IDs, prevents dangling HeartTwin provenance links, validates phase history, creates stable artifact IDs, and emits a SHA-256 `state_fingerprint` from the canonical snapshot.
+
+See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.1.0.schema.json` for the contract and migration details.
 
 ## Current implementation
 
@@ -76,6 +87,7 @@ The repository includes:
 - command adapters for ElectroTrace, MyoTrace, OptiCell, CardioScore, CardiTrace, and CardiAgent;
 - in-process CardiBridge routing with HTTP fallback;
 - native CDT-compatible cardiac digital-twin backend;
+- canonical CardiacState reduction for both low-level and explicit workflow execution;
 - explicit benchmark/test-group binding between CardiLearn and CardiBench;
 - reproducible workflow run IDs and per-step SHA-256 provenance;
 - a full multimodal workflow ending in CardiEval and CardiTrace;
@@ -126,6 +138,8 @@ There are two CI layers:
 
 1. `CI` runs the HeartTwin package tests without optional component installations.
 2. `HeartTwin integration` installs the actual component repositories into a clean environment, runs native connection smoke tests, runs the multimodal workflow, then runs the complete HeartTwin test suite across Python 3.10, 3.11, and 3.12.
+
+The CardiacState tests additionally validate the published Draft 2020-12 JSON schema against runtime snapshots.
 
 ## Roadmap
 
