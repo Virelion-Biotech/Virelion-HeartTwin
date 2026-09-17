@@ -22,6 +22,7 @@ from .contracts import (
     Provenance,
     ServiceResult,
     SimulationResultPayload,
+    VexObservationPayload,
     WorkflowRun,
     WorkflowState,
 )
@@ -97,13 +98,20 @@ def _as_agent(data: dict[str, Any], entity_id: str) -> AgentChallengePayload:
         raise WorkflowError(f"CardiAgent returned an invalid typed payload: {exc}") from exc
 
 
+def _as_vex(data: dict[str, Any]) -> VexObservationPayload:
+    try:
+        return VexObservationPayload.model_validate(data)
+    except Exception as exc:
+        raise WorkflowError(f"CardiVex returned an invalid typed payload: {exc}") from exc
+
+
 def _benchmark_lock_to_learning_test(
     benchmark_samples: list[dict[str, Any]], learning: LearningResultPayload, *, seed: int
 ) -> BenchmarkResolutionPayload:
     """Re-materialize CardiBench using the model's actual test biological groups."""
     try:
         from cardi_bench import Sample, materialize
-    except Exception as exc:  # pragma: no cover - environment dependent
+    except Exception as exc:  # pragma: no cover
         raise WorkflowError(f"CardiBench native package is required: {exc}") from exc
 
     by_id = {str(row["sample_id"]): row for row in benchmark_samples}
@@ -114,15 +122,9 @@ def _benchmark_lock_to_learning_test(
     test_groups = {str(by_id[sample_id]["group_id"]) for sample_id in test_ids}
     rows = [
         Sample(
-            sample_id=str(item["sample_id"]),
-            group_id=str(item["group_id"]),
-            study_id=str(item["study_id"]),
-            label=str(item["label"]),
-            technical_group=item.get("technical_group"),
-            organism=item.get("organism"),
-            timepoint=item.get("timepoint"),
-            cell_context=item.get("cell_context"),
-            region=item.get("region"),
+            sample_id=str(item["sample_id"]), group_id=str(item["group_id"]), study_id=str(item["study_id"]),
+            label=str(item["label"]), technical_group=item.get("technical_group"), organism=item.get("organism"),
+            timepoint=item.get("timepoint"), cell_context=item.get("cell_context"), region=item.get("region"),
         )
         for item in benchmark_samples
     ]
@@ -211,11 +213,11 @@ def run_multimodal_workflow(
     simulation: dict[str, Any] | None = None,
     seed: int = 42,
 ) -> WorkflowRun:
-    """Run a complete local multimodal HeartTwin research pipeline.
+    """Run a complete local multimodal HeartTwin workflow.
 
-    Dataflow: Atlas context -> CardiLearn -> CardiBench lock -> CardiSim -> CardiAgent
-    -> CardiBridge -> CardiVex -> CardiEval -> CardiTrace.
-    Every service-to-service transition is validated against a typed HeartTwin contract.
+    Dataflow: Atlas -> CardiLearn -> CardiBench lock -> CardiSim -> CardiAgent ->
+    CardiBridge -> CardiVex -> CardiEval -> CardiTrace.
+    Every inter-service transition is validated against a typed HeartTwin contract.
     """
     run_id = new_run_id(
         entity_id,
@@ -229,47 +231,32 @@ def run_multimodal_workflow(
     steps: list[ServiceResult] = []
     state = WorkflowState(entity_id=entity_id, observations=observations)
 
-    atlas_result = _call(
-        registry,
-        "atlas.context",
-        entity_id,
-        {
-            "context_id": f"{entity_id}-context",
-            "record_ids": atlas_record_ids or [],
-            "records": atlas_records or [],
-        },
-    )
+    atlas_result = _call(registry, "atlas.context", entity_id, {
+        "context_id": f"{entity_id}-context",
+        "record_ids": atlas_record_ids or [],
+        "records": atlas_records or [],
+    })
     state.atlas = _as_atlas(atlas_result.data)
     steps.append(atlas_result)
 
-    learning_result = _call(
-        registry,
-        "learn.infer",
-        entity_id,
-        {
-            "data": learning_data,
-            "target_column": "target",
-            "group_column": "group_id",
-            "model": "logistic_regression",
-            "task": "classification",
-            "seed": seed,
-        },
-    )
+    learning_result = _call(registry, "learn.infer", entity_id, {
+        "data": learning_data,
+        "target_column": "target",
+        "group_column": "group_id",
+        "model": "logistic_regression",
+        "task": "classification",
+        "seed": seed,
+    })
     state.learning = _as_learning(learning_result.data)
     steps.append(learning_result)
 
-    benchmark_result = _call(
-        registry,
-        "benchmark.resolve",
-        entity_id,
-        {
-            "benchmark_id": "hearttwin-multimodal-initial",
-            "version": "1.0",
-            "policy": "subject_heldout",
-            "seed": seed,
-            "samples": benchmark_samples,
-        },
-    )
+    benchmark_result = _call(registry, "benchmark.resolve", entity_id, {
+        "benchmark_id": "hearttwin-multimodal-initial",
+        "version": "1.0",
+        "policy": "subject_heldout",
+        "seed": seed,
+        "samples": benchmark_samples,
+    })
     _as_benchmark(benchmark_result.data)
     locked_benchmark = _benchmark_lock_to_learning_test(benchmark_samples, state.learning, seed=seed)
     benchmark_result = benchmark_result.model_copy(update={"data": locked_benchmark.model_dump(mode="json")})
@@ -288,87 +275,62 @@ def run_multimodal_workflow(
     state.simulation = _as_simulation(simulation_result.data)
     steps.append(simulation_result)
 
-    agent_result = _call(
-        registry,
-        "agent.challenge",
-        entity_id,
-        {
-            "observations": [
-                {
-                    "modality": "structural",
-                    "values": {
-                        "domain": "ischemic",
-                        "severity": max(
-                            0.1,
-                            min(
-                                0.9,
-                                1.0 - float(state.simulation.summary.get("cardiac_health_score", 0.5)),
-                            ),
-                        ),
-                        "count": 1,
-                        "seed": seed,
-                    },
-                }
-            ],
-            "context": {"simulation": state.simulation.model_dump(mode="json")},
-        },
-    )
+    agent_result = _call(registry, "agent.challenge", entity_id, {
+        "observations": [{
+            "modality": "structural",
+            "values": {
+                "domain": "ischemic",
+                "severity": max(0.1, min(0.9, 1.0 - float(state.simulation.summary.get("cardiac_health_score", 0.5)))),
+                "count": 1,
+                "seed": seed,
+            },
+        }],
+        "context": {"simulation": state.simulation.model_dump(mode="json")},
+    })
     state.agent = _as_agent(agent_result.data, entity_id)
     steps.append(agent_result)
 
     scenario = _scenario_from_workflow(entity_id, state.simulation)
     _register_local_vex_handler(registry, entity_id, scenario)
-    bridge_result = _call(
-        registry,
-        "bridge.publish",
-        entity_id,
-        {
-            "message_type": "agent.challenge",
-            "producer": "CardiAgent",
-            "consumer": "CardiVex",
-            "challenge_type": "hearttwin.multimodal",
-            "population": state.agent.challenges,
-            "intended_task": "defensive-phenotype-evaluation",
-        },
-    )
-    state.bridge = BridgePublicationPayload.model_validate(
-        {
-            "contract_version": "1.0",
-            "message_type": "agent.challenge",
-            "message_id": str(bridge_result.data.get("message_id", "unknown")),
-            "status": str(bridge_result.data.get("status", "unknown")),
-            "transport": str(bridge_result.data.get("transport", "unknown")),
-            "content_sha256": bridge_result.data.get("content_sha256"),
-        }
-    )
+    bridge_result = _call(registry, "bridge.publish", entity_id, {
+        "message_type": "agent.challenge",
+        "producer": "CardiAgent",
+        "consumer": "CardiVex",
+        "challenge_type": "hearttwin.multimodal",
+        "population": state.agent.challenges,
+        "intended_task": "defensive-phenotype-evaluation",
+    })
+    consumer = bridge_result.data.get("result")
+    if not isinstance(consumer, dict):
+        raise WorkflowError("CardiBridge publish did not return a consumer result")
+    state.vex = _as_vex(consumer)
+    state.bridge = BridgePublicationPayload.model_validate({
+        "contract_version": "1.0",
+        "message_type": "agent.challenge",
+        "message_id": str(bridge_result.data.get("message_id", "unknown")),
+        "status": str(bridge_result.data.get("status", "unknown")),
+        "transport": str(bridge_result.data.get("transport", "unknown")),
+        "content_sha256": bridge_result.data.get("content_sha256"),
+        "consumer_result": consumer,
+    })
     steps.append(bridge_result)
 
-    evaluation_result = _call(
-        registry,
-        "evaluation.run",
-        entity_id,
-        {
-            "benchmark": state.benchmark.model_dump(mode="json"),
-            "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
-            "model_id": state.learning.model_id,
-            "task_id": "binary-cardiac-state-detection",
-        },
-    )
+    evaluation_result = _call(registry, "evaluation.run", entity_id, {
+        "benchmark": state.benchmark.model_dump(mode="json"),
+        "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
+        "model_id": state.learning.model_id,
+        "task_id": "binary-cardiac-state-detection",
+    })
     state.evaluation = _as_evaluation(evaluation_result.data)
     steps.append(evaluation_result)
 
-    trace_result = _call(
-        registry,
-        "trace.record",
-        entity_id,
-        {
-            "context": {"workflow_run_id": run_id},
-            "observations": [item.model_dump(mode="json") for item in observations],
-            "workflow_state": state.model_dump(mode="json"),
-            "results": [item.model_dump(mode="json") for item in steps],
-            "hearttwin_run_id": run_id,
-        },
-    )
+    trace_result = _call(registry, "trace.record", entity_id, {
+        "context": {"workflow_run_id": run_id},
+        "observations": [item.model_dump(mode="json") for item in observations],
+        "workflow_state": state.model_dump(mode="json"),
+        "results": [item.model_dump(mode="json") for item in steps],
+        "hearttwin_run_id": run_id,
+    })
     state.trace = trace_result.data
     steps.append(trace_result)
 
