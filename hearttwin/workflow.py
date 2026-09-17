@@ -444,6 +444,7 @@ def run_multimodal_workflow(
     store.record_evaluation(state.evaluation, evaluation_result.provenance)
     steps.append(evaluation_result)
 
+    pre_trace_fingerprint = store.fingerprint()
     trace_result = _call(
         registry,
         "trace.record",
@@ -452,7 +453,7 @@ def run_multimodal_workflow(
             "context": {"workflow_run_id": run_id},
             "observations": [item.model_dump(mode="json") for item in observations],
             "workflow_state": state.model_dump(mode="json"),
-            "canonical_state_fingerprint": store.fingerprint(),
+            "canonical_state_fingerprint": pre_trace_fingerprint,
             "results": [item.model_dump(mode="json") for item in steps],
             "hearttwin_run_id": run_id,
         },
@@ -461,7 +462,7 @@ def run_multimodal_workflow(
     store.record_trace(trace_result.data, trace_result.provenance)
     steps.append(trace_result)
 
-    state.cardiac_state = store.snapshot()
-    state.provenance = list(state.cardiac_state.provenance)
-    state.cardiac_state.biological_context["canonical_state_fingerprint"] = store.fingerprint()
+    canonical = store.snapshot()
+    state.cardiac_state = canonical
+    state.provenance = list(canonical.provenance)
     return WorkflowRun(run_id=run_id, entity_id=entity_id, status="ok", state=state, steps=steps)
