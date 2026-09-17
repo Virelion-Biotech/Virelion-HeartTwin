@@ -42,9 +42,10 @@ _CAPABILITY_PREFIX_TO_DOMAIN = {
 class CardiacStateStore:
     """Mutable reducer around one canonical :class:`CardiacState`.
 
-    The store is intentionally deterministic at the content level: every typed
-    artifact receives an ID derived from its stable content, and every artifact
-    keeps links to the provenance run(s) that produced it.
+    Every typed artifact receives an ID derived from stable content and keeps
+    links to the HeartTwin provenance run(s) that produced it. External
+    dataset/benchmark provenance namespaces remain embedded in their own
+    contracts and are not conflated with HeartTwin run IDs.
     """
 
     def __init__(self, state: CardiacState):
@@ -99,7 +100,9 @@ class CardiacStateStore:
     def record_modality(
         self, payload: ModalityAnalysisPayload, provenance: Provenance | None = None
     ) -> None:
-        self._append_unique(self.state.modality_analyses, payload, "observation_id", payload.observation_id)
+        self._append_unique(
+            self.state.modality_analyses, payload, "observation_id", payload.observation_id
+        )
         self._add_provenance(provenance)
         domain = _CAPABILITY_PREFIX_TO_DOMAIN.get(payload.capability.split(".", 1)[0] + ".")
         if domain:
@@ -127,7 +130,9 @@ class CardiacStateStore:
             dataset_fingerprint=payload.dataset_fingerprint,
             provenance_ids=self._add_provenance(provenance),
         )
-        self._append_unique(self.state.prediction_artifacts, artifact, "prediction_id", artifact_id)
+        self._append_unique(
+            self.state.prediction_artifacts, artifact, "prediction_id", artifact_id
+        )
         self.state.predictions = [
             {"capability": "learn.infer", "data": payload.model_dump(mode="json"), "status": "inferred"}
         ]
@@ -146,7 +151,9 @@ class CardiacStateStore:
             population_size=payload.population_size,
             provenance_ids=self._add_provenance(provenance),
         )
-        self._append_unique(self.state.simulation_artifacts, artifact, "simulation_id", artifact_id)
+        self._append_unique(
+            self.state.simulation_artifacts, artifact, "simulation_id", artifact_id
+        )
         self.state.simulations = [
             {"capability": "simulation.run", "data": payload.model_dump(mode="json"), "status": "simulated"}
         ]
@@ -157,7 +164,12 @@ class CardiacStateStore:
         self, payload: AgentChallengePayload, provenance: Provenance | None = None
     ) -> None:
         fingerprint = sha256(payload.model_dump(mode="json"))
-        self.state.challenges.append(payload)
+        self._append_unique(
+            self.state.challenges,
+            payload,
+            "entity_id",
+            payload.entity_id or fingerprint,
+        )
         self._add_provenance(provenance)
         self._record_derived(
             domain="inference",
@@ -188,7 +200,9 @@ class CardiacStateStore:
     def record_bridge(
         self, payload: BridgePublicationPayload, provenance: Provenance | None = None
     ) -> None:
-        self._append_unique(self.state.bridge_publications, payload, "message_id", payload.message_id)
+        self._append_unique(
+            self.state.bridge_publications, payload, "message_id", payload.message_id
+        )
         self._add_provenance(provenance)
 
     def record_evaluation(
@@ -209,7 +223,9 @@ class CardiacStateStore:
             evaluation_fingerprint=payload.evaluation_fingerprint,
             provenance_ids=self._add_provenance(provenance),
         )
-        self._append_unique(self.state.evaluation_artifacts, artifact, "validation_id", validation_id)
+        self._append_unique(
+            self.state.evaluation_artifacts, artifact, "validation_id", validation_id
+        )
         self.state.validation = {"evaluation": payload.model_dump(mode="json")}
         self.state.state_phase = "validated"
         return artifact
@@ -246,8 +262,8 @@ class CardiacStateStore:
     def reduce_service_result(self, result: ServiceResult) -> None:
         """Reduce a successful typed service result into canonical state.
 
-        Unknown or legacy service outputs are deliberately left in
-        ``ServiceResult.data`` rather than guessed into a cardiac-state field.
+        Unknown or legacy service outputs remain in ``ServiceResult.data`` rather
+        than being guessed into a cardiac-state field.
         """
         if result.provenance is not None:
             self._add_provenance(result.provenance)
@@ -333,11 +349,9 @@ class CardiacStateStore:
         ):
             for item in collection:
                 all_links.extend(item.provenance_ids)
-        for item in state.benchmarks:
-            all_links.extend(item.provenance)
         for item in all_links:
             if item not in provenance_ids:
-                raise CardiacStateValidationError(f"Dangling provenance link: {item}")
+                raise CardiacStateValidationError(f"Dangling HeartTwin provenance link: {item}")
 
         expected_phase = "unknown"
         if state.observations:
