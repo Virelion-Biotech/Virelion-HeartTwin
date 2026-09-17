@@ -8,13 +8,14 @@ services.
 from __future__ import annotations
 
 from statistics import mean
-from typing import Any, Iterable
+from typing import Any
 
 from .cardibridge_adapter import _local_router
 from .contracts import (
     AgentChallengePayload,
     AtlasContextPayload,
     BenchmarkResolutionPayload,
+    BridgePublicationPayload,
     EvaluationResultPayload,
     LearningResultPayload,
     Observation,
@@ -24,7 +25,6 @@ from .contracts import (
     WorkflowRun,
     WorkflowState,
 )
-from .orchestrator import HeartTwin
 from .provenance import new_run_id, sha256
 from .service_registry import ServiceRegistry
 
@@ -100,12 +100,7 @@ def _as_agent(data: dict[str, Any], entity_id: str) -> AgentChallengePayload:
 def _benchmark_lock_to_learning_test(
     benchmark_samples: list[dict[str, Any]], learning: LearningResultPayload, *, seed: int
 ) -> BenchmarkResolutionPayload:
-    """Re-materialize CardiBench using the model's already-locked test biological groups.
-
-    CardiLearn and CardiBench intentionally use different split implementations. This
-    explicit transformation prevents the common but dangerous mistake of evaluating a
-    model on one test split while claiming another benchmark split.
-    """
+    """Re-materialize CardiBench using the model's actual test biological groups."""
     try:
         from cardi_bench import Sample, materialize
     except Exception as exc:  # pragma: no cover - environment dependent
@@ -140,16 +135,12 @@ def _benchmark_lock_to_learning_test(
         seed=seed,
     )
     return BenchmarkResolutionPayload.model_validate(
-        {
-            "contract_version": "1.0",
-            **materialized.to_dict(),
-            "samples": benchmark_samples,
-        }
+        {"contract_version": "1.0", **materialized.to_dict(), "samples": benchmark_samples}
     )
 
 
 def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload) -> dict[str, Any]:
-    """Translate simulation-level outputs into a phenotype-level CardiVex scenario."""
+    """Translate a simulation summary into a phenotype-level CardiVex proxy scenario."""
     health = float(simulation.summary.get("cardiac_health_score", 0.5))
     burden = max(0.0, min(1.0, 1.0 - health))
     axes = {
@@ -163,7 +154,11 @@ def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload)
     }
 
     def domain(value: float) -> dict[str, Any]:
-        return {"value": round(float(max(0.0, min(1.0, value))), 6), "uncertainty": 0.05, "evidence_status": "proxy"}
+        return {
+            "value": round(float(max(0.0, min(1.0, value))), 6),
+            "uncertainty": 0.05,
+            "evidence_status": "proxy",
+        }
 
     return {
         "scenario_id": f"CVX-HT-{sha256({'entity': entity_id})[:12].upper()}",
@@ -198,7 +193,10 @@ def _register_local_vex_handler(registry: ServiceRegistry, entity_id: str, scena
             {"entity_id": entity_id, "scenario": scenario, "bridge_message_id": envelope.message_id},
         )
 
-    router.register("agent.challenge", "CardiVex", handler)
+    try:
+        router.register("agent.challenge", "CardiVex", handler)
+    except (KeyError, ValueError):
+        return
 
 
 def run_multimodal_workflow(
@@ -219,12 +217,15 @@ def run_multimodal_workflow(
     -> CardiBridge -> CardiVex -> CardiEval -> CardiTrace.
     Every service-to-service transition is validated against a typed HeartTwin contract.
     """
-    run_id = new_run_id(entity_id, {
-        "observations": [item.model_dump(mode="json") for item in observations],
-        "benchmark_samples": benchmark_samples,
-        "learning_data": learning_data,
-        "seed": seed,
-    })
+    run_id = new_run_id(
+        entity_id,
+        {
+            "observations": [item.model_dump(mode="json") for item in observations],
+            "benchmark_samples": benchmark_samples,
+            "learning_data": learning_data,
+            "seed": seed,
+        },
+    )
     steps: list[ServiceResult] = []
     state = WorkflowState(entity_id=entity_id, observations=observations)
 
@@ -269,13 +270,9 @@ def run_multimodal_workflow(
             "samples": benchmark_samples,
         },
     )
-    initial_benchmark = _as_benchmark(benchmark_result.data)
+    _as_benchmark(benchmark_result.data)
     locked_benchmark = _benchmark_lock_to_learning_test(benchmark_samples, state.learning, seed=seed)
-    # The second lock is the explicit typed transformation that binds the evaluator to
-    # the actual model test groups rather than trusting two unrelated split algorithms.
-    benchmark_result = benchmark_result.model_copy(
-        update={"data": locked_benchmark.model_dump(mode="json")}
-    )
+    benchmark_result = benchmark_result.model_copy(update={"data": locked_benchmark.model_dump(mode="json")})
     state.benchmark = locked_benchmark
     steps.append(benchmark_result)
 
@@ -301,7 +298,13 @@ def run_multimodal_workflow(
                     "modality": "structural",
                     "values": {
                         "domain": "ischemic",
-                        "severity": max(0.1, min(0.9, 1.0 - float(state.simulation.summary.get("cardiac_health_score", 0.5)))),
+                        "severity": max(
+                            0.1,
+                            min(
+                                0.9,
+                                1.0 - float(state.simulation.summary.get("cardiac_health_score", 0.5)),
+                            ),
+                        ),
                         "count": 1,
                         "seed": seed,
                     },
@@ -328,24 +331,29 @@ def run_multimodal_workflow(
             "intended_task": "defensive-phenotype-evaluation",
         },
     )
-    bridge_data = bridge_result.data
-    state.bridge = {
-        "contract_version": "1.0",
-        "message_type": "agent.challenge",
-        "message_id": str(bridge_data.get("message_id", "unknown")),
-        "status": str(bridge_data.get("status", "unknown")),
-        "transport": str(bridge_data.get("transport", "unknown")),
-        "content_sha256": bridge_data.get("content_sha256"),
-    }
+    state.bridge = BridgePublicationPayload.model_validate(
+        {
+            "contract_version": "1.0",
+            "message_type": "agent.challenge",
+            "message_id": str(bridge_result.data.get("message_id", "unknown")),
+            "status": str(bridge_result.data.get("status", "unknown")),
+            "transport": str(bridge_result.data.get("transport", "unknown")),
+            "content_sha256": bridge_result.data.get("content_sha256"),
+        }
+    )
     steps.append(bridge_result)
 
-    evaluation_payload = {
-        "benchmark": state.benchmark.model_dump(mode="json"),
-        "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
-        "model_id": state.learning.model_id,
-        "task_id": "binary-cardiac-state-detection",
-    }
-    evaluation_result = _call(registry, "evaluation.run", entity_id, evaluation_payload)
+    evaluation_result = _call(
+        registry,
+        "evaluation.run",
+        entity_id,
+        {
+            "benchmark": state.benchmark.model_dump(mode="json"),
+            "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
+            "model_id": state.learning.model_id,
+            "task_id": "binary-cardiac-state-detection",
+        },
+    )
     state.evaluation = _as_evaluation(evaluation_result.data)
     steps.append(evaluation_result)
 
