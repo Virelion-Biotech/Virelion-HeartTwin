@@ -11,7 +11,6 @@ CONTRACT_VERSION = "1.0.0"
 
 class Provenance(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     source_service: str
     source_repository: str | None = None
     source_version: str | None = None
@@ -23,7 +22,6 @@ class Provenance(BaseModel):
 
 class Observation(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     observation_id: str
     modality: Literal[
         "molecular", "electrical", "mechanical", "imaging", "safety", "structural",
@@ -37,7 +35,6 @@ class Observation(BaseModel):
 
 class CardiacState(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = CONTRACT_VERSION
     entity_id: str
     biological_context: dict[str, Any] = Field(default_factory=dict)
@@ -51,7 +48,6 @@ class CardiacState(BaseModel):
 
 class ServiceResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     service: str
     capability: str
     status: Literal["ok", "unavailable", "error", "skipped"]
@@ -62,7 +58,6 @@ class ServiceResult(BaseModel):
 
 class AtlasContextPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = "1.0"
     context_id: str
     record_ids: list[str] = Field(default_factory=list)
@@ -72,7 +67,6 @@ class AtlasContextPayload(BaseModel):
 
 class BenchmarkSamplePayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     sample_id: str
     group_id: str
     study_id: str
@@ -86,7 +80,6 @@ class BenchmarkSamplePayload(BaseModel):
 
 class BenchmarkResolutionPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = "1.0"
     benchmark_id: str
     version: str
@@ -101,7 +94,6 @@ class BenchmarkResolutionPayload(BaseModel):
 
 class LearningPredictionPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     sample_id: str
     y_true: int | float | str
     y_pred: int | float | str
@@ -111,7 +103,6 @@ class LearningPredictionPayload(BaseModel):
 
 class LearningResultPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = "1.0"
     model_id: str
     task: str
@@ -123,7 +114,6 @@ class LearningResultPayload(BaseModel):
 
 class SimulationResultPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = "1.0"
     backend: str
     summary: dict[str, Any]
@@ -133,7 +123,6 @@ class SimulationResultPayload(BaseModel):
 
 class EvaluationResultPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = "1.0"
     benchmark_id: str
     benchmark_version: str
@@ -147,9 +136,15 @@ class EvaluationResultPayload(BaseModel):
     evaluation_fingerprint: str | None = None
 
 
+class AgentChallengePayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "1.0"
+    entity_id: str | None = None
+    challenges: list[dict[str, Any]]
+
+
 class BridgePublicationPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = "1.0"
     message_type: str
     message_id: str
@@ -162,7 +157,6 @@ class WorkflowState(BaseModel):
     """Typed state exchanged between explicit HeartTwin workflow stages."""
 
     model_config = ConfigDict(extra="forbid")
-
     contract_version: str = CONTRACT_VERSION
     entity_id: str
     observations: list[Observation] = Field(default_factory=list)
@@ -170,14 +164,24 @@ class WorkflowState(BaseModel):
     benchmark: BenchmarkResolutionPayload | None = None
     learning: LearningResultPayload | None = None
     simulation: SimulationResultPayload | None = None
+    agent: AgentChallengePayload | None = None
     evaluation: EvaluationResultPayload | None = None
     bridge: BridgePublicationPayload | None = None
+    trace: dict[str, Any] | None = None
     provenance: list[Provenance] = Field(default_factory=list)
+
+
+class WorkflowRun(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    run_id: str
+    entity_id: str
+    status: Literal["ok", "error"]
+    state: WorkflowState
+    steps: list[ServiceResult] = Field(default_factory=list)
 
 
 class TwinRun(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     run_id: str
     entity_id: str
     requested_capabilities: list[str]
