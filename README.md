@@ -1,81 +1,89 @@
 # Virelion-HeartTwin
 
-HeartTwin is the orchestration and integration layer for the Virelion cardiac research software stack. It provides one API/CLI for discovering available services, invoking specialist analyses, exchanging typed state objects, and composing research workflows.
+HeartTwin is the orchestration and integration layer for the Virelion cardiac research software stack. It provides one API/CLI for service discovery, specialist analysis, typed state exchange, cross-service workflows, provenance, and reproducible evaluation.
 
-HeartTwin does not duplicate specialist-service algorithms blindly. CardiSim now includes a native, dependency-light cardiac digital-twin reference backend whose architecture is aligned with the audited `juliacamps/Cardiac-Digital-Twin` research pipeline.
+HeartTwin does not duplicate specialist-service algorithms blindly. It can use installed Virelion component packages natively, existing HeartTwin command adapters, CardiBridge transport, or external HTTP services where a deployment endpoint is configured.
 
 ## Integrated services
 
-| Service | Role | Status |
+| Service | Role | Current connection |
 |---|---|---|
-| CardiAtlas | biomedical metadata and evidence context | Registered — no adapter yet |
-| CardiBench | benchmark definitions and dataset policies | Registered — no adapter yet |
-| CardiEval | independent evaluation | Registered — no adapter yet |
-| ElectroTrace | ECG/electrophysiology analysis | Registered — no adapter yet |
-| MyoTrace | video-based mechanical analysis | Registered — no adapter yet |
-| OptiCell | microscopy QC and cell analysis | Registered — no adapter yet |
-| CardioScore | MEA-based cardiac safety scoring | Registered — no adapter yet |
-| CardiLearn | molecular-state learning | Registered — no adapter yet |
-| CardiSim | synthetic cardiac trajectories and cardiac digital twin | **Native CDT-compatible backend added** |
-| CardiStudio | experimental design, synthetic populations, constraints, and power planning | Registered — no adapter yet |
-| DCCP | defensive challenge scenarios, OOD assessment, and recovery scoring | Registered — no adapter yet |
-| CardiTrace | provenance and reproducibility | Registered — no adapter yet |
-| CardiBridge | typed interoperability | Registered — no adapter yet |
-| CardiAgent | challenge generation | Registered — no adapter yet |
-| CardiVex | challenge evaluation | Registered — no adapter yet |
+| CardiAtlas | biomedical metadata and evidence context | Native + HTTP fallback |
+| CardiBench | benchmark definitions and dataset policies | Native + HTTP fallback |
+| CardiEval | independent evaluation | Native + HTTP fallback |
+| ElectroTrace | ECG/electrophysiology analysis | HeartTwin command adapter |
+| MyoTrace | video-based mechanical analysis | HeartTwin command adapter + E2E test |
+| OptiCell | microscopy QC and cell analysis | HeartTwin command adapter |
+| CardioScore | MEA-based cardiac safety scoring | HeartTwin command adapter |
+| CardiLearn | molecular-state learning | Native + HTTP fallback |
+| CardiSim | synthetic trajectories | Native + HTTP fallback |
+| CardiSimNative | CDT-compatible reference digital twin | Built into HeartTwin |
+| CardiStudio | experimental design, populations, constraints, power | Native + HTTP fallback |
+| DCCP | defensive challenge scenarios and resilience scoring | Native + HTTP fallback |
+| CardiTrace | provenance and reproducibility | HeartTwin command adapter |
+| CardiBridge | typed interoperability and delivery | In-process + HTTP fallback |
+| CardiAgent | phenotype-level challenge generation | HeartTwin command adapter |
+| CardiVex | challenge/OOD evaluation | Native + HTTP fallback |
 
-Registration in `configs/services.yaml` reflects service discovery configuration; scientific validation is separate.
+Service registration in `configs/services.yaml` is separate from scientific validation. Native connections require the corresponding Virelion package to be installed; HTTP environment variables remain available as deployment fallbacks.
 
 ## Architecture
 
 ```text
-inputs / experiments
-        ↓
-     HeartTwin
-        ↓
-service registry + adapters
-        ↓
-Observation / Anatomy / Context
-        ↓
-CardiSim digital-twin core
-   ├── mesh geometry
-   ├── conduction roots
-   ├── Eikonal/Dijkstra propagation
-   ├── repolarisation
-   └── pseudo-ECG observation
-        ↓
-calibration / uncertainty-ready state
-        ↓
-CardiBench / CardiEval
-        ↓
-CardiTrace
+observations / experiment data
+            │
+            ▼
+        HeartTwin
+            │
+   typed workflow state
+            │
+     ┌──────┼─────────┐
+     ▼      ▼         ▼
+ CardiAtlas CardiLearn CardiStudio
+     │      │         │
+     └──────┼─────────┘
+            ▼
+        CardiBench
+            │
+            ▼
+     CardiSim / CDT
+            │
+      ┌─────┴─────┐
+      ▼           ▼
+ ElectroTrace  MyoTrace / OptiCell / CardioScore
+      │           │
+      └─────┬─────┘
+            ▼
+        CardiacState
+            │
+      ┌─────┼───────────┐
+      ▼     ▼           ▼
+ CardiAgent CardiVex   CardiEval
+      │                   │
+      └──────► CardiBridge│
+                           ▼
+                       CardiTrace
 ```
 
-CardiBridge defines cross-service protocol contracts. CardiTrace records provenance. CardiEval remains the independent evaluation boundary.
+The low-level `HeartTwin.run()` API remains backward compatible. `hearttwin.workflow.run_multimodal_workflow()` is the explicit dependency graph: each service result is validated into a versioned typed contract before it becomes downstream workflow state.
 
 ## Current implementation
 
 The repository includes:
 
-- typed cardiac-state contracts;
-- observation and provenance records;
-- service capability registry with HTTP, command, and builtin adapters;
-- native CardiSim cardiac digital-twin backend;
-- tetrahedral mesh ingestion and validation;
-- fibre-aware Eikonal/Dijkstra propagation;
-- explicit healthy/border-zone/dense-scar tissue state;
-- deterministic pseudo-ECG observation generation for software integration;
-- bounded parameter calibration and synthetic recovery tests;
-- optional `module:function` bridge for an externally installed upstream CDT wrapper;
-- CLI, service configuration, JSON Schemas, and orchestration tests.
-
-## Cardiac-Digital-Twin integration
-
-See `docs/CARDIAC_DIGITAL_TWIN_INTEGRATION.md` for the architecture, provenance, data contract, calibration strategy, and scientific boundary.
-
-The audited upstream reference is `juliacamps/Cardiac-Digital-Twin` at commit `816d51fab0837cfe9e20c7d3a318429e9acf0733`. The upstream repository is MIT licensed. See `hearttwin/cdt_manifest.py` and `THIRD_PARTY_NOTICES.md`.
+- typed cardiac-state and workflow contracts;
+- native adapters for CardiAtlas, CardiBench, CardiEval, CardiLearn, CardiSim, CardiVex, CardiStudio, and DCCP;
+- command adapters for ElectroTrace, MyoTrace, OptiCell, CardioScore, CardiTrace, and CardiAgent;
+- in-process CardiBridge routing with HTTP fallback;
+- native CDT-compatible cardiac digital-twin backend;
+- explicit benchmark/test-group binding between CardiLearn and CardiBench;
+- reproducible workflow run IDs and per-step SHA-256 provenance;
+- a full multimodal workflow ending in CardiEval and CardiTrace;
+- cross-repository GitHub Actions integration testing on Python 3.10–3.12.
 
 ## Quick start
+
+Base package:
 
 ```bash
 pip install -e '.[dev]'
@@ -84,34 +92,48 @@ hearttwin doctor
 pytest -q
 ```
 
-The native digital-twin capability can be invoked through the Python facade:
+Install the component repositories for the complete native stack:
 
-```python
-from hearttwin import VirelionServices, load_registry
-
-v = VirelionServices(load_registry())
-result = v.simulate_cardiac_twin(
-    "synthetic-001",
-    geometry={
-        "node_xyz": [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]],
-        "tetrahedra": [[0, 1, 2, 3]],
-        "scar_labels": [0, 0, 0, 1],
-    },
-    root_nodes=[0],
-)
+```bash
+for repo in \
+  Virelion-CardiAtlas Virelion-CardiBench Virelion-CardiEval Virelion-CardiLearn \
+  Virelion-CardiSim Virelion-CardiVex Virelion-CardiStudio Virelion-DCCP \
+  Virelion-ElectroTrace Virelion-MyoTrace Virelion-OptiCell Virelion-CardioScore \
+  Virelion-CardiTrace Virelion-CardiBridge Virelion-CardiAgent; do
+  python -m pip install "git+https://github.com/Virelion-Biotech/${repo}.git@main"
+done
 ```
+
+Run the synthetic end-to-end workflow:
+
+```bash
+hearttwin workflow-demo --output outputs/workflow-demo.json
+```
+
+The workflow is computational test infrastructure. Its generated states are not patient measurements, and passing software integration tests does not establish clinical or biological validity.
+
+## Cardiac-Digital-Twin integration
+
+See `docs/CARDIAC_DIGITAL_TWIN_INTEGRATION.md` for the architecture, provenance, data contract, calibration strategy, and scientific boundary.
+
+The audited upstream reference is `juliacamps/Cardiac-Digital-Twin` at commit `816d51fab0837cfe9e20c7d3a318429e9acf0733`. The upstream repository is MIT licensed. See `hearttwin/cdt_manifest.py` and `THIRD_PARTY_NOTICES.md`.
+
+## Validation
+
+There are two CI layers:
+
+1. `CI` runs the HeartTwin package tests without optional component installations.
+2. `HeartTwin integration` installs the actual component repositories into a clean environment, runs native connection smoke tests, runs the multimodal workflow, then runs the complete HeartTwin test suite across Python 3.10, 3.11, and 3.12.
 
 ## Roadmap
 
-1. Native adapters for remaining services.
-2. Multimodal state assembly and normalization.
-3. Upstream CDT numerical-equivalence fixtures using the published example dataset.
-4. Replace the reference pseudo-ECG with a validated observation model and integrate ElectroTrace.
-5. Expand scar from scalar conduction multipliers to calibrated tissue tensors and border-zone cellular models.
-6. Add mechanics/hemodynamics and Echo/CMR anatomy backends.
-7. Add posterior/uncertainty objects and surrogate acceleration.
-8. CardiBench/CardiEval external validation gates.
-9. Persistent jobs/artifacts, compatibility gates, API, and research UI.
+1. Expand modality-specific typed observation contracts and artifact references.
+2. Replace the reference pseudo-ECG with a validated observation model and integrate it with ElectroTrace outputs.
+3. Expand scar modelling to calibrated tissue tensors and border-zone cellular models.
+4. Add mechanics/hemodynamics and Echo/CMR anatomy backends.
+5. Add posterior/uncertainty objects and surrogate acceleration.
+6. Add external CardiBench/CardiEval scientific validation gates.
+7. Add persistent jobs/artifacts, compatibility gates, API, and research UI.
 
 A complete software integration is not equivalent to a clinically validated digital twin.
 
@@ -122,7 +144,3 @@ HeartTwin is research infrastructure. It does not diagnose patients or prescribe
 ## License
 
 GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See `LICENSE`.
-
-## Citation
-
-Cite the HeartTwin release and the individual service releases used in a workflow. When the CDT-compatible backend or upstream runtime adapter is used, also cite the upstream `Cardiac-Digital-Twin` work and preserve its MIT notice for any upstream source actually distributed.
