@@ -143,6 +143,15 @@ class AgentChallengePayload(BaseModel):
     challenges: list[dict[str, Any]]
 
 
+class VexObservationPayload(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    contract_version: str = "1.0"
+    scenario_id: str | None = None
+    evidence_tier: str | None = None
+    confidence: str | None = None
+    primary: dict[str, Any] = Field(default_factory=dict)
+
+
 class BridgePublicationPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
     contract_version: str = "1.0"
@@ -151,11 +160,11 @@ class BridgePublicationPayload(BaseModel):
     status: str
     transport: str
     content_sha256: str | None = None
+    consumer_result: dict[str, Any] | None = None
 
 
 class WorkflowState(BaseModel):
     """Typed state exchanged between explicit HeartTwin workflow stages."""
-
     model_config = ConfigDict(extra="forbid")
     contract_version: str = CONTRACT_VERSION
     entity_id: str
@@ -165,6 +174,7 @@ class WorkflowState(BaseModel):
     learning: LearningResultPayload | None = None
     simulation: SimulationResultPayload | None = None
     agent: AgentChallengePayload | None = None
+    vex: VexObservationPayload | None = None
     evaluation: EvaluationResultPayload | None = None
     bridge: BridgePublicationPayload | None = None
     trace: dict[str, Any] | None = None
