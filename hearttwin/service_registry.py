@@ -33,7 +33,7 @@ class ServiceAdapter:
         try:
             __import__(self._native_package(self.spec.builtin))
             return True
-        except ImportError:
+        except Exception:
             return False
 
     def _endpoint_healthy(self) -> bool:
