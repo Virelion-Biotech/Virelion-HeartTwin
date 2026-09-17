@@ -19,6 +19,7 @@ from .contracts import (
     ServiceResult,
     SimulationArtifact,
     SimulationResultPayload,
+    StatePhase,
     StateTransition,
     StateValue,
     ValidationArtifact,
@@ -81,8 +82,7 @@ class CardiacStateStore:
             raise CardiacStateValidationError(
                 f"Duplicate observation_id: {observation.observation_id}"
             )
-        if observation.provenance.run_id not in {item.run_id for item in self.state.provenance}:
-            self.state.provenance.append(observation.provenance)
+        self._add_provenance(observation.provenance)
         self.state.observations.append(observation)
         if self.state.state_phase == "unknown":
             self.state.state_phase = "baseline"
@@ -157,19 +157,15 @@ class CardiacStateStore:
         self.state.simulations = [
             {"capability": "simulation.run", "data": payload.model_dump(mode="json"), "status": "simulated"}
         ]
-        self.state.state_phase = "simulated"
         return artifact
 
     def record_agent(
         self, payload: AgentChallengePayload, provenance: Provenance | None = None
     ) -> None:
         fingerprint = sha256(payload.model_dump(mode="json"))
-        self._append_unique(
-            self.state.challenges,
-            payload,
-            "entity_id",
-            payload.entity_id or fingerprint,
-        )
+        existing_ids = {sha256(item.model_dump(mode="json")) for item in self.state.challenges}
+        if fingerprint not in existing_ids:
+            self.state.challenges.append(payload)
         self._add_provenance(provenance)
         self._record_derived(
             domain="inference",
@@ -185,7 +181,9 @@ class CardiacStateStore:
         self, payload: VexObservationPayload, provenance: Provenance | None = None
     ) -> None:
         fingerprint = sha256(payload.model_dump(mode="json"))
-        self.state.vex_observations.append(payload)
+        existing_ids = {sha256(item.model_dump(mode="json")) for item in self.state.vex_observations}
+        if fingerprint not in existing_ids:
+            self.state.vex_observations.append(payload)
         self._add_provenance(provenance)
         self._record_derived(
             domain="safety",
@@ -227,7 +225,6 @@ class CardiacStateStore:
             self.state.evaluation_artifacts, artifact, "validation_id", validation_id
         )
         self.state.validation = {"evaluation": payload.model_dump(mode="json")}
-        self.state.state_phase = "validated"
         return artifact
 
     def record_trace(self, data: Mapping[str, Any], provenance: Provenance | None = None) -> None:
@@ -237,13 +234,15 @@ class CardiacStateStore:
 
     def transition(
         self,
-        to_phase: Any,
+        to_phase: StatePhase,
         *,
         trigger: str,
         provenance: Provenance | None = None,
         details: Mapping[str, Any] | None = None,
     ) -> StateTransition:
         from_phase = self.state.state_phase
+        if to_phase == from_phase:
+            raise CardiacStateValidationError(f"No-op state transition is not allowed: {to_phase}")
         transition_id = f"transition-{sha256({'entity_id': self.state.entity_id, 'from': from_phase, 'to': to_phase, 'trigger': trigger, 'n': len(self.state.transitions)})[:16]}"
         transition = StateTransition(
             transition_id=transition_id,
@@ -280,12 +279,16 @@ class CardiacStateStore:
                 self.record_learning(LearningResultPayload.model_validate(data), result.provenance)
             elif result.capability == "simulation.run":
                 self.record_simulation(SimulationResultPayload.model_validate(data), result.provenance)
+                if self.state.state_phase != "simulated":
+                    self.transition("simulated", trigger=result.capability, provenance=result.provenance)
             elif result.capability == "agent.challenge":
                 self.record_agent(AgentChallengePayload.model_validate(data), result.provenance)
             elif result.capability == "vex.observe":
                 self.record_vex(VexObservationPayload.model_validate(data), result.provenance)
             elif result.capability == "evaluation.run":
                 self.record_evaluation(EvaluationResultPayload.model_validate(data), result.provenance)
+                if self.state.state_phase != "validated":
+                    self.transition("validated", trigger=result.capability, provenance=result.provenance)
             elif result.capability == "bridge.publish":
                 self.record_bridge(BridgePublicationPayload.model_validate(data), result.provenance)
             elif result.capability == "trace.record":
@@ -353,7 +356,7 @@ class CardiacStateStore:
             if item not in provenance_ids:
                 raise CardiacStateValidationError(f"Dangling HeartTwin provenance link: {item}")
 
-        expected_phase = "unknown"
+        expected_phase: StatePhase = "unknown"
         if state.observations:
             expected_phase = "baseline"
         for transition in sorted(state.transitions, key=lambda item: item.sequence):
