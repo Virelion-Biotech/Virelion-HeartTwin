@@ -25,33 +25,33 @@ class ServiceAdapter:
     def __init__(self, spec: ServiceSpec):
         self.spec = spec
 
-    def available(self) -> bool:
-        if self.spec.builtin == "cardibridge":
-            try:
-                import cardibridge  # noqa: F401
-                return True
-            except ImportError:
-                if self.spec.endpoint:
-                    try:
-                        with urllib.request.urlopen(self.spec.endpoint.rstrip("/") + "/health", timeout=2):
-                            return True
-                    except Exception:
-                        return False
-                return False
+    def _builtin_available(self) -> bool:
         if self.spec.builtin == "cardiac_digital_twin":
             return True
-        if self.spec.builtin:
-            try:
-                __import__(self._native_package(self.spec.builtin))
+        if not self.spec.builtin:
+            return False
+        try:
+            __import__(self._native_package(self.spec.builtin))
+            return True
+        except ImportError:
+            return False
+
+    def _endpoint_healthy(self) -> bool:
+        if not self.spec.endpoint:
+            return False
+        try:
+            with urllib.request.urlopen(self.spec.endpoint.rstrip("/") + "/health", timeout=2):
                 return True
-            except ImportError:
-                return False
+        except Exception:
+            return False
+
+    def available(self) -> bool:
+        if self.spec.builtin == "cardibridge":
+            return self._builtin_available() or self._endpoint_healthy()
+        if self._builtin_available():
+            return True
         if self.spec.endpoint:
-            try:
-                with urllib.request.urlopen(self.spec.endpoint.rstrip("/") + "/health", timeout=2):
-                    return True
-            except Exception:
-                return False
+            return self._endpoint_healthy()
         if self.spec.command:
             first_token = self.spec.command.split()[0] if self.spec.command.strip() else ""
             return shutil.which(first_token) is not None
@@ -77,6 +77,18 @@ class ServiceAdapter:
             capability_leaf=capability.rsplit(".", 1)[-1],
         )
 
+    def _invoke_http(self, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+        if not self.spec.endpoint:
+            raise RuntimeError(f"Service {self.spec.name} has no HTTP endpoint")
+        req = urllib.request.Request(
+            self.spec.endpoint.rstrip("/") + self._request_path(capability),
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=120) as response:
+            return json.loads(response.read())
+
     def invoke(self, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         if capability not in self.spec.capabilities:
             raise ValueError(f"{self.spec.name} does not advertise {capability}")
@@ -86,18 +98,11 @@ class ServiceAdapter:
         if self.spec.builtin == "cardiac_digital_twin":
             from .builtin_services import cardiac_digital_twin
             return cardiac_digital_twin(payload)
-        if self.spec.builtin:
+        if self._builtin_available():
             from .native_services import invoke_native
             return invoke_native(self.spec.name, capability, payload)
         if self.spec.endpoint:
-            req = urllib.request.Request(
-                self.spec.endpoint.rstrip("/") + self._request_path(capability),
-                data=json.dumps(payload).encode(),
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            with urllib.request.urlopen(req, timeout=120) as response:
-                return json.loads(response.read())
+            return self._invoke_http(capability, payload)
         if self.spec.command:
             env = os.environ.copy()
             env["HEARTTWIN_PAYLOAD"] = json.dumps(payload)
