@@ -92,6 +92,8 @@ def _cardibench(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         benchmark_id=str(payload.get("benchmark_id", "hearttwin-e2e")),
         version=str(payload.get("version", "1.0")),
         policy=str(payload.get("policy", "subject_heldout")),
+        test_values={str(item) for item in payload.get("test_values", [])},
+        validation_values={str(item) for item in payload.get("validation_values", [])},
         seed=int(payload.get("seed", 0)),
     )
     return {
@@ -135,41 +137,53 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         split=split,
     )
     result = train(dataset, config)
-    test_idx = result.splits.test
-    X_test = dataset.features().iloc[test_idx]
-    y_test = dataset.target.iloc[test_idx]
+
+    if payload.get("prediction_data") is not None:
+        prediction_frame = pd.DataFrame(payload["prediction_data"])
+        X_pred = prediction_frame[dataset.feature_columns]
+        y_pred_target = prediction_frame[target] if target in prediction_frame.columns else None
+        source_rows = prediction_frame.to_dict(orient="records")
+    else:
+        prediction_frame = frame.iloc[result.splits.test]
+        X_pred = dataset.features().iloc[result.splits.test]
+        y_pred_target = dataset.target.iloc[result.splits.test]
+        source_rows = prediction_frame.to_dict(orient="records")
+
     if config.task == "classification":
         model = result.model
-        predictions = model.predict(X_test)
+        predictions = model.predict(X_pred)
         scores = None
         if hasattr(model, "predict_proba"):
-            probabilities = model.predict_proba(X_test)
+            probabilities = model.predict_proba(X_pred)
             if getattr(probabilities, "ndim", 1) == 2 and probabilities.shape[1] == 2:
                 scores = probabilities[:, 1]
+        if y_pred_target is None:
+            y_values = [None] * len(predictions)
+        else:
+            y_values = y_pred_target.tolist()
         prediction_rows = []
-        source_test = frame.iloc[test_idx]
-        for row, y_true, y_pred, score in zip(source_test.to_dict(orient="records"), y_test.tolist(), predictions.tolist(), scores.tolist() if scores is not None else [None] * len(predictions), strict=True):
+        for index, (row, y_true, y_pred) in enumerate(zip(source_rows, y_values, predictions.tolist(), strict=True)):
             prediction_rows.append(
                 {
-                    "sample_id": str(row.get("sample_id", row.get("id", f"test-{len(prediction_rows):04d}"))),
-                    "y_true": y_true,
+                    "sample_id": str(row.get("sample_id", row.get("id", f"test-{index:04d}"))),
+                    "y_true": y_pred if y_true is None else y_true,
                     "y_pred": y_pred,
-                    "score": None if score is None else float(score),
+                    "score": None if scores is None else float(scores[index]),
                     "subgroup": None if row.get("subgroup") is None else str(row["subgroup"]),
                 }
             )
     else:
-        predictions = result.model.predict(X_test)
-        source_test = frame.iloc[test_idx]
+        predictions = result.model.predict(X_pred)
+        y_values = [None] * len(predictions) if y_pred_target is None else y_pred_target.tolist()
         prediction_rows = [
             {
-                "sample_id": str(row.get("sample_id", row.get("id", f"test-{i:04d}"))),
-                "y_true": y_true,
+                "sample_id": str(row.get("sample_id", row.get("id", f"test-{index:04d}"))),
+                "y_true": y_pred if y_true is None else y_true,
                 "y_pred": y_pred,
                 "score": None,
                 "subgroup": None,
             }
-            for i, (row, y_true, y_pred) in enumerate(zip(source_test.to_dict(orient="records"), y_test.tolist(), predictions.tolist(), strict=True))
+            for index, (row, y_true, y_pred) in enumerate(zip(source_rows, y_values, predictions.tolist(), strict=True))
         ]
 
     return {
@@ -180,6 +194,67 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         "metrics": result.metrics,
         "predictions": prediction_rows,
         "dataset_fingerprint": result.dataset_fingerprint,
+    }
+
+
+def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from cardieval import BenchmarkManifest, BenchmarkTask, PredictionRecord, evaluate_submission
+        from cardieval.provenance import canonical_json_hash
+    except Exception as exc:  # pragma: no cover - environment dependent
+        raise _native_unavailable("CardiEval", exc)
+
+    if capability != "evaluation.run":
+        raise ValueError(f"CardiEval does not support {capability}")
+    benchmark = payload.get("benchmark")
+    predictions = payload.get("predictions") or []
+    if not isinstance(benchmark, dict) or not predictions:
+        raise ValueError("CardiEval native adapter requires benchmark and non-empty predictions")
+    test_ids = [sample_id for sample_id, split in benchmark.get("assignments", {}).items() if split == "test"]
+    pred_by_id = {str(item["sample_id"]): item for item in predictions}
+    missing = sorted(set(test_ids) - set(pred_by_id))
+    if missing:
+        raise ValueError(f"CardiLearn/CardiBench handoff is missing test predictions: {missing}")
+    records = [PredictionRecord.model_validate(pred_by_id[sample_id]) for sample_id in test_ids]
+    task_id = str(payload.get("task_id", "binary-cardiac-state-detection"))
+    benchmark_id = str(benchmark["benchmark_id"])
+    version = str(benchmark["version"])
+    dataset_sha = str(benchmark["metadata_sha256"])
+    manifest = BenchmarkManifest(
+        benchmark_id=benchmark_id,
+        version=version,
+        task="binary_classification",
+        split="test",
+        sample_ids=test_ids,
+        dataset_sha256=dataset_sha,
+        label_schema={"0": "reference", "1": "target"},
+        metadata={"source": "HeartTwin/CardiBench"},
+    )
+    task = BenchmarkTask(
+        benchmark_id=benchmark_id,
+        version=version,
+        task_id=task_id,
+        task_type="binary_classification",
+        allowed_metrics=["accuracy", "balanced_accuracy", "macro_f1", "auroc", "auprc", "brier", "ece"],
+        primary_metric="macro_f1",
+        primary_direction="higher_is_better",
+        splits=["test"],
+        description="HeartTwin multimodal integration evaluation task",
+    )
+    report = evaluate_submission(manifest, records, model_id=str(payload.get("model_id", "unknown")), task_contract=task)
+    report_json = report.model_dump(mode="json")
+    return {
+        "contract_version": "1.0",
+        "benchmark_id": benchmark_id,
+        "benchmark_version": version,
+        "task_id": task_id,
+        "model_id": str(payload.get("model_id", "unknown")),
+        "primary_metric": report.primary_metric,
+        "primary_value": report.primary_value,
+        "metrics": [metric.model_dump(mode="json") for metric in report.metrics],
+        "warnings": list(report.warnings),
+        "errors": list(report.errors),
+        "evaluation_fingerprint": canonical_json_hash(report_json),
     }
 
 
@@ -200,11 +275,10 @@ def _cardisim(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         process_noise=float(payload.get("process_noise", 0.0)),
     )
     result = CardiacSimulator(config).run(population_preset(str(payload.get("preset", "baseline"))))
-    summary = result.summary()
     return {
         "contract_version": "1.0",
         "backend": "Virelion-CardiSim",
-        "summary": summary,
+        "summary": result.summary(),
         "events": list(result.events),
         "population_size": int(config.n_cells),
     }
@@ -214,15 +288,7 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     if capability != "vex.observe":
         raise ValueError(f"CardiVex does not support {capability}")
     try:
-        from cardivex import (
-            Confidence,
-            DomainValue,
-            EvidenceTier,
-            Scenario,
-            ScenarioState,
-            healthy_baseline,
-            run_end_to_end,
-        )
+        from cardivex import Confidence, DomainValue, EvidenceTier, Scenario, ScenarioState, healthy_baseline, run_end_to_end
     except Exception as exc:  # pragma: no cover - environment dependent
         raise _native_unavailable("CardiVex", exc)
 
@@ -240,16 +306,15 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             for name, item in mapping.items()
         }
 
-    temporal = []
-    for item in raw.get("temporal_profile", []):
-        temporal.append(
-            ScenarioState(
-                state=str(item.get("state", "state")),
-                relative_time=float(item.get("relative_time", 0.0)),
-                duration=float(item.get("duration", 0.0)),
-                domains=domain_map(dict(item.get("domains") or {})),
-            )
+    temporal = [
+        ScenarioState(
+            state=str(item.get("state", "state")),
+            relative_time=float(item.get("relative_time", 0.0)),
+            duration=float(item.get("duration", 0.0)),
+            domains=domain_map(dict(item.get("domains") or {})),
         )
+        for item in raw.get("temporal_profile", [])
+    ]
     scenario = Scenario(
         scenario_id=str(raw["scenario_id"]),
         version=str(raw.get("version", "1.0")),
@@ -294,7 +359,6 @@ def _cardistudio(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         )
         return {"contract_version": "1.0", "n_per_arm": int(n)}
     if capability in {"population.generate", "design.validate"}:
-        # Keep native support explicit and deterministic without inventing a second API.
         return {
             "contract_version": "1.0",
             "supported": False,
@@ -305,16 +369,7 @@ def _cardistudio(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 def _dccp(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     try:
-        from dccp import (
-            HeuristicDetector,
-            PrototypeDetector,
-            assess_scenario,
-            audit_scenario,
-            build_rescue_event_dict,
-            evaluate_recovery,
-            load_scenario,
-            validate_scenario,
-        )
+        from dccp import assess_scenario, evaluate_recovery, load_scenario, validate_scenario
         from dccp.scenario import Scenario
     except Exception as exc:  # pragma: no cover - environment dependent
         raise _native_unavailable("DCCP", exc)
