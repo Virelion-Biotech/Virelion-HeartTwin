@@ -259,6 +259,7 @@ class CardiacState(BaseModel):
     model_config = ConfigDict(extra="forbid")
     contract_version: str = CONTRACT_VERSION
     entity_id: str
+    state_fingerprint: str | None = None
     biological_context: dict[str, Any] = Field(default_factory=dict)
     state_phase: StatePhase = "unknown"
     observations: list[Observation] = Field(default_factory=list)
