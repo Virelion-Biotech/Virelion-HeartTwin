@@ -65,6 +65,7 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
     assert run.state.benchmark is not None
     assert run.state.simulation is not None
     assert run.state.agent is not None
+    assert run.state.vex is not None
     assert run.state.bridge is not None
     assert run.state.evaluation is not None
     assert run.state.trace is not None
@@ -85,3 +86,4 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
     assert run.state.evaluation.evaluation_fingerprint
     assert run.state.bridge.transport == "in-process"
     assert run.state.bridge.status in {"processed", "duplicate"}
+    assert run.state.bridge.consumer_result is not None
