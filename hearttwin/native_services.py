@@ -10,9 +10,11 @@ from typing import Any
 
 
 def _native_unavailable(name: str, exc: Exception) -> RuntimeError:
-    return RuntimeError(
+    error = RuntimeError(
         f"Native service {name!r} is unavailable: install the corresponding Virelion package."
-    ) from exc
+    )
+    error.__cause__ = exc
+    return error
 
 
 def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -157,10 +159,7 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             probabilities = model.predict_proba(X_pred)
             if getattr(probabilities, "ndim", 1) == 2 and probabilities.shape[1] == 2:
                 scores = probabilities[:, 1]
-        if y_pred_target is None:
-            y_values = [None] * len(predictions)
-        else:
-            y_values = y_pred_target.tolist()
+        y_values = [None] * len(predictions) if y_pred_target is None else y_pred_target.tolist()
         prediction_rows = []
         for index, (row, y_true, y_pred) in enumerate(zip(source_rows, y_values, predictions.tolist(), strict=True)):
             prediction_rows.append(
@@ -241,7 +240,12 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         splits=["test"],
         description="HeartTwin multimodal integration evaluation task",
     )
-    report = evaluate_submission(manifest, records, model_id=str(payload.get("model_id", "unknown")), task_contract=task)
+    report = evaluate_submission(
+        manifest,
+        records,
+        model_id=str(payload.get("model_id", "unknown")),
+        task_contract=task,
+    )
     report_json = report.model_dump(mode="json")
     return {
         "contract_version": "1.0",
