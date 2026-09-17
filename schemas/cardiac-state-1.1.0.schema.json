@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://virelion.ai/schemas/cardiac-state-1.1.0.json",
+  "title": "Virelion Cardiac State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "entity_id", "observations"],
+  "properties": {
+    "contract_version": {"const": "1.1.0"},
+    "entity_id": {"type": "string", "minLength": 1},
+    "state_fingerprint": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "biological_context": {"type": "object"},
+    "state_phase": {"$ref": "#/$defs/statePhase"},
+    "observations": {"type": "array", "items": {"$ref": "#/$defs/observation"}},
+    "atlas_context": {"anyOf": [{"$ref": "#/$defs/atlas"}, {"type": "null"}]},
+    "benchmarks": {"type": "array", "items": {"$ref": "#/$defs/benchmark"}},
+    "modality_analyses": {"type": "array", "items": {"$ref": "#/$defs/modalityAnalysis"}},
+    "derived_values": {"type": "array", "items": {"$ref": "#/$defs/stateValue"}},
+    "simulation_artifacts": {"type": "array", "items": {"$ref": "#/$defs/simulationArtifact"}},
+    "prediction_artifacts": {"type": "array", "items": {"$ref": "#/$defs/predictionArtifact"}},
+    "evaluation_artifacts": {"type": "array", "items": {"$ref": "#/$defs/validationArtifact"}},
+    "challenges": {"type": "array", "items": {"$ref": "#/$defs/agentChallenge"}},
+    "vex_observations": {"type": "array", "items": {"$ref": "#/$defs/vexObservation"}},
+    "bridge_publications": {"type": "array", "items": {"$ref": "#/$defs/bridgePublication"}},
+    "transitions": {"type": "array", "items": {"$ref": "#/$defs/stateTransition"}},
+    "trace_records": {"type": "array", "items": {"type": "object"}},
+    "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}},
+    "inferred_state": {"type": "object"},
+    "simulations": {"type": "array", "items": {"type": "object"}},
+    "predictions": {"type": "array", "items": {"type": "object"}},
+    "validation": {"type": "object"}
+  },
+  "$defs": {
+    "statePhase": {
+      "type": "string",
+      "enum": ["unknown", "baseline", "injury", "acute", "remodeling", "recovery", "intervention", "post_intervention", "simulated", "validated"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_service", "run_id"],
+      "properties": {
+        "source_service": {"type": "string", "minLength": 1},
+        "source_repository": {"type": ["string", "null"]},
+        "source_version": {"type": ["string", "null"]},
+        "run_id": {"type": "string", "minLength": 1},
+        "created_at": {"type": "string", "format": "date-time"},
+        "parent_run_ids": {"type": "array", "items": {"type": "string"}},
+        "content_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "modality", "values", "provenance", "status"],
+      "properties": {
+        "observation_id": {"type": "string", "minLength": 1},
+        "modality": {"type": "string", "enum": ["molecular", "electrical", "mechanical", "imaging", "safety", "structural", "clinical", "other"]},
+        "values": {"type": "object"},
+        "provenance": {"$ref": "#/$defs/provenance"},
+        "status": {"type": "string", "enum": ["observed", "inferred", "simulated"]},
+        "uncertainty": {"type": "object"},
+        "recorded_at": {"type": ["string", "null"], "format": "date-time"},
+        "anatomical_region": {"type": ["string", "null"]},
+        "measurement_method": {"type": ["string", "null"]},
+        "quality": {"type": "object"}
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "distribution": {"type": ["string", "null"]},
+        "lower": {"type": ["number", "null"]},
+        "upper": {"type": ["number", "null"]},
+        "std": {"type": ["number", "null"]},
+        "confidence_level": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "method": {"type": ["string", "null"]}
+      }
+    },
+    "stateValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value_id", "domain", "variable", "value", "status"],
+      "properties": {
+        "value_id": {"type": "string", "minLength": 1},
+        "domain": {"type": "string", "enum": ["electrical", "mechanical", "structural", "molecular", "metabolic", "imaging", "clinical", "safety", "simulation", "inference", "other"]},
+        "variable": {"type": "string", "minLength": 1},
+        "value": {},
+        "unit": {"type": ["string", "null"]},
+        "anatomical_region": {"type": ["string", "null"]},
+        "time": {"type": ["string", "null"], "format": "date-time"},
+        "status": {"type": "string", "enum": ["observed", "inferred", "simulated"]},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "uncertainty": {"anyOf": [{"$ref": "#/$defs/uncertainty"}, {"type": "null"}]},
+        "method": {"type": ["string", "null"]},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "atlas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context_id"],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "context_id": {"type": "string"},
+        "record_ids": {"type": "array", "items": {"type": "string"}},
+        "context": {"type": "object"},
+        "provenance": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "benchmarkSample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_id", "group_id", "study_id", "label"],
+      "properties": {
+        "sample_id": {"type": "string"},
+        "group_id": {"type": "string"},
+        "study_id": {"type": "string"},
+        "label": {"type": "string"},
+        "technical_group": {"type": ["string", "null"]},
+        "organism": {"type": ["string", "null"]},
+        "timepoint": {"type": ["string", "null"]},
+        "cell_context": {"type": ["string", "null"]},
+        "region": {"type": ["string", "null"]}
+      }
+    },
+    "benchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["benchmark_id", "version", "policy", "seed", "assignments", "sample_count", "group_count", "metadata_sha256", "samples"],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "benchmark_id": {"type": "string"},
+        "version": {"type": "string"},
+        "policy": {"type": "string"},
+        "seed": {"type": "integer"},
+        "assignments": {"type": "object", "additionalProperties": {"type": "string"}},
+        "sample_count": {"type": "integer", "minimum": 0},
+        "group_count": {"type": "integer", "minimum": 0},
+        "metadata_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "samples": {"type": "array", "items": {"$ref": "#/$defs/benchmarkSample"}}
+      }
+    },
+    "modalityAnalysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "modality", "capability", "service", "input_path", "output", "content_sha256"],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "observation_id": {"type": "string"},
+        "modality": {"type": "string", "enum": ["electrical", "mechanical", "imaging", "safety"]},
+        "capability": {"type": "string"},
+        "service": {"type": "string"},
+        "input_path": {"type": "string"},
+        "output": {"type": "object"},
+        "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "simulationArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["simulation_id", "service", "backend", "population_size"],
+      "properties": {
+        "simulation_id": {"type": "string"},
+        "service": {"type": "string"},
+        "backend": {"type": "string"},
+        "summary": {"type": "object"},
+        "events": {"type": "array", "items": {"type": "string"}},
+        "population_size": {"type": "integer", "minimum": 0},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "learningPrediction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_id", "y_true", "y_pred"],
+      "properties": {
+        "sample_id": {"type": "string"},
+        "y_true": {},
+        "y_pred": {},
+        "score": {"type": ["number", "null"]},
+        "subgroup": {"type": ["string", "null"]}
+      }
+    },
+    "predictionArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prediction_id", "model_id", "task", "target_column"],
+      "properties": {
+        "prediction_id": {"type": "string"},
+        "model_id": {"type": "string"},
+        "task": {"type": "string"},
+        "target_column": {"type": "string"},
+        "feature_columns": {"type": "array", "items": {"type": "string"}},
+        "predictions": {"type": "array", "items": {"$ref": "#/$defs/learningPrediction"}},
+        "metrics": {"type": "object"},
+        "dataset_fingerprint": {"type": ["string", "null"]},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "validationArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validation_id", "benchmark_id", "benchmark_version", "task_id", "model_id"],
+      "properties": {
+        "validation_id": {"type": "string"},
+        "benchmark_id": {"type": "string"},
+        "benchmark_version": {"type": "string"},
+        "task_id": {"type": "string"},
+        "model_id": {"type": "string"},
+        "primary_metric": {"type": ["string", "null"]},
+        "primary_value": {"type": ["number", "null"]},
+        "metrics": {"type": "array", "items": {"type": "object"}},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "evaluation_fingerprint": {"type": ["string", "null"]},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "agentChallenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["challenges"],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "entity_id": {"type": ["string", "null"]},
+        "challenges": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "vexObservation": {
+      "type": "object",
+      "properties": {
+        "contract_version": {"type": "string"},
+        "scenario_id": {"type": ["string", "null"]},
+        "evidence_tier": {"type": ["string", "null"]},
+        "confidence": {"type": ["string", "null"]},
+        "primary": {"type": "object"}
+      }
+    },
+    "bridgePublication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["message_type", "message_id", "status", "transport"],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "message_type": {"type": "string"},
+        "message_id": {"type": "string"},
+        "status": {"type": "string"},
+        "transport": {"type": "string"},
+        "content_sha256": {"type": ["string", "null"]},
+        "consumer_result": {"type": ["object", "null"]}
+      }
+    },
+    "stateTransition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transition_id", "sequence", "from_phase", "to_phase", "trigger"],
+      "properties": {
+        "transition_id": {"type": "string"},
+        "sequence": {"type": "integer", "minimum": 0},
+        "from_phase": {"$ref": "#/$defs/statePhase"},
+        "to_phase": {"$ref": "#/$defs/statePhase"},
+        "trigger": {"type": "string"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}},
+        "details": {"type": "object"}
+      }
+    }
+  }
+}
