@@ -110,6 +110,8 @@ Run the synthetic end-to-end workflow:
 hearttwin workflow-demo --output outputs/workflow-demo.json
 ```
 
+The integration matrix installs the actual repositories from clean environments and fails hard if a required native service cannot be imported. Component compatibility fixes are kept in the component repositories rather than hidden by HeartTwin fallbacks.
+
 The workflow is computational test infrastructure. Its generated states are not patient measurements, and passing software integration tests does not establish clinical or biological validity.
 
 ## Cardiac-Digital-Twin integration
@@ -143,4 +145,4 @@ HeartTwin is research infrastructure. It does not diagnose patients or prescribe
 
 ## License
 
-GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See `LICENSE`.
+GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later).
