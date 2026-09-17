@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from .contracts import CardiacState, Observation, Provenance, ServiceResult, TwinRun
+from .contracts import Observation, Provenance, ServiceResult, TwinRun
 from .provenance import new_run_id, sha256
 from .service_registry import ServiceRegistry
+from .state import CardiacStateStore, CardiacStateValidationError
 
 DEFAULT_CAPABILITIES = [
     "atlas.context", "atlas.search", "design.generate", "population.generate",
@@ -35,11 +36,10 @@ class HeartTwin:
             "observations": [o.model_dump(mode="json") for o in observations],
         }
         run_id = new_run_id(entity_id, payload)
-        state = CardiacState(
-            entity_id=entity_id,
-            biological_context=context or {},
+        store = CardiacStateStore.new(
+            entity_id,
             observations=observations,
-            provenance=[o.provenance for o in observations],
+            biological_context=context or {},
         )
         results: list[ServiceResult] = []
         for capability in requested:
@@ -72,29 +72,31 @@ class HeartTwin:
                         "hearttwin_run_id": run_id,
                     }
                 out = adapter.invoke(capability, invocation_payload)
+                step_run_id = new_run_id(
+                    entity_id,
+                    {"hearttwin_run_id": run_id, "capability": capability, "data": out},
+                )
                 p = Provenance(
                     source_service=adapter.spec.name,
                     source_repository=adapter.spec.repository,
-                    run_id=run_id,
+                    run_id=step_run_id,
+                    parent_run_ids=[run_id],
                     content_sha256=sha256(out),
                 )
-                results.append(
-                    ServiceResult(
-                        service=adapter.spec.name,
-                        capability=capability,
-                        status="ok",
-                        data=out,
-                        provenance=p,
-                    )
+                result = ServiceResult(
+                    service=adapter.spec.name,
+                    capability=capability,
+                    status="ok",
+                    data=out,
+                    provenance=p,
                 )
-                if capability.startswith("learn."):
-                    state.predictions.append({"capability": capability, "data": out, "status": "inferred"})
-                elif capability.startswith("simulation."):
-                    state.simulations.append({"capability": capability, "data": out, "status": "simulated"})
-                elif capability == "trace.record":
-                    state.validation["trace"] = out
-                elif capability == "evaluation.run":
-                    state.validation["evaluation"] = out
+                results.append(result)
+                try:
+                    store.reduce_service_result(result)
+                except CardiacStateValidationError:
+                    # Low-level HeartTwin.run remains compatible with legacy service payloads.
+                    # The explicit multimodal workflow is strict and validates every stage.
+                    pass
             except Exception as exc:
                 results.append(
                     ServiceResult(
@@ -104,6 +106,7 @@ class HeartTwin:
                         message=str(exc),
                     )
                 )
+        state = store.snapshot()
         return TwinRun(
             run_id=run_id,
             entity_id=entity_id,
