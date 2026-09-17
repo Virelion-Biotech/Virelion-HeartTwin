@@ -107,6 +107,7 @@ class LearningResultPayload(BaseModel):
     model_id: str
     task: str
     target_column: str
+    feature_columns: list[str] = Field(default_factory=list)
     metrics: dict[str, dict[str, float]]
     predictions: list[LearningPredictionPayload]
     dataset_fingerprint: str | None = None
@@ -152,6 +153,18 @@ class VexObservationPayload(BaseModel):
     primary: dict[str, Any] = Field(default_factory=dict)
 
 
+class ModalityAnalysisPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "1.0"
+    observation_id: str
+    modality: Literal["electrical", "mechanical", "imaging", "safety"]
+    capability: str
+    service: str
+    input_path: str
+    output: dict[str, Any]
+    content_sha256: str
+
+
 class BridgePublicationPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
     contract_version: str = "1.0"
@@ -169,6 +182,7 @@ class WorkflowState(BaseModel):
     contract_version: str = CONTRACT_VERSION
     entity_id: str
     observations: list[Observation] = Field(default_factory=list)
+    modality_analyses: list[ModalityAnalysisPayload] = Field(default_factory=list)
     atlas: AtlasContextPayload | None = None
     benchmark: BenchmarkResolutionPayload | None = None
     learning: LearningResultPayload | None = None
