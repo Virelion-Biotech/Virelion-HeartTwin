@@ -236,9 +236,18 @@ def _register_local_vex_handler(registry: ServiceRegistry, entity_id: str, scena
         vex = registry.capability("vex.observe")
         if vex is None:
             raise WorkflowError("CardiVex is required as the CardiBridge consumer")
+        message_scenario: dict[str, Any] | None = None
+        raw_payload = getattr(envelope, "payload", None)
+        if isinstance(raw_payload, dict):
+            population = raw_payload.get("population")
+            if isinstance(population, list) and population and isinstance(population[0], dict):
+                candidate = population[0].get("scenario")
+                if isinstance(candidate, dict):
+                    message_scenario = candidate
+        selected_scenario = message_scenario or scenario
         return vex.invoke(
             "vex.observe",
-            {"entity_id": entity_id, "scenario": scenario, "bridge_message_id": envelope.message_id},
+            {"entity_id": entity_id, "scenario": selected_scenario, "bridge_message_id": envelope.message_id},
         )
 
     try:
