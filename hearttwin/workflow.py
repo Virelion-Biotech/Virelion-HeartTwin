@@ -361,6 +361,12 @@ def run_multimodal_workflow(
     simulation_result = _call(registry, "simulation.run", entity_id, sim_payload)
     state.simulation = _as_simulation(simulation_result.data)
     store.record_simulation(state.simulation, simulation_result.provenance)
+    store.transition(
+        "simulated",
+        trigger="CardiSim:simulation.run",
+        provenance=simulation_result.provenance,
+        details={"backend": state.simulation.backend},
+    )
     health = float(state.simulation.summary.get("cardiac_health_score", 0.5))
     store.add_derived_value(
         domain="simulation",
@@ -442,6 +448,15 @@ def run_multimodal_workflow(
     )
     state.evaluation = _as_evaluation(evaluation_result.data)
     store.record_evaluation(state.evaluation, evaluation_result.provenance)
+    store.transition(
+        "validated",
+        trigger="CardiEval:evaluation.run",
+        provenance=evaluation_result.provenance,
+        details={
+            "evaluation_fingerprint": state.evaluation.evaluation_fingerprint,
+            "primary_metric": state.evaluation.primary_metric,
+        },
+    )
     steps.append(evaluation_result)
 
     pre_trace_fingerprint = store.fingerprint()
