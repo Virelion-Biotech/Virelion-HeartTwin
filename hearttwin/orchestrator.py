@@ -19,7 +19,7 @@ DEFAULT_CAPABILITIES = [
 TYPED_STATE_CAPABILITIES = {
     "atlas.context", "benchmark.resolve", "learn.infer", "learn.predict",
     "simulation.run", "evaluation.run", "agent.challenge", "vex.observe",
-    "bridge.publish", "trace.record",
+    "trace.record",
 }
 
 
@@ -96,13 +96,13 @@ class HeartTwin:
                     data=out,
                     provenance=p,
                 )
-                results.append(result)
                 try:
                     store.reduce_service_result(result)
                 except CardiacStateValidationError as exc:
                     if capability in TYPED_STATE_CAPABILITIES:
                         raise exc
                     # Specialist legacy adapters are still retained as raw ServiceResult.data.
+                results.append(result)
             except Exception as exc:
                 results.append(
                     ServiceResult(
