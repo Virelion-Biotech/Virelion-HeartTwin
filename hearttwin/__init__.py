@@ -14,6 +14,7 @@ from .contracts import (
     ServiceResult,
     SimulationResultPayload,
     TwinRun,
+    VexObservationPayload,
     WorkflowRun,
     WorkflowState,
 )
