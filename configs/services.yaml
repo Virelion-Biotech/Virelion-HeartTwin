@@ -45,7 +45,8 @@ services:
     command: carditrace-hearttwin
   - name: CardiBridge
     repository: Virelion-Biotech/Virelion-CardiBridge
-    capabilities: [bridge.validate]
+    capabilities: [bridge.validate, bridge.publish, bridge.contracts, bridge.asyncapi, bridge.replay, bridge.health]
+    builtin: cardibridge
     endpoint: ${CARDIBRIDGE_URL}
     path_template: /v1/{capability_leaf}
   - name: CardiAgent

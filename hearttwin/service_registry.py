@@ -18,6 +18,18 @@ class ServiceSpec:
 class ServiceAdapter:
     def __init__(self, spec: ServiceSpec): self.spec = spec
     def available(self) -> bool:
+        if self.spec.builtin == "cardibridge":
+            try:
+                import cardibridge  # noqa: F401
+                return True
+            except ImportError:
+                if self.spec.endpoint:
+                    try:
+                        with urllib.request.urlopen(self.spec.endpoint.rstrip("/")+"/health", timeout=2):
+                            return True
+                    except Exception:
+                        return False
+                return False
         if self.spec.builtin: return True
         if self.spec.endpoint:
             try:
@@ -32,6 +44,9 @@ class ServiceAdapter:
         return self.spec.path_template.format(capability=capability_path, capability_leaf=capability.rsplit(".",1)[-1])
     def invoke(self, capability: str, payload: dict[str,Any]) -> dict[str,Any]:
         if capability not in self.spec.capabilities: raise ValueError(f"{self.spec.name} does not advertise {capability}")
+        if self.spec.builtin == "cardibridge":
+            from .cardibridge_adapter import invoke_cardibridge
+            return invoke_cardibridge(capability, payload, endpoint=self.spec.endpoint)
         if self.spec.builtin:
             if self.spec.builtin == "cardiac_digital_twin":
                 from .builtin_services import cardiac_digital_twin
