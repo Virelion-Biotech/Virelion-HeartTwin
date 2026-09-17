@@ -1,8 +1,7 @@
 """Explicit typed multimodal HeartTwin workflow.
 
-This module is deliberately separate from ``HeartTwin.run``. The latter remains a
-low-level capability runner; this module defines an actual dependency graph where
-outputs are validated into typed contracts before becoming downstream workflow state.
+This module defines a dependency graph where service outputs are validated into
+versioned contracts and simultaneously reduced into one canonical CardiacState.
 """
 from __future__ import annotations
 
@@ -28,6 +27,7 @@ from .contracts import (
 )
 from .provenance import new_run_id, sha256
 from .service_registry import ServiceRegistry
+from .state import CardiacStateStore
 
 
 class WorkflowError(RuntimeError):
@@ -278,44 +278,76 @@ def run_multimodal_workflow(
             "seed": seed,
         },
     )
+    store = CardiacStateStore.new(
+        entity_id,
+        observations=observations,
+        biological_context={"workflow_run_id": run_id},
+    )
+    state = WorkflowState(
+        entity_id=entity_id,
+        observations=observations,
+        cardiac_state=store.state,
+    )
     steps: list[ServiceResult] = []
-    state = WorkflowState(entity_id=entity_id, observations=observations)
 
     specialist_results = _run_specialist_modalities(registry, entity_id, observations)
     for result, typed in specialist_results:
         steps.append(result)
         state.modality_analyses.append(typed)
+        store.record_modality(typed, result.provenance)
 
-    atlas_result = _call(registry, "atlas.context", entity_id, {
-        "context_id": f"{entity_id}-context",
-        "record_ids": atlas_record_ids or [],
-        "records": atlas_records or [],
-    })
+    atlas_result = _call(
+        registry,
+        "atlas.context",
+        entity_id,
+        {
+            "context_id": f"{entity_id}-context",
+            "record_ids": atlas_record_ids or [],
+            "records": atlas_records or [],
+        },
+    )
     state.atlas = _as_atlas(atlas_result.data)
+    store.record_atlas(state.atlas, atlas_result.provenance)
     steps.append(atlas_result)
 
-    learning_result = _call(registry, "learn.infer", entity_id, {
-        "data": learning_data,
-        "target_column": "target",
-        "group_column": "group_id",
-        "model": "logistic_regression",
-        "task": "classification",
-        "seed": seed,
-    })
+    learning_result = _call(
+        registry,
+        "learn.infer",
+        entity_id,
+        {
+            "data": learning_data,
+            "target_column": "target",
+            "group_column": "group_id",
+            "model": "logistic_regression",
+            "task": "classification",
+            "seed": seed,
+        },
+    )
     state.learning = _as_learning(learning_result.data)
+    store.record_learning(state.learning, learning_result.provenance)
     steps.append(learning_result)
 
-    benchmark_result = _call(registry, "benchmark.resolve", entity_id, {
-        "benchmark_id": "hearttwin-multimodal-initial",
-        "version": "1.0",
-        "policy": "subject_heldout",
-        "seed": seed,
-        "samples": benchmark_samples,
-    })
+    benchmark_result = _call(
+        registry,
+        "benchmark.resolve",
+        entity_id,
+        {
+            "benchmark_id": "hearttwin-multimodal-initial",
+            "version": "1.0",
+            "policy": "subject_heldout",
+            "seed": seed,
+            "samples": benchmark_samples,
+        },
+    )
     _as_benchmark(benchmark_result.data)
-    locked_benchmark = _benchmark_lock_to_learning_test(benchmark_samples, state.learning, seed=seed)
-    benchmark_result = benchmark_result.model_copy(update={"data": locked_benchmark.model_dump(mode="json")})
+    locked_benchmark = _benchmark_lock_to_learning_test(
+        benchmark_samples, state.learning, seed=seed
+    )
+    benchmark_result = benchmark_result.model_copy(
+        update={"data": locked_benchmark.model_dump(mode="json")}
+    )
     state.benchmark = locked_benchmark
+    store.record_benchmark(locked_benchmark, benchmark_result.provenance)
     steps.append(benchmark_result)
 
     scores = [float(item.score) for item in state.learning.predictions if item.score is not None]
@@ -328,36 +360,58 @@ def run_multimodal_workflow(
     sim_payload.setdefault("seed", seed)
     simulation_result = _call(registry, "simulation.run", entity_id, sim_payload)
     state.simulation = _as_simulation(simulation_result.data)
+    store.record_simulation(state.simulation, simulation_result.provenance)
+    health = float(state.simulation.summary.get("cardiac_health_score", 0.5))
+    store.add_derived_value(
+        domain="simulation",
+        variable="cardiac_health_score",
+        value=health,
+        status="simulated",
+        confidence=None,
+        method="CardiSim",
+        provenance=simulation_result.provenance,
+    )
     steps.append(simulation_result)
 
-    agent_result = _call(registry, "agent.challenge", entity_id, {
-        "observations": [{
-            "modality": "structural",
-            "values": {
-                "domain": "ischemic",
-                "severity": max(0.1, min(0.9, 1.0 - float(state.simulation.summary.get("cardiac_health_score", 0.5)))),
-                "count": 1,
-                "seed": seed,
-            },
-        }],
-        "context": {"simulation": state.simulation.model_dump(mode="json")},
-    })
+    agent_result = _call(
+        registry,
+        "agent.challenge",
+        entity_id,
+        {
+            "observations": [{
+                "modality": "structural",
+                "values": {
+                    "domain": "ischemic",
+                    "severity": max(0.1, min(0.9, 1.0 - health)),
+                    "count": 1,
+                    "seed": seed,
+                },
+            }],
+            "context": {"simulation": state.simulation.model_dump(mode="json")},
+        },
+    )
     state.agent = _as_agent(agent_result.data, entity_id)
+    store.record_agent(state.agent, agent_result.provenance)
     steps.append(agent_result)
 
     scenario = _scenario_from_workflow(entity_id, state.simulation)
     _register_local_vex_handler(registry, entity_id, scenario)
-    bridge_result = _call(registry, "bridge.publish", entity_id, {
-        "message_type": "agent.challenge",
-        "producer": "CardiAgent",
-        "consumer": "CardiVex",
-        "challenge_type": "hearttwin.multimodal",
-        "population": [
-            {"entity_id": entity_id, "challenge": challenge, "scenario": scenario}
-            for challenge in state.agent.challenges
-        ],
-        "intended_task": "defensive-phenotype-evaluation",
-    })
+    bridge_result = _call(
+        registry,
+        "bridge.publish",
+        entity_id,
+        {
+            "message_type": "agent.challenge",
+            "producer": "CardiAgent",
+            "consumer": "CardiVex",
+            "challenge_type": "hearttwin.multimodal",
+            "population": [
+                {"entity_id": entity_id, "challenge": challenge, "scenario": scenario}
+                for challenge in state.agent.challenges
+            ],
+            "intended_task": "defensive-phenotype-evaluation",
+        },
+    )
     consumer = bridge_result.data.get("result")
     if not isinstance(consumer, dict):
         raise WorkflowError("CardiBridge publish did not return a consumer result")
@@ -371,26 +425,43 @@ def run_multimodal_workflow(
         "content_sha256": bridge_result.data.get("content_sha256"),
         "consumer_result": consumer,
     })
+    store.record_vex(state.vex, bridge_result.provenance)
+    store.record_bridge(state.bridge, bridge_result.provenance)
     steps.append(bridge_result)
 
-    evaluation_result = _call(registry, "evaluation.run", entity_id, {
-        "benchmark": state.benchmark.model_dump(mode="json"),
-        "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
-        "model_id": state.learning.model_id,
-        "task_id": "binary-cardiac-state-detection",
-    })
+    evaluation_result = _call(
+        registry,
+        "evaluation.run",
+        entity_id,
+        {
+            "benchmark": state.benchmark.model_dump(mode="json"),
+            "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
+            "model_id": state.learning.model_id,
+            "task_id": "binary-cardiac-state-detection",
+        },
+    )
     state.evaluation = _as_evaluation(evaluation_result.data)
+    store.record_evaluation(state.evaluation, evaluation_result.provenance)
     steps.append(evaluation_result)
 
-    trace_result = _call(registry, "trace.record", entity_id, {
-        "context": {"workflow_run_id": run_id},
-        "observations": [item.model_dump(mode="json") for item in observations],
-        "workflow_state": state.model_dump(mode="json"),
-        "results": [item.model_dump(mode="json") for item in steps],
-        "hearttwin_run_id": run_id,
-    })
+    trace_result = _call(
+        registry,
+        "trace.record",
+        entity_id,
+        {
+            "context": {"workflow_run_id": run_id},
+            "observations": [item.model_dump(mode="json") for item in observations],
+            "workflow_state": state.model_dump(mode="json"),
+            "canonical_state_fingerprint": store.fingerprint(),
+            "results": [item.model_dump(mode="json") for item in steps],
+            "hearttwin_run_id": run_id,
+        },
+    )
     state.trace = trace_result.data
+    store.record_trace(trace_result.data, trace_result.provenance)
     steps.append(trace_result)
 
-    state.provenance.extend(item.provenance for item in steps if item.provenance is not None)
+    state.cardiac_state = store.snapshot()
+    state.provenance = list(state.cardiac_state.provenance)
+    state.cardiac_state.biological_context["canonical_state_fingerprint"] = store.fingerprint()
     return WorkflowRun(run_id=run_id, entity_id=entity_id, status="ok", state=state, steps=steps)
