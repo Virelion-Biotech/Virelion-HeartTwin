@@ -374,11 +374,14 @@ class CardiacStateStore:
 
     def snapshot(self) -> CardiacState:
         self.validate()
-        return self.state.model_copy(deep=True)
+        snapshot = self.state.model_copy(deep=True)
+        snapshot.state_fingerprint = sha256(
+            snapshot.model_dump(mode="json", exclude={"state_fingerprint"})
+        )
+        return snapshot
 
     def fingerprint(self) -> str:
-        self.validate()
-        return sha256(self.state.model_dump(mode="json"))
+        return self.snapshot().state_fingerprint or ""
 
     def _record_derived(
         self,
