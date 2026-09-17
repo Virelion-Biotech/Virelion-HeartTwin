@@ -68,10 +68,29 @@ jobs:
           done
 
       - name: Validate registry
-        run: hearttwin doctor
+        env:
+          HEARTTWIN_REQUIRE_NATIVE: "1"
+        run: |
+          hearttwin doctor
+          python - <<'PY'
+          import json
+          import subprocess
+          doctor = json.loads(subprocess.check_output(["hearttwin", "doctor"], text=True))
+          required = [
+              "CardiAtlas", "CardiBench", "CardiEval", "CardiLearn",
+              "CardiSim", "CardiVex", "CardiStudio", "DCCP",
+          ]
+          missing = [name for name in required if not doctor.get(name)]
+          if missing:
+              raise SystemExit(f"Native services unavailable after installation: {missing}")
+          PY
 
       - name: Run HeartTwin integration tests
+        env:
+          HEARTTWIN_REQUIRE_NATIVE: "1"
         run: python -m pytest -q tests/test_native_service_connections.py tests/test_multimodal_workflow.py
 
       - name: Run full HeartTwin test suite
+        env:
+          HEARTTWIN_REQUIRE_NATIVE: "1"
         run: python -m pytest -q
