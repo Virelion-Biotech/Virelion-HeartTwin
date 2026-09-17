@@ -9,11 +9,12 @@ from hearttwin.contracts import (
     Provenance,
     ServiceResult,
     SimulationResultPayload,
+    StateValue,
 )
 from hearttwin.state import CardiacStateStore, CardiacStateValidationError, state_from_service_results
 
 
-def provenance(service: str, run_id: str, content: object = None) -> Provenance:
+def provenance(service: str, run_id: str) -> Provenance:
     return Provenance(source_service=service, run_id=run_id, content_sha256="a" * 64)
 
 
@@ -83,7 +84,11 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
     assert len(snapshot.evaluation_artifacts) == 1
     assert snapshot.state_fingerprint
     assert snapshot.state_fingerprint == store.fingerprint()
-    assert all(link in {p.run_id for p in snapshot.provenance} for item in snapshot.derived_values for link in item.provenance_ids)
+    assert all(
+        link in {p.run_id for p in snapshot.provenance}
+        for item in snapshot.derived_values
+        for link in item.provenance_ids
+    )
 
 
 def test_state_from_service_results_uses_typed_reduction():
@@ -111,14 +116,14 @@ def test_state_from_service_results_uses_typed_reduction():
 def test_dangling_provenance_is_rejected():
     store = CardiacStateStore.new("subject-1")
     store.state.derived_values.append(
-        {
-            "value_id": "v1",
-            "domain": "clinical",
-            "variable": "heart_rate",
-            "value": 70,
-            "status": "observed",
-            "provenance_ids": ["missing-run"],
-        }
+        StateValue(
+            value_id="v1",
+            domain="clinical",
+            variable="heart_rate",
+            value=70,
+            status="inferred",
+            provenance_ids=["missing-run"],
+        )
     )
-    with pytest.raises(CardiStateValidationError, match="Dangling HeartTwin provenance"):
+    with pytest.raises(CardiacStateValidationError, match="Dangling HeartTwin provenance"):
         store.validate()
