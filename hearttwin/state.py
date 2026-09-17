@@ -69,6 +69,14 @@ class CardiacStateStore:
         )
         return cls(state)
 
+    @classmethod
+    def from_snapshot(cls, state: CardiacState, *, verify: bool = True) -> "CardiacStateStore":
+        """Create a store from an existing snapshot, optionally verifying its fingerprint."""
+        store = cls(state.model_copy(deep=True))
+        if verify:
+            store.verify_fingerprint()
+        return store
+
     def _add_provenance(self, provenance: Provenance | None) -> list[str]:
         if provenance is None:
             return []
@@ -94,7 +102,13 @@ class CardiacStateStore:
     def record_benchmark(
         self, payload: BenchmarkResolutionPayload, provenance: Provenance | None = None
     ) -> None:
-        self._append_unique(self.state.benchmarks, payload, "benchmark_id", payload.benchmark_id)
+        if not any(
+            existing.benchmark_id == payload.benchmark_id
+            and existing.version == payload.version
+            and existing.metadata_sha256 == payload.metadata_sha256
+            for existing in self.state.benchmarks
+        ):
+            self.state.benchmarks.append(payload)
         self._add_provenance(provenance)
 
     def record_modality(
@@ -116,7 +130,10 @@ class CardiacStateStore:
             )
 
     def record_learning(
-        self, payload: LearningResultPayload, provenance: Provenance | None = None
+        self,
+        payload: LearningResultPayload,
+        provenance: Provenance | None = None,
+        capability: str = "learn.infer",
     ) -> PredictionArtifact:
         artifact_id = f"pred-{sha256(payload.model_dump(mode='json'))[:16]}"
         artifact = PredictionArtifact(
@@ -134,7 +151,7 @@ class CardiacStateStore:
             self.state.prediction_artifacts, artifact, "prediction_id", artifact_id
         )
         self.state.predictions = [
-            {"capability": "learn.infer", "data": payload.model_dump(mode="json"), "status": "inferred"}
+            {"capability": capability, "data": payload.model_dump(mode="json"), "status": "inferred"}
         ]
         return artifact
 
@@ -186,7 +203,7 @@ class CardiacStateStore:
             self.state.vex_observations.append(payload)
         self._add_provenance(provenance)
         self._record_derived(
-            domain="safety",
+            domain="inference",
             variable="vex.evidence_tier",
             value=payload.evidence_tier or "unknown",
             status="inferred",
@@ -276,7 +293,11 @@ class CardiacStateStore:
             elif result.capability == "benchmark.resolve":
                 self.record_benchmark(BenchmarkResolutionPayload.model_validate(data), result.provenance)
             elif result.capability in {"learn.infer", "learn.predict"}:
-                self.record_learning(LearningResultPayload.model_validate(data), result.provenance)
+                self.record_learning(
+                    LearningResultPayload.model_validate(data),
+                    result.provenance,
+                    capability=result.capability,
+                )
             elif result.capability == "simulation.run":
                 self.record_simulation(SimulationResultPayload.model_validate(data), result.provenance)
                 if self.state.state_phase != "simulated":
@@ -375,13 +396,26 @@ class CardiacStateStore:
                 f"state_phase={state.state_phase} is inconsistent with current observations"
             )
 
+    def _fingerprint_payload(self) -> dict[str, Any]:
+        return self.state.model_dump(mode="json", exclude={"state_fingerprint"})
+
     def snapshot(self) -> CardiacState:
         self.validate()
         snapshot = self.state.model_copy(deep=True)
-        snapshot.state_fingerprint = sha256(
-            snapshot.model_dump(mode="json", exclude={"state_fingerprint"})
-        )
+        snapshot.state_fingerprint = sha256(snapshot.model_dump(mode="json", exclude={"state_fingerprint"}))
         return snapshot
+
+    def verify_fingerprint(self) -> str:
+        """Verify the embedded fingerprint and return it."""
+        self.validate()
+        if not self.state.state_fingerprint:
+            raise CardiacStateValidationError("State has no embedded state_fingerprint")
+        expected = sha256(self._fingerprint_payload())
+        if expected != self.state.state_fingerprint:
+            raise CardiacStateValidationError(
+                "CardiacState fingerprint mismatch: snapshot may have been modified after creation"
+            )
+        return expected
 
     def fingerprint(self) -> str:
         return self.snapshot().state_fingerprint or ""
