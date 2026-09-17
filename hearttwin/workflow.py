@@ -2,8 +2,7 @@
 
 This module is deliberately separate from ``HeartTwin.run``. The latter remains a
 low-level capability runner; this module defines an actual dependency graph where
-outputs are validated into typed contracts before becoming inputs to downstream
-services.
+outputs are validated into typed contracts before becoming downstream workflow state.
 """
 from __future__ import annotations
 
@@ -18,6 +17,7 @@ from .contracts import (
     BridgePublicationPayload,
     EvaluationResultPayload,
     LearningResultPayload,
+    ModalityAnalysisPayload,
     Observation,
     Provenance,
     ServiceResult,
@@ -103,6 +103,52 @@ def _as_vex(data: dict[str, Any]) -> VexObservationPayload:
         return VexObservationPayload.model_validate(data)
     except Exception as exc:
         raise WorkflowError(f"CardiVex returned an invalid typed payload: {exc}") from exc
+
+
+def _run_specialist_modalities(
+    registry: ServiceRegistry,
+    entity_id: str,
+    observations: list[Observation],
+) -> list[tuple[ServiceResult, ModalityAnalysisPayload]]:
+    """Consume file-backed modality observations with their native HeartTwin adapters."""
+    capability_by_modality = {
+        "electrical": "electrical.analyze",
+        "mechanical": "mechanical.analyze",
+        "imaging": "imaging.qc",
+        "safety": "safety.score",
+    }
+    outputs: list[tuple[ServiceResult, ModalityAnalysisPayload]] = []
+    for observation in observations:
+        capability = capability_by_modality.get(observation.modality)
+        input_path = observation.values.get("input_path")
+        if capability is None or not input_path:
+            continue
+        adapter = registry.capability(capability)
+        if adapter is None:
+            raise WorkflowError(
+                f"Observation {observation.observation_id} requires {capability}, but it is not registered"
+            )
+        if not adapter.available():
+            raise WorkflowError(
+                f"Observation {observation.observation_id} requires {capability}, but its service is unavailable"
+            )
+        result = _call(
+            registry,
+            capability,
+            entity_id,
+            {"observations": [observation.model_dump(mode="json")]},
+        )
+        payload = ModalityAnalysisPayload(
+            observation_id=observation.observation_id,
+            modality=observation.modality,
+            capability=capability,
+            service=adapter.spec.name,
+            input_path=str(input_path),
+            output=result.data,
+            content_sha256=result.provenance.content_sha256 if result.provenance else sha256(result.data),
+        )
+        outputs.append((result, payload))
+    return outputs
 
 
 def _benchmark_lock_to_learning_test(
@@ -213,12 +259,7 @@ def run_multimodal_workflow(
     simulation: dict[str, Any] | None = None,
     seed: int = 42,
 ) -> WorkflowRun:
-    """Run a complete local multimodal HeartTwin workflow.
-
-    Dataflow: Atlas -> CardiLearn -> CardiBench lock -> CardiSim -> CardiAgent ->
-    CardiBridge -> CardiVex -> CardiEval -> CardiTrace.
-    Every inter-service transition is validated against a typed HeartTwin contract.
-    """
+    """Run a complete local multimodal HeartTwin workflow."""
     run_id = new_run_id(
         entity_id,
         {
@@ -230,6 +271,11 @@ def run_multimodal_workflow(
     )
     steps: list[ServiceResult] = []
     state = WorkflowState(entity_id=entity_id, observations=observations)
+
+    specialist_results = _run_specialist_modalities(registry, entity_id, observations)
+    for result, typed in specialist_results:
+        steps.append(result)
+        state.modality_analyses.append(typed)
 
     atlas_result = _call(registry, "atlas.context", entity_id, {
         "context_id": f"{entity_id}-context",
@@ -297,7 +343,10 @@ def run_multimodal_workflow(
         "producer": "CardiAgent",
         "consumer": "CardiVex",
         "challenge_type": "hearttwin.multimodal",
-        "population": state.agent.challenges,
+        "population": [
+            {"entity_id": entity_id, "challenge": challenge, "scenario": scenario}
+            for challenge in state.agent.challenges
+        ],
         "intended_task": "defensive-phenotype-evaluation",
     })
     consumer = bridge_result.data.get("result")
