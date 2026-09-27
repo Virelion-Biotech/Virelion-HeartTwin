@@ -28,6 +28,7 @@ from .contracts import (
 from .provenance import new_run_id, sha256
 from .service_registry import ServiceRegistry
 from .state import CardiacStateStore
+from .state_crosswalk import CROSSWALK_VERSION, cardisim_summary_to_cardivex
 
 
 class WorkflowError(RuntimeError):
@@ -152,22 +153,12 @@ def _run_specialist_modalities(
 
 
 def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload) -> dict[str, Any]:
-    """Translate a simulation summary into a phenotype-level CardiVex proxy scenario."""
-    health = float(simulation.summary.get("cardiac_health_score", 0.5))
-    burden = max(0.0, min(1.0, 1.0 - health))
-    axes = {
-        "inflammatory": burden,
-        "vascular_endothelial": min(1.0, burden * 0.8),
-        "metabolic_mitochondrial": min(1.0, burden * 1.1),
-        "contractile_functional": burden,
-        "structural_injury": min(1.0, burden * 0.9),
-        "cell_death": min(1.0, burden * 0.7),
-        "remodeling": min(1.0, burden * 0.85),
-    }
+    """Translate only direct CardiSim phenotype semantics into a CardiVex proxy scenario."""
+    initial_axes, final_axes, changes = cardisim_summary_to_cardivex(simulation.summary)
 
     def domain(value: float) -> dict[str, Any]:
         return {
-            "value": round(float(max(0.0, min(1.0, value))), 6),
+            "value": round(float(value), 6),
             "uncertainty": 0.05,
             "evidence_status": "proxy",
         }
@@ -179,16 +170,31 @@ def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload)
         "target_model": "HeartTwin",
         "evidence_tier": "characterized_proxy",
         "confidence": "exploratory",
-        "phenotype_domains": {name: domain(value) for name, value in axes.items()},
+        "phenotype_domains": {name: domain(value) for name, value in final_axes.items()},
         "temporal_profile": [
-            {"state": "baseline", "relative_time": 0.0, "duration": 1.0, "domains": {name: domain(0.0) for name in axes}},
-            {"state": "simulated", "relative_time": 1.0, "duration": 1.0, "domains": {name: domain(value) for name, value in axes.items()}},
+            {
+                "state": "baseline",
+                "relative_time": 0.0,
+                "duration": 1.0,
+                "domains": {name: domain(value) for name, value in initial_axes.items()},
+            },
+            {
+                "state": "simulated",
+                "relative_time": 1.0,
+                "duration": 1.0,
+                "domains": {name: domain(value) for name, value in final_axes.items()},
+            },
         ],
-        "description": "Computational phenotype proxy derived from CardiSim output; not an empirical patient state.",
-        "severity_profile": axes,
+        "description": (
+            "Computational phenotype proxy derived from direct/inverse CardiSim phenotype semantics; "
+            "ambiguous cross-service mappings are intentionally omitted."
+        ),
+        "severity_profile": changes,
         "ood_status": "validation",
         "provenance_sources": ["Virelion-CardiSim", "Virelion-HeartTwin"],
-        "provenance_transformations": ["simulation.summary -> phenotype-domain proxy"],
+        "provenance_transformations": [
+            f"cardisim.final -> cardivex direct/inverse crosswalk {CROSSWALK_VERSION}"
+        ],
     }
 
 
