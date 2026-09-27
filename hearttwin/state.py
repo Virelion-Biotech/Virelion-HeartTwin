@@ -23,6 +23,7 @@ from .contracts import (
     StateTransition,
     StateValue,
     ValidationArtifact,
+    ValidationGateRecord,
     VexObservationPayload,
 )
 from .provenance import sha256
@@ -251,6 +252,81 @@ class CardiacStateStore:
         self.state.validation["trace"] = dict(data)
         self._add_provenance(provenance)
 
+    def apply_validation_gate(
+        self,
+        target_phase: StatePhase,
+        *,
+        criteria: Mapping[str, bool],
+        evidence_ids: list[str] | None = None,
+        notes: list[str] | None = None,
+        provenance: Provenance | None = None,
+    ) -> ValidationGateRecord:
+        """Promote scientific status only through explicit evidence gates."""
+        required = {
+            "internally_validated": {
+                "from_phase": "evaluated",
+                "criteria": {"locked_holdout", "independent_ground_truth", "prespecified_metric"},
+            },
+            "externally_validated": {
+                "from_phase": "internally_validated",
+                "criteria": {"independent_external_dataset", "reproduced_primary_result"},
+            },
+            "decision_eligible": {
+                "from_phase": "externally_validated",
+                "criteria": {"safety_review", "uncertainty_review", "domain_scope_defined"},
+            },
+        }
+        if target_phase not in required:
+            raise CardiacStateValidationError(
+                "Validation gates may target only internally_validated, externally_validated, or decision_eligible"
+            )
+        policy = required[target_phase]
+        if self.state.state_phase != policy["from_phase"]:
+            raise CardiacStateValidationError(
+                f"{target_phase} requires state_phase={policy['from_phase']}, "
+                f"got {self.state.state_phase}"
+            )
+        missing = sorted(policy["criteria"] - set(criteria))
+        failed = sorted(key for key in policy["criteria"] if not bool(criteria.get(key)))
+        if missing or failed:
+            raise CardiacStateValidationError(
+                f"{target_phase} gate criteria not satisfied; missing={missing}, failed={failed}"
+            )
+        evidence_ids = list(evidence_ids or [])
+        if target_phase == "internally_validated":
+            if not self.state.evaluation_artifacts:
+                raise CardiacStateValidationError("internal validation requires a recorded evaluation artifact")
+            latest = self.state.evaluation_artifacts[-1]
+            if latest.errors:
+                raise CardiacStateValidationError("internal validation cannot pass with evaluation errors")
+            if not latest.evaluation_fingerprint:
+                raise CardiacStateValidationError(
+                    "internal validation requires a fingerprinted evaluation"
+                )
+        elif not evidence_ids:
+            raise CardiacStateValidationError(
+                f"{target_phase} requires explicit supporting evidence_ids"
+            )
+
+        gate_id = f"gate-{sha256({'entity_id': self.state.entity_id, 'target': target_phase, 'criteria': dict(criteria), 'evidence': evidence_ids, 'n': len(self.state.validation_gates)})[:16]}"
+        gate = ValidationGateRecord(
+            gate_id=gate_id,
+            target_phase=target_phase,
+            passed=True,
+            criteria={str(key): bool(value) for key, value in criteria.items()},
+            evidence_ids=evidence_ids,
+            notes=list(notes or []),
+            provenance_ids=self._add_provenance(provenance),
+        )
+        self.state.validation_gates.append(gate)
+        self.transition(
+            target_phase,
+            trigger=f"validation_gate:{target_phase}",
+            provenance=provenance,
+            details={"gate_id": gate_id, "evidence_ids": evidence_ids},
+        )
+        return gate
+
     def transition(
         self,
         to_phase: StatePhase,
@@ -358,6 +434,7 @@ class CardiacStateStore:
         self._assert_unique([item.simulation_id for item in state.simulation_artifacts], "simulation_id")
         self._assert_unique([item.prediction_id for item in state.prediction_artifacts], "prediction_id")
         self._assert_unique([item.validation_id for item in state.evaluation_artifacts], "validation_id")
+        self._assert_unique([item.gate_id for item in state.validation_gates], "gate_id")
         self._assert_unique([item.message_id for item in state.bridge_publications], "message_id")
         self._assert_unique([item.transition_id for item in state.transitions], "transition_id")
 
@@ -369,6 +446,7 @@ class CardiacStateStore:
             state.simulation_artifacts,
             state.prediction_artifacts,
             state.evaluation_artifacts,
+            state.validation_gates,
             state.transitions,
         ):
             for item in collection:
