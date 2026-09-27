@@ -45,7 +45,7 @@ def _observation(entity_id: str, modality: str, values: dict) -> Observation:
     )
 
 
-def _rows(n: int = 20) -> list[dict]:
+def _rows(n: int = 40) -> list[dict]:
     return [
         {
             "sample_id": f"S{i:03d}",
