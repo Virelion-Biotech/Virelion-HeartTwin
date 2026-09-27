@@ -242,6 +242,8 @@ class CardiacStateStore:
             self.state.evaluation_artifacts, artifact, "validation_id", validation_id
         )
         self.state.validation = {"evaluation": payload.model_dump(mode="json")}
+        if self.state.state_phase != "evaluated":
+            self.transition("evaluated", trigger="evaluation.run", provenance=provenance)
         return artifact
 
     def record_trace(self, data: Mapping[str, Any], provenance: Provenance | None = None) -> None:
@@ -308,8 +310,6 @@ class CardiacStateStore:
                 self.record_vex(VexObservationPayload.model_validate(data), result.provenance)
             elif result.capability == "evaluation.run":
                 self.record_evaluation(EvaluationResultPayload.model_validate(data), result.provenance)
-                if self.state.state_phase != "validated":
-                    self.transition("validated", trigger=result.capability, provenance=result.provenance)
             elif result.capability == "bridge.publish":
                 self.record_bridge(BridgePublicationPayload.model_validate(data), result.provenance)
             elif result.capability == "trace.record":
