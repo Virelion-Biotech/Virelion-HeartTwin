@@ -30,7 +30,7 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
 
     atlas_prov = provenance("CardiAtlas", "atlas-1")
     store.record_atlas(
-        AtlasContextPayload(context_id="subject-1-context", record_ids=["r1"]),
+        AtlasContextPayload(context_id="subject-1-context", phenotype_ids=["r1"]),
         atlas_prov,
     )
 
