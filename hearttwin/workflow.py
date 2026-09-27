@@ -314,7 +314,17 @@ def run_multimodal_workflow(
         raise WorkflowError("CardiBench produced no training split")
 
     training_rows = [by_sample_id[sample_id] for sample_id in sorted(train_ids)]
-    prediction_rows = [by_sample_id[sample_id] for sample_id in sorted(test_ids)]
+    reference_targets = {}
+    prediction_rows = []
+    for sample_id in sorted(test_ids):
+        row = dict(by_sample_id[sample_id])
+        if "target" not in row:
+            raise WorkflowError(f"Locked test sample {sample_id} has no controlled target label")
+        reference_targets[sample_id] = row["target"]
+        # Never expose held-out outcomes to CardiLearn during inference.
+        row.pop("target", None)
+        row.pop("label", None)
+        prediction_rows.append(row)
 
     learning_result = _call(
         registry,
@@ -337,10 +347,18 @@ def run_multimodal_workflow(
             "CardiLearn predictions do not exactly match the locked CardiBench test set: "
             f"expected={sorted(test_ids)}, observed={sorted(predicted_ids)}"
         )
-    if any(item.y_true is None for item in state.learning.predictions):
+    if any(item.y_true is not None for item in state.learning.predictions):
         raise WorkflowError(
-            "CardiLearn returned unlabeled holdout predictions; CardiEval requires independent ground truth"
+            "CardiLearn unexpectedly received or returned held-out ground truth"
         )
+    state.learning = state.learning.model_copy(
+        update={
+            "predictions": [
+                item.model_copy(update={"y_true": reference_targets[item.sample_id]})
+                for item in state.learning.predictions
+            ]
+        }
+    )
     store.record_learning(state.learning, learning_result.provenance)
     steps.append(learning_result)
 
@@ -436,6 +454,7 @@ def run_multimodal_workflow(
         {
             "benchmark": state.benchmark.model_dump(mode="json"),
             "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
+            "reference_labels": reference_targets,
             "model_id": state.learning.model_id,
             "task_id": "binary-cardiac-state-detection",
         },
