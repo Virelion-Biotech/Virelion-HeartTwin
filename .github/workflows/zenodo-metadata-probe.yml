@@ -30,6 +30,26 @@ jobs:
                   "key": item.get("key") or item.get("filename"),
                   "size": item.get("size"),
                   "checksum": item.get("checksum"),
-                  "content": item.get("links", {}).get("content"),
+                  "links": item.get("links", {}),
               }, sort_keys=True))
+          PY
+
+      - name: Probe tar range support
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+          record = json.loads(urllib.request.urlopen("https://zenodo.org/api/records/14034739", timeout=60).read())
+          item = next(x for x in record["files"] if (x.get("key") or x.get("filename")) == "meta_data.tar")
+          links = item.get("links", {})
+          url = links.get("content") or links.get("self")
+          print("DOWNLOAD_URL", url)
+          req = urllib.request.Request(url, headers={"Range": "bytes=0-1023"})
+          with urllib.request.urlopen(req, timeout=60) as response:
+              data = response.read()
+              print("RANGE_STATUS", getattr(response, "status", None))
+              print("RANGE_LEN", len(data))
+              print("CONTENT_RANGE", response.headers.get("Content-Range"))
+              print("ACCEPT_RANGES", response.headers.get("Accept-Ranges"))
+              print("FIRST_100", data[:100])
           PY
