@@ -90,6 +90,7 @@ def test_cardieval_rejects_missing_holdout_ground_truth() -> None:
             {
                 "benchmark": benchmark,
                 "predictions": [{"sample_id": "S1", "y_true": None, "y_pred": 1, "score": 0.9}],
+                "reference_labels": {},
                 "model_id": "fixture",
             },
         )
@@ -124,3 +125,33 @@ def test_cardilearn_excludes_identifiers_and_outcome_labels_from_features() -> N
     )
     assert result["feature_columns"] == ["x1", "x2"]
     assert not {"sample_id", "study_id", "group_id", "label", "target"} & set(result["feature_columns"])
+
+
+def test_cardieval_rejects_prediction_label_that_disagrees_with_reference() -> None:
+    registry = load_registry()
+    _require_native(registry)
+    adapter = registry.capability("evaluation.run")
+    benchmark = {
+        "benchmark_id": "ground-truth-mismatch",
+        "version": "1.0",
+        "policy": "subject_heldout",
+        "seed": 1,
+        "assignments": {"S1": "test"},
+        "label_counts": {"test": {"MI": 1}},
+        "sample_count": 1,
+        "group_count": 1,
+        "metadata_sha256": "a" * 64,
+        "samples": [
+            {"sample_id": "S1", "group_id": "G1", "study_id": "ST1", "label": "MI"}
+        ],
+    }
+    with pytest.raises(ValueError, match="disagrees with controlled reference"):
+        adapter.invoke(
+            "evaluation.run",
+            {
+                "benchmark": benchmark,
+                "predictions": [{"sample_id": "S1", "y_true": 0, "y_pred": 1, "score": 0.9}],
+                "reference_labels": {"S1": 1},
+                "model_id": "fixture",
+            },
+        )
