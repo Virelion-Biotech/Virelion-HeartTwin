@@ -3,6 +3,17 @@ name: CDT numerical equivalence
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - "hearttwin/cardiac_twin/**"
+      - "hearttwin/cdt_manifest.py"
+      - "scripts/fetch_cdt_zenodo.py"
+      - "scripts/build_cdt_forward_fixture.py"
+      - "scripts/build_native_from_cdt_fixture.py"
+      - "scripts/compare_cdt_lat.py"
+      - "tests/test_cdt_*"
+      - ".github/workflows/cdt-reference.yml"
   workflow_dispatch:
     inputs:
       subject:
