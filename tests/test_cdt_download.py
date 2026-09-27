@@ -1,7 +1,14 @@
+import importlib.util
 from io import BytesIO
 from pathlib import Path
 
-from scripts.fetch_cdt_zenodo import download
+
+SCRIPT = Path(__file__).parents[1] / "scripts" / "fetch_cdt_zenodo.py"
+SPEC = importlib.util.spec_from_file_location("fetch_cdt_zenodo", SCRIPT)
+assert SPEC is not None and SPEC.loader is not None
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+download = MODULE.download
 
 
 class _Response(BytesIO):
