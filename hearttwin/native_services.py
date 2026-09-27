@@ -100,7 +100,36 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     target = str(payload.get("target_column", "target"))
     group = payload.get("group_column", "group_id")
     frame = pd.DataFrame(rows)
-    dataset = Dataset(frame=frame, target_column=target, group_column=group if group else None)
+    reserved = {
+        target, str(group) if group else "", "sample_id", "id", "study_id",
+        "subject_id", "donor_id", "animal_id", "technical_group", "label", "subgroup",
+    }
+    requested_features = payload.get("feature_columns")
+    if requested_features is None:
+        feature_columns = [
+            column
+            for column in frame.columns
+            if column not in reserved and pd.api.types.is_numeric_dtype(frame[column])
+        ]
+    else:
+        feature_columns = [str(column) for column in requested_features]
+        forbidden = sorted(set(feature_columns) & reserved)
+        missing_features = sorted(set(feature_columns) - set(frame.columns))
+        if forbidden:
+            raise ValueError(
+                "CardiLearn feature_columns include identifiers/outcomes that are forbidden for modeling: "
+                f"{forbidden}"
+            )
+        if missing_features:
+            raise ValueError(f"CardiLearn feature_columns are missing from data: {missing_features}")
+    if not feature_columns:
+        raise ValueError("CardiLearn has no leakage-safe numeric feature columns")
+    modeling_columns = feature_columns + [target] + ([str(group)] if group else [])
+    dataset = Dataset(
+        frame=frame[modeling_columns].copy(),
+        target_column=target,
+        group_column=str(group) if group else None,
+    )
     split = SplitConfig(
         test_size=float(payload.get("test_size", 0.2)), validation_size=float(payload.get("validation_size", 0.2)),
         random_state=int(payload.get("seed", 42)), stratify=bool(payload.get("stratify", True)),
@@ -112,7 +141,12 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     result = train(dataset, config)
     if payload.get("prediction_data") is not None:
         prediction_frame = pd.DataFrame(payload["prediction_data"])
-        X_pred = prediction_frame[dataset.feature_columns]
+        missing_prediction_features = sorted(set(feature_columns) - set(prediction_frame.columns))
+        if missing_prediction_features:
+            raise ValueError(
+                f"prediction_data is missing feature columns: {missing_prediction_features}"
+            )
+        X_pred = prediction_frame[feature_columns]
         y_pred_target = prediction_frame[target] if target in prediction_frame.columns else None
     else:
         prediction_frame = frame.iloc[result.splits.test]
@@ -138,7 +172,8 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         })
     return {
         "contract_version": "1.0", "model_id": str(payload.get("model_id", config.model)), "task": config.task,
-        "target_column": target, "metrics": result.metrics, "predictions": prediction_rows,
+        "target_column": target, "feature_columns": feature_columns,
+        "metrics": result.metrics, "predictions": prediction_rows,
         "dataset_fingerprint": result.dataset_fingerprint,
     }
 
