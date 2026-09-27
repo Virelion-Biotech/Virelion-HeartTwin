@@ -27,6 +27,13 @@ from .contracts import (
 from .state import CardiacStateStore, CardiacStateValidationError, state_from_service_results
 from .api import VirelionServices
 from .workflow import WorkflowError, run_multimodal_workflow
+from .validation_gate import (
+    MetricCriterion,
+    ValidationGateDecision,
+    ValidationGatePolicy,
+    apply_validation_gate,
+    evaluate_validation_gate,
+)
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -43,6 +50,8 @@ __all__ = [
     "VexObservationPayload", "ModalityAnalysisPayload", "BridgePublicationPayload",
     "CardiacStateStore", "CardiacStateValidationError", "state_from_service_results",
     "WorkflowState", "WorkflowRun", "WorkflowError", "run_multimodal_workflow",
+    "MetricCriterion", "ValidationGateDecision", "ValidationGatePolicy",
+    "apply_validation_gate", "evaluate_validation_gate",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
