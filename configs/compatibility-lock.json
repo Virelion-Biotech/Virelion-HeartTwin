@@ -1,0 +1,81 @@
+{
+  "lock_version": 1,
+  "generated_on": "2026-09-27",
+  "repositories": [
+    {
+      "name": "Virelion-CardiAtlas",
+      "sha": "0bd108fc6d59a3320618f4602ee5567b78b0b95c",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiBench",
+      "sha": "91c260d78fbd17f27fd6a2ce85ee396d41342f9f",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiEval",
+      "sha": "4526a588c4b58c301db93548fc55b12ac8d8d436",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiLearn",
+      "sha": "25a7f5e96b54b2ddcb9669ae50b8f7f02c363e3d",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiSim",
+      "sha": "76f2b142cb26f954d600b7cb437a23ef23bc0696",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiVex",
+      "sha": "1e3af09c87c6d3567b85f59379367d07c1078d20",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiStudio",
+      "sha": "a0e3867edcc5c87030a3ebab3a9757da0ec3b088",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-DCCP",
+      "sha": "7ad5ca3383885d7674635848b317e4e343684fcb",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-ElectroTrace",
+      "sha": "524f429cc91df5b50675bb6f83f8a1bbb924654a",
+      "role": "adapter"
+    },
+    {
+      "name": "Virelion-MyoTrace",
+      "sha": "8456735e3ba7b833b5e58c11cf4c551cf79a984d",
+      "role": "adapter"
+    },
+    {
+      "name": "Virelion-OptiCell",
+      "sha": "76f2e13d5c4870be5fc92ab187a2d55ec9ed3fb5",
+      "role": "adapter"
+    },
+    {
+      "name": "Virelion-CardioScore",
+      "sha": "b3f4e65ae951e802fe600d06a315545184eee6d3",
+      "role": "adapter"
+    },
+    {
+      "name": "Virelion-CardiTrace",
+      "sha": "483753ebb9ebe2b3cc9c60ae7dfc93ec770210b4",
+      "role": "adapter"
+    },
+    {
+      "name": "Virelion-CardiBridge",
+      "sha": "36b2ffed97704ab6ef8c82342871045fe1f38e1e",
+      "role": "adapter"
+    },
+    {
+      "name": "Virelion-CardiAgent",
+      "sha": "1c0dcf07eca281461832af329c9a7398fb44dc31",
+      "role": "adapter"
+    }
+  ]
+}
