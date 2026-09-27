@@ -53,3 +53,91 @@ jobs:
               print("ACCEPT_RANGES", response.headers.get("Accept-Ranges"))
               print("FIRST_100", data[:100])
           PY
+
+      - name: Scan remote tar for DTI004 geometry
+        run: |
+          python - <<'PY'
+          import io
+          import json
+          import tarfile
+          import urllib.request
+
+          record = json.loads(urllib.request.urlopen("https://zenodo.org/api/records/14034739", timeout=60).read())
+          item = next(x for x in record["files"] if (x.get("key") or x.get("filename")) == "meta_data.tar")
+          url = item["links"]["self"]
+          total = int(item["size"])
+
+          class RangeReader(io.RawIOBase):
+              def __init__(self, url, size, block_size=1024 * 1024):
+                  self.url = url
+                  self.size = size
+                  self.block_size = block_size
+                  self.pos = 0
+                  self.cache_start = -1
+                  self.cache = b""
+                  self.requests = 0
+                  self.bytes_fetched = 0
+              def readable(self):
+                  return True
+              def seekable(self):
+                  return True
+              def tell(self):
+                  return self.pos
+              def seek(self, offset, whence=io.SEEK_SET):
+                  if whence == io.SEEK_SET:
+                      pos = offset
+                  elif whence == io.SEEK_CUR:
+                      pos = self.pos + offset
+                  elif whence == io.SEEK_END:
+                      pos = self.size + offset
+                  else:
+                      raise ValueError("invalid whence")
+                  if pos < 0:
+                      raise ValueError("negative seek")
+                  self.pos = min(pos, self.size)
+                  return self.pos
+              def _block(self, start):
+                  aligned = (start // self.block_size) * self.block_size
+                  if self.cache_start == aligned:
+                      return
+                  end = min(self.size, aligned + self.block_size) - 1
+                  req = urllib.request.Request(self.url, headers={"Range": f"bytes={aligned}-{end}"})
+                  with urllib.request.urlopen(req, timeout=60) as response:
+                      data = response.read()
+                      if getattr(response, "status", 200) != 206:
+                          raise RuntimeError(f"Range request not honored: {response.status}")
+                  self.cache_start = aligned
+                  self.cache = data
+                  self.requests += 1
+                  self.bytes_fetched += len(data)
+              def read(self, n=-1):
+                  if self.pos >= self.size:
+                      return b""
+                  if n is None or n < 0:
+                      n = self.size - self.pos
+                  n = min(n, self.size - self.pos)
+                  out = bytearray()
+                  while n:
+                      self._block(self.pos)
+                      rel = self.pos - self.cache_start
+                      take = min(n, len(self.cache) - rel)
+                      if take <= 0:
+                          raise RuntimeError("empty range cache")
+                      out += self.cache[rel:rel+take]
+                      self.pos += take
+                      n -= take
+                  return bytes(out)
+
+          reader = RangeReader(url, total)
+          matches = []
+          with tarfile.open(fileobj=reader, mode="r:") as archive:
+              for member in archive:
+                  name = member.name
+                  if "DTI004" in name and ("geometric_data" in name or "geometric_data_ruben" in name):
+                      matches.append((name, member.size, member.offset_data))
+          print("DTI004_MATCH_COUNT", len(matches))
+          print("RANGE_REQUESTS", reader.requests)
+          print("RANGE_BYTES_FETCHED", reader.bytes_fetched)
+          for name, size, offset in matches:
+              print("DTI004_MEMBER", json.dumps({"name": name, "size": size, "offset_data": offset}, sort_keys=True))
+          PY
