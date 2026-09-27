@@ -23,6 +23,7 @@ CardiacState
 ├── simulation_artifacts
 ├── prediction_artifacts
 ├── evaluation_artifacts
+├── validation_gates
 ├── challenges / vex_observations
 ├── bridge_publications
 ├── transitions
@@ -42,9 +43,9 @@ Every HeartTwin-produced typed artifact can link to one or more HeartTwin `Prove
 
 ## Phase history
 
-The state supports explicit phases such as `baseline`, `injury`, `acute`, `remodeling`, `recovery`, `intervention`, `post_intervention`, `simulated`, and `validated`. `StateTransition` records the trigger, sequence, timestamp, provenance links, and optional details.
+The state supports explicit phases such as `baseline`, `injury`, `acute`, `remodeling`, `recovery`, `intervention`, `post_intervention`, `simulated`, `evaluated`, `internally_validated`, `externally_validated`, and `decision_eligible`. The legacy `validated` value remains readable for old snapshots but is not an automatic workflow target. `StateTransition` records the trigger, sequence, timestamp, provenance links, and optional details.
 
-Current integration workflows use `baseline -> simulated -> validated` for synthetic infrastructure tests. This is a software execution state, not a clinical inference about a real patient.
+Current integration workflows use `baseline -> simulated -> evaluated`. Evaluation alone cannot advance scientific validation. `CardiacStateStore.apply_validation_gate()` requires explicit criteria and provenance for internal validation, independent external evidence for external validation, and safety/uncertainty/scope review for decision eligibility.
 
 ## Validation boundary
 
