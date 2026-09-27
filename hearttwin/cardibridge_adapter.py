@@ -214,15 +214,13 @@ def _publish(payload: dict[str, Any], *, use_local: bool, base: str | None) -> d
                 "transport": "in-process",
             }
 
-        # Register a default no-op handler for demo/e2e if none exists
         try:
             result = router.dispatch(obj)
-        except LookupError:
-            def _default_handler(_env: Any) -> dict[str, Any]:
-                return {"ok": True, "echo_type": _env.message_type}
-
-            router.register(obj.message_type, obj.consumer, _default_handler)
-            result = router.dispatch(obj)
+        except LookupError as exc:
+            raise RuntimeError(
+                "CardiBridge has no registered consumer for "
+                f"{obj.message_type!r} -> {obj.consumer!r}; publish is fail-closed"
+            ) from exc
 
         status = result.get("status") if isinstance(result, dict) else None
         return {
