@@ -151,42 +151,6 @@ def _run_specialist_modalities(
     return outputs
 
 
-def _benchmark_lock_to_learning_test(
-    benchmark_samples: list[dict[str, Any]], learning: LearningResultPayload, *, seed: int
-) -> BenchmarkResolutionPayload:
-    """Re-materialize CardiBench using the model's actual test biological groups."""
-    try:
-        from cardi_bench import Sample, materialize
-    except Exception as exc:  # pragma: no cover
-        raise WorkflowError(f"CardiBench native package is required: {exc}") from exc
-
-    by_id = {str(row["sample_id"]): row for row in benchmark_samples}
-    test_ids = {prediction.sample_id for prediction in learning.predictions}
-    missing = sorted(test_ids - set(by_id))
-    if missing:
-        raise WorkflowError(f"CardiLearn test predictions are absent from CardiBench samples: {missing}")
-    test_groups = {str(by_id[sample_id]["group_id"]) for sample_id in test_ids}
-    rows = [
-        Sample(
-            sample_id=str(item["sample_id"]), group_id=str(item["group_id"]), study_id=str(item["study_id"]),
-            label=str(item["label"]), technical_group=item.get("technical_group"), organism=item.get("organism"),
-            timepoint=item.get("timepoint"), cell_context=item.get("cell_context"), region=item.get("region"),
-        )
-        for item in benchmark_samples
-    ]
-    materialized = materialize(
-        rows,
-        benchmark_id="hearttwin-multimodal-e2e",
-        version="1.0",
-        policy="subject_heldout",
-        test_values=test_groups,
-        seed=seed,
-    )
-    return BenchmarkResolutionPayload.model_validate(
-        {"contract_version": "1.0", **materialized.to_dict(), "samples": benchmark_samples}
-    )
-
-
 def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload) -> dict[str, Any]:
     """Translate a simulation summary into a phenotype-level CardiVex proxy scenario."""
     health = float(simulation.summary.get("cardiac_health_score", 0.5))
@@ -310,12 +274,51 @@ def run_multimodal_workflow(
     store.record_atlas(state.atlas, atlas_result.provenance)
     steps.append(atlas_result)
 
+    benchmark_result = _call(
+        registry,
+        "benchmark.resolve",
+        entity_id,
+        {
+            "benchmark_id": "hearttwin-multimodal-e2e",
+            "version": "1.0",
+            "policy": "subject_heldout",
+            "seed": seed,
+            "samples": benchmark_samples,
+        },
+    )
+    state.benchmark = _as_benchmark(benchmark_result.data)
+    store.record_benchmark(state.benchmark, benchmark_result.provenance)
+    steps.append(benchmark_result)
+
+    by_sample_id = {str(row.get("sample_id")): row for row in learning_data}
+    benchmark_ids = set(state.benchmark.assignments)
+    missing_learning_rows = sorted(benchmark_ids - set(by_sample_id))
+    if missing_learning_rows:
+        raise WorkflowError(
+            "CardiBench samples are missing from CardiLearn input data: "
+            f"{missing_learning_rows}"
+        )
+    test_ids = {
+        sample_id
+        for sample_id, split in state.benchmark.assignments.items()
+        if split == "test"
+    }
+    train_ids = benchmark_ids - test_ids
+    if not test_ids:
+        raise WorkflowError("CardiBench produced no test holdout; evaluation cannot proceed")
+    if not train_ids:
+        raise WorkflowError("CardiBench produced no training data")
+
+    training_rows = [by_sample_id[sample_id] for sample_id in sorted(train_ids)]
+    prediction_rows = [by_sample_id[sample_id] for sample_id in sorted(test_ids)]
+
     learning_result = _call(
         registry,
         "learn.infer",
         entity_id,
         {
-            "data": learning_data,
+            "data": training_rows,
+            "prediction_data": prediction_rows,
             "target_column": "target",
             "group_column": "group_id",
             "model": "logistic_regression",
@@ -324,31 +327,18 @@ def run_multimodal_workflow(
         },
     )
     state.learning = _as_learning(learning_result.data)
+    predicted_ids = {item.sample_id for item in state.learning.predictions}
+    if predicted_ids != test_ids:
+        raise WorkflowError(
+            "CardiLearn predictions do not exactly match the locked CardiBench test set: "
+            f"expected={sorted(test_ids)}, observed={sorted(predicted_ids)}"
+        )
+    if any(item.y_true is None for item in state.learning.predictions):
+        raise WorkflowError(
+            "CardiLearn returned unlabeled holdout predictions; CardiEval requires independent ground truth"
+        )
     store.record_learning(state.learning, learning_result.provenance)
     steps.append(learning_result)
-
-    benchmark_result = _call(
-        registry,
-        "benchmark.resolve",
-        entity_id,
-        {
-            "benchmark_id": "hearttwin-multimodal-initial",
-            "version": "1.0",
-            "policy": "subject_heldout",
-            "seed": seed,
-            "samples": benchmark_samples,
-        },
-    )
-    _as_benchmark(benchmark_result.data)
-    locked_benchmark = _benchmark_lock_to_learning_test(
-        benchmark_samples, state.learning, seed=seed
-    )
-    benchmark_result = benchmark_result.model_copy(
-        update={"data": locked_benchmark.model_dump(mode="json")}
-    )
-    state.benchmark = locked_benchmark
-    store.record_benchmark(locked_benchmark, benchmark_result.provenance)
-    steps.append(benchmark_result)
 
     scores = [float(item.score) for item in state.learning.predictions if item.score is not None]
     score_mean = mean(scores) if scores else 0.5
@@ -448,15 +438,6 @@ def run_multimodal_workflow(
     )
     state.evaluation = _as_evaluation(evaluation_result.data)
     store.record_evaluation(state.evaluation, evaluation_result.provenance)
-    store.transition(
-        "validated",
-        trigger="CardiEval:evaluation.run",
-        provenance=evaluation_result.provenance,
-        details={
-            "evaluation_fingerprint": state.evaluation.evaluation_fingerprint,
-            "primary_metric": state.evaluation.primary_metric,
-        },
-    )
     steps.append(evaluation_result)
 
     pre_trace_fingerprint = store.fingerprint()
