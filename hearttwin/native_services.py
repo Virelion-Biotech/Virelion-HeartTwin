@@ -195,16 +195,28 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     missing = sorted(set(test_ids) - set(pred_by_id))
     if missing:
         raise ValueError(f"CardiLearn/CardiBench handoff is missing test predictions: {missing}")
-    unlabeled = sorted(
-        sample_id for sample_id in test_ids
-        if pred_by_id[sample_id].get("y_true") is None
-    )
-    if unlabeled:
+    reference_labels = payload.get("reference_labels")
+    if not isinstance(reference_labels, dict):
+        raise ValueError(
+            "CardiEval requires a separate reference_labels mapping controlled outside CardiLearn"
+        )
+    missing_labels = sorted(sample_id for sample_id in test_ids if sample_id not in reference_labels)
+    if missing_labels:
         raise ValueError(
             "CardiEval requires independent ground truth for every benchmark test sample; "
-            f"missing labels for: {unlabeled}"
+            f"missing labels for: {missing_labels}"
         )
-    records = [PredictionRecord.model_validate(pred_by_id[sample_id]) for sample_id in test_ids]
+    records = []
+    for sample_id in test_ids:
+        item = dict(pred_by_id[sample_id])
+        supplied = item.get("y_true")
+        reference = reference_labels[sample_id]
+        if supplied is not None and supplied != reference:
+            raise ValueError(
+                f"Prediction payload label disagrees with controlled reference label for {sample_id}"
+            )
+        item["y_true"] = reference
+        records.append(PredictionRecord.model_validate(item))
     benchmark_id = str(benchmark["benchmark_id"])
     version = str(benchmark["version"])
     manifest = BenchmarkManifest(
