@@ -1,11 +1,35 @@
 from __future__ import annotations
 
+import os
 import shutil
 
 import numpy as np
 import pytest
 
 from hearttwin import Observation, Provenance, load_registry, run_multimodal_workflow
+
+
+_FULL_STACK_CAPABILITIES = {
+    "atlas.context",
+    "learn.infer",
+    "benchmark.resolve",
+    "simulation.run",
+    "agent.challenge",
+    "bridge.publish",
+    "evaluation.run",
+    "trace.record",
+}
+
+
+def _require_full_stack(registry) -> None:
+    missing = sorted(
+        capability
+        for capability in _FULL_STACK_CAPABILITIES
+        if registry.capability(capability) is None or not registry.capability(capability).available()
+    )
+    if missing and os.getenv("HEARTTWIN_REQUIRE_NATIVE") != "1":
+        pytest.skip("full Virelion stack not installed: " + ", ".join(missing))
+    assert not missing, "full Virelion stack not installed: " + ", ".join(missing)
 
 
 def _observation(entity_id: str, modality: str, values: dict) -> Observation:
@@ -38,6 +62,7 @@ def _rows(n: int = 20) -> list[dict]:
 
 def test_native_multimodal_workflow_is_end_to_end() -> None:
     registry = load_registry()
+    _require_full_stack(registry)
     observations = [
         _observation("E2E-001", "molecular", {"gene_a": 0.4, "gene_b": 0.6}),
         _observation("E2E-001", "structural", {"region": "left_ventricle", "zone": "IZ"}),
@@ -89,6 +114,15 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
     assert all(step.status == "ok" for step in run.steps)
     assert run.state.evaluation.primary_metric == "macro_f1"
     assert run.state.evaluation.evaluation_fingerprint
+    assert run.state.cardiac_state is not None
+    assert run.state.cardiac_state.state_phase == "evaluated"
+    test_ids = {
+        sample_id
+        for sample_id, split in run.state.benchmark.assignments.items()
+        if split == "test"
+    }
+    assert {item.sample_id for item in run.state.learning.predictions} == test_ids
+    assert all(item.y_true is not None for item in run.state.learning.predictions)
     assert run.state.bridge.transport == "in-process"
     assert run.state.bridge.status in {"processed", "duplicate"}
     assert run.state.bridge.consumer_result is not None
@@ -128,6 +162,7 @@ def _write_video(path) -> None:
 
 def test_real_specialist_modalities_feed_typed_workflow_state(tmp_path) -> None:
     registry = load_registry()
+    _require_full_stack(registry)
     if shutil.which("electrotrace-hearttwin") is None or shutil.which("myotrace-hearttwin") is None:
         pytest.skip("specialist HeartTwin commands are not installed")
 
