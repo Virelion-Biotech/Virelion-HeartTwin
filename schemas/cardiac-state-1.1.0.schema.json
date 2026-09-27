@@ -144,6 +144,13 @@
         "policy": {"type": "string"},
         "seed": {"type": "integer"},
         "assignments": {"type": "object", "additionalProperties": {"type": "string"}},
+        "label_counts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {"type": "integer", "minimum": 0}
+          }
+        },
         "sample_count": {"type": "integer", "minimum": 0},
         "group_count": {"type": "integer", "minimum": 0},
         "metadata_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
