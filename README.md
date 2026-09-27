@@ -39,15 +39,20 @@ observations / experiment data
       CardiacState  ◄── canonical typed state
             │
    ┌────────┼──────────────────┐
-   ▼        ▼                  ▼
-CardiAtlas CardiLearn       modality adapters
-   │        │                  │
-   └────────┼──────────────────┘
-            ▼
-        CardiBench
-            │
-            ▼
-     CardiSim / CDT
+   ▼                           ▼
+CardiAtlas               modality adapters
+   │                           │
+   └──────────────┬────────────┘
+                  ▼
+              CardiBench
+                  │
+          locked train/val/test
+                  │
+                  ▼
+              CardiLearn
+                  │
+                  ▼
+           CardiSim / CDT
             │
       ┌─────┴─────┐
       ▼           ▼
@@ -148,7 +153,7 @@ The CardiacState tests additionally validate the published Draft 2020-12 JSON sc
 3. Expand scar modelling to calibrated tissue tensors and border-zone cellular models.
 4. Add mechanics/hemodynamics and Echo/CMR anatomy backends.
 5. Add posterior/uncertainty objects and surrogate acceleration.
-6. Add external CardiBench/CardiEval scientific validation gates.
+6. Exercise the implemented validation-gate contract against independent external datasets and preregistered acceptance criteria.
 7. Add persistent jobs/artifacts, compatibility gates, API, and research UI.
 
 A complete software integration is not equivalent to a clinically validated digital twin.
