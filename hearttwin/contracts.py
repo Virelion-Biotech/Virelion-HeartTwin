@@ -118,6 +118,20 @@ StatePhase = Literal[
 ]
 
 
+class ValidationGateRecord(BaseModel):
+    """Auditable evidence gate required for scientific state promotion."""
+
+    model_config = ConfigDict(extra="forbid")
+    gate_id: str
+    target_phase: Literal["internally_validated", "externally_validated", "decision_eligible"]
+    passed: bool
+    criteria: dict[str, bool]
+    evidence_ids: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
 class StateTransition(BaseModel):
     model_config = ConfigDict(extra="forbid")
     transition_id: str
@@ -281,6 +295,7 @@ class CardiacState(BaseModel):
     simulation_artifacts: list[SimulationArtifact] = Field(default_factory=list)
     prediction_artifacts: list[PredictionArtifact] = Field(default_factory=list)
     evaluation_artifacts: list[ValidationArtifact] = Field(default_factory=list)
+    validation_gates: list[ValidationGateRecord] = Field(default_factory=list)
     challenges: list[AgentChallengePayload] = Field(default_factory=list)
     vex_observations: list[VexObservationPayload] = Field(default_factory=list)
     bridge_publications: list[BridgePublicationPayload] = Field(default_factory=list)
