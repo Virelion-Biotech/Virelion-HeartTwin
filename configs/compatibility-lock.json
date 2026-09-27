@@ -4,7 +4,7 @@
   "repositories": [
     {
       "name": "Virelion-CardiAtlas",
-      "sha": "0bd108fc6d59a3320618f4602ee5567b78b0b95c",
+      "sha": "f22bc65ef5496322957d2bf10a0e79e257d02cf2",
       "role": "native"
     },
     {
@@ -14,7 +14,7 @@
     },
     {
       "name": "Virelion-CardiEval",
-      "sha": "4526a588c4b58c301db93548fc55b12ac8d8d436",
+      "sha": "f890d2c559d967d2d8fceb41b6decea023b741c5",
       "role": "native"
     },
     {
@@ -49,7 +49,7 @@
     },
     {
       "name": "Virelion-MyoTrace",
-      "sha": "8456735e3ba7b833b5e58c11cf4c551cf79a984d",
+      "sha": "955991cb915a7c31af3d82b9a254d75bdd181167",
       "role": "adapter"
     },
     {
@@ -74,7 +74,7 @@
     },
     {
       "name": "Virelion-CardiAgent",
-      "sha": "1c0dcf07eca281461832af329c9a7398fb44dc31",
+      "sha": "c1006e0b29f3f8ebf9d40feb9194bf21599e6b95",
       "role": "adapter"
     }
   ]
