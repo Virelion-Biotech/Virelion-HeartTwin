@@ -164,6 +164,19 @@ def _as_benchmark(data: dict[str, Any]) -> BenchmarkResolutionPayload:
         raise WorkflowError(f"CardiBench returned an invalid typed payload: {exc}") from exc
 
 
+def _require_classification_split_coverage(
+    benchmark: BenchmarkResolutionPayload,
+    split: str,
+) -> None:
+    counts = benchmark.label_counts.get(split, {})
+    represented = sorted(label for label, count in counts.items() if int(count) > 0)
+    if len(represented) < 2:
+        raise WorkflowError(
+            f"Locked classification {split} split must contain at least two represented labels; "
+            f"observed={counts}"
+        )
+
+
 def _as_learning(data: dict[str, Any]) -> LearningResultPayload:
     try:
         return LearningResultPayload.model_validate(data)
@@ -386,6 +399,8 @@ def run_multimodal_workflow(
         },
     )
     state.benchmark = _as_benchmark(benchmark_result.data)
+    _require_classification_split_coverage(state.benchmark, "train")
+    _require_classification_split_coverage(state.benchmark, "test")
     store.record_benchmark(state.benchmark, benchmark_result.provenance)
     steps.append(benchmark_result)
 
