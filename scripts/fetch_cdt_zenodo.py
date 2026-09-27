@@ -38,10 +38,30 @@ def md5(path: Path) -> str:
     return _digest(path, "md5")  # nosec B324
 
 
-def download(url: str, destination: Path) -> None:
+def download(url: str, destination: Path, *, expected_size: int | None = None) -> None:
+    """Download with a resumable .part file when the server supports HTTP Range."""
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(url, timeout=120) as response, destination.open("wb") as fh:
-        shutil.copyfileobj(response, fh)
+    partial = Path(str(destination) + ".part")
+    for _attempt in range(2):
+        offset = partial.stat().st_size if partial.exists() else 0
+        headers = {"Range": f"bytes={offset}-"} if offset else {}
+        request = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(request, timeout=120) as response:
+            status = int(getattr(response, "status", 200) or 200)
+            if offset and status != 206:
+                partial.unlink(missing_ok=True)
+                continue
+            mode = "ab" if offset else "wb"
+            with partial.open(mode) as fh:
+                shutil.copyfileobj(response, fh)
+        size = partial.stat().st_size
+        if expected_size is not None and size != expected_size:
+            raise RuntimeError(
+                f"Incomplete download for {destination.name}: expected {expected_size} bytes, got {size}"
+            )
+        partial.replace(destination)
+        return
+    raise RuntimeError(f"Server did not honor resume request for {destination.name}")
 
 
 def _safe_member_path(root: Path, member_name: str) -> Path:
@@ -120,14 +140,23 @@ def main() -> None:
         if not key or not url:
             raise RuntimeError(f"Malformed Zenodo file entry: {item}")
         destination = downloads / key
+        expected_size = int(item["size"]) if item.get("size") is not None else None
+        if destination.exists() and expected_size is not None and destination.stat().st_size != expected_size:
+            destination.unlink()
         if not destination.exists():
-            download(url, destination)
+            download(url, destination, expected_size=expected_size)
         actual = sha256(destination)
         expected = item.get("checksum")
         if expected and expected.startswith("md5:"):
+            expected_md5 = expected.removeprefix("md5:")
             actual_md5 = md5(destination)
-            if actual_md5 != expected.removeprefix("md5:"):
-                raise RuntimeError(f"Checksum mismatch for {key}")
+            if actual_md5 != expected_md5:
+                destination.unlink(missing_ok=True)
+                download(url, destination, expected_size=expected_size)
+                actual = sha256(destination)
+                actual_md5 = md5(destination)
+                if actual_md5 != expected_md5:
+                    raise RuntimeError(f"Checksum mismatch for {key} after clean re-download")
         manifest.append({"key": key, "size": destination.stat().st_size, "sha256": actual, "zenodo_checksum": expected, "url": url})
         maybe_extract(destination, extracts)
 
