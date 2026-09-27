@@ -93,3 +93,34 @@ def test_cardieval_rejects_missing_holdout_ground_truth() -> None:
                 "model_id": "fixture",
             },
         )
+
+
+def test_cardilearn_excludes_identifiers_and_outcome_labels_from_features() -> None:
+    registry = load_registry()
+    _require_native(registry)
+    adapter = registry.capability("learn.infer")
+    rows = [
+        {
+            "sample_id": f"S{i}",
+            "study_id": "ST1",
+            "group_id": f"G{i}",
+            "label": "MI" if i % 2 else "sham",
+            "target": i % 2,
+            "x1": float(i),
+            "x2": float(i % 3),
+        }
+        for i in range(20)
+    ]
+    result = adapter.invoke(
+        "learn.infer",
+        {
+            "data": rows,
+            "target_column": "target",
+            "group_column": "group_id",
+            "task": "classification",
+            "model": "logistic_regression",
+            "seed": 7,
+        },
+    )
+    assert result["feature_columns"] == ["x1", "x2"]
+    assert not {"sample_id", "study_id", "group_id", "label", "target"} & set(result["feature_columns"])
