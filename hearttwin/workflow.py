@@ -303,11 +303,15 @@ def run_multimodal_workflow(
         for sample_id, split in state.benchmark.assignments.items()
         if split == "test"
     }
-    train_ids = benchmark_ids - test_ids
+    train_ids = {
+        sample_id
+        for sample_id, split in state.benchmark.assignments.items()
+        if split == "train"
+    }
     if not test_ids:
         raise WorkflowError("CardiBench produced no test holdout; evaluation cannot proceed")
     if not train_ids:
-        raise WorkflowError("CardiBench produced no training data")
+        raise WorkflowError("CardiBench produced no training split")
 
     training_rows = [by_sample_id[sample_id] for sample_id in sorted(train_ids)]
     prediction_rows = [by_sample_id[sample_id] for sample_id in sorted(test_ids)]
