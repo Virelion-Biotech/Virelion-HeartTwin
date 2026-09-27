@@ -15,13 +15,13 @@ def test_phase_history_is_explicit_and_ordered():
     )
     store = CardiacStateStore.new("entity-1", [observation])
     store.transition("simulated", trigger="simulation.run", provenance=Provenance(source_service="CardiSim", run_id="sim-1"))
-    store.transition("validated", trigger="evaluation.run", provenance=Provenance(source_service="CardiEval", run_id="eval-1"))
+    store.transition("evaluated", trigger="evaluation.run", provenance=Provenance(source_service="CardiEval", run_id="eval-1"))
     snapshot = store.snapshot()
     assert [(t.from_phase, t.to_phase) for t in snapshot.transitions] == [
         ("baseline", "simulated"),
-        ("simulated", "validated"),
+        ("simulated", "evaluated"),
     ]
-    assert snapshot.state_phase == "validated"
+    assert snapshot.state_phase == "evaluated"
 
 
 def test_noop_transition_is_rejected():
