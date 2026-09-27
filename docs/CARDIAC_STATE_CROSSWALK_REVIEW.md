@@ -1,8 +1,23 @@
 # Cardiac-state crosswalk review
 
-Status: **engineering-ready proposal; biological sign-off required before executable use**.
+Status: **direct identity/sign-inversion subset implemented; ambiguous mappings still require biological sign-off**.
 
 HeartTwin now has typed orchestration contracts, but CardiVex, CardiSim, and DCCP still use distinct scientific vocabularies. This document makes the proposed mappings explicit so no service silently reinterprets another service's state.
+
+## Executable safe subset
+
+HeartTwin `state_crosswalk.py` version `0.1.0` currently executes only mappings that are direct semantic identities or sign inversions:
+
+- CardiSim `contractility` → CardiVex `contractile_impairment = 1 - contractility`
+- `electrophysiology` → `electrophysiologic_disturbance = 1 - electrophysiology`
+- `metabolism` → `metabolic_stress = 1 - metabolism`
+- `mitochondrial_health` → `mitochondrial_dysfunction = 1 - mitochondrial_health`
+- `viability` → `viability_burden = 1 - viability`
+- `inflammation` → `inflammatory_activation`
+- `fibrosis` → `fibrosis_remodeling`
+- `oxidative_stress` → `oxidative_stress`
+
+CardiSim `angiogenesis` and `hypertrophy` are intentionally not converted into vascular or structural-dysfunction domains.
 
 ## Canonical candidate
 
@@ -25,7 +40,7 @@ CardiVex's empirically exercised domain/state vocabulary is the current candidat
 
 ## Rules
 
-1. Raw service outputs remain preserved even after a future canonical transform.
+1. Raw service outputs remain preserved alongside every canonical transform.
 2. Every executable crosswalk must carry a version and transformation provenance.
 3. Low-confidence mappings may not be introduced as defaults.
 4. `ischemic_burden` remains unresolved until a domain reviewer defines and validates a composite or direct observable.
