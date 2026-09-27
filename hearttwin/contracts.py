@@ -168,6 +168,7 @@ class BenchmarkResolutionPayload(BaseModel):
     policy: str
     seed: int
     assignments: dict[str, str]
+    label_counts: dict[str, dict[str, int]] = Field(default_factory=dict)
     sample_count: int
     group_count: int
     metadata_sha256: str
