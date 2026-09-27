@@ -21,12 +21,21 @@ REQUIRED_DIRS = ("clinical_data", "cellular_data")
 GEOMETRY_DIRS = ("geometric_data", "geometric_data_ruben")
 
 
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
+def _digest(path: Path, algorithm: str) -> str:
+    h = hashlib.new(algorithm)
     with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+        for chunk in iter(lambda: fh.read(8 * 1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def sha256(path: Path) -> str:
+    return _digest(path, "sha256")
+
+
+def md5(path: Path) -> str:
+    # Zenodo exposes MD5 for interoperability; this is not a security primitive.
+    return _digest(path, "md5")  # nosec B324
 
 
 def download(url: str, destination: Path) -> None:
@@ -116,8 +125,8 @@ def main() -> None:
         actual = sha256(destination)
         expected = item.get("checksum")
         if expected and expected.startswith("md5:"):
-            md5 = hashlib.md5(destination.read_bytes()).hexdigest()  # nosec B303: checksum interoperability, not security
-            if md5 != expected.removeprefix("md5:"):
+            actual_md5 = md5(destination)
+            if actual_md5 != expected.removeprefix("md5:"):
                 raise RuntimeError(f"Checksum mismatch for {key}")
         manifest.append({"key": key, "size": destination.stat().st_size, "sha256": actual, "zenodo_checksum": expected, "url": url})
         maybe_extract(destination, extracts)
