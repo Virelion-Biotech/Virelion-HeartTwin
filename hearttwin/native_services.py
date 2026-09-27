@@ -250,7 +250,8 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     if capability != "vex.observe":
         raise ValueError(f"CardiVex does not support {capability}")
     try:
-        from cardivex import Confidence, DomainValue, EvidenceTier, Scenario, ScenarioState, healthy_baseline, run_end_to_end
+        from cardivex import Confidence, EvidenceTier, Scenario, ScenarioState, healthy_baseline, run_end_to_end
+        from cardivex.models import DomainValue
     except Exception as exc:  # pragma: no cover
         raise _native_unavailable("CardiVex", exc)
     raw = payload.get("scenario")
