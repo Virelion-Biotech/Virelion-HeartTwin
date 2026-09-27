@@ -64,3 +64,32 @@ def test_cardibench_native_smoke() -> None:
     )
     assert result["sample_count"] == 6
     assert set(result["assignments"]) == {item["sample_id"] for item in samples}
+
+
+def test_cardieval_rejects_missing_holdout_ground_truth() -> None:
+    registry = load_registry()
+    _require_native(registry)
+    adapter = registry.capability("evaluation.run")
+    assert adapter is not None
+    benchmark = {
+        "benchmark_id": "ground-truth-gate",
+        "version": "1.0",
+        "policy": "subject_heldout",
+        "seed": 1,
+        "assignments": {"S1": "test"},
+        "sample_count": 1,
+        "group_count": 1,
+        "metadata_sha256": "a" * 64,
+        "samples": [
+            {"sample_id": "S1", "group_id": "G1", "study_id": "ST1", "label": "MI"}
+        ],
+    }
+    with pytest.raises(ValueError, match="independent ground truth"):
+        adapter.invoke(
+            "evaluation.run",
+            {
+                "benchmark": benchmark,
+                "predictions": [{"sample_id": "S1", "y_true": None, "y_pred": 1, "score": 0.9}],
+                "model_id": "fixture",
+            },
+        )
