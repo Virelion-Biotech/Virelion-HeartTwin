@@ -79,8 +79,9 @@ jobs:
           import subprocess
           doctor = json.loads(subprocess.check_output(["hearttwin", "doctor"], text=True))
           required = [
-              "CardiAtlas", "CardiBench", "CardiEval", "CardiLearn",
-              "CardiSim", "CardiVex", "CardiStudio", "DCCP",
+              "CardiAtlas", "CardiBench", "CardiEval", "ElectroTrace", "MyoTrace",
+              "OptiCell", "CardioScore", "CardiLearn", "CardiSim", "CardiTrace",
+              "CardiBridge", "CardiAgent", "CardiVex", "CardiStudio", "DCCP",
           ]
           missing = [name for name in required if not doctor.get(name)]
           if missing:
