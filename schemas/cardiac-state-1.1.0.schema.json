@@ -19,6 +19,7 @@
     "simulation_artifacts": {"type": "array", "items": {"$ref": "#/$defs/simulationArtifact"}},
     "prediction_artifacts": {"type": "array", "items": {"$ref": "#/$defs/predictionArtifact"}},
     "evaluation_artifacts": {"type": "array", "items": {"$ref": "#/$defs/validationArtifact"}},
+    "validation_gates": {"type": "array", "items": {"$ref": "#/$defs/validationGate"}},
     "challenges": {"type": "array", "items": {"$ref": "#/$defs/agentChallenge"}},
     "vex_observations": {"type": "array", "items": {"$ref": "#/$defs/vexObservation"}},
     "bridge_publications": {"type": "array", "items": {"$ref": "#/$defs/bridgePublication"}},
@@ -230,6 +231,24 @@
         "warnings": {"type": "array", "items": {"type": "string"}},
         "errors": {"type": "array", "items": {"type": "string"}},
         "evaluation_fingerprint": {"type": ["string", "null"]},
+        "provenance_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "validationGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate_id", "target_phase", "passed", "criteria"],
+      "properties": {
+        "gate_id": {"type": "string", "minLength": 1},
+        "target_phase": {
+          "type": "string",
+          "enum": ["internally_validated", "externally_validated", "decision_eligible"]
+        },
+        "passed": {"const": true},
+        "criteria": {"type": "object", "additionalProperties": {"type": "boolean"}},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}},
+        "notes": {"type": "array", "items": {"type": "string"}},
+        "timestamp": {"type": "string", "format": "date-time"},
         "provenance_ids": {"type": "array", "items": {"type": "string"}}
       }
     },
