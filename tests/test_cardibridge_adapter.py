@@ -5,7 +5,7 @@ import pytest
 
 pytest.importorskip("cardibridge")
 
-from hearttwin.cardibridge_adapter import cardibridge_available, invoke_cardibridge
+from hearttwin.cardibridge_adapter import _local_router, cardibridge_available, invoke_cardibridge
 from hearttwin.service_registry import ServiceAdapter, ServiceSpec
 
 
@@ -30,6 +30,12 @@ def test_bridge_validate_agent_challenge():
 
 
 def test_bridge_publish_and_duplicate():
+    router, _ = _local_router()
+    router.register(
+        "agent.challenge",
+        "worker",
+        lambda envelope: {"status": "accepted", "message_type": envelope.message_type},
+    )
     payload = {
         "entity_id": "e-pub-1",
         "message_type": "agent.challenge",
@@ -67,3 +73,19 @@ def test_service_adapter_builtin_path():
     health = adapter.invoke("bridge.health", {})
     assert health.get("transport") in {"in-process", "http"}
     assert "status" in health or "store_ok" in health or "ok" in str(health).lower()
+
+
+def test_bridge_publish_fails_closed_without_consumer():
+    with pytest.raises(RuntimeError, match="no registered consumer"):
+        invoke_cardibridge(
+            "bridge.publish",
+            {
+                "entity_id": "e-unregistered-1",
+                "message_type": "agent.challenge",
+                "idempotency_key": "ht-unregistered-001",
+                "challenge_type": "integration",
+                "intended_task": "unit-test",
+                "population": [{"cell": "cardiomyocyte"}],
+                "consumer": "definitely-unregistered-consumer",
+            },
+        )
