@@ -33,7 +33,7 @@
   "$defs": {
     "statePhase": {
       "type": "string",
-      "enum": ["unknown", "baseline", "injury", "acute", "remodeling", "recovery", "intervention", "post_intervention", "simulated", "validated"]
+      "enum": ["unknown", "baseline", "injury", "acute", "remodeling", "recovery", "intervention", "post_intervention", "simulated", "evaluated", "internally_validated", "externally_validated", "decision_eligible", "validated"]
     },
     "provenance": {
       "type": "object",
@@ -104,9 +104,17 @@
       "properties": {
         "contract_version": {"type": "string"},
         "context_id": {"type": "string"},
-        "record_ids": {"type": "array", "items": {"type": "string"}},
-        "context": {"type": "object"},
-        "provenance": {"type": "array", "items": {"type": "string"}}
+        "phenotype_ids": {"type": "array", "items": {"type": "string"}},
+        "cell_state_ids": {"type": "array", "items": {"type": "string"}},
+        "marker_ids": {"type": "array", "items": {"type": "string"}},
+        "dataset_ids": {"type": "array", "items": {"type": "string"}},
+        "study_ids": {"type": "array", "items": {"type": "string"}},
+        "sample_ids": {"type": "array", "items": {"type": "string"}},
+        "intervention_ids": {"type": "array", "items": {"type": "string"}},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "provenance": {"type": "array", "items": {"type": "string"}},
+        "metadata": {"type": "object"}
       }
     },
     "benchmarkSample": {
@@ -177,7 +185,7 @@
       "required": ["sample_id", "y_true", "y_pred"],
       "properties": {
         "sample_id": {"type": "string"},
-        "y_true": {},
+        "y_true": {"type": ["number", "string", "null"]},
         "y_pred": {},
         "score": {"type": ["number", "null"]},
         "subgroup": {"type": ["string", "null"]}
