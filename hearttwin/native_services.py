@@ -262,7 +262,17 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     if capability != "vex.observe":
         raise ValueError(f"CardiVex does not support {capability}")
     try:
-        from cardivex import Confidence, EvidenceTier, Scenario, ScenarioState, healthy_baseline, run_end_to_end
+        from cardivex import (
+            Confidence,
+            EvidenceTier,
+            Scenario,
+            ScenarioState,
+            from_domain_scores,
+            generate_patient,
+            healthy_baseline,
+            run_end_to_end,
+            state_to_domains,
+        )
         from cardivex.models import DomainValue
     except Exception as exc:  # pragma: no cover
         raise _native_unavailable("CardiVex", exc)
@@ -295,7 +305,10 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         validation_targets=tuple(raw.get("validation_targets") or ()), ood_status=str(raw.get("ood_status", "train")),
         provenance_sources=tuple(raw.get("provenance_sources") or ()), provenance_transformations=tuple(raw.get("provenance_transformations") or ()),
     )
-    result = run_end_to_end(scenario, baseline=healthy_baseline())
+    patient = generate_patient(seed=0)
+    latent_baseline = healthy_baseline(patient)
+    baseline = from_domain_scores(state_to_domains(latent_baseline))
+    result = run_end_to_end(scenario, baseline=baseline)
     return {"contract_version": "1.0", **result.to_dict()}
 
 
