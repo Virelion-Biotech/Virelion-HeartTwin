@@ -112,7 +112,9 @@ class ValidationArtifact(BaseModel):
 
 StatePhase = Literal[
     "unknown", "baseline", "injury", "acute", "remodeling", "recovery",
-    "intervention", "post_intervention", "simulated", "validated"
+    "intervention", "post_intervention", "simulated", "evaluated",
+    "internally_validated", "externally_validated", "decision_eligible",
+    "validated"  # legacy snapshots only; new workflows do not auto-promote here
 ]
 
 
@@ -130,11 +132,19 @@ class StateTransition(BaseModel):
 
 class AtlasContextPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    contract_version: str = "1.0"
+    contract_version: str = "1.1"
     context_id: str
-    record_ids: list[str] = Field(default_factory=list)
-    context: dict[str, Any] = Field(default_factory=dict)
+    phenotype_ids: list[str] = Field(default_factory=list)
+    cell_state_ids: list[str] = Field(default_factory=list)
+    marker_ids: list[str] = Field(default_factory=list)
+    dataset_ids: list[str] = Field(default_factory=list)
+    study_ids: list[str] = Field(default_factory=list)
+    sample_ids: list[str] = Field(default_factory=list)
+    intervention_ids: list[str] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(default_factory=list)
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     provenance: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class BenchmarkSamplePayload(BaseModel):
@@ -167,7 +177,7 @@ class BenchmarkResolutionPayload(BaseModel):
 class LearningPredictionPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
     sample_id: str
-    y_true: int | float | str
+    y_true: int | float | str | None = None
     y_pred: int | float | str
     score: float | None = None
     subgroup: str | None = None
