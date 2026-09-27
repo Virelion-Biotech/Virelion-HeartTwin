@@ -57,6 +57,99 @@ def _call(registry: ServiceRegistry, capability: str, entity_id: str, payload: d
     )
 
 
+def _trace_manifest(
+    *,
+    run_id: str,
+    observations: list[Observation],
+    state: WorkflowState,
+    canonical_state_fingerprint: str,
+    steps: list[ServiceResult],
+) -> dict[str, Any]:
+    """Build a compact auditable trace manifest without duplicating raw modality payloads."""
+    benchmark = state.benchmark
+    learning = state.learning
+    simulation = state.simulation
+    evaluation = state.evaluation
+    bridge = state.bridge
+    return {
+        "context": {
+            "workflow_run_id": run_id,
+            "contract_version": state.contract_version,
+            "trace_payload": "content-addressed-manifest-v1",
+        },
+        "observations": [
+            {
+                "observation_id": item.observation_id,
+                "modality": item.modality,
+                "status": item.status,
+                "payload_sha256": sha256(item.model_dump(mode="json")),
+                "provenance_run_id": item.provenance.run_id,
+                "source_content_sha256": item.provenance.content_sha256,
+            }
+            for item in observations
+        ],
+        "workflow_state": {
+            "entity_id": state.entity_id,
+            "modality_analyses": [
+                {
+                    "observation_id": item.observation_id,
+                    "capability": item.capability,
+                    "service": item.service,
+                    "content_sha256": item.content_sha256,
+                }
+                for item in state.modality_analyses
+            ],
+            "benchmark": None if benchmark is None else {
+                "benchmark_id": benchmark.benchmark_id,
+                "version": benchmark.version,
+                "policy": benchmark.policy,
+                "metadata_sha256": benchmark.metadata_sha256,
+            },
+            "learning": None if learning is None else {
+                "model_id": learning.model_id,
+                "task": learning.task,
+                "dataset_fingerprint": learning.dataset_fingerprint,
+                "prediction_count": len(learning.predictions),
+                "predictions_sha256": sha256(
+                    [item.model_dump(mode="json") for item in learning.predictions]
+                ),
+            },
+            "simulation": None if simulation is None else {
+                "backend": simulation.backend,
+                "population_size": simulation.population_size,
+                "summary_sha256": sha256(simulation.summary),
+            },
+            "evaluation": None if evaluation is None else {
+                "benchmark_id": evaluation.benchmark_id,
+                "benchmark_version": evaluation.benchmark_version,
+                "model_id": evaluation.model_id,
+                "evaluation_fingerprint": evaluation.evaluation_fingerprint,
+                "primary_metric": evaluation.primary_metric,
+                "primary_value": evaluation.primary_value,
+            },
+            "bridge": None if bridge is None else {
+                "message_id": bridge.message_id,
+                "status": bridge.status,
+                "transport": bridge.transport,
+                "content_sha256": bridge.content_sha256,
+            },
+        },
+        "canonical_state_fingerprint": canonical_state_fingerprint,
+        "results": [
+            {
+                "service": item.service,
+                "capability": item.capability,
+                "status": item.status,
+                "data_sha256": sha256(item.data),
+                "provenance_run_id": item.provenance.run_id if item.provenance else None,
+                "content_sha256": item.provenance.content_sha256 if item.provenance else None,
+            }
+            for item in steps
+        ],
+        "hearttwin_run_id": run_id,
+    }
+
+
 def _as_atlas(data: dict[str, Any]) -> AtlasContextPayload:
     try:
         return AtlasContextPayload.model_validate(data)
@@ -474,14 +567,13 @@ def run_multimodal_workflow(
         registry,
         "trace.record",
         entity_id,
-        {
-            "context": {"workflow_run_id": run_id},
-            "observations": [item.model_dump(mode="json") for item in observations],
-            "workflow_state": state.model_dump(mode="json"),
-            "canonical_state_fingerprint": pre_trace_fingerprint,
-            "results": [item.model_dump(mode="json") for item in steps],
-            "hearttwin_run_id": run_id,
-        },
+        _trace_manifest(
+            run_id=run_id,
+            observations=observations,
+            state=state,
+            canonical_state_fingerprint=pre_trace_fingerprint,
+            steps=steps,
+        ),
     )
     state.trace = trace_result.data
     store.record_trace(trace_result.data, trace_result.provenance)
