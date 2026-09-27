@@ -131,7 +131,7 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     for index, (row, y_true, y_pred) in enumerate(zip(source_rows, y_values, predictions.tolist(), strict=True)):
         prediction_rows.append({
             "sample_id": str(row.get("sample_id", row.get("id", f"test-{index:04d}"))),
-            "y_true": y_pred if y_true is None else y_true,
+            "y_true": y_true,
             "y_pred": y_pred,
             "score": None if scores is None else float(scores[index]),
             "subgroup": None if row.get("subgroup") is None else str(row["subgroup"]),
@@ -160,6 +160,15 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     missing = sorted(set(test_ids) - set(pred_by_id))
     if missing:
         raise ValueError(f"CardiLearn/CardiBench handoff is missing test predictions: {missing}")
+    unlabeled = sorted(
+        sample_id for sample_id in test_ids
+        if pred_by_id[sample_id].get("y_true") is None
+    )
+    if unlabeled:
+        raise ValueError(
+            "CardiEval requires independent ground truth for every benchmark test sample; "
+            f"missing labels for: {unlabeled}"
+        )
     records = [PredictionRecord.model_validate(pred_by_id[sample_id]) for sample_id in test_ids]
     benchmark_id = str(benchmark["benchmark_id"])
     version = str(benchmark["version"])
