@@ -11,7 +11,7 @@ for name in "${repos[@]}"; do
   if [[ -d "$dir/.git" ]]; then
     git -C "$dir" fetch origin main --quiet
     git -C "$dir" checkout main --quiet
-    git -C "$dir" reset --hard origin/main --quiet
+    git -C "$dir" merge --ff-only origin/main --quiet
   else
     git clone --depth 1 --branch main "$url" "$dir"
   fi

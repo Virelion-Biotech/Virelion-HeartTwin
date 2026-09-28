@@ -39,11 +39,15 @@ def test_bridge_publish_and_duplicate():
         "population": [{"cell": "cardiomyocyte"}],
         "consumer": "worker",
     }
+    from hearttwin.cardibridge_adapter import _local_router
+    router, _ = _local_router()
+    router.register("agent.challenge", "worker", lambda envelope: {"handled": True})
     first = invoke_cardibridge("bridge.publish", payload)
     payload["message_id"] = first["message_id"]
     second = invoke_cardibridge("bridge.publish", payload)
     assert first["status"] == "processed"
     assert second["status"] == "duplicate"
+    assert second["result"] == first["result"] == {"handled": True}
     assert first["message_id"] == second["message_id"]
 
 

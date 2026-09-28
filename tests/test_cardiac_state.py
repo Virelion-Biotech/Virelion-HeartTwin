@@ -78,7 +78,7 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
 
     snapshot = store.snapshot()
     assert snapshot.contract_version == "1.1.0"
-    assert snapshot.state_phase == "validated"
+    assert snapshot.state_phase == "baseline"  # Recording metrics is not a validation gate.
     assert len(snapshot.prediction_artifacts) == 1
     assert snapshot.predictions[0]["capability"] == "learn.predict"
     assert len(snapshot.simulation_artifacts) == 1

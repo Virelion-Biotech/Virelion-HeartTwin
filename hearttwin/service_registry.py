@@ -105,9 +105,16 @@ class ServiceAdapter:
             return self._invoke_http(capability, payload)
         if self.spec.command:
             env = os.environ.copy()
-            env["HEARTTWIN_PAYLOAD"] = json.dumps(payload)
+            raw = json.dumps(payload)
+            env.pop("HEARTTWIN_PAYLOAD", None)
+            env.pop("HEARTTWIN_PAYLOAD_STDIN", None)
+            if len(raw.encode("utf-8")) > 32768:
+                env["HEARTTWIN_PAYLOAD_STDIN"] = "1"
+            else:
+                env["HEARTTWIN_PAYLOAD"] = raw
             process = subprocess.run(
                 self.spec.command,
+                input=raw if env.get("HEARTTWIN_PAYLOAD_STDIN") == "1" else None,
                 shell=True,
                 capture_output=True,
                 text=True,

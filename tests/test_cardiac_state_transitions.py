@@ -1,6 +1,6 @@
 import pytest
 
-from hearttwin.contracts import Observation, Provenance, ServiceResult
+from hearttwin.contracts import Observation, Provenance
 from hearttwin.orchestrator import HeartTwin
 from hearttwin.service_registry import ServiceRegistry, ServiceSpec
 from hearttwin.state import CardiacStateStore, CardiacStateValidationError

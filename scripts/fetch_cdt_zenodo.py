@@ -21,8 +21,8 @@ REQUIRED_DIRS = ("clinical_data", "cellular_data")
 GEOMETRY_DIRS = ("geometric_data", "geometric_data_ruben")
 
 
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
+def file_digest(path: Path, algorithm: str = "sha256") -> str:
+    h = hashlib.new(algorithm)
     with path.open("rb") as fh:
         for chunk in iter(lambda: fh.read(1024 * 1024), b""):
             h.update(chunk)
@@ -31,8 +31,13 @@ def sha256(path: Path) -> str:
 
 def download(url: str, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(url, timeout=120) as response, destination.open("wb") as fh:
-        shutil.copyfileobj(response, fh)
+    partial = destination.with_name(destination.name + ".part")
+    try:
+        with urllib.request.urlopen(url, timeout=120) as response, partial.open("wb") as fh:
+            shutil.copyfileobj(response, fh, length=1024 * 1024)
+        partial.replace(destination)
+    finally:
+        partial.unlink(missing_ok=True)
 
 
 def _safe_member_path(root: Path, member_name: str) -> Path:
@@ -110,13 +115,13 @@ def main() -> None:
         url = links.get("content") or links.get("self")
         if not key or not url:
             raise RuntimeError(f"Malformed Zenodo file entry: {item}")
-        destination = downloads / key
+        destination = _safe_member_path(downloads, key)
         if not destination.exists():
             download(url, destination)
-        actual = sha256(destination)
+        actual = file_digest(destination)
         expected = item.get("checksum")
         if expected and expected.startswith("md5:"):
-            md5 = hashlib.md5(destination.read_bytes()).hexdigest()  # nosec B303: checksum interoperability, not security
+            md5 = file_digest(destination, "md5")  # nosec B303: checksum interoperability, not security
             if md5 != expected.removeprefix("md5:"):
                 raise RuntimeError(f"Checksum mismatch for {key}")
         manifest.append({"key": key, "size": destination.stat().st_size, "sha256": actual, "zenodo_checksum": expected, "url": url})

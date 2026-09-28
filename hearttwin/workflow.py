@@ -5,7 +5,7 @@ versioned contracts and simultaneously reduced into one canonical CardiacState.
 """
 from __future__ import annotations
 
-from statistics import mean
+from math import isfinite
 from typing import Any
 
 from .cardibridge_adapter import _local_router
@@ -100,6 +100,8 @@ def _as_agent(data: dict[str, Any], entity_id: str) -> AgentChallengePayload:
 
 def _as_vex(data: dict[str, Any]) -> VexObservationPayload:
     try:
+        if not data.get("scenario_id") or not data.get("primary"):
+            raise ValueError("Missing CardiVex scenario or primary observation")
         return VexObservationPayload.model_validate(data)
     except Exception as exc:
         raise WorkflowError(f"CardiVex returned an invalid typed payload: {exc}") from exc
@@ -151,80 +153,52 @@ def _run_specialist_modalities(
     return outputs
 
 
-def _benchmark_lock_to_learning_test(
-    benchmark_samples: list[dict[str, Any]], learning: LearningResultPayload, *, seed: int
-) -> BenchmarkResolutionPayload:
-    """Re-materialize CardiBench using the model's actual test biological groups."""
-    try:
-        from cardi_bench import Sample, materialize
-    except Exception as exc:  # pragma: no cover
-        raise WorkflowError(f"CardiBench native package is required: {exc}") from exc
-
-    by_id = {str(row["sample_id"]): row for row in benchmark_samples}
-    test_ids = {prediction.sample_id for prediction in learning.predictions}
-    missing = sorted(test_ids - set(by_id))
-    if missing:
-        raise WorkflowError(f"CardiLearn test predictions are absent from CardiBench samples: {missing}")
-    test_groups = {str(by_id[sample_id]["group_id"]) for sample_id in test_ids}
-    rows = [
-        Sample(
-            sample_id=str(item["sample_id"]), group_id=str(item["group_id"]), study_id=str(item["study_id"]),
-            label=str(item["label"]), technical_group=item.get("technical_group"), organism=item.get("organism"),
-            timepoint=item.get("timepoint"), cell_context=item.get("cell_context"), region=item.get("region"),
-        )
-        for item in benchmark_samples
-    ]
-    materialized = materialize(
-        rows,
-        benchmark_id="hearttwin-multimodal-e2e",
-        version="1.0",
-        policy="subject_heldout",
-        test_values=test_groups,
-        seed=seed,
-    )
-    return BenchmarkResolutionPayload.model_validate(
-        {"contract_version": "1.0", **materialized.to_dict(), "samples": benchmark_samples}
-    )
-
-
 def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload) -> dict[str, Any]:
     """Translate a simulation summary into a phenotype-level CardiVex proxy scenario."""
-    health = float(simulation.summary.get("cardiac_health_score", 0.5))
-    burden = max(0.0, min(1.0, 1.0 - health))
-    axes = {
-        "inflammatory": burden,
-        "vascular_endothelial": min(1.0, burden * 0.8),
-        "metabolic_mitochondrial": min(1.0, burden * 1.1),
-        "contractile_functional": burden,
-        "structural_injury": min(1.0, burden * 0.9),
-        "cell_death": min(1.0, burden * 0.7),
-        "remodeling": min(1.0, burden * 0.85),
+    # These are explicit model-variable proxies, not measured disease states.
+    mapping = {
+        "inflammatory_activation": ("inflammation", False),
+        "metabolic_stress": ("metabolism", True),
+        "mitochondrial_dysfunction": ("mitochondrial_health", True),
+        "oxidative_stress": ("oxidative_stress", False),
+        "viability_burden": ("viability", True),
+        "fibrosis_remodeling": ("fibrosis", False),
+        "contractile_impairment": ("contractility", True),
+        "electrophysiologic_disturbance": ("electrophysiology", True),
     }
 
-    def domain(value: float) -> dict[str, Any]:
-        return {
-            "value": round(float(max(0.0, min(1.0, value))), 6),
-            "uncertainty": 0.05,
-            "evidence_status": "proxy",
-        }
+    def domains(key: str) -> dict[str, Any]:
+        values = simulation.summary.get(key)
+        if not isinstance(values, dict):
+            raise WorkflowError(f"Simulation summary is missing {key} phenotype values")
+        output = {}
+        for domain, (variable, invert) in mapping.items():
+            value = float(values[variable])
+            if not isfinite(value) or not 0 <= value <= 1:
+                raise WorkflowError(f"Invalid normalized simulation variable: {variable}")
+            output[domain] = {"value": 1.0 - value if invert else value,
+                              "evidence_status": "extrapolated"}
+        return output
 
+    initial, final = domains("initial"), domains("final")
+    duration = float(simulation.summary["duration"])
     return {
-        "scenario_id": f"CVX-HT-{sha256({'entity': entity_id})[:12].upper()}",
+        "scenario_id": f"CVX-HT-{sha256({'entity': entity_id, 'simulation': simulation.model_dump(mode='json')})[:12].upper()}",
         "version": "1.0",
         "name": "HeartTwin simulation-derived phenotype challenge",
         "target_model": "HeartTwin",
-        "evidence_tier": "characterized_proxy",
+        "evidence_tier": "extrapolated",
         "confidence": "exploratory",
-        "phenotype_domains": {name: domain(value) for name, value in axes.items()},
+        "phenotype_domains": final,
         "temporal_profile": [
-            {"state": "baseline", "relative_time": 0.0, "duration": 1.0, "domains": {name: domain(0.0) for name in axes}},
-            {"state": "simulated", "relative_time": 1.0, "duration": 1.0, "domains": {name: domain(value) for name, value in axes.items()}},
+            {"state": "baseline", "relative_time": 0.0, "duration": 0.0, "domains": initial},
+            {"state": "simulated", "relative_time": duration, "duration": duration, "domains": final},
         ],
-        "description": "Computational phenotype proxy derived from CardiSim output; not an empirical patient state.",
-        "severity_profile": axes,
+        "description": "Uncalibrated computational proxies; not empirical patient states. Uncertainty is not estimated.",
+        "severity_profile": {key: item["value"] for key, item in final.items()},
         "ood_status": "validation",
         "provenance_sources": ["Virelion-CardiSim", "Virelion-HeartTwin"],
-        "provenance_transformations": ["simulation.summary -> phenotype-domain proxy"],
+        "provenance_transformations": ["Named normalized model variables; health variables complemented to burden. No fitted biological calibration or uncertainty estimate."],
     }
 
 
@@ -250,10 +224,7 @@ def _register_local_vex_handler(registry: ServiceRegistry, entity_id: str, scena
             {"entity_id": entity_id, "scenario": selected_scenario, "bridge_message_id": envelope.message_id},
         )
 
-    try:
-        router.register("agent.challenge", "CardiVex", handler)
-    except (KeyError, ValueError):
-        return
+    router.register("agent.challenge", "CardiVex", handler)
 
 
 def run_multimodal_workflow(
@@ -263,6 +234,8 @@ def run_multimodal_workflow(
     observations: list[Observation],
     benchmark_samples: list[dict[str, Any]],
     learning_data: list[dict[str, Any]],
+    feature_columns: list[str],
+    reference_labels: dict[str, int],
     atlas_record_ids: list[str] | None = None,
     atlas_records: list[dict[str, Any]] | None = None,
     simulation: dict[str, Any] | None = None,
@@ -275,6 +248,11 @@ def run_multimodal_workflow(
             "observations": [item.model_dump(mode="json") for item in observations],
             "benchmark_samples": benchmark_samples,
             "learning_data": learning_data,
+            "feature_columns": feature_columns,
+            "reference_labels": reference_labels,
+            "simulation": simulation,
+            "atlas_record_ids": atlas_record_ids,
+            "atlas_records": atlas_records,
             "seed": seed,
         },
     )
@@ -310,50 +288,40 @@ def run_multimodal_workflow(
     store.record_atlas(state.atlas, atlas_result.provenance)
     steps.append(atlas_result)
 
+    # Freeze the benchmark before fitting. The learner cannot choose evaluation IDs.
+    benchmark_result = _call(
+        registry, "benchmark.resolve", entity_id,
+        {"benchmark_id": "hearttwin-multimodal", "version": "1.0",
+         "policy": "subject_heldout", "seed": seed, "samples": benchmark_samples},
+    )
+    state.benchmark = _as_benchmark(benchmark_result.data)
+    assignments = state.benchmark.assignments
+    if set(reference_labels) != set(assignments) or any(type(v) is not int or v not in (0, 1) for v in reference_labels.values()):
+        raise WorkflowError("reference_labels must provide explicit 0/1 labels for exactly the benchmark samples")
+    rows_by_id = {str(row["sample_id"]): row for row in learning_data}
+    if len(rows_by_id) != len(learning_data) or set(rows_by_id) != set(assignments):
+        raise WorkflowError("Learning data must contain exactly the unique benchmark sample IDs")
+    for sample in state.benchmark.samples:
+        row = rows_by_id[sample.sample_id]
+        if str(row.get("group_id")) != sample.group_id or str(row.get("study_id")) != sample.study_id:
+            raise WorkflowError("Learning and benchmark biological identifiers disagree")
+        if row.get("target") != reference_labels[sample.sample_id]:
+            raise WorkflowError("Learning targets disagree with benchmark reference labels")
+    store.record_benchmark(state.benchmark, benchmark_result.provenance)
+    steps.append(benchmark_result)
     learning_result = _call(
-        registry,
-        "learn.infer",
-        entity_id,
-        {
-            "data": learning_data,
-            "target_column": "target",
-            "group_column": "group_id",
-            "model": "logistic_regression",
-            "task": "classification",
-            "seed": seed,
-        },
+        registry, "learn.infer", entity_id,
+        {"data": learning_data, "target_column": "target", "group_column": "group_id",
+         "feature_columns": feature_columns, "split_assignments": assignments,
+         "model": "logistic_regression", "task": "classification", "seed": seed},
     )
     state.learning = _as_learning(learning_result.data)
     store.record_learning(state.learning, learning_result.provenance)
     steps.append(learning_result)
 
-    benchmark_result = _call(
-        registry,
-        "benchmark.resolve",
-        entity_id,
-        {
-            "benchmark_id": "hearttwin-multimodal-initial",
-            "version": "1.0",
-            "policy": "subject_heldout",
-            "seed": seed,
-            "samples": benchmark_samples,
-        },
-    )
-    _as_benchmark(benchmark_result.data)
-    locked_benchmark = _benchmark_lock_to_learning_test(
-        benchmark_samples, state.learning, seed=seed
-    )
-    benchmark_result = benchmark_result.model_copy(
-        update={"data": locked_benchmark.model_dump(mode="json")}
-    )
-    state.benchmark = locked_benchmark
-    store.record_benchmark(locked_benchmark, benchmark_result.provenance)
-    steps.append(benchmark_result)
-
-    scores = [float(item.score) for item in state.learning.predictions if item.score is not None]
-    score_mean = mean(scores) if scores else 0.5
     sim_payload = dict(simulation or {})
-    sim_payload.setdefault("preset", "mi" if score_mean >= 0.5 else "baseline")
+    if not sim_payload.get("preset"):
+        raise WorkflowError("An explicit simulation preset is required; classifier scores do not identify a mechanistic disease model")
     sim_payload.setdefault("n_cells", 32)
     sim_payload.setdefault("duration", 3.0)
     sim_payload.setdefault("dt", 0.25)
@@ -443,20 +411,14 @@ def run_multimodal_workflow(
             "benchmark": state.benchmark.model_dump(mode="json"),
             "predictions": [item.model_dump(mode="json") for item in state.learning.predictions],
             "model_id": state.learning.model_id,
+            "reference_labels": {sid: reference_labels[sid] for sid, partition in assignments.items() if partition == "test"},
             "task_id": "binary-cardiac-state-detection",
         },
     )
     state.evaluation = _as_evaluation(evaluation_result.data)
     store.record_evaluation(state.evaluation, evaluation_result.provenance)
-    store.transition(
-        "validated",
-        trigger="CardiEval:evaluation.run",
-        provenance=evaluation_result.provenance,
-        details={
-            "evaluation_fingerprint": state.evaluation.evaluation_fingerprint,
-            "primary_metric": state.evaluation.primary_metric,
-        },
-    )
+    if state.evaluation.errors:
+        raise WorkflowError(f"Evaluation failed: {state.evaluation.errors}")
     steps.append(evaluation_result)
 
     pre_trace_fingerprint = store.fingerprint()

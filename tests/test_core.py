@@ -1,4 +1,3 @@
-import pytest
 from hearttwin.contracts import Observation, Provenance
 from hearttwin.service_registry import ServiceRegistry, ServiceSpec
 from hearttwin.orchestrator import HeartTwin

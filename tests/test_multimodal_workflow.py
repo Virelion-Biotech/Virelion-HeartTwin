@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 
 import numpy as np
@@ -38,6 +39,10 @@ def _rows(n: int = 20) -> list[dict]:
 
 def test_native_multimodal_workflow_is_end_to_end() -> None:
     registry = load_registry()
+    missing = [name for name, adapter in registry.adapters.items() if not adapter.available()]
+    if missing and os.getenv("HEARTTWIN_REQUIRE_NATIVE") != "1":
+        pytest.skip("component packages not installed: " + ", ".join(missing))
+    assert not missing, missing
     observations = [
         _observation("E2E-001", "molecular", {"gene_a": 0.4, "gene_b": 0.6}),
         _observation("E2E-001", "structural", {"region": "left_ventricle", "zone": "IZ"}),
@@ -60,6 +65,8 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
             for row in rows
         ],
         learning_data=rows,
+        feature_columns=["gene_a", "gene_b"],
+        reference_labels={row["sample_id"]: row["target"] for row in rows},
         simulation={"preset": "mi", "n_cells": 16, "duration": 1.0, "dt": 0.25},
         seed=42,
     )
@@ -128,6 +135,10 @@ def _write_video(path) -> None:
 
 def test_real_specialist_modalities_feed_typed_workflow_state(tmp_path) -> None:
     registry = load_registry()
+    missing = [name for name, adapter in registry.adapters.items() if not adapter.available()]
+    if missing and os.getenv("HEARTTWIN_REQUIRE_NATIVE") != "1":
+        pytest.skip("component packages not installed: " + ", ".join(missing))
+    assert not missing, missing
     if shutil.which("electrotrace-hearttwin") is None or shutil.which("myotrace-hearttwin") is None:
         pytest.skip("specialist HeartTwin commands are not installed")
 
@@ -157,6 +168,8 @@ def test_real_specialist_modalities_feed_typed_workflow_state(tmp_path) -> None:
             for row in rows
         ],
         learning_data=rows,
+        feature_columns=["gene_a", "gene_b"],
+        reference_labels={row["sample_id"]: row["target"] for row in rows},
         simulation={"preset": "mi", "n_cells": 8, "duration": 1.0, "dt": 0.25},
         seed=7,
     )

@@ -52,7 +52,12 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         context_id = str(payload.get("context_id") or f"ctx-{payload.get('entity_id', 'unknown')}")
         record_ids = [str(item) for item in payload.get("record_ids", [])]
         context = service.atlas_context(context_id, record_ids)
-        return {"contract_version": "1.0", **context.to_dict()}
+        raw = context.to_dict()
+        return {
+            "contract_version": "1.0", "context_id": context_id,
+            "record_ids": record_ids, "context": raw,
+            "provenance": list(raw.get("evidence_ids", [])),
+        }
     raise ValueError(f"CardiAtlas does not support {capability}")
 
 
@@ -81,7 +86,9 @@ def _cardibench(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         validation_values={str(item) for item in payload.get("validation_values", [])},
         seed=int(payload.get("seed", 0)),
     )
-    return {"contract_version": "1.0", **result.to_dict(), "samples": raw_samples}
+    data = result.to_dict()
+    data.pop("label_counts", None)
+    return {"contract_version": "1.0", **data, "samples": raw_samples}
 
 
 def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -100,7 +107,14 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     target = str(payload.get("target_column", "target"))
     group = payload.get("group_column", "group_id")
     frame = pd.DataFrame(rows)
-    dataset = Dataset(frame=frame, target_column=target, group_column=group if group else None)
+    # Outcome aliases and identifiers must never become model features by default.
+    features = payload.get("feature_columns")
+    reserved = {target, group, "sample_id", "id", "study_id", "label", "subgroup", "condition", "region", "technical_group"}
+    if not isinstance(features, list) or not features or len(features) != len(set(features)):
+        raise ValueError("CardiLearn adapter requires explicit, unique feature_columns")
+    if set(features) & reserved or not set(features) <= set(frame.columns):
+        raise ValueError("feature_columns contain missing columns or outcome/identifier metadata")
+    dataset = Dataset(frame=frame[features + [target] + ([group] if group else [])], target_column=target, group_column=group if group else None)
     split = SplitConfig(
         test_size=float(payload.get("test_size", 0.2)), validation_size=float(payload.get("validation_size", 0.2)),
         random_state=int(payload.get("seed", 42)), stratify=bool(payload.get("stratify", True)),
@@ -109,7 +123,39 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         task=str(payload.get("task", "classification")), model=str(payload.get("model", "logistic_regression")),
         target_column=target, group_column=group if group else None, random_state=int(payload.get("seed", 42)), split=split,
     )
-    result = train(dataset, config)
+    assignments = payload.get("split_assignments")
+    if assignments is None:
+        result = train(dataset, config)
+    else:
+        from types import SimpleNamespace
+        from cardilearn.models import build_model
+        from cardilearn.metrics import evaluate
+        from cardilearn.reproducibility import dataframe_fingerprint
+        if "sample_id" not in frame or frame.sample_id.isna().any() or frame.sample_id.astype(str).duplicated().any():
+            raise ValueError("Locked training requires unique sample IDs")
+        ids = frame.sample_id.astype(str).tolist()
+        if set(assignments) != set(ids) or set(assignments.values()) - {"train", "validation", "test"}:
+            raise ValueError("Split assignments must cover exactly the learning samples")
+        indices = {name: [i for i, sid in enumerate(ids) if assignments[sid] == name] for name in ("train", "validation", "test")}
+        if not indices["train"] or not indices["test"]:
+            raise ValueError("Locked benchmark needs nonempty training and test partitions")
+        if group:
+            if frame[group].isna().any():
+                raise ValueError("Biological group IDs must not be missing")
+            group_splits = {}
+            for sid, gid in zip(ids, frame[group].astype(str)):
+                group_splits.setdefault(gid, set()).add(assignments[sid])
+            if any(len(values) != 1 for values in group_splits.values()):
+                raise ValueError("Biological group leakage across benchmark splits")
+        X, y = dataset.features(), dataset.target
+        if config.task == "classification" and y.iloc[indices["train"]].nunique() < 2:
+            raise ValueError("Training partition requires at least two classes")
+        model = build_model(config.task, config.model, X.iloc[indices["train"]])
+        model.fit(X.iloc[indices["train"]], y.iloc[indices["train"]])
+        metrics = {name: evaluate(model, X.iloc[index], y.iloc[index], config.task)
+                   for name, index in indices.items() if name != "test" and index}
+        result = SimpleNamespace(model=model, splits=SimpleNamespace(**indices), metrics=metrics,
+                                 dataset_fingerprint=dataframe_fingerprint(dataset.frame))
     if payload.get("prediction_data") is not None:
         prediction_frame = pd.DataFrame(payload["prediction_data"])
         X_pred = prediction_frame[dataset.feature_columns]
@@ -125,20 +171,23 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     if config.task == "classification" and hasattr(result.model, "predict_proba"):
         probabilities = result.model.predict_proba(X_pred)
         if getattr(probabilities, "ndim", 1) == 2 and probabilities.shape[1] == 2:
-            scores = probabilities[:, 1]
+            classes = list(result.model.classes_)
+            if set(classes) != {0, 1}:
+                raise ValueError("Binary probability scoring requires explicit 0/1 target encoding")
+            scores = probabilities[:, classes.index(1)]
     y_values = [None] * len(predictions) if y_pred_target is None else y_pred_target.tolist()
     prediction_rows = []
     for index, (row, y_true, y_pred) in enumerate(zip(source_rows, y_values, predictions.tolist(), strict=True)):
         prediction_rows.append({
             "sample_id": str(row.get("sample_id", row.get("id", f"test-{index:04d}"))),
-            "y_true": y_pred if y_true is None else y_true,
+            "y_true": None if y_true is None or pd.isna(y_true) else y_true,
             "y_pred": y_pred,
             "score": None if scores is None else float(scores[index]),
             "subgroup": None if row.get("subgroup") is None else str(row["subgroup"]),
         })
     return {
         "contract_version": "1.0", "model_id": str(payload.get("model_id", config.model)), "task": config.task,
-        "target_column": target, "metrics": result.metrics, "predictions": prediction_rows,
+        "target_column": target, "feature_columns": features, "metrics": result.metrics, "predictions": prediction_rows,
         "dataset_fingerprint": result.dataset_fingerprint,
     }
 
@@ -157,9 +206,11 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("CardiEval native adapter requires benchmark and non-empty predictions")
     test_ids = [sample_id for sample_id, split in benchmark.get("assignments", {}).items() if split == "test"]
     pred_by_id = {str(item["sample_id"]): item for item in predictions}
-    missing = sorted(set(test_ids) - set(pred_by_id))
-    if missing:
-        raise ValueError(f"CardiLearn/CardiBench handoff is missing test predictions: {missing}")
+    if len(pred_by_id) != len(predictions) or set(pred_by_id) != set(test_ids):
+        raise ValueError("Predictions must cover exactly the benchmark test IDs without duplicates")
+    labels = payload.get("reference_labels")
+    if not isinstance(labels, dict) or set(labels) != set(test_ids) or any(v is None for v in labels.values()):
+        raise ValueError("Evaluation requires independently supplied reference_labels for every test ID")
     records = [PredictionRecord.model_validate(pred_by_id[sample_id]) for sample_id in test_ids]
     benchmark_id = str(benchmark["benchmark_id"])
     version = str(benchmark["version"])
@@ -167,11 +218,13 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         benchmark_id=benchmark_id, version=version, task="binary_classification", split="test",
         sample_ids=test_ids, dataset_sha256=str(benchmark["metadata_sha256"]),
         label_schema={"0": "reference", "1": "target"}, metadata={"source": "HeartTwin/CardiBench"},
+        authoritative_labels=labels,
     )
     task = BenchmarkTask(
         benchmark_id=benchmark_id, version=version, task_id=str(payload.get("task_id", "binary-cardiac-state-detection")),
         task_type="binary_classification", allowed_metrics=["accuracy", "balanced_accuracy", "macro_f1", "auroc", "auprc", "brier", "ece"],
         primary_metric="macro_f1", primary_direction="higher_is_better", splits=["test"],
+        requires_authoritative_labels=True,
         description="HeartTwin multimodal integration evaluation task",
     )
     report = evaluate_submission(manifest, records, model_id=str(payload.get("model_id", "unknown")), task_contract=task)
@@ -206,7 +259,9 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     if capability != "vex.observe":
         raise ValueError(f"CardiVex does not support {capability}")
     try:
-        from cardivex import Confidence, DomainValue, EvidenceTier, Scenario, ScenarioState, healthy_baseline, run_end_to_end
+        from cardivex import Confidence, EvidenceTier, Scenario, ScenarioState, run_end_to_end
+        from cardivex.models import DomainValue
+        from cardivex.features import from_domain_scores
     except Exception as exc:  # pragma: no cover
         raise _native_unavailable("CardiVex", exc)
     raw = payload.get("scenario")
@@ -238,13 +293,13 @@ def _cardivex(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         validation_targets=tuple(raw.get("validation_targets") or ()), ood_status=str(raw.get("ood_status", "train")),
         provenance_sources=tuple(raw.get("provenance_sources") or ()), provenance_transformations=tuple(raw.get("provenance_transformations") or ()),
     )
-    result = run_end_to_end(scenario, baseline=healthy_baseline())
-    return {"contract_version": "1.0", **result.to_dict()}
+    result = run_end_to_end(scenario, baseline=from_domain_scores({key: item.value for key, item in scenario.temporal_profile[0].domains.items()}))
+    return {"contract_version": "1.0", "scenario_id": scenario.scenario_id, "evidence_tier": scenario.evidence_tier.value, "confidence": scenario.confidence.value, "primary": result.assessment.to_dict(), **result.to_dict()}
 
 
 def _cardistudio(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     try:
-        from cardistudio import ChallengeSpec, FeatureSpec, PopulationBuilder, approximate_two_sample_n, full_factorial, validate_challenge, validate_population
+        from cardistudio import ChallengeSpec, PopulationBuilder, approximate_two_sample_n, full_factorial, validate_challenge, validate_population
     except Exception as exc:  # pragma: no cover
         raise _native_unavailable("CardiStudio", exc)
     if capability == "design.generate":
@@ -280,6 +335,9 @@ def _dccp(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         from dccp.library import materialize_challenge_set
         root = payload.get("scenario_root", "scenarios")
         return {"contract_version": "1.0", "challenge_set": materialize_challenge_set(str(root), include_ood=bool(payload.get("include_ood", True)))}
+    if capability == "host.map":
+        from dccp.omics_map import map_module_scores_to_axes
+        return {"contract_version": "1.0", "axes": map_module_scores_to_axes(dict(payload.get("module_scores") or {}))}
     raw = payload.get("scenario")
     scenario = Scenario.from_dict(raw) if isinstance(raw, dict) else load_scenario(str(payload["scenario_path"]))
     if capability == "challenge.validate":
@@ -300,7 +358,4 @@ def _dccp(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             rescued={str(k): float(v) for k, v in rescued.items()},
         )
         return {"contract_version": "1.0", **report.as_dict()}
-    if capability == "host.map":
-        from dccp.omics_map import map_module_scores_to_axes
-        return {"contract_version": "1.0", "axes": map_module_scores_to_axes(dict(payload.get("module_scores") or {}))}
     raise ValueError(f"DCCP does not support {capability}")

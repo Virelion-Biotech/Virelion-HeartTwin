@@ -167,7 +167,7 @@ class BenchmarkResolutionPayload(BaseModel):
 class LearningPredictionPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
     sample_id: str
-    y_true: int | float | str
+    y_true: int | float | str | None = None
     y_pred: int | float | str
     score: float | None = None
     subgroup: str | None = None

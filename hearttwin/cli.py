@@ -84,6 +84,8 @@ def main() -> None:
             for row in rows
         ],
         learning_data=rows,
+        feature_columns=["gene_a", "gene_b"],
+        reference_labels={row["sample_id"]: row["target"] for row in rows},
         simulation={"preset": "mi", "n_cells": 16, "duration": 1.0, "dt": 0.25},
         seed=42,
     )

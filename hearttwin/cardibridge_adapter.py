@@ -123,7 +123,7 @@ def _build_envelope(payload: dict[str, Any]) -> dict[str, Any]:
     else:
         challenge_payload = dict(payload.get("contract_payload") or payload)
 
-    kwargs: dict[str, Any] = {}
+    kwargs: dict[str, Any] = {"message_id": sha256({"idempotency_key": key})[:32]}
     if payload.get("message_id"):
         kwargs["message_id"] = str(payload["message_id"])
     ts = (
@@ -214,21 +214,13 @@ def _publish(payload: dict[str, Any], *, use_local: bool, base: str | None) -> d
                 "transport": "in-process",
             }
 
-        # Register a default no-op handler for demo/e2e if none exists
-        try:
-            result = router.dispatch(obj)
-        except LookupError:
-            def _default_handler(_env: Any) -> dict[str, Any]:
-                return {"ok": True, "echo_type": _env.message_type}
-
-            router.register(obj.message_type, obj.consumer, _default_handler)
-            result = router.dispatch(obj)
+        result = router.dispatch(obj)
 
         status = result.get("status") if isinstance(result, dict) else None
         return {
             "status": status if status in {"processed", "duplicate"} else "processed",
             "message_id": obj.message_id,
-            "result": result,
+            "result": result.get("result") if status == "duplicate" else result,
             "transport": "in-process",
             "content_sha256": sha256(json.dumps(envelope, sort_keys=True)),
         }

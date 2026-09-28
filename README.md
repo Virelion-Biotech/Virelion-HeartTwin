@@ -25,7 +25,7 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | CardiAgent | phenotype-level challenge generation | HeartTwin command adapter |
 | CardiVex | challenge/OOD evaluation | Native + HTTP fallback |
 
-Service registration in `configs/services.yaml` is separate from scientific validation. Native connections require the corresponding Virelion package to be installed; HTTP environment variables remain available as deployment fallbacks.
+The installed default registry is packaged in `hearttwin/services.yaml`; `load_registry(path)` accepts an explicit configuration override. Service registration is separate from scientific validation. Native connections require the corresponding Virelion package to be installed; HTTP environment variables remain available as deployment fallbacks.
 
 ## Architecture
 
@@ -160,3 +160,12 @@ HeartTwin is research infrastructure. It does not diagnose patients or prescribe
 ## License
 
 GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later).
+
+## Verified integration and remaining gaps
+
+Install the component revisions tested together with `python -m pip install -r requirements-services.txt`.
+The workflow now requires explicit `feature_columns`, a `reference_labels` mapping for every benchmark sample, and a simulation `preset`. Benchmark assignments are fixed before training; identifiers and outcome metadata are excluded from features. These checks do not establish that user-supplied labels are scientifically valid or that selected features are free of all confounding.
+
+The current workflow is a research integration pipeline. Specialist analyses are recorded in the shared state, but do not yet calibrate a patient-specific model. Classification evaluation does not change a simulated state into a biologically validated state. CardiSim-to-CardiVex domain mappings are explicitly extrapolated and have no calibrated uncertainty estimate.
+
+See [the repair audit](docs/REPAIR_AUDIT_2026-09-28.md) for verified defects, test coverage and unresolved product/scientific gaps. Command adapters accept large JSON payloads through stdin when `HEARTTWIN_PAYLOAD_STDIN=1`; small payloads retain the existing environment-variable protocol.

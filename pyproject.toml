@@ -17,3 +17,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["hearttwin*"]
+
+[tool.setuptools.package-data]
+hearttwin = ["services.yaml"]
