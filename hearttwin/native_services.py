@@ -6,6 +6,8 @@ HeartTwin ServiceAdapter boundary remains backwards-compatible.
 """
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 
@@ -35,29 +37,117 @@ def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dic
     return handler(capability, payload)
 
 
-def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+_ATLAS_CONTEXT_ID_FIELDS = (
+    "phenotype_ids", "cell_state_ids", "marker_ids", "dataset_ids",
+    "study_ids", "sample_ids", "intervention_ids", "evidence_ids",
+)
+
+
+def _cardiatlas_api(payload: dict[str, Any]):
     try:
-        from cardiatlas import AtlasService, record_from_dict
+        from cardiatlas import AtlasAPI, AtlasService, SQLiteAtlasStore, record_from_dict
     except Exception as exc:  # pragma: no cover
         raise _native_unavailable("CardiAtlas", exc)
-    service = AtlasService.empty()
-    for raw in payload.get("records", []):
-        if isinstance(raw, dict):
-            service.add(record_from_dict(raw))
+
+    db_path = os.getenv("CARDIATLAS_DB")
+    if db_path:
+        path = Path(db_path).expanduser()
+        if not path.is_file():
+            raise RuntimeError(f"CARDIATLAS_DB does not exist or is not a file: {path}")
+        with SQLiteAtlasStore(path) as store:
+            service = store.load_service()
+    else:
+        service = AtlasService.empty()
+
+    raw_records = payload.get("records", [])
+    if raw_records is None:
+        raw_records = []
+    if not isinstance(raw_records, list):
+        raise ValueError("records must be an array of record objects")
+    for index, raw in enumerate(raw_records):
+        if not isinstance(raw, dict):
+            raise ValueError(f"records[{index}] must be an object")
+        service.add(record_from_dict(raw))
+    return AtlasAPI(service)
+
+
+def _normalize_atlas_context(raw: dict[str, Any], record_ids: list[str]) -> tuple[dict[str, Any], list[str]]:
+    resolved: set[str] = set()
+    for field in _ATLAS_CONTEXT_ID_FIELDS:
+        values = raw.get(field, [])
+        if isinstance(values, list):
+            resolved.update(item for item in values if isinstance(item, str))
+    provenance = sorted(resolved)
+    missing = sorted(set(record_ids) - resolved)
+
+    normalized = dict(raw)
+    normalized["provenance"] = provenance
+    metadata = dict(normalized.get("metadata") or {})
+    if missing:
+        metadata["missing_record_ids"] = missing
+    else:
+        metadata.pop("missing_record_ids", None)
+    normalized["metadata"] = metadata
+    return normalized, provenance
+
+
+def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    api = _cardiatlas_api(payload)
+
     if capability == "atlas.search":
-        query = str(payload.get("query", ""))
-        records = service.search(query, record_type=payload.get("record_type"))
-        return {"contract_version": "1.0", "query": query, "records": [record.to_dict() for record in records], "count": len(records)}
-    if capability == "atlas.context":
-        context_id = str(payload.get("context_id") or f"ctx-{payload.get('entity_id', 'unknown')}")
-        record_ids = [str(item) for item in payload.get("record_ids", [])]
-        context = service.atlas_context(context_id, record_ids)
-        raw = context.to_dict()
+        has_query = "query" in payload
+        has_text = "text" in payload
+        if has_query and has_text and payload["query"] != payload["text"]:
+            raise ValueError("query and text disagree")
+        if not has_query and not has_text:
+            return {"contract_version": "1.0", "query": "", "records": [], "count": 0}
+
+        query = payload.get("query", payload.get("text", ""))
+        if not isinstance(query, str):
+            raise ValueError("query/text must be a string")
+        record_type = payload.get("record_type")
+        if record_type is not None and not isinstance(record_type, str):
+            raise ValueError("record_type must be a string or null")
+        tags = payload.get("tags", [])
+        if not isinstance(tags, (list, tuple)) or isinstance(tags, (str, bytes)):
+            raise ValueError("tags must be an array of strings")
+        if not all(isinstance(tag, str) for tag in tags):
+            raise ValueError("tags must contain only strings")
+        limit = payload.get("limit", 20)
+        if isinstance(limit, bool) or not isinstance(limit, int):
+            raise ValueError("limit must be an integer")
+        if not 0 <= limit <= 1000:
+            raise ValueError("limit must be between 0 and 1000")
+
+        result = api.search(text=query, record_type=record_type, tags=tuple(tags), limit=limit)
+        records = [item["record"] for item in result["results"]]
         return {
-            "contract_version": "1.0", "context_id": context_id,
-            "record_ids": record_ids, "context": raw,
-            "provenance": list(raw.get("evidence_ids", [])),
+            "contract_version": "1.0",
+            "query": query,
+            "records": records,
+            "count": len(records),
         }
+
+    if capability == "atlas.context":
+        record_ids = payload.get("record_ids", [])
+        if not isinstance(record_ids, list) or not all(isinstance(item, str) for item in record_ids):
+            raise ValueError("record_ids must be an array of strings")
+        context_id = payload.get("context_id")
+        if context_id is None:
+            context_id = f"ctx-{payload.get('entity_id', 'unknown')}"
+        if not isinstance(context_id, str) or not context_id:
+            raise ValueError("context_id must be a non-empty string")
+
+        raw = api.context(record_ids=record_ids, context_id=context_id).to_dict()
+        normalized, provenance = _normalize_atlas_context(raw, record_ids)
+        return {
+            "contract_version": "1.0",
+            "context_id": context_id,
+            "record_ids": list(record_ids),
+            "context": normalized,
+            "provenance": provenance,
+        }
+
     raise ValueError(f"CardiAtlas does not support {capability}")
 
 

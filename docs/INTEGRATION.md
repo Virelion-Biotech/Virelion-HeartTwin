@@ -75,6 +75,8 @@ HeartTwin exposes `observations_for(payload, modality)` for adapters and integra
 ## Deployment modes
 
 1. **HTTP services**: set the corresponding `*_URL` environment variable. The adapter calls `/health` and the configured service `path_template`, which defaults to `/v1/<capability path>`.
+   - CardiAtlas's HTTP fallback is `CARDIATLAS_URL` and is expected to expose `/v1/atlas/search` and `/v1/atlas/context` with the same response shapes as the native adapter.
+   - When CardiAtlas is installed locally, `CARDIATLAS_DB=/path/to/atlas.sqlite` optionally points the native adapter at a persistent Atlas. The path must already exist and be a file; HeartTwin will not silently create an empty database for a mistyped path. Request-local `records` are overlaid on the loaded in-memory service and are not written back to the database.
 2. **Local services**: replace `endpoint` with a command in `configs/services.yaml`; HeartTwin sends the canonical request in `HEARTTWIN_PAYLOAD` and expects JSON on stdout. Command availability is checked with `shutil.which` using the first command token.
 3. **Unavailable services**: no endpoint/command is required. The capability is returned as `unavailable`, preserving the rest of the run.
 
