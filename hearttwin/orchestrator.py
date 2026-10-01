@@ -17,7 +17,7 @@ DEFAULT_CAPABILITIES = [
 ]
 
 TYPED_STATE_CAPABILITIES = {
-    "atlas.context", "benchmark.resolve", "learn.infer", "learn.predict",
+    "anatomy.build", "atlas.context", "benchmark.resolve", "learn.infer", "learn.predict",
     "simulation.run", "evaluation.run", "agent.challenge", "vex.observe",
     "trace.record",
 }
