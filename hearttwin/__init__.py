@@ -2,6 +2,7 @@ from .orchestrator import HeartTwin
 from .config import load_registry
 from .contracts import (
     AgentChallengePayload,
+    AnatomyBundlePayload,
     AtlasContextPayload,
     BenchmarkResolutionPayload,
     BridgePublicationPayload,
@@ -38,7 +39,7 @@ __all__ = [
     "CardiacState", "Observation", "Provenance", "ServiceResult", "TwinRun",
     "StateValue", "UncertaintySpec", "PredictionArtifact", "SimulationArtifact",
     "ValidationArtifact", "StateTransition",
-    "AtlasContextPayload", "BenchmarkResolutionPayload", "LearningResultPayload",
+    "AnatomyBundlePayload", "AtlasContextPayload", "BenchmarkResolutionPayload", "LearningResultPayload",
     "SimulationResultPayload", "EvaluationResultPayload", "AgentChallengePayload",
     "VexObservationPayload", "ModalityAnalysisPayload", "BridgePublicationPayload",
     "CardiacStateStore", "CardiacStateValidationError", "state_from_service_results",
