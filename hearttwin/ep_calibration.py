@@ -106,6 +106,7 @@ def run_ep_calibration(
     inference_backend: str,
     ep_backend: str,
     ep_settings: Mapping[str, Any] | None = None,
+    fixed_parameters: Mapping[str, float] | None = None,
     sampler_settings: Mapping[str, Any] | None = None,
     seed: int | None = None,
 ) -> dict[str, Any]:
@@ -124,6 +125,7 @@ def run_ep_calibration(
         inference_backend=inference_backend,
         ep_backend=ep_backend,
         ep_settings=ep_settings,
+        fixed_parameters=fixed_parameters,
         sampler_settings=sampler_settings,
         seed=seed,
     )
