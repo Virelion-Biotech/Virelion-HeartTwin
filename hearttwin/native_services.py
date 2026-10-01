@@ -112,6 +112,10 @@ def _cardianatomy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         return api.correspondence_compare(payload)
     if capability == "anatomy.motion.summarize":
         return api.motion_summarize(payload)
+    if capability == "anatomy.validation.segmentation":
+        return api.validation_segmentation(payload)
+    if capability == "anatomy.validation.points":
+        return api.validation_points(payload)
     raise ValueError(f"CardiAnatomy does not support {capability}")
 
 
