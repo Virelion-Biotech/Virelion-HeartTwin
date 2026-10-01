@@ -94,3 +94,29 @@ def test_cardianatomy_native_smoke() -> None:
         },
     )
     assert inverse["matrix"][0][3] == -2.0
+
+    correspondence = registry.capability(
+        "anatomy.correspondence.compare"
+    ).invoke(
+        "anatomy.correspondence.compare",
+        {
+            "reference_points": [[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+            "target_points": [[1, 0, 0], [2, 0, 0], [1, 1, 0]],
+            "reference_cells": [[0, 1, 2]],
+            "target_cells": [[0, 1, 2]],
+        },
+    )
+    assert correspondence["connectivity_identical"] is True
+
+    motion = registry.capability("anatomy.motion.summarize").invoke(
+        "anatomy.motion.summarize",
+        {
+            "frames": [
+                [[0, 0, 0], [1, 0, 0]],
+                [[0.5, 0, 0], [1.5, 0, 0]],
+                [[0, 0, 0], [1, 0, 0]],
+            ],
+            "cyclic": True,
+        },
+    )
+    assert motion["cyclic_closure_error"]["max"] == 0.0
