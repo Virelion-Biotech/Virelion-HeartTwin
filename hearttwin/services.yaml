@@ -21,7 +21,7 @@ services:
     endpoint: ${CARDIEVAL_URL}
   - name: ElectroTrace
     repository: Virelion-Biotech/Virelion-ElectroTrace
-    capabilities: [electrical.analyze]
+    capabilities: [electrical.analyze, electrical.prepare_calibration]
     command: electrotrace-hearttwin
   - name: MyoTrace
     repository: Virelion-Biotech/Virelion-MyoTrace
@@ -40,6 +40,16 @@ services:
     capabilities: [learn.infer, learn.predict]
     builtin: cardilearn
     endpoint: ${CARDILEARN_URL}
+  - name: CardiEP
+    repository: Virelion-Biotech/Virelion-CardiEP
+    capabilities: [ep.health, ep.simulate, ep.calibrate]
+    builtin: cardiep
+    endpoint: ${CARDIEP_URL}
+  - name: CardiInfer
+    repository: Virelion-Biotech/Virelion-CardiInfer
+    capabilities: [infer.health, infer.run, infer.propagate]
+    builtin: cardiinfer
+    endpoint: ${CARDIINFER_URL}
   - name: CardiSim
     repository: Virelion-Biotech/Virelion-CardiSim
     capabilities: [simulation.run]
