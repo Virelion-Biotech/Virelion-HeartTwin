@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import pytest
 
 pytest.importorskip("cardiep")
+pytest.importorskip("cardiinfer")
 
 from hearttwin import load_registry
 
@@ -108,3 +109,120 @@ def test_cardiep_ecosystem_is_discoverable_through_hearttwin() -> None:
     payload = adapter.invoke("ep.ecosystem", {})
     projects = {item["project"] for item in payload["external_projects"]}
     assert {"Cardiac-Digital-Twin", "fenicsx-beat", "MonoAlg3D_C", "openCARP"} <= projects
+
+
+def test_hearttwin_runs_cardiep_abc_inverse_loop(tmp_path: Path) -> None:
+    registry = load_registry()
+    geometry = _geometry(tmp_path)
+
+    observed = tmp_path / "observed_activation.json"
+    observed.write_text(
+        json.dumps({"values_ms": [0.0, 10.0, 20.0, 40.0]}) + "\n",
+        encoding="utf-8",
+    )
+    observation = {
+        "observation_id": "lat",
+        "kind": "activation_map",
+        "artifact": {
+            "artifact_id": "observed-lat",
+            "kind": "activation_map",
+            "uri": observed.as_uri(),
+        },
+        "units": "ms",
+    }
+    anatomy_ref = {
+        "artifact_id": "ht-ep-geometry",
+        "kind": "ep_geometry",
+        "uri": geometry.as_uri(),
+    }
+    model_context = {
+        "ep_backend": "numpy-eikonal-v1",
+        "anatomy_ref": anatomy_ref,
+        "ep_observations": [observation],
+        "ep_settings": {"root_nodes": [0]},
+        "fixed_parameters": {
+            "sheet_speed": 0.05,
+            "normal_speed": 0.025,
+            "apd_ms": 280.0,
+        },
+    }
+
+    backends = registry.capability("infer.backends")
+    assert backends is not None
+    backend_payload = backends.invoke("infer.backends", {})
+    backend_status = {item["name"]: item for item in backend_payload["backends"]}
+    assert backend_status["cardiep-abc-rejection-v1"]["available"] is True
+
+    inference = registry.capability("infer.run")
+    assert inference is not None
+    result = inference.invoke(
+        "infer.run",
+        {
+            "subject_id": "HT-EP-ABC-1",
+            "model_service": "CardiEP",
+            "model_capability": "ep.simulate",
+            "backend": "cardiep-abc-rejection-v1",
+            "priors": [
+                {
+                    "name": "fibre_speed",
+                    "distribution": "uniform",
+                    "bounds": [0.05, 0.15],
+                    "unit": "cm/ms",
+                }
+            ],
+            "likelihood": [
+                {
+                    "term_id": "lat:activation",
+                    "observation_ref": observation["artifact"],
+                    "model_output": "activation_map",
+                    "discrepancy": "rmse",
+                    "weight": 1.0,
+                    "metadata": {"observation_id": "lat"},
+                }
+            ],
+            "model_context": model_context,
+            "sampler_settings": {
+                "n_samples": 32,
+                "acceptance_fraction": 0.125,
+                "min_accept": 4,
+                "output_dir": str(tmp_path / "posterior"),
+            },
+            "seed": 42,
+        },
+    )
+
+    assert result["backend"] == "cardiep-abc-rejection-v1"
+    assert result["validation_status"] == "software_checked"
+    assert result["diagnostics"]["n_accepted"] == 4
+    assert result["diagnostics"]["best_objective"] < 1.0
+    posterior = {item["parameter"]: item for item in result["posterior"]}
+    assert abs(posterior["fibre_speed"]["median"] - 0.1) < 0.02
+    posterior_artifact = result["posterior_samples"]
+    assert posterior_artifact is not None
+    assert Path(urlparse(posterior_artifact["uri"]).path).is_file()
+
+    propagate = registry.capability("infer.propagate")
+    assert propagate is not None
+    propagated = propagate.invoke(
+        "infer.propagate",
+        {
+            "subject_id": "HT-EP-ABC-1",
+            "backend": "cardiep-abc-rejection-v1",
+            "model_service": "CardiEP",
+            "model_capability": "ep.simulate",
+            "posterior_samples": posterior_artifact,
+            "outputs": ["activation_span_ms", "apd_mean_ms"],
+            "model_context": model_context,
+            "settings": {
+                "max_samples": 4,
+                "output_dir": str(tmp_path / "propagation"),
+            },
+        },
+    )
+    assert propagated["backend"] == "cardiep-abc-rejection-v1"
+    assert propagated["diagnostics"]["n_samples"] == 4
+    assert set(propagated["output_summaries"]) == {
+        "activation_span_ms",
+        "apd_mean_ms",
+    }
+    assert Path(urlparse(propagated["samples"][0]["uri"]).path).is_file()
