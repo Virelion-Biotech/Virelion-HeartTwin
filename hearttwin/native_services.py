@@ -21,6 +21,7 @@ def _native_unavailable(name: str, exc: Exception) -> RuntimeError:
 
 def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     dispatch = {
+        "CardiAnatomy": _cardianatomy,
         "CardiAtlas": _cardiatlas,
         "CardiBench": _cardibench,
         "CardiEval": _cardieval,
@@ -35,6 +36,28 @@ def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dic
     except KeyError as exc:
         raise ValueError(f"Unknown native HeartTwin service: {service}") from exc
     return handler(capability, payload)
+
+
+def _cardianatomy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from cardianatomy import AnatomyAPI
+    except Exception as exc:  # pragma: no cover
+        raise _native_unavailable("CardiAnatomy", exc)
+
+    api = AnatomyAPI()
+    if capability == "anatomy.health":
+        return api.health()
+    if capability == "anatomy.build":
+        return api.build(payload)
+    if capability == "anatomy.validate":
+        return api.validate(payload)
+    if capability == "anatomy.tools":
+        return api.tools()
+    if capability == "anatomy.microstructure.reference":
+        return api.reference_microstructure(payload)
+    if capability == "anatomy.scar.classify":
+        return api.scar_classify(payload)
+    raise ValueError(f"CardiAnatomy does not support {capability}")
 
 
 _ATLAS_CONTEXT_ID_FIELDS = (
