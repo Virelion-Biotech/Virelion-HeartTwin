@@ -8,6 +8,7 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 
 | Service | Role | Current connection |
 |---|---|---|
+| CardiAnatomy | patient-specific imaging, geometry, registration, mesh, fibers, scar, and anatomy QC | Native + HTTP fallback |
 | CardiAtlas | biomedical metadata and evidence context | Native + HTTP fallback |
 | CardiBench | benchmark definitions and dataset policies | Native + HTTP fallback |
 | CardiEval | independent evaluation | Native + HTTP fallback |
@@ -38,9 +39,9 @@ observations / experiment data
             ▼
       CardiacState  ◄── canonical typed state
             │
-   ┌────────┼──────────────────┐
-   ▼        ▼                  ▼
-CardiAtlas CardiLearn       modality adapters
+   ┌────────┼──────────────────────────────┐
+   ▼        ▼                              ▼
+CardiAnatomy CardiAtlas / CardiLearn   modality adapters
    │        │                  │
    └────────┼──────────────────┘
             ▼
@@ -83,7 +84,7 @@ See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.1.0.schema.json` for th
 The repository includes:
 
 - typed cardiac-state and workflow contracts;
-- native adapters for CardiAtlas, CardiBench, CardiEval, CardiLearn, CardiSim, CardiVex, CardiStudio, and DCCP;
+- native adapters for CardiAnatomy, CardiAtlas, CardiBench, CardiEval, CardiLearn, CardiSim, CardiVex, CardiStudio, and DCCP;
 - command adapters for ElectroTrace, MyoTrace, OptiCell, CardioScore, CardiTrace, and CardiAgent;
 - in-process CardiBridge routing with HTTP fallback;
 - native CDT-compatible cardiac digital-twin backend;
@@ -108,7 +109,7 @@ Install the component repositories for the complete native stack:
 
 ```bash
 for repo in \
-  Virelion-CardiAtlas Virelion-CardiBench Virelion-CardiEval Virelion-CardiLearn \
+  Virelion-CardiAnatomy Virelion-CardiAtlas Virelion-CardiBench Virelion-CardiEval Virelion-CardiLearn \
   Virelion-CardiSim Virelion-CardiVex Virelion-CardiStudio Virelion-DCCP \
   Virelion-ElectroTrace Virelion-MyoTrace Virelion-OptiCell Virelion-CardioScore \
   Virelion-CardiTrace Virelion-CardiBridge Virelion-CardiAgent; do
