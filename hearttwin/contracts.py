@@ -225,6 +225,24 @@ class VexObservationPayload(BaseModel):
     primary: dict[str, Any] = Field(default_factory=dict)
 
 
+class AnatomyBundlePayload(BaseModel):
+    """Compact HeartTwin view of a CardiAnatomy AnatomyBundle."""
+
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "2.0.0"
+    subject_id: str
+    study_id: str
+    acquisition_id: str
+    artifacts: list[dict[str, Any]] = Field(default_factory=list)
+    frames: list[dict[str, Any]] = Field(default_factory=list)
+    registrations: list[dict[str, Any]] = Field(default_factory=list)
+    labels: list[dict[str, Any]] = Field(default_factory=list)
+    stages: list[dict[str, Any]] = Field(default_factory=list)
+    qc: dict[str, Any] | None = None
+    provenance: dict[str, Any] = Field(default_factory=dict)
+    bundle_fingerprint: str | None = None
+
+
 class ModalityAnalysisPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
     contract_version: str = "1.0"
@@ -264,6 +282,7 @@ class CardiacState(BaseModel):
     state_phase: StatePhase = "unknown"
     observations: list[Observation] = Field(default_factory=list)
     atlas_context: AtlasContextPayload | None = None
+    anatomy_bundles: list[AnatomyBundlePayload] = Field(default_factory=list)
     benchmarks: list[BenchmarkResolutionPayload] = Field(default_factory=list)
     modality_analyses: list[ModalityAnalysisPayload] = Field(default_factory=list)
     derived_values: list[StateValue] = Field(default_factory=list)
@@ -304,6 +323,7 @@ class WorkflowState(BaseModel):
     cardiac_state: CardiacState | None = None
     modality_analyses: list[ModalityAnalysisPayload] = Field(default_factory=list)
     atlas: AtlasContextPayload | None = None
+    anatomy: AnatomyBundlePayload | None = None
     benchmark: BenchmarkResolutionPayload | None = None
     learning: LearningResultPayload | None = None
     simulation: SimulationResultPayload | None = None
