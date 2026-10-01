@@ -26,7 +26,7 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | CardiAgent | phenotype-level challenge generation | HeartTwin command adapter |
 | CardiVex | challenge/OOD evaluation | Native + HTTP fallback |
 
-The installed default registry is packaged in `hearttwin/services.yaml`; `load_registry(path)` accepts an explicit configuration override. Service registration is separate from scientific validation. Native connections require the corresponding Virelion package to be installed; HTTP environment variables remain available as deployment fallbacks.
+The installed default registry is packaged in `hearttwin/services.yaml`; `load_registry(path)` accepts an explicit configuration override. CardiAnatomy 0.4.0 is pinned in the clean-stack matrix and supplies cine phase selection, coordinate transforms, dense-correspondence checks, 4D mesh-motion summaries, advanced geometry QC, and anatomy readiness gates. Service registration is separate from scientific validation. Native connections require the corresponding Virelion package to be installed; HTTP environment variables remain available as deployment fallbacks.
 
 ## Architecture
 
