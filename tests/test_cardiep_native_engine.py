@@ -1,4 +1,6 @@
+import hashlib
 import json
+import shutil
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -7,7 +9,13 @@ import pytest
 pytest.importorskip("cardiep")
 pytest.importorskip("cardiinfer")
 
-from hearttwin import load_registry
+from hearttwin import (
+    EPCalibrationWorkflowError,
+    Observation,
+    Provenance,
+    load_registry,
+    run_ep_calibration,
+)
 
 
 def _geometry(tmp_path: Path) -> Path:
@@ -193,6 +201,9 @@ def test_hearttwin_runs_cardiep_abc_inverse_loop(tmp_path: Path) -> None:
 
     assert result["backend"] == "cardiep-abc-rejection-v1"
     assert result["validation_status"] == "software_checked"
+    assert result["convergence"]["converged"] is None
+    assert result["convergence"]["effective_sample_size_min"] is None
+    assert result["diagnostics"]["accepted_particle_count_is_ess"] is False
     assert result["diagnostics"]["n_accepted"] == 4
     assert result["diagnostics"]["best_objective"] < 1.0
     posterior = {item["parameter"]: item for item in result["posterior"]}
@@ -226,3 +237,126 @@ def test_hearttwin_runs_cardiep_abc_inverse_loop(tmp_path: Path) -> None:
         "apd_mean_ms",
     }
     assert Path(urlparse(propagated["samples"][0]["uri"]).path).is_file()
+
+
+
+@pytest.mark.skipif(
+    shutil.which("electrotrace-hearttwin") is None,
+    reason="ElectroTrace HeartTwin adapter is not installed",
+)
+def test_high_level_ep_calibration_runs_electrotrace_to_posterior(tmp_path: Path) -> None:
+    registry = load_registry()
+    geometry = _geometry(tmp_path)
+    geometry_sha = hashlib.sha256(geometry.read_bytes()).hexdigest()
+
+    observed = tmp_path / "measured_activation.json"
+    observed.write_text(
+        json.dumps({"values_ms": [0.0, 10.0, 20.0, 40.0]}) + "\n",
+        encoding="utf-8",
+    )
+    electrical = Observation(
+        observation_id="clinical-map",
+        modality="electrical",
+        values={
+            "input_path": str(observed),
+            "observation_kind": "activation_map",
+            "coordinate_frame": "cardiac_mesh",
+            "units": "ms",
+            "discrepancy": "rmse",
+            "weight": 1.0,
+        },
+        provenance=Provenance(
+            source_service="fixture",
+            run_id="fixture-run",
+        ),
+    )
+
+    result = run_ep_calibration(
+        registry,
+        entity_id="HT-HIGHLEVEL-1",
+        electrical_observation=electrical,
+        anatomy_ref={
+            "artifact_id": "highlevel-geometry",
+            "kind": "ep_geometry",
+            "uri": geometry.as_uri(),
+            "sha256": geometry_sha,
+        },
+        priors=[
+            {
+                "name": "fibre_speed",
+                "distribution": "uniform",
+                "bounds": [0.05, 0.15],
+                "unit": "cm/ms",
+            }
+        ],
+        inference_backend="cardiep-abc-rejection-v1",
+        ep_backend="numpy-eikonal-v1",
+        ep_settings={"root_nodes": [0]},
+        fixed_parameters={
+            "sheet_speed": 0.05,
+            "normal_speed": 0.025,
+            "apd_ms": 280.0,
+        },
+        sampler_settings={
+            "n_samples": 32,
+            "acceptance_fraction": 0.125,
+            "min_accept": 4,
+            "output_dir": str(tmp_path / "highlevel-posterior"),
+        },
+        seed=42,
+    )
+
+    inference = result["inference_result"]
+    assert inference["subject_id"] == "HT-HIGHLEVEL-1"
+    assert inference["backend"] == "cardiep-abc-rejection-v1"
+    assert inference["diagnostics"]["best_objective"] < 1.0
+    assert inference["convergence"]["converged"] is None
+    assert result["measurement_handoff"]["observations"][0]["kind"] == "activation_map"
+    assert len(result["problem_sha256"]) == 64
+    assert len(result["result_sha256"]) == 64
+    posterior = inference["posterior_samples"]
+    assert posterior is not None
+    assert Path(urlparse(posterior["uri"]).path).is_file()
+
+
+@pytest.mark.skipif(
+    shutil.which("electrotrace-hearttwin") is None,
+    reason="ElectroTrace HeartTwin adapter is not installed",
+)
+def test_high_level_ep_calibration_wraps_electrotrace_failures(tmp_path: Path) -> None:
+    bad_map = tmp_path / "map.json"
+    bad_map.write_text("{}\n", encoding="utf-8")
+    electrical = Observation(
+        observation_id="bad-map",
+        modality="electrical",
+        values={
+            "input_path": str(bad_map),
+            "observation_kind": "activation_map",
+            "units": "ms",
+        },
+        provenance=Provenance(source_service="fixture", run_id="fixture-run"),
+    )
+
+    with pytest.raises(
+        EPCalibrationWorkflowError,
+        match="ElectroTrace EP calibration preparation failed",
+    ):
+        run_ep_calibration(
+            load_registry(),
+            entity_id="HT-BAD",
+            electrical_observation=electrical,
+            anatomy_ref={
+                "artifact_id": "unused",
+                "kind": "ep_geometry",
+                "uri": bad_map.as_uri(),
+            },
+            priors=[
+                {
+                    "name": "fibre_speed",
+                    "distribution": "uniform",
+                    "bounds": [0.05, 0.15],
+                }
+            ],
+            inference_backend="cardiep-abc-rejection-v1",
+            ep_backend="numpy-eikonal-v1",
+        )
