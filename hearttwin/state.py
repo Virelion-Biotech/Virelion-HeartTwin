@@ -6,6 +6,7 @@ from typing import Any, Mapping
 
 from .contracts import (
     AgentChallengePayload,
+    AnatomyBundlePayload,
     AtlasContextPayload,
     BenchmarkResolutionPayload,
     BridgePublicationPayload,
@@ -98,6 +99,27 @@ class CardiacStateStore:
     def record_atlas(self, payload: AtlasContextPayload, provenance: Provenance | None = None) -> None:
         self.state.atlas_context = payload
         self._add_provenance(provenance)
+
+    def record_anatomy(
+        self, payload: AnatomyBundlePayload, provenance: Provenance | None = None
+    ) -> None:
+        fingerprint = payload.bundle_fingerprint or sha256(payload.model_dump(mode="json"))
+        existing = {
+            item.bundle_fingerprint or sha256(item.model_dump(mode="json"))
+            for item in self.state.anatomy_bundles
+        }
+        if fingerprint not in existing:
+            self.state.anatomy_bundles.append(payload)
+        self._add_provenance(provenance)
+        self._record_derived(
+            domain="structural",
+            variable="anatomy.bundle_fingerprint",
+            value=fingerprint,
+            status="inferred",
+            method="CardiAnatomy",
+            provenance=provenance,
+            value_id=f"value-{fingerprint[:16]}",
+        )
 
     def record_benchmark(
         self, payload: BenchmarkResolutionPayload, provenance: Provenance | None = None
@@ -288,7 +310,9 @@ class CardiacStateStore:
 
         data = result.data
         try:
-            if result.capability == "atlas.context":
+            if result.capability == "anatomy.build":
+                self.record_anatomy(AnatomyBundlePayload.model_validate(data), result.provenance)
+            elif result.capability == "atlas.context":
                 self.record_atlas(AtlasContextPayload.model_validate(data), result.provenance)
             elif result.capability == "benchmark.resolve":
                 self.record_benchmark(BenchmarkResolutionPayload.model_validate(data), result.provenance)
