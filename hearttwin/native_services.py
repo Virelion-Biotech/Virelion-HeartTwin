@@ -102,6 +102,12 @@ def _cardianatomy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         return api.series_rank(payload)
     if capability == "anatomy.segmentation.qc":
         return api.segmentation_qc(payload)
+    if capability == "anatomy.cine.phases":
+        return api.cine_phases(payload)
+    if capability == "anatomy.transforms.compose":
+        return api.transforms_compose(payload)
+    if capability == "anatomy.transforms.invert":
+        return api.transforms_invert(payload)
     raise ValueError(f"CardiAnatomy does not support {capability}")
 
 
