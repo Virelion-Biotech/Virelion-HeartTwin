@@ -74,3 +74,23 @@ def test_cardianatomy_native_smoke() -> None:
     assert health["service"] == "CardiAnatomy"
     presets = registry.capability("anatomy.presets").invoke("anatomy.presets", {})
     assert "cine_cmr_biventricular" in presets["presets"]
+
+    phases = registry.capability("anatomy.cine.phases").invoke(
+        "anatomy.cine.phases",
+        {"volumes_ml": [120.0, 90.0, 65.0, 85.0, 110.0]},
+    )
+    assert phases["ed_phase"] == 0
+    assert phases["es_phase"] == 2
+
+    inverse = registry.capability("anatomy.transforms.invert").invoke(
+        "anatomy.transforms.invert",
+        {
+            "matrix": [
+                [1.0, 0.0, 0.0, 2.0],
+                [0.0, 1.0, 0.0, -1.0],
+                [0.0, 0.0, 1.0, 3.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
+        },
+    )
+    assert inverse["matrix"][0][3] == -2.0
