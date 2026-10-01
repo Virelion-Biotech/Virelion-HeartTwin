@@ -22,6 +22,7 @@ def prepare_ep_inference_problem(
     inference_backend: str,
     ep_backend: str,
     ep_settings: Mapping[str, Any] | None = None,
+    fixed_parameters: Mapping[str, float] | None = None,
     sampler_settings: Mapping[str, Any] | None = None,
     seed: int | None = None,
 ) -> dict[str, Any]:
@@ -72,6 +73,7 @@ def prepare_ep_inference_problem(
         anatomy_ref=anatomy_ref,
         priors=priors,
         ep_settings=ep_settings,
+        fixed_parameters=fixed_parameters,
         sampler_settings=sampler_settings,
         seed=seed,
     )
