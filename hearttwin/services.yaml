@@ -42,7 +42,7 @@ services:
     endpoint: ${CARDILEARN_URL}
   - name: CardiEP
     repository: Virelion-Biotech/Virelion-CardiEP
-    capabilities: [ep.health, ep.simulate, ep.calibrate]
+    capabilities: [ep.health, ep.backends, ep.simulate, ep.calibrate, ep.validate.reference, ep.ecosystem]
     builtin: cardiep
     endpoint: ${CARDIEP_URL}
   - name: CardiInfer
