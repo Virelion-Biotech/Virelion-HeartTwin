@@ -49,6 +49,12 @@ def _cardiep(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     api = EPAPI()
     if capability == "ep.health":
         return api.health()
+    if capability == "ep.backends":
+        return api.backends()
+    if capability == "ep.validate.reference":
+        return api.validate_reference()
+    if capability == "ep.ecosystem":
+        return api.ecosystem()
     if capability == "ep.simulate":
         return api.simulate(payload)
     if capability == "ep.calibrate":
