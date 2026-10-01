@@ -70,6 +70,8 @@ def _cardiinfer(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     api = InferAPI()
     if capability == "infer.health":
         return api.health()
+    if capability == "infer.backends":
+        return api.backends()
     if capability == "infer.run":
         return api.infer(payload)
     if capability == "infer.propagate":
