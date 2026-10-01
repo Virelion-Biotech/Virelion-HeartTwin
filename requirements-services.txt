@@ -1,6 +1,6 @@
 # Component commits pinned for cross-repository integration CI on Python 3.12.
 # Transitive Python dependencies remain governed by component package constraints.
-git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@25bc1446405cc0eaf698529ab4a20e85d82768b5
+git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@61cfadf9864cef8928611141a501ef020434e7e6
 git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@a006ad9e2f59ceeabe3ff3eec0a871160f951591
 git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@877369106aa8f20eeae197cb667754dd39aea24c
 git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@e66781f794eb855d0b1869c49c8a38dd2dbc5f00
