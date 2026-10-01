@@ -26,6 +26,8 @@ def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dic
         "CardiBench": _cardibench,
         "CardiEval": _cardieval,
         "CardiLearn": _cardilearn,
+        "CardiEP": _cardiep,
+        "CardiInfer": _cardiinfer,
         "CardiSim": _cardisim,
         "CardiVex": _cardivex,
         "CardiStudio": _cardistudio,
@@ -36,6 +38,37 @@ def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dic
     except KeyError as exc:
         raise ValueError(f"Unknown native HeartTwin service: {service}") from exc
     return handler(capability, payload)
+
+
+
+def _cardiep(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from cardiep.api import EPAPI
+    except Exception as exc:  # pragma: no cover
+        raise _native_unavailable("CardiEP", exc)
+    api = EPAPI()
+    if capability == "ep.health":
+        return api.health()
+    if capability == "ep.simulate":
+        return api.simulate(payload)
+    if capability == "ep.calibrate":
+        return api.calibrate(payload)
+    raise ValueError(f"CardiEP does not support {capability}")
+
+
+def _cardiinfer(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from cardiinfer.api import InferAPI
+    except Exception as exc:  # pragma: no cover
+        raise _native_unavailable("CardiInfer", exc)
+    api = InferAPI()
+    if capability == "infer.health":
+        return api.health()
+    if capability == "infer.run":
+        return api.infer(payload)
+    if capability == "infer.propagate":
+        return api.propagate(payload)
+    raise ValueError(f"CardiInfer does not support {capability}")
 
 
 def _cardianatomy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
