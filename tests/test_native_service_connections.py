@@ -120,3 +120,27 @@ def test_cardianatomy_native_smoke() -> None:
         },
     )
     assert motion["cyclic_closure_error"]["max"] == 0.0
+
+    overlap = registry.capability(
+        "anatomy.validation.segmentation"
+    ).invoke(
+        "anatomy.validation.segmentation",
+        {
+            "reference_labels": [1, 1, 0, 0],
+            "prediction_labels": [1, 0, 0, 0],
+        },
+    )
+    assert overlap["metrics"]["1"]["dice"] > 0.66
+
+    point_metrics = registry.capability(
+        "anatomy.validation.points"
+    ).invoke(
+        "anatomy.validation.points",
+        {
+            "reference_points": [[0, 0, 0], [1, 0, 0]],
+            "prediction_points": [[1, 0, 0], [2, 0, 0]],
+            "units": "mm",
+            "block_size": 1,
+        },
+    )
+    assert point_metrics["hausdorff"] == 1.0
