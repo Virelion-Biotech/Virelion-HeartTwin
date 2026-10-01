@@ -108,6 +108,10 @@ def _cardianatomy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         return api.transforms_compose(payload)
     if capability == "anatomy.transforms.invert":
         return api.transforms_invert(payload)
+    if capability == "anatomy.correspondence.compare":
+        return api.correspondence_compare(payload)
+    if capability == "anatomy.motion.summarize":
+        return api.motion_summarize(payload)
     raise ValueError(f"CardiAnatomy does not support {capability}")
 
 
