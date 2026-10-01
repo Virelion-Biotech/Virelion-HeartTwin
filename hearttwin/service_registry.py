@@ -60,6 +60,7 @@ class ServiceAdapter:
     @staticmethod
     def _native_package(builtin: str) -> str:
         return {
+            "cardianatomy": "cardianatomy",
             "cardiatlas": "cardiatlas",
             "cardibench": "cardi_bench",
             "cardieval": "cardieval",
