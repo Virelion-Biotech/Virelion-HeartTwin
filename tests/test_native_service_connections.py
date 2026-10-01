@@ -8,6 +8,7 @@ from hearttwin import load_registry
 
 
 NATIVE_SERVICES = {
+    "CardiAnatomy",
     "CardiAtlas",
     "CardiBench",
     "CardiEval",
@@ -64,3 +65,12 @@ def test_cardibench_native_smoke() -> None:
     )
     assert result["sample_count"] == 6
     assert set(result["assignments"]) == {item["sample_id"] for item in samples}
+
+
+def test_cardianatomy_native_smoke() -> None:
+    registry = load_registry()
+    _require_native(registry)
+    health = registry.capability("anatomy.health").invoke("anatomy.health", {})
+    assert health["service"] == "CardiAnatomy"
+    presets = registry.capability("anatomy.presets").invoke("anatomy.presets", {})
+    assert "cine_cmr_biventricular" in presets["presets"]
