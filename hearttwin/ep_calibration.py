@@ -43,13 +43,18 @@ def prepare_ep_inference_problem(
         raise EPCalibrationWorkflowError(
             "ElectroTrace calibration capability is unavailable"
         )
-    handoff = electrotrace.invoke(
-        "electrical.prepare_calibration",
-        {
-            "entity_id": entity_id,
-            "observations": [electrical_observation.model_dump(mode="json")],
-        },
-    )
+    try:
+        handoff = electrotrace.invoke(
+            "electrical.prepare_calibration",
+            {
+                "entity_id": entity_id,
+                "observations": [electrical_observation.model_dump(mode="json")],
+            },
+        )
+    except Exception as exc:
+        raise EPCalibrationWorkflowError(
+            f"ElectroTrace EP calibration preparation failed: {exc}"
+        ) from exc
 
     try:
         from cardiep import observations_from_electrotrace
@@ -61,22 +66,26 @@ def prepare_ep_inference_problem(
 
     # Validate the measurement against the CardiEP observation contract before
     # it is allowed to become a likelihood input.
-    ep_observations = observations_from_electrotrace(handoff)
-    if not ep_observations:
-        raise EPCalibrationWorkflowError("ElectroTrace returned no EP observations")
-
-    request = ep_inference_request_from_electrotrace(
-        handoff,
-        subject_id=entity_id,
-        inference_backend=inference_backend,
-        ep_backend=ep_backend,
-        anatomy_ref=anatomy_ref,
-        priors=priors,
-        ep_settings=ep_settings,
-        fixed_parameters=fixed_parameters,
-        sampler_settings=sampler_settings,
-        seed=seed,
-    )
+    try:
+        ep_observations = observations_from_electrotrace(handoff)
+        if not ep_observations:
+            raise ValueError("ElectroTrace returned no EP observations")
+        request = ep_inference_request_from_electrotrace(
+            handoff,
+            subject_id=entity_id,
+            inference_backend=inference_backend,
+            ep_backend=ep_backend,
+            anatomy_ref=anatomy_ref,
+            priors=priors,
+            ep_settings=ep_settings,
+            fixed_parameters=fixed_parameters,
+            sampler_settings=sampler_settings,
+            seed=seed,
+        )
+    except Exception as exc:
+        raise EPCalibrationWorkflowError(
+            f"Invalid ElectroTrace/CardiEP inference handoff: {exc}"
+        ) from exc
     request_json = request.model_dump(mode="json")
     return {
         "contract_version": "1.0",
