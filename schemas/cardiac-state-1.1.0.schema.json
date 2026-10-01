@@ -13,6 +13,7 @@
     "state_phase": {"$ref": "#/$defs/statePhase"},
     "observations": {"type": "array", "items": {"$ref": "#/$defs/observation"}},
     "atlas_context": {"anyOf": [{"$ref": "#/$defs/atlas"}, {"type": "null"}]},
+    "anatomy_bundles": {"type": "array", "items": {"$ref": "#/$defs/anatomyBundle"}},
     "benchmarks": {"type": "array", "items": {"$ref": "#/$defs/benchmark"}},
     "modality_analyses": {"type": "array", "items": {"$ref": "#/$defs/modalityAnalysis"}},
     "derived_values": {"type": "array", "items": {"$ref": "#/$defs/stateValue"}},
@@ -107,6 +108,25 @@
         "record_ids": {"type": "array", "items": {"type": "string"}},
         "context": {"type": "object"},
         "provenance": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "anatomyBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject_id", "study_id", "acquisition_id"],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "subject_id": {"type": "string"},
+        "study_id": {"type": "string"},
+        "acquisition_id": {"type": "string"},
+        "artifacts": {"type": "array", "items": {"type": "object"}},
+        "frames": {"type": "array", "items": {"type": "object"}},
+        "registrations": {"type": "array", "items": {"type": "object"}},
+        "labels": {"type": "array", "items": {"type": "object"}},
+        "stages": {"type": "array", "items": {"type": "object"}},
+        "qc": {"type": ["object", "null"]},
+        "provenance": {"type": "object"},
+        "bundle_fingerprint": {"type": ["string", "null"]}
       }
     },
     "benchmarkSample": {

@@ -109,6 +109,7 @@ class ServiceAdapter:
             raw = json.dumps(payload)
             env.pop("HEARTTWIN_PAYLOAD", None)
             env.pop("HEARTTWIN_PAYLOAD_STDIN", None)
+            env["HEARTTWIN_CAPABILITY"] = capability
             if len(raw.encode("utf-8")) > 32768:
                 env["HEARTTWIN_PAYLOAD_STDIN"] = "1"
             else:
