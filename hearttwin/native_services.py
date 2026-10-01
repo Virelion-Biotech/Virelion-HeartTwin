@@ -57,6 +57,18 @@ def _cardianatomy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         return api.reference_microstructure(payload)
     if capability == "anatomy.scar.classify":
         return api.scar_classify(payload)
+    if capability == "anatomy.presets":
+        return api.presets()
+    if capability == "anatomy.registration.rigid":
+        return api.registration_rigid(payload)
+    if capability == "anatomy.geometry.measure":
+        return api.geometry_measure(payload)
+    if capability == "anatomy.manifest.audit":
+        return api.manifest_audit(payload)
+    if capability == "anatomy.series.rank":
+        return api.series_rank(payload)
+    if capability == "anatomy.segmentation.qc":
+        return api.segmentation_qc(payload)
     raise ValueError(f"CardiAnatomy does not support {capability}")
 
 
