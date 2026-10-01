@@ -1,7 +1,7 @@
 services:
   - name: CardiAnatomy
     repository: Virelion-Biotech/Virelion-CardiAnatomy
-    capabilities: [anatomy.health, anatomy.build, anatomy.validate, anatomy.tools, anatomy.microstructure.reference, anatomy.scar.classify, anatomy.presets, anatomy.registration.rigid, anatomy.geometry.measure, anatomy.manifest.audit, anatomy.series.rank, anatomy.segmentation.qc, anatomy.cine.phases, anatomy.transforms.compose, anatomy.transforms.invert, anatomy.correspondence.compare, anatomy.motion.summarize]
+    capabilities: [anatomy.health, anatomy.build, anatomy.validate, anatomy.tools, anatomy.microstructure.reference, anatomy.scar.classify, anatomy.presets, anatomy.registration.rigid, anatomy.geometry.measure, anatomy.manifest.audit, anatomy.series.rank, anatomy.segmentation.qc, anatomy.cine.phases, anatomy.transforms.compose, anatomy.transforms.invert, anatomy.correspondence.compare, anatomy.motion.summarize, anatomy.validation.segmentation, anatomy.validation.points]
     builtin: cardianatomy
     endpoint: ${CARDIANATOMY_URL}
   - name: CardiAtlas
