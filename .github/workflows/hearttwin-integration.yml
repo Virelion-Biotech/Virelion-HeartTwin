@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: hearttwin-integration-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration:
     name: Python ${{ matrix.python-version }} · full Virelion stack
