@@ -77,8 +77,8 @@ def test_hearttwin_runs_generic_cardiinfer_command_forward_model(tmp_path: Path)
                         "uri": "file:///unused",
                     },
                     "model_output": "outputs.y",
-                    "discrepancy": "gaussian",
-                    "noise_parameters": {"sigma": 0.1},
+                    "discrepancy": "rmse",
+                    "noise_parameters": {},
                     "metadata": {"observed": [0.25]},
                 }
             ],
