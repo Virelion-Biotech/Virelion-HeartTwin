@@ -16,7 +16,7 @@ import urllib.request
 import numpy as np
 
 from .config import load_registry
-from .contracts import Observation, Provenance
+from .contracts import CONTRACT_VERSION, Observation, Provenance
 from .operations import ArtifactStore, CaseJournal, IdempotencyStore, JobQueue
 from .provenance import sha256
 from .service_registry import ServiceRegistry, ServiceSpec
@@ -560,6 +560,44 @@ def _run_concurrent_case_probe(
     }
 
 
+def _verify_worker_compatibility(
+    base: ServiceRegistry,
+    health: dict[str, dict[str, Any]],
+) -> None:
+    for name, result in health.items():
+        adapter = base.adapters.get(name)
+        if adapter is None:
+            raise RuntimeError(f"Unknown worker service in health fanout: {name}")
+        spec = adapter.spec
+        expected_fingerprint = sha256(
+            {
+                "service": spec.name,
+                "repository": spec.repository,
+                "capabilities": sorted(spec.capabilities),
+                "path_template": spec.path_template,
+            }
+        )
+        if result.get("protocol_version") != "1.0":
+            raise RuntimeError(
+                f"{name} worker protocol mismatch: "
+                f"{result.get('protocol_version')!r}"
+            )
+        if result.get("hearttwin_contract_version") != CONTRACT_VERSION:
+            raise RuntimeError(
+                f"{name} HeartTwin contract mismatch: "
+                f"{result.get('hearttwin_contract_version')!r} "
+                f"!= {CONTRACT_VERSION!r}"
+            )
+        if result.get("service_fingerprint") != expected_fingerprint:
+            raise RuntimeError(
+                f"{name} service registry fingerprint mismatch"
+            )
+        if result.get("capabilities") != sorted(spec.capabilities):
+            raise RuntimeError(
+                f"{name} advertised capabilities do not match coordinator"
+            )
+
+
 def _distributed_registry(
     base: ServiceRegistry,
     endpoints: dict[str, str],
@@ -771,6 +809,87 @@ def run_operational_rehearsal(
         ]
         if unhealthy:
             raise RuntimeError(f"Unhealthy rehearsal workers: {unhealthy}")
+        _verify_worker_compatibility(base, health)
+
+        # Deliberately introduce protocol skew and prove the coordinator refuses it.
+        skew_worker = workers["CardiStudio"]
+        skew_worker.env["HEARTTWIN_REHEARSAL_PROTOCOL_OVERRIDE"] = "0.9"
+        skew_worker.restart()
+        skew_rejected = False
+        try:
+            skew_health = {
+                "CardiStudio": _get_json(
+                    endpoints["CardiStudio"] + "/health"
+                )
+            }
+            try:
+                _verify_worker_compatibility(base, skew_health)
+            except RuntimeError:
+                skew_rejected = True
+        finally:
+            skew_worker.env.pop(
+                "HEARTTWIN_REHEARSAL_PROTOCOL_OVERRIDE",
+                None,
+            )
+            skew_worker.restart()
+
+        if not skew_rejected:
+            raise RuntimeError(
+                "Protocol-skewed worker was not rejected"
+            )
+        restored_health = {
+            "CardiStudio": _get_json(
+                endpoints["CardiStudio"] + "/health"
+            )
+        }
+        _verify_worker_compatibility(base, restored_health)
+        journal.event(
+            case_id,
+            "fault.version_skew_rejected",
+            {"service": "CardiStudio"},
+        )
+
+        # Prove the coordinator rejects an unexpectedly large service response.
+        size_env_before = {
+            "HEARTTWIN_HTTP_ATTEMPTS": os.environ.get(
+                "HEARTTWIN_HTTP_ATTEMPTS"
+            ),
+            "HEARTTWIN_HTTP_MAX_RESPONSE_BYTES": os.environ.get(
+                "HEARTTWIN_HTTP_MAX_RESPONSE_BYTES"
+            ),
+        }
+        os.environ["HEARTTWIN_HTTP_ATTEMPTS"] = "1"
+        os.environ["HEARTTWIN_HTTP_MAX_RESPONSE_BYTES"] = "16"
+        oversized_response_rejected = False
+        try:
+            anatomy_health = distributed.capability("anatomy.health")
+            if anatomy_health is None:
+                raise RuntimeError("anatomy.health route disappeared")
+            try:
+                anatomy_health.invoke(
+                    "anatomy.health",
+                    {"entity_id": case_id},
+                )
+            except RuntimeError as exc:
+                if "exceeds 16 bytes" not in str(exc):
+                    raise
+                oversized_response_rejected = True
+        finally:
+            for name, previous in size_env_before.items():
+                if previous is None:
+                    os.environ.pop(name, None)
+                else:
+                    os.environ[name] = previous
+
+        if not oversized_response_rejected:
+            raise RuntimeError(
+                "Oversized HTTP response was not rejected"
+            )
+        journal.event(
+            case_id,
+            "fault.oversized_response_rejected",
+            {"service": "CardiAnatomy"},
+        )
 
         timeout_observed = False
         try:
@@ -1106,6 +1225,8 @@ def run_operational_rehearsal(
             "output_artifact": repaired.model_dump(),
             "timeout_observed": timeout_observed,
             "worker_restart_recovered": True,
+            "version_skew_rejected": skew_rejected,
+            "oversized_response_rejected": oversized_response_rejected,
             "http_retry_recovered": True,
             "duplicate_suppressed": second_cached,
             "idempotency_survived_worker_restart": third_cached,

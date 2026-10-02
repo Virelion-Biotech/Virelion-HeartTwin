@@ -8,8 +8,12 @@ import time
 import numpy as np
 import pytest
 
+from hearttwin.contracts import CONTRACT_VERSION
 from hearttwin.native_services import _json_safe
+from hearttwin.provenance import sha256
+from hearttwin.rehearsal import _verify_worker_compatibility
 from hearttwin.rehearsal_worker import RehearsalWorker
+from hearttwin.service_registry import ServiceRegistry, ServiceSpec
 
 
 @dataclass
@@ -117,3 +121,49 @@ def test_worker_caches_completed_idempotent_request() -> None:
     assert first == ({"ok": True}, False)
     assert second == ({"ok": True}, True)
     assert adapter.calls == 1
+
+
+
+def test_worker_compatibility_rejects_protocol_and_registry_skew() -> None:
+    spec = ServiceSpec(
+        name="Fixture",
+        repository="Virelion-Biotech/Fixture",
+        capabilities=("fixture.run", "fixture.health"),
+        endpoint="http://127.0.0.1:9999",
+    )
+    registry = ServiceRegistry([spec])
+    fingerprint = sha256(
+        {
+            "service": spec.name,
+            "repository": spec.repository,
+            "capabilities": sorted(spec.capabilities),
+            "path_template": spec.path_template,
+        }
+    )
+    health = {
+        "Fixture": {
+            "protocol_version": "1.0",
+            "hearttwin_contract_version": CONTRACT_VERSION,
+            "service_fingerprint": fingerprint,
+            "capabilities": sorted(spec.capabilities),
+        }
+    }
+    _verify_worker_compatibility(registry, health)
+
+    bad_protocol = {
+        "Fixture": {
+            **health["Fixture"],
+            "protocol_version": "0.9",
+        }
+    }
+    with pytest.raises(RuntimeError, match="protocol mismatch"):
+        _verify_worker_compatibility(registry, bad_protocol)
+
+    bad_fingerprint = {
+        "Fixture": {
+            **health["Fixture"],
+            "service_fingerprint": "0" * 64,
+        }
+    }
+    with pytest.raises(RuntimeError, match="fingerprint mismatch"):
+        _verify_worker_compatibility(registry, bad_fingerprint)

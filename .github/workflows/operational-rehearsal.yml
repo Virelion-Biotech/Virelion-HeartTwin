@@ -86,6 +86,8 @@ jobs:
               "status": "ok",
               "timeout_observed": True,
               "worker_restart_recovered": True,
+              "version_skew_rejected": True,
+              "oversized_response_rejected": True,
               "http_retry_recovered": True,
               "duplicate_suppressed": True,
               "idempotency_survived_worker_restart": True,
@@ -158,6 +160,14 @@ jobs:
           )
           assert any(
               row["event_type"] == "fault.queue_lease_recovered"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.version_skew_rejected"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.oversized_response_rejected"
               for row in state["events"]
           )
           assert any(

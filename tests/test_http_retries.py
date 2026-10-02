@@ -133,6 +133,7 @@ def test_http_client_error_is_not_retried(monkeypatch) -> None:
         ("HEARTTWIN_HTTP_ATTEMPTS", "0"),
         ("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "0"),
         ("HEARTTWIN_HTTP_BACKOFF_SECONDS", "-1"),
+        ("HEARTTWIN_HTTP_MAX_RESPONSE_BYTES", "0"),
     ],
 )
 def test_invalid_http_retry_configuration_fails_closed(
@@ -314,6 +315,116 @@ def test_http_remote_disconnect_is_retried_with_same_idempotency_key(
         == server.requests[1]["idempotency"]
     )
     assert server.requests[0]["body"] == server.requests[1]["body"]
+
+
+
+def test_http_response_rejects_declared_oversize_body(monkeypatch) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "1")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "2")
+    monkeypatch.setenv("HEARTTWIN_HTTP_MAX_RESPONSE_BYTES", "64")
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+            raw = b'{"ok": true}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", "1000000")
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        with pytest.raises(RuntimeError, match="exceeds 64 bytes"):
+            _adapter(f"http://{host}:{port}").invoke(
+                "atlas.search",
+                {"entity_id": "C1", "query": "oversize"},
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_http_response_rejects_streamed_oversize_body(monkeypatch) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "1")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "2")
+    monkeypatch.setenv("HEARTTWIN_HTTP_MAX_RESPONSE_BYTES", "64")
+
+    class Handler(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.0"
+
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+            raw = b'{"payload":"' + (b"x" * 256) + b'"}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        with pytest.raises(RuntimeError, match="exceeds 64 bytes"):
+            _adapter(f"http://{host}:{port}").invoke(
+                "atlas.search",
+                {"entity_id": "C1", "query": "streamed-oversize"},
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_http_response_requires_json_object(monkeypatch) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "1")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "2")
+    monkeypatch.setenv("HEARTTWIN_HTTP_MAX_RESPONSE_BYTES", "1024")
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+            raw = b'["not", "an", "object"]'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        with pytest.raises(RuntimeError, match="must be a JSON object"):
+            _adapter(f"http://{host}:{port}").invoke(
+                "atlas.search",
+                {"entity_id": "C1", "query": "bad-shape"},
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
 
 
 

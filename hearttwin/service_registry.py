@@ -15,14 +15,9 @@ from typing import Any
 
 def _strict_json_object(raw: str | bytes, *, source: str) -> dict[str, Any]:
     def reject_constant(value: str) -> None:
-        raise ValueError(
-            f"{source} returned non-standard JSON constant {value!r}"
-        )
+        raise ValueError(f"{source} returned non-standard JSON constant {value}")
 
-    try:
-        payload = json.loads(raw, parse_constant=reject_constant)
-    except (json.JSONDecodeError, UnicodeDecodeError, ValueError) as exc:
-        raise ValueError(f"{source} returned invalid strict JSON: {exc}") from exc
+    payload = json.loads(raw, parse_constant=reject_constant)
     if not isinstance(payload, dict):
         raise TypeError(
             f"{source} returned {type(payload).__name__}; expected a JSON object"
@@ -120,8 +115,19 @@ class ServiceAdapter:
         timeout = float(os.getenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "120"))
         attempts = int(os.getenv("HEARTTWIN_HTTP_ATTEMPTS", "3"))
         backoff = float(os.getenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0.2"))
-        if timeout <= 0 or attempts < 1 or backoff < 0:
-            raise ValueError("Invalid HeartTwin HTTP retry configuration")
+        max_response_bytes = int(
+            os.getenv("HEARTTWIN_HTTP_MAX_RESPONSE_BYTES", str(32 * 1024 * 1024))
+        )
+        if (
+            timeout <= 0
+            or attempts < 1
+            or backoff < 0
+            or max_response_bytes < 1
+        ):
+            raise ValueError(
+                "Invalid HeartTwin HTTP retry configuration "
+                "or response-size limit"
+            )
 
         url = self.spec.endpoint.rstrip("/") + self._request_path(capability)
         last_error: Exception | None = None
@@ -138,8 +144,28 @@ class ServiceAdapter:
             )
             try:
                 with urllib.request.urlopen(req, timeout=timeout) as response:
+                    content_length = response.headers.get("Content-Length")
+                    if content_length is not None:
+                        try:
+                            declared = int(content_length)
+                        except ValueError as exc:
+                            raise RuntimeError(
+                                f"Invalid Content-Length from "
+                                f"{self.spec.name}/{capability}"
+                            ) from exc
+                        if declared > max_response_bytes:
+                            raise RuntimeError(
+                                f"HTTP response from {self.spec.name}/{capability} "
+                                f"exceeds {max_response_bytes} bytes"
+                            )
+                    body = response.read(max_response_bytes + 1)
+                    if len(body) > max_response_bytes:
+                        raise RuntimeError(
+                            f"HTTP response from {self.spec.name}/{capability} "
+                            f"exceeds {max_response_bytes} bytes"
+                        )
                     return _strict_json_object(
-                        response.read(),
+                        body,
                         source=f"HTTP service {self.spec.name}/{capability}",
                     )
             except urllib.error.HTTPError as exc:
