@@ -251,7 +251,7 @@ def _run_concurrent_case_probe(
         rows = _rows_for_case(
             concurrent_case_id,
             n=18,
-            prefix=f"C{index}",
+            prefix=concurrent_case_id.rsplit("-", 1)[-1],
         )
         input_payload = {
             "probe": "multi-case-isolation",
@@ -396,14 +396,12 @@ def _run_concurrent_case_probe(
                     f"First concurrent execution was cached for {concurrent_case_id}"
                 )
 
-            # Force A to finish after at least one sibling, regardless of compute timing.
+            # Force A to finish after a sibling has fully persisted completion.
             if concurrent_case_id == case_ids[0]:
                 if not secondary_completed.wait(timeout=120):
                     raise RuntimeError(
                         "Could not force out-of-order concurrent completion"
                     )
-            else:
-                secondary_completed.set()
 
             state = result.get("state") or {}
             canonical = state.get("cardiac_state") or {}
@@ -442,6 +440,8 @@ def _run_concurrent_case_probe(
             )
             with completion_lock:
                 completion_order.append(concurrent_case_id)
+            if concurrent_case_id != case_ids[0]:
+                secondary_completed.set()
             return {
                 "case_id": concurrent_case_id,
                 "workflow_run_id": result["run_id"],
@@ -463,11 +463,11 @@ def _run_concurrent_case_probe(
             pool.submit(process_one, f"case-worker-{index}")
             for index in range(3)
         ]
-        results = [
-            future.result()
-            for future in as_completed(futures)
-            if future.result() is not None
-        ]
+        results = []
+        for future in as_completed(futures):
+            item = future.result()
+            if item is not None:
+                results.append(item)
 
     if len(results) != len(case_ids):
         raise RuntimeError("Not every concurrent case completed")
