@@ -314,3 +314,78 @@ def test_http_remote_disconnect_is_retried_with_same_idempotency_key(
         == server.requests[1]["idempotency"]
     )
     assert server.requests[0]["body"] == server.requests[1]["body"]
+
+
+
+def test_http_transport_rejects_nonstandard_json_response(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "1")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "2")
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+            raw = b'{"score": NaN}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        with pytest.raises(ValueError, match="non-standard JSON constant"):
+            _adapter(f"http://{host}:{port}").invoke(
+                "atlas.search",
+                {"entity_id": "C1", "query": "strict-json"},
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_http_transport_requires_json_object_response(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "1")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "2")
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+            raw = b'[1, 2, 3]'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        with pytest.raises(TypeError, match="expected a JSON object"):
+            _adapter(f"http://{host}:{port}").invoke(
+                "atlas.search",
+                {"entity_id": "C1", "query": "object-only"},
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
