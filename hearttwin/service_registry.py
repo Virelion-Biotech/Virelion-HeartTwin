@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import shutil
@@ -139,7 +140,12 @@ class ServiceAdapter:
                 last_error = error
                 if attempt == attempts:
                     raise error
-            except (urllib.error.URLError, TimeoutError) as exc:
+            except (
+                urllib.error.URLError,
+                TimeoutError,
+                ConnectionError,
+                http.client.HTTPException,
+            ) as exc:
                 last_error = exc
                 if attempt == attempts:
                     raise
