@@ -101,6 +101,133 @@ class ArtifactStore:
         Path(record.path).write_bytes(b"CORRUPTED-BY-HEARTTWIN-REHEARSAL")
 
 
+class IdempotencyStore:
+    """SQLite-backed cache of completed transport requests.
+
+    This provides successful-response deduplication across worker restarts.
+    It does not claim exactly-once execution if a process dies after performing
+    a side effect but before the result is committed.
+    """
+
+    def __init__(self, path: str | Path):
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._initialize()
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.path, timeout=30.0)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute("PRAGMA busy_timeout=30000")
+        return connection
+
+    def _initialize(self) -> None:
+        with self._connect() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS idempotent_results (
+                    service TEXT NOT NULL,
+                    idempotency_key TEXT NOT NULL,
+                    capability TEXT NOT NULL,
+                    payload_sha256 TEXT NOT NULL,
+                    result_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (service, idempotency_key)
+                )
+                """
+            )
+
+    @staticmethod
+    def payload_fingerprint(
+        capability: str,
+        payload: Any,
+    ) -> str:
+        return sha256(
+            {
+                "capability": capability,
+                "payload": payload,
+            }
+        )
+
+    def get(
+        self,
+        service: str,
+        idempotency_key: str,
+        capability: str,
+        payload: Any,
+    ) -> dict[str, Any] | None:
+        fingerprint = self.payload_fingerprint(capability, payload)
+        with self._connect() as db:
+            row = db.execute(
+                """
+                SELECT capability,payload_sha256,result_json
+                FROM idempotent_results
+                WHERE service=? AND idempotency_key=?
+                """,
+                (service, idempotency_key),
+            ).fetchone()
+        if row is None:
+            return None
+        if (
+            row["capability"] != capability
+            or row["payload_sha256"] != fingerprint
+        ):
+            raise RuntimeError(
+                "Idempotency key was reused with a different "
+                "capability or payload"
+            )
+        result = json.loads(row["result_json"])
+        if not isinstance(result, dict):
+            raise RuntimeError("Persisted idempotent result is not a JSON object")
+        return result
+
+    def put(
+        self,
+        service: str,
+        idempotency_key: str,
+        capability: str,
+        payload: Any,
+        result: dict[str, Any],
+    ) -> None:
+        fingerprint = self.payload_fingerprint(capability, payload)
+        encoded = _canonical_json(result)
+        with self._connect() as db:
+            db.execute(
+                """
+                INSERT OR IGNORE INTO idempotent_results(
+                    service,idempotency_key,capability,payload_sha256,
+                    result_json,created_at
+                ) VALUES(?,?,?,?,?,?)
+                """,
+                (
+                    service,
+                    idempotency_key,
+                    capability,
+                    fingerprint,
+                    encoded,
+                    _now(),
+                ),
+            )
+            row = db.execute(
+                """
+                SELECT capability,payload_sha256,result_json
+                FROM idempotent_results
+                WHERE service=? AND idempotency_key=?
+                """,
+                (service, idempotency_key),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("Failed to persist idempotent result")
+        if (
+            row["capability"] != capability
+            or row["payload_sha256"] != fingerprint
+            or row["result_json"] != encoded
+        ):
+            raise RuntimeError(
+                "Conflicting result for an existing idempotency key"
+            )
+
+
 class CaseJournal:
     """SQLite-backed durable journal with stage-level idempotency."""
 

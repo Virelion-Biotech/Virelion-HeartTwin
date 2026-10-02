@@ -10,6 +10,7 @@ from typing import Any
 import urllib.request
 
 from .config import load_registry
+from .operations import IdempotencyStore
 from .provenance import sha256
 
 
@@ -24,6 +25,12 @@ class RehearsalWorker:
         self.cache: dict[str, dict[str, Any]] = {}
         self.inflight: dict[str, dict[str, Any]] = {}
         self.cache_lock = threading.Lock()
+        store_path = os.environ.get("HEARTTWIN_REHEARSAL_IDEMPOTENCY_DB")
+        self.idempotency_store = (
+            IdempotencyStore(store_path)
+            if store_path
+            else None
+        )
         if service_name == "CardiBridge":
             self._configure_remote_vex()
 
@@ -107,6 +114,19 @@ class RehearsalWorker:
                 "payload": payload,
             }
         )
+        idempotency_store = getattr(self, "idempotency_store", None)
+        if idempotency_store is not None:
+            persisted = idempotency_store.get(
+                self.service_name,
+                key,
+                capability,
+                payload,
+            )
+            if persisted is not None:
+                with self.cache_lock:
+                    self.cache[key] = persisted
+                return persisted, True
+
         with self.cache_lock:
             cached = self.cache.get(key)
             if cached is not None:
@@ -150,6 +170,14 @@ class RehearsalWorker:
             raise
         else:
             entry["result"] = result
+            if idempotency_store is not None:
+                idempotency_store.put(
+                    self.service_name,
+                    key,
+                    capability,
+                    payload,
+                    result,
+                )
             with self.cache_lock:
                 self.cache[key] = result
             return result, False

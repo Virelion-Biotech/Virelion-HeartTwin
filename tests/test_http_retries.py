@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import socket
 import threading
+import time
 import urllib.error
 
 import pytest
@@ -151,6 +153,73 @@ def test_invalid_http_retry_configuration_fails_closed(
             )
 
     assert server.requests == []
+
+
+
+def test_http_retry_recovers_when_service_starts_during_outage(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "6")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0.05")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "0.2")
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+
+    requests: list[str] = []
+    ready = threading.Event()
+    stopped = threading.Event()
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+            requests.append(
+                self.headers.get("X-HeartTwin-Idempotency-Key", "")
+            )
+            raw = b'{"ok": true}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server_holder: list[ThreadingHTTPServer] = []
+
+    def delayed_server() -> None:
+        time.sleep(0.12)
+        server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+        server_holder.append(server)
+        ready.set()
+        try:
+            server.serve_forever(poll_interval=0.05)
+        finally:
+            server.server_close()
+            stopped.set()
+
+    thread = threading.Thread(target=delayed_server, daemon=True)
+    thread.start()
+    try:
+        adapter = _adapter(f"http://127.0.0.1:{port}")
+        result = adapter.invoke(
+            "atlas.search",
+            {"entity_id": "C1", "query": "recover"},
+        )
+        assert result == {"ok": True}
+        assert ready.is_set()
+        assert len(requests) == 1
+        assert requests[0]
+    finally:
+        if server_holder:
+            server_holder[0].shutdown()
+        thread.join(timeout=5)
+
+    assert not thread.is_alive()
+    assert stopped.is_set()
 
 
 

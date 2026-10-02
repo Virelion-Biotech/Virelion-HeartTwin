@@ -7,6 +7,7 @@ from pathlib import Path
 import socket
 import subprocess
 import sys
+import threading
 import time
 from typing import Any
 import urllib.error
@@ -657,6 +658,9 @@ def run_operational_rehearsal(
             worker_env.pop(key, None)
     worker_env["CARDIBRIDGE_STORE_PATH"] = str(root / "cardibridge.sqlite3")
     worker_env["CARDITRACE_ROOT"] = str(root / "carditrace")
+    worker_env["HEARTTWIN_REHEARSAL_IDEMPOTENCY_DB"] = str(
+        root / "worker-idempotency.sqlite3"
+    )
     worker_env["HEARTTWIN_REHEARSAL_ENDPOINTS"] = json.dumps(endpoints)
 
     workers = {
@@ -692,6 +696,12 @@ def run_operational_rehearsal(
             probes["CardiInfer"] = distributed.capability(
                 "infer.backends"
             ).invoke("infer.backends", {})
+            probes["CardiMech"] = distributed.capability(
+                "mechanics.health"
+            ).invoke(
+                "mechanics.health",
+                {"entity_id": case_id},
+            )
             probes["CardiStudio"] = distributed.capability(
                 "design.generate"
             ).invoke(
@@ -720,6 +730,10 @@ def run_operational_rehearsal(
                 raise RuntimeError("CardiEP distributed probe failed")
             if not probes["CardiInfer"].get("backends"):
                 raise RuntimeError("CardiInfer distributed probe failed")
+            if probes["CardiMech"].get("service") != "CardiMech":
+                raise RuntimeError("CardiMech distributed probe failed")
+            if probes["CardiMech"].get("status") not in {"ok", "degraded"}:
+                raise RuntimeError("CardiMech distributed probe returned invalid status")
             if probes["CardiStudio"].get("n_runs") != 1:
                 raise RuntimeError("CardiStudio distributed probe failed")
             if not isinstance(probes["DCCP"], dict):
@@ -734,6 +748,7 @@ def run_operational_rehearsal(
                     "CardiAnatomy",
                     "CardiEP",
                     "CardiInfer",
+                    "CardiMech",
                     "CardiStudio",
                     "DCCP",
                 ]
@@ -796,6 +811,66 @@ def run_operational_rehearsal(
             raise RuntimeError("Restarted CardiAtlas returned a misaligned result")
         journal.event(case_id, "fault.worker_recovered", {"service": "CardiAtlas"})
 
+        # Prove the real ServiceAdapter retry loop can bridge a temporary outage.
+        workers["CardiAtlas"].stop()
+        retry_env_names = (
+            "HEARTTWIN_HTTP_ATTEMPTS",
+            "HEARTTWIN_HTTP_TIMEOUT_SECONDS",
+            "HEARTTWIN_HTTP_BACKOFF_SECONDS",
+        )
+        retry_env_before = {
+            name: os.environ.get(name)
+            for name in retry_env_names
+        }
+        os.environ["HEARTTWIN_HTTP_ATTEMPTS"] = "6"
+        os.environ["HEARTTWIN_HTTP_TIMEOUT_SECONDS"] = "0.5"
+        os.environ["HEARTTWIN_HTTP_BACKOFF_SECONDS"] = "0.1"
+
+        restart_errors: list[BaseException] = []
+
+        def delayed_atlas_restart() -> None:
+            try:
+                time.sleep(0.25)
+                workers["CardiAtlas"].start()
+            except BaseException as exc:  # pragma: no cover - surfaced below
+                restart_errors.append(exc)
+
+        restart_thread = threading.Thread(
+            target=delayed_atlas_restart,
+            name="rehearsal-atlas-restart",
+        )
+        restart_thread.start()
+        try:
+            retry_result = recovered.invoke(
+                "atlas.search",
+                {
+                    "entity_id": case_id,
+                    "query": f"{case_id}-retry-recovery",
+                    "records": [],
+                },
+            )
+        finally:
+            restart_thread.join(timeout=30)
+            for name, previous in retry_env_before.items():
+                if previous is None:
+                    os.environ.pop(name, None)
+                else:
+                    os.environ[name] = previous
+
+        if restart_thread.is_alive():
+            raise RuntimeError("Delayed CardiAtlas restart thread did not finish")
+        if restart_errors:
+            raise RuntimeError(
+                f"Delayed CardiAtlas restart failed: {restart_errors[0]}"
+            )
+        if retry_result.get("query") != f"{case_id}-retry-recovery":
+            raise RuntimeError("HTTP retry did not recover through temporary outage")
+        journal.event(
+            case_id,
+            "fault.http_retry_recovered",
+            {"service": "CardiAtlas"},
+        )
+
         duplicate_url = endpoints["CardiAnatomy"] + "/v1/anatomy/health"
         duplicate_payload = {"entity_id": case_id}
         first, first_cached = _post_json(
@@ -813,6 +888,22 @@ def run_operational_rehearsal(
         journal.event(
             case_id,
             "fault.duplicate_suppressed",
+            {"service": "CardiAnatomy"},
+        )
+
+        workers["CardiAnatomy"].restart()
+        third, third_cached = _post_json(
+            duplicate_url,
+            duplicate_payload,
+            idempotency_key="duplicate-probe",
+        )
+        if third != first or not third_cached:
+            raise RuntimeError(
+                "Successful idempotency result did not survive worker restart"
+            )
+        journal.event(
+            case_id,
+            "fault.idempotency_survived_restart",
             {"service": "CardiAnatomy"},
         )
 
@@ -974,7 +1065,9 @@ def run_operational_rehearsal(
             "output_artifact": repaired.model_dump(),
             "timeout_observed": timeout_observed,
             "worker_restart_recovered": True,
+            "http_retry_recovered": True,
             "duplicate_suppressed": second_cached,
+            "idempotency_survived_worker_restart": third_cached,
             "artifact_corruption_detected": True,
             "durable_replay_reused": replay_reused,
             "queue_lease_recovered": True,
