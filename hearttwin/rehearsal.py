@@ -849,6 +849,48 @@ def run_operational_rehearsal(
             {"service": "CardiStudio"},
         )
 
+        # Prove the coordinator rejects an unexpectedly large service response.
+        size_env_before = {
+            "HEARTTWIN_HTTP_ATTEMPTS": os.environ.get(
+                "HEARTTWIN_HTTP_ATTEMPTS"
+            ),
+            "HEARTTWIN_HTTP_MAX_RESPONSE_BYTES": os.environ.get(
+                "HEARTTWIN_HTTP_MAX_RESPONSE_BYTES"
+            ),
+        }
+        os.environ["HEARTTWIN_HTTP_ATTEMPTS"] = "1"
+        os.environ["HEARTTWIN_HTTP_MAX_RESPONSE_BYTES"] = "16"
+        oversized_response_rejected = False
+        try:
+            anatomy_health = distributed.capability("anatomy.health")
+            if anatomy_health is None:
+                raise RuntimeError("anatomy.health route disappeared")
+            try:
+                anatomy_health.invoke(
+                    "anatomy.health",
+                    {"entity_id": case_id},
+                )
+            except RuntimeError as exc:
+                if "exceeds 16 bytes" not in str(exc):
+                    raise
+                oversized_response_rejected = True
+        finally:
+            for name, previous in size_env_before.items():
+                if previous is None:
+                    os.environ.pop(name, None)
+                else:
+                    os.environ[name] = previous
+
+        if not oversized_response_rejected:
+            raise RuntimeError(
+                "Oversized HTTP response was not rejected"
+            )
+        journal.event(
+            case_id,
+            "fault.oversized_response_rejected",
+            {"service": "CardiAnatomy"},
+        )
+
         timeout_observed = False
         try:
             _post_json(
@@ -1184,6 +1226,7 @@ def run_operational_rehearsal(
             "timeout_observed": timeout_observed,
             "worker_restart_recovered": True,
             "version_skew_rejected": skew_rejected,
+            "oversized_response_rejected": oversized_response_rejected,
             "http_retry_recovered": True,
             "duplicate_suppressed": second_cached,
             "idempotency_survived_worker_restart": third_cached,
