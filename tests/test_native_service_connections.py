@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 
 import pytest
@@ -144,3 +145,23 @@ def test_cardianatomy_native_smoke() -> None:
         },
     )
     assert point_metrics["hausdorff"] == 1.0
+
+
+
+def test_dccp_host_map_native_result_is_json_boundary_safe() -> None:
+    registry = load_registry()
+    _require_native(registry)
+    result = registry.capability("host.map").invoke(
+        "host.map",
+        {
+            "entity_id": "json-boundary-smoke",
+            "module_scores": {
+                "inflammatory": 0.8,
+                "contractile_functional": 0.6,
+                "metabolic_mitochondrial": 0.4,
+            },
+        },
+    )
+    encoded = json.dumps(result, allow_nan=False)
+    assert '"continuous"' in encoded
+    assert isinstance(result["axes"]["ordinal"], dict)

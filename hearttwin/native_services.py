@@ -519,7 +519,8 @@ def _dccp(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         return {"contract_version": "1.0", "challenge_set": materialize_challenge_set(str(root), include_ood=bool(payload.get("include_ood", True)))}
     if capability == "host.map":
         from dccp.omics_map import map_module_scores_to_axes
-        return {"contract_version": "1.0", "axes": map_module_scores_to_axes(dict(payload.get("module_scores") or {}))}
+        axes = map_module_scores_to_axes(dict(payload.get("module_scores") or {}))
+        return {"contract_version": "1.0", "axes": axes.as_dict()}
     raw = payload.get("scenario")
     scenario = Scenario.from_dict(raw) if isinstance(raw, dict) else load_scenario(str(payload["scenario_path"]))
     if capability == "challenge.validate":

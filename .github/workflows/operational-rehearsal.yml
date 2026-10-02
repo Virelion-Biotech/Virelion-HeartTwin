@@ -10,6 +10,18 @@ on:
       - ".github/workflows/operational-rehearsal.yml"
       - "hearttwin/rehearsal.py"
       - "hearttwin/rehearsal_worker.py"
+      - "hearttwin/native_services.py"
+      - "hearttwin/operations.py"
+      - "hearttwin/service_registry.py"
+      - "hearttwin/workflow.py"
+      - "requirements-services.txt"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/operational-rehearsal.yml"
+      - "hearttwin/rehearsal.py"
+      - "hearttwin/rehearsal_worker.py"
+      - "hearttwin/native_services.py"
       - "hearttwin/operations.py"
       - "hearttwin/service_registry.py"
       - "hearttwin/workflow.py"
