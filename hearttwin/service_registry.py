@@ -112,7 +112,10 @@ class ServiceAdapter:
             or backoff < 0
             or max_response_bytes < 1
         ):
-            raise ValueError("Invalid HeartTwin HTTP retry/size configuration")
+            raise ValueError(
+                "Invalid HeartTwin HTTP retry configuration "
+                "or response-size limit"
+            )
 
         url = self.spec.endpoint.rstrip("/") + self._request_path(capability)
         last_error: Exception | None = None
