@@ -6,18 +6,24 @@ import math
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+_NONFINITE_PREFIX = "\u0000hearttwin:nonfinite:"
+_ESCAPED_STRING_PREFIX = "\u0000hearttwin:string:"
+
 
 def _canonicalize(value: Any) -> Any:
     if isinstance(value, float):
         if math.isnan(value):
-            return {"__hearttwin_nonfinite_float__": "nan"}
+            return _NONFINITE_PREFIX + "nan"
         if math.isinf(value):
-            return {
-                "__hearttwin_nonfinite_float__": (
-                    "positive_infinity" if value > 0 else "negative_infinity"
-                )
-            }
+            return _NONFINITE_PREFIX + (
+                "positive_infinity" if value > 0 else "negative_infinity"
+            )
         return value
+    if isinstance(value, str) and (
+        value.startswith(_NONFINITE_PREFIX)
+        or value.startswith(_ESCAPED_STRING_PREFIX)
+    ):
+        return _ESCAPED_STRING_PREFIX + value
     if isinstance(value, Mapping):
         return {str(key): _canonicalize(item) for key, item in value.items()}
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
