@@ -164,3 +164,29 @@ def test_job_queue_can_requeue_explicit_failure(tmp_path: Path) -> None:
     assert reclaimed is not None
     assert reclaimed["job_id"] == job_id
     assert reclaimed["attempts"] == 2
+
+
+def test_job_queue_allows_only_one_concurrent_lease(tmp_path: Path) -> None:
+    import threading
+
+    queue = JobQueue(tmp_path / "queue.sqlite3")
+    job_id = queue.enqueue("C1", "stage", {"x": 1})
+    barrier = threading.Barrier(3)
+    claims: list[dict | None] = []
+
+    def claimant(worker_id: str) -> None:
+        barrier.wait()
+        claims.append(queue.claim(worker_id, lease_seconds=5.0))
+
+    first = threading.Thread(target=claimant, args=("worker-a",))
+    second = threading.Thread(target=claimant, args=("worker-b",))
+    first.start()
+    second.start()
+    barrier.wait()
+    first.join(timeout=5)
+    second.join(timeout=5)
+
+    successful = [claim for claim in claims if claim is not None]
+    assert len(successful) == 1
+    assert successful[0]["job_id"] == job_id
+    assert queue.get(job_id)["status"] == "leased"
