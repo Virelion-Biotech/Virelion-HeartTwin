@@ -41,3 +41,23 @@ def test_simulated_domains_use_actual_variables_and_extrapolated_evidence():
     assert scenario["phenotype_domains"]["contractile_impairment"]["value"] == pytest.approx(1 - result.summary["final"]["contractility"])
     assert scenario["temporal_profile"][0]["domains"]["inflammatory_activation"]["value"] == pytest.approx(result.summary["initial"]["inflammation"])
     assert "uncertainty" not in scenario["phenotype_domains"]["contractile_impairment"]
+
+
+
+def test_undefined_learning_metrics_become_warnings_not_nan() -> None:
+    from hearttwin.native_services import _finite_learning_metrics
+
+    metrics, warnings = _finite_learning_metrics(
+        {
+            "validation": {
+                "accuracy": 0.75,
+                "roc_auc": float("nan"),
+                "loss": float("inf"),
+            }
+        }
+    )
+
+    assert metrics == {"validation": {"accuracy": 0.75}}
+    assert len(warnings) == 2
+    assert any("validation.roc_auc" in item for item in warnings)
+    assert any("validation.loss" in item for item in warnings)
