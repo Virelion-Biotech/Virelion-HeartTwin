@@ -4,7 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from hearttwin.operations import ArtifactStore, CaseJournal, JobQueue
+from hearttwin.operations import (
+    ArtifactStore,
+    CaseJournal,
+    IdempotencyStore,
+    JobQueue,
+)
 
 
 def test_artifact_store_detects_corruption_and_repairs(tmp_path: Path) -> None:
@@ -190,3 +195,78 @@ def test_job_queue_allows_only_one_concurrent_lease(tmp_path: Path) -> None:
     assert len(successful) == 1
     assert successful[0]["job_id"] == job_id
     assert queue.get(job_id)["status"] == "leased"
+
+
+
+def test_idempotency_store_survives_reopen(tmp_path: Path) -> None:
+    path = tmp_path / "idempotency.sqlite3"
+    store = IdempotencyStore(path)
+    payload = {"entity_id": "C1", "value": 7}
+    result = {"ok": True, "value": 7}
+
+    assert store.get(
+        "CardiAnatomy",
+        "same-key",
+        "anatomy.health",
+        payload,
+    ) is None
+
+    store.put(
+        "CardiAnatomy",
+        "same-key",
+        "anatomy.health",
+        payload,
+        result,
+    )
+
+    reopened = IdempotencyStore(path)
+    assert reopened.get(
+        "CardiAnatomy",
+        "same-key",
+        "anatomy.health",
+        payload,
+    ) == result
+
+
+def test_idempotency_store_rejects_key_reuse_with_changed_payload(
+    tmp_path: Path,
+) -> None:
+    store = IdempotencyStore(tmp_path / "idempotency.sqlite3")
+    store.put(
+        "CardiAnatomy",
+        "same-key",
+        "anatomy.health",
+        {"entity_id": "C1"},
+        {"ok": True},
+    )
+
+    with pytest.raises(RuntimeError, match="different"):
+        store.get(
+            "CardiAnatomy",
+            "same-key",
+            "anatomy.health",
+            {"entity_id": "C2"},
+        )
+
+
+def test_idempotency_store_rejects_conflicting_result(
+    tmp_path: Path,
+) -> None:
+    store = IdempotencyStore(tmp_path / "idempotency.sqlite3")
+    payload = {"entity_id": "C1"}
+    store.put(
+        "CardiAnatomy",
+        "same-key",
+        "anatomy.health",
+        payload,
+        {"ok": True},
+    )
+
+    with pytest.raises(RuntimeError, match="Conflicting result"):
+        store.put(
+            "CardiAnatomy",
+            "same-key",
+            "anatomy.health",
+            payload,
+            {"ok": False},
+        )
