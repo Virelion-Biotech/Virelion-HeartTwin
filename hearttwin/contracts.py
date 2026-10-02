@@ -180,7 +180,7 @@ class LearningResultPayload(BaseModel):
     task: str
     target_column: str
     feature_columns: list[str] = Field(default_factory=list)
-    metrics: dict[str, dict[str, float]]
+    metrics: dict[str, dict[str, float | None]]
     predictions: list[LearningPredictionPayload]
     dataset_fingerprint: str | None = None
     warnings: list[str] = Field(default_factory=list)
