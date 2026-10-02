@@ -15,7 +15,7 @@ import numpy as np
 
 from .config import load_registry
 from .contracts import Observation, Provenance
-from .operations import ArtifactStore, CaseJournal
+from .operations import ArtifactStore, CaseJournal, JobQueue
 from .provenance import sha256
 from .service_registry import ServiceRegistry, ServiceSpec
 from .workflow import run_multimodal_workflow
@@ -245,7 +245,9 @@ def run_operational_rehearsal(
 ) -> dict[str, Any]:
     root = Path(workdir).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    journal = CaseJournal(root / "journal.sqlite3")
+    journal_path = root / "journal.sqlite3"
+    journal = CaseJournal(journal_path)
+    queue = JobQueue(journal_path)
     artifacts = ArtifactStore(root / "artifacts")
     inputs = _write_inputs(root / "inputs")
     rows = _rows()
@@ -259,6 +261,39 @@ def run_operational_rehearsal(
         "rows_sha256": sha256(rows),
     }
     journal.begin_case(case_id, input_manifest)
+
+    queue_job_id = queue.enqueue(
+        case_id,
+        "distributed-workflow",
+        {"rows_sha256": input_manifest["rows_sha256"]},
+    )
+    first_claim = queue.claim("worker-a", lease_seconds=0.05)
+    if first_claim is None or first_claim["job_id"] != queue_job_id:
+        raise RuntimeError("Initial durable queue claim failed")
+    time.sleep(0.08)
+    second_claim = queue.claim("worker-b", lease_seconds=30.0)
+    if (
+        second_claim is None
+        or second_claim["job_id"] != queue_job_id
+        or second_claim["attempts"] != 2
+    ):
+        raise RuntimeError("Expired queue lease was not reclaimed correctly")
+    queue.complete(
+        queue_job_id,
+        "worker-b",
+        {"recovered": True, "case_id": case_id},
+    )
+    queue_state = queue.get(queue_job_id)
+    if queue_state["status"] != "ok":
+        raise RuntimeError("Reclaimed queue job did not complete")
+    journal.event(
+        case_id,
+        "fault.queue_lease_recovered",
+        {
+            "job_id": queue_job_id,
+            "attempts": queue_state["attempts"],
+        },
+    )
 
     base = load_registry()
     worker_specs = [
@@ -523,6 +558,9 @@ def run_operational_rehearsal(
             "duplicate_suppressed": second_cached,
             "artifact_corruption_detected": True,
             "durable_replay_reused": replay_reused,
+            "queue_lease_recovered": True,
+            "queue_job_id": queue_job_id,
+            "queue_attempts": queue_state["attempts"],
             "journal_event_count": len(snapshot["events"]),
             "journal_stage_count": len(snapshot["stages"]),
         }
