@@ -99,6 +99,7 @@ def test_hearttwin_runs_generic_cardiinfer_command_forward_model(tmp_path: Path)
         },
     )
 
+    assert result["contract_version"] == "1.1"
     assert result["backend"] == "native-abc-smc-v1"
     assert result["model_service"] == "ToyForward"
     assert result["validation_status"] == "software_checked"
