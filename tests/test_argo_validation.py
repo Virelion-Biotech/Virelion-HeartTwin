@@ -261,3 +261,10 @@ def test_argo_coloring_rejects_unpaired_missingness(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="missingness"):
         load_argo_patient(root, strict_official_counts=False)
+
+
+
+def test_official_argo_validation_rejects_unknown_patient_identity(tmp_path: Path) -> None:
+    root = _synthetic_patient(tmp_path)
+    with pytest.raises(ValueError, match="Pt1 through Pt9"):
+        load_argo_patient(root, strict_official_counts=True)
