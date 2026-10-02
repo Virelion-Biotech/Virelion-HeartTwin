@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -155,9 +156,20 @@ def test_argo_prepare_never_writes_heldout_targets(tmp_path: Path) -> None:
     assert not target_ids & set(split["holdout_ids"])
     assert targets["heldout_targets_included"] is False
 
-    portable_identity = dict(split)
-    portable_identity["patient_dir"] = "/different/machine/path"
-    assert portable_identity["split_sha256"] == split["split_sha256"]
+    copied_root = tmp_path / "copied" / root.name
+    copied_root.parent.mkdir(parents=True)
+    shutil.copytree(root, copied_root)
+    copied = prepare_argo_empirical_study(
+        copied_root,
+        tmp_path / "study-copy",
+        holdout_fraction=0.5,
+        seed=17,
+        strict_official_counts=False,
+    )
+    assert copied["split"]["patient_dir"] != split["patient_dir"]
+    assert copied["split"]["split_sha256"] == split["split_sha256"]
+    assert copied["split"]["calibration_ids"] == split["calibration_ids"]
+    assert copied["split"]["holdout_ids"] == split["holdout_ids"]
 
 
 def test_argo_holdout_scoring_recomputes_raw_targets_and_accepts_perfect_predictions(
