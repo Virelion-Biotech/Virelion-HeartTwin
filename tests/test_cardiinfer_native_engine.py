@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import pytest
 
-from hearttwin import load_registry
+from hearttwin import VirelionServices, load_registry
 
 
 def _require_cardiinfer(registry) -> None:
@@ -52,51 +52,46 @@ def test_hearttwin_runs_generic_cardiinfer_command_forward_model(tmp_path: Path)
         encoding="utf-8",
     )
 
-    infer = registry.capability("infer.run")
-    assert infer is not None
-    result = infer.invoke(
-        "infer.run",
-        {
-            "subject_id": "hearttwin-generic-infer-smoke",
-            "model_service": "ToyForward",
-            "model_capability": "toy.simulate",
-            "backend": "native-abc-smc-v1",
-            "priors": [
-                {
-                    "name": "x",
-                    "distribution": "uniform",
-                    "bounds": [0.0, 1.0],
-                }
-            ],
-            "likelihood": [
-                {
-                    "term_id": "y",
-                    "observation_ref": {
-                        "artifact_id": "synthetic-y",
-                        "kind": "synthetic",
-                        "uri": "file:///unused",
-                    },
-                    "model_output": "outputs.y",
-                    "discrepancy": "gaussian",
-                    "noise_parameters": {"sigma": 0.1},
-                    "metadata": {"observed": [0.25]},
-                }
-            ],
-            "model_context": {
-                "forward_model": {
-                    "mode": "command",
-                    "command": [sys.executable, str(forward)],
-                    "timeout_s": 10,
-                }
-            },
-            "sampler_settings": {
-                "n_particles": 8,
-                "n_generations": 1,
-                "initial_oversample": 2,
-                "output_dir": str(tmp_path / "inference"),
-            },
-            "seed": 17,
+    services = VirelionServices(registry)
+    result = services.infer(
+        "hearttwin-generic-infer-smoke",
+        model_service="ToyForward",
+        model_capability="toy.simulate",
+        backend="native-abc-smc-v1",
+        priors=[
+            {
+                "name": "x",
+                "distribution": "uniform",
+                "bounds": [0.0, 1.0],
+            }
+        ],
+        likelihood=[
+            {
+                "term_id": "y",
+                "observation_ref": {
+                    "artifact_id": "synthetic-y",
+                    "kind": "synthetic",
+                    "uri": "file:///unused",
+                },
+                "model_output": "outputs.y",
+                "discrepancy": "rmse",
+                "metadata": {"observed": [0.25]},
+            }
+        ],
+        model_context={
+            "forward_model": {
+                "mode": "command",
+                "command": [sys.executable, str(forward)],
+                "timeout_s": 10,
+            }
         },
+        sampler_settings={
+            "n_particles": 8,
+            "n_generations": 1,
+            "initial_oversample": 2,
+            "output_dir": str(tmp_path / "inference"),
+        },
+        seed=17,
     )
 
     assert result["contract_version"] == "1.1"
