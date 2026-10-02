@@ -216,3 +216,73 @@ def test_http_retry_recovers_when_service_starts_during_outage(
 
     assert not thread.is_alive()
     assert stopped.is_set()
+
+
+
+def test_http_retry_recovers_after_response_connection_drop(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "3")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "1")
+
+    requests: list[dict[str, str]] = []
+    dropped = False
+    parent = {"dropped": False}
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            return
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length", "0"))
+            body = self.rfile.read(length).decode("utf-8")
+            requests.append(
+                {
+                    "idempotency": self.headers.get(
+                        "X-HeartTwin-Idempotency-Key",
+                        "",
+                    ),
+                    "attempt": self.headers.get("X-HeartTwin-Attempt", ""),
+                    "body": body,
+                }
+            )
+            if not parent["dropped"]:
+                parent["dropped"] = True
+                try:
+                    self.connection.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
+                self.connection.close()
+                return
+
+            raw = b'{"ok": true}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(
+        target=server.serve_forever,
+        daemon=True,
+    )
+    thread.start()
+    try:
+        host, port = server.server_address
+        result = _adapter(f"http://{host}:{port}").invoke(
+            "atlas.search",
+            {"entity_id": "C1", "query": "drop-response"},
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    assert result == {"ok": True}
+    assert len(requests) == 2
+    assert requests[0]["idempotency"]
+    assert requests[0]["idempotency"] == requests[1]["idempotency"]
+    assert [item["attempt"] for item in requests] == ["1", "2"]
+    assert requests[0]["body"] == requests[1]["body"]
