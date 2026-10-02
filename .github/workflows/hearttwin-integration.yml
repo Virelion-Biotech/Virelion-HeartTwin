@@ -62,7 +62,12 @@ jobs:
       - name: Run HeartTwin integration tests
         env:
           HEARTTWIN_REQUIRE_NATIVE: "1"
-        run: python -m pytest -q tests/test_native_service_connections.py tests/test_multimodal_workflow.py tests/test_cardiep_native_engine.py
+        run: >-
+          python -m pytest -q
+          tests/test_stack_continuity_canary.py
+          tests/test_native_service_connections.py
+          tests/test_multimodal_workflow.py
+          tests/test_cardiep_native_engine.py
 
       - name: Run full HeartTwin test suite
         env:
