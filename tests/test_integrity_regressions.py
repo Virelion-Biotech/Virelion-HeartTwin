@@ -123,5 +123,5 @@ def test_command_transport_rejects_nonstandard_nan_response(tmp_path) -> None:
 
 def test_command_transport_requires_json_object_response(tmp_path) -> None:
     adapter = _command_adapter(tmp_path, "print('[1, 2, 3]')")
-    with pytest.raises(TypeError, match="expected a JSON object"):
+    with pytest.raises(RuntimeError, match="must be a JSON object"):
         adapter.invoke("trace.record", {"value": 1.0})
