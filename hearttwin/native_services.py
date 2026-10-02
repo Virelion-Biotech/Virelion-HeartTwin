@@ -6,9 +6,41 @@ HeartTwin ServiceAdapter boundary remains backwards-compatible.
 """
 from __future__ import annotations
 
+import math
 import os
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
+
+
+def _json_safe(value: Any) -> Any:
+    if value is None or isinstance(value, (str, bool, int)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("Native service returned a non-finite float")
+        return value
+    if isinstance(value, dict):
+        return {
+            str(key): _json_safe(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple, set)):
+        return [_json_safe(item) for item in value]
+    if hasattr(value, "model_dump"):
+        return _json_safe(value.model_dump(mode="json"))
+    if hasattr(value, "as_dict"):
+        return _json_safe(value.as_dict())
+    if is_dataclass(value):
+        return _json_safe(asdict(value))
+    if hasattr(value, "tolist"):
+        return _json_safe(value.tolist())
+    if hasattr(value, "item"):
+        return _json_safe(value.item())
+    raise TypeError(
+        "Native service returned a non-JSON transport value: "
+        f"{type(value).__name__}"
+    )
 
 
 def _native_unavailable(name: str, exc: Exception) -> RuntimeError:
@@ -37,7 +69,14 @@ def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dic
         handler = dispatch[service]
     except KeyError as exc:
         raise ValueError(f"Unknown native HeartTwin service: {service}") from exc
-    return handler(capability, payload)
+    result = handler(capability, payload)
+    normalized = _json_safe(result)
+    if not isinstance(normalized, dict):
+        raise TypeError(
+            f"Native service {service} returned "
+            f"{type(normalized).__name__}; expected an object"
+        )
+    return normalized
 
 
 
