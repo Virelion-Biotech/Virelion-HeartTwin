@@ -183,6 +183,7 @@ class LearningResultPayload(BaseModel):
     metrics: dict[str, dict[str, float]]
     predictions: list[LearningPredictionPayload]
     dataset_fingerprint: str | None = None
+    warnings: list[str] = Field(default_factory=list)
 
 
 class SimulationResultPayload(BaseModel):

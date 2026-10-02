@@ -243,6 +243,11 @@ def _run_concurrent_case_probe(
         case_ids[1]: 0.05,
         case_ids[2]: 0.10,
     }
+    seed_by_case = {
+        case_ids[0]: 3,
+        case_ids[1]: 3,
+        case_ids[2]: 1,
+    }
 
     journal = CaseJournal(journal_path)
     queue = JobQueue(journal_path)
@@ -263,6 +268,7 @@ def _run_concurrent_case_probe(
             "case_id": concurrent_case_id,
             "rows_sha256": input_payload["rows_sha256"],
             "delay_seconds": delay_by_case[concurrent_case_id],
+            "seed": seed_by_case[concurrent_case_id],
         }
         job_ids[concurrent_case_id] = queue.enqueue(
             concurrent_case_id,
@@ -280,7 +286,12 @@ def _run_concurrent_case_probe(
                     "Duplicate concurrent submission was not idempotently collapsed"
                 )
 
-    if len(queue.list_jobs()) != len(case_ids):
+    concurrent_enqueued = [
+        item
+        for item in queue.list_jobs()
+        if item["job_type"] == "concurrent-workflow"
+    ]
+    if len(concurrent_enqueued) != len(case_ids):
         raise RuntimeError("Duplicate submission created an extra queue job")
 
     # Simulate the coordinator process disappearing after enqueue but before work.
@@ -307,6 +318,7 @@ def _run_concurrent_case_probe(
             prefix=concurrent_case_id.rsplit("-", 1)[-1],
         )
         expected_sha = sha256(rows)
+        case_seed = int(payload["seed"])
         if payload.get("rows_sha256") != expected_sha:
             queue.fail(job_id, worker_id, "rows fingerprint mismatch")
             raise RuntimeError(
@@ -343,6 +355,12 @@ def _run_concurrent_case_probe(
             ),
         ]
 
+        simulation_config = {
+            "preset": "mi",
+            "n_cells": 6,
+            "duration": 0.75,
+            "dt": 0.25,
+        }
         workflow_payload = {
             "case_id": concurrent_case_id,
             "rows_sha256": expected_sha,
@@ -350,6 +368,10 @@ def _run_concurrent_case_probe(
                 item.model_dump(mode="json")
                 for item in observations
             ],
+            "feature_columns": ["gene_a", "gene_b"],
+            "benchmark_policy": "subject_heldout",
+            "seed": case_seed,
+            "simulation": simulation_config,
         }
 
         def execute() -> dict[str, Any]:
@@ -373,13 +395,8 @@ def _run_concurrent_case_probe(
                     row["sample_id"]: row["target"]
                     for row in rows
                 },
-                simulation={
-                    "preset": "mi",
-                    "n_cells": 6,
-                    "duration": 0.75,
-                    "dt": 0.25,
-                },
-                seed=2718,
+                simulation=dict(simulation_config),
+                seed=case_seed,
             )
             return run.model_dump(mode="json")
 
@@ -845,6 +862,13 @@ def run_operational_rehearsal(
             ),
         ]
 
+        workflow_seed = 6
+        simulation_config = {
+            "preset": "mi",
+            "n_cells": 12,
+            "duration": 1.0,
+            "dt": 0.25,
+        }
         workflow_payload = {
             "case_id": case_id,
             "rows_sha256": sha256(rows),
@@ -852,6 +876,10 @@ def run_operational_rehearsal(
                 observation.model_dump(mode="json")
                 for observation in observations
             ],
+            "feature_columns": ["gene_a", "gene_b"],
+            "benchmark_policy": "subject_heldout",
+            "seed": workflow_seed,
+            "simulation": simulation_config,
         }
 
         def execute_workflow() -> dict[str, Any]:
@@ -875,13 +903,8 @@ def run_operational_rehearsal(
                     row["sample_id"]: row["target"]
                     for row in rows
                 },
-                simulation={
-                    "preset": "mi",
-                    "n_cells": 12,
-                    "duration": 1.0,
-                    "dt": 0.25,
-                },
-                seed=314159,
+                simulation=dict(simulation_config),
+                seed=workflow_seed,
             )
             return run.model_dump(mode="json")
 

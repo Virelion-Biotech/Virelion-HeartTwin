@@ -312,6 +312,36 @@ def _cardibench(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     return {"contract_version": "1.0", **data, "samples": raw_samples}
 
 
+def _finite_learning_metrics(
+    metrics: dict[str, Any],
+) -> tuple[dict[str, dict[str, float]], list[str]]:
+    cleaned: dict[str, dict[str, float]] = {}
+    warnings: list[str] = []
+    for split, raw_metrics in dict(metrics or {}).items():
+        if not isinstance(raw_metrics, dict):
+            warnings.append(
+                f"Learning metrics for {split} were not a mapping and were omitted"
+            )
+            continue
+        split_metrics: dict[str, float] = {}
+        for name, raw_value in raw_metrics.items():
+            try:
+                value = float(raw_value)
+            except (TypeError, ValueError):
+                warnings.append(
+                    f"Learning metric {split}.{name} was non-numeric and was omitted"
+                )
+                continue
+            if not math.isfinite(value):
+                warnings.append(
+                    f"Learning metric {split}.{name} is undefined and was omitted"
+                )
+                continue
+            split_metrics[str(name)] = value
+        cleaned[str(split)] = split_metrics
+    return cleaned, warnings
+
+
 def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     try:
         import pandas as pd
@@ -406,10 +436,17 @@ def _cardilearn(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             "score": None if scores is None else float(scores[index]),
             "subgroup": None if row.get("subgroup") is None else str(row["subgroup"]),
         })
+    metrics, metric_warnings = _finite_learning_metrics(result.metrics)
     return {
-        "contract_version": "1.0", "model_id": str(payload.get("model_id", config.model)), "task": config.task,
-        "target_column": target, "feature_columns": features, "metrics": result.metrics, "predictions": prediction_rows,
+        "contract_version": "1.0",
+        "model_id": str(payload.get("model_id", config.model)),
+        "task": config.task,
+        "target_column": target,
+        "feature_columns": features,
+        "metrics": metrics,
+        "predictions": prediction_rows,
         "dataset_fingerprint": result.dataset_fingerprint,
+        "warnings": metric_warnings,
     }
 
 

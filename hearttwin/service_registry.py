@@ -123,9 +123,23 @@ class ServiceAdapter:
                 with urllib.request.urlopen(req, timeout=timeout) as response:
                     return json.loads(response.read())
             except urllib.error.HTTPError as exc:
-                last_error = exc
-                if exc.code < 500 or attempt == attempts:
+                try:
+                    body = exc.read().decode("utf-8", errors="replace")
+                except Exception:
+                    body = ""
+                detail = body.strip()
+                if exc.code < 500:
+                    if detail:
+                        exc.msg = f"{exc.msg}: {detail}"
                     raise
+                error = RuntimeError(
+                    f"HTTP {exc.code} from {self.spec.name}/{capability}"
+                    + (f": {detail}" if detail else "")
+                )
+                error.__cause__ = exc
+                last_error = error
+                if attempt == attempts:
+                    raise error
             except (
                 urllib.error.URLError,
                 TimeoutError,

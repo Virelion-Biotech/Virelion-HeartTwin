@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-import http.client
 import json
 import threading
 import urllib.error
