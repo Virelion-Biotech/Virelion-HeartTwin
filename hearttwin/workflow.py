@@ -421,7 +421,9 @@ def run_multimodal_workflow(
         raise WorkflowError(f"Evaluation failed: {state.evaluation.errors}")
     steps.append(evaluation_result)
 
-    pre_trace_fingerprint = store.fingerprint()
+    pre_trace_state = store.snapshot()
+    pre_trace_fingerprint = pre_trace_state.state_fingerprint or ""
+    state.cardiac_state = pre_trace_state
     trace_result = _call(
         registry,
         "trace.record",
