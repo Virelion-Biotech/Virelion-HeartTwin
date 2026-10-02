@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import argparse
 import csv
-from dataclasses import dataclass
 import hashlib
 import json
 import math
-from pathlib import Path
 import re
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -479,23 +479,29 @@ def prepare_argo_empirical_study(
             }
         )
 
-    split_payload = {
-        "schema_version": "hearttwin-argo-split-v1",
+    extraction = {
+        "r_reference": "maximum_multilead_rms_in_reliable_final-beat_search_window",
+        "local_activation": "maximum_absolute_bipolar_EGM_derivative_within_±200_ms_of_R",
+        "ecg_window_ms": [-350.0, 350.0],
+        "ecg_normalization": "per-lead baseline subtraction plus one global amplitude scale",
+    }
+    split_identity = {
+        "schema_version": "hearttwin-argo-split-identity-v1",
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
         "patient_id": patient["patient_id"],
-        "patient_dir": str(Path(patient_dir).expanduser().resolve()),
         "seed": int(seed),
         "holdout_fraction": float(holdout_fraction),
         "calibration_ids": calibration_ids,
         "holdout_ids": holdout_ids,
-        "extraction": {
-            "r_reference": "maximum_multilead_rms_in_reliable_final-beat_search_window",
-            "local_activation": "maximum_absolute_bipolar_EGM_derivative_within_±200_ms_of_R",
-            "ecg_window_ms": [-350.0, 350.0],
-            "ecg_normalization": "per-lead baseline subtraction plus one global amplitude scale",
-        },
+        "extraction": extraction,
+    }
+    split_payload = {
+        "schema_version": "hearttwin-argo-split-v1",
+        **split_identity,
+        "schema_version": "hearttwin-argo-split-v1",
+        "patient_dir": str(Path(patient_dir).expanduser().resolve()),
         "scientific_boundary": (
             "ARGO provides surface ECG, intracardiac EGMs and reconstructed CARTO EA maps, "
             "but not a volumetric fibre-resolved ventricular anatomy for CardiEP. This split "
@@ -503,7 +509,7 @@ def prepare_argo_empirical_study(
             "requires an independently registered volumetric anatomy/fibre model."
         ),
     }
-    split_payload["split_sha256"] = sha256(split_payload)
+    split_payload["split_sha256"] = sha256(split_identity)
 
     calibration_payload = {
         "schema_version": "hearttwin-argo-calibration-targets-v1",
@@ -567,7 +573,12 @@ def _score_ecg(
     interpolated = np.vstack(
         [np.interp(common_time, pred_time, pred_values[i]) for i in range(12)]
     )
-    interpolated -= np.median(interpolated[:, : max(1, interpolated.shape[1] // 5)], axis=1, keepdims=True)
+    baseline_width = max(1, interpolated.shape[1] // 5)
+    interpolated -= np.median(
+        interpolated[:, :baseline_width],
+        axis=1,
+        keepdims=True,
+    )
     scale = float(np.max(np.abs(interpolated)))
     if scale <= 1e-12:
         raise ValueError("Predicted ECG is effectively flat")
