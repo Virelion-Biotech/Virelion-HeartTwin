@@ -85,6 +85,18 @@ jobs:
                   )
           if data.get("distributed_service_count", 0) < 15:
               raise SystemExit("Too few services crossed real HTTP worker boundaries")
+          expected_branches = {
+              "CardiAnatomy",
+              "CardiEP",
+              "CardiInfer",
+              "CardiStudio",
+              "DCCP",
+          }
+          if set(data.get("branch_probes_passed", [])) != expected_branches:
+              raise SystemExit(
+                  "Distributed branch probes incomplete: "
+                  f"{data.get('branch_probes_passed')!r}"
+              )
           print(json.dumps(data, indent=2, sort_keys=True))
           PY
 
