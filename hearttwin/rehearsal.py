@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 from pathlib import Path
@@ -142,11 +143,20 @@ def _observation(entity_id: str, modality: str, values: dict[str, Any]) -> Obser
 
 
 def _rows(n: int = 20) -> list[dict[str, Any]]:
+    return _rows_for_case(CANARY, n=n, prefix="R")
+
+
+def _rows_for_case(
+    case_id: str,
+    *,
+    n: int = 20,
+    prefix: str = "S",
+) -> list[dict[str, Any]]:
     return [
         {
-            "sample_id": f"R{i:03d}",
-            "group_id": f"RG{i:03d}",
-            "study_id": CANARY,
+            "sample_id": f"{case_id}-{prefix}{i:03d}",
+            "group_id": f"{case_id}-G{i:03d}",
+            "study_id": case_id,
             "label": "MI" if i % 2 else "sham",
             "target": i % 2,
             "gene_a": float(i) / n,
@@ -210,6 +220,325 @@ def _write_inputs(root: Path) -> dict[str, Path]:
         "mechanical": video,
         "imaging": image,
         "safety": safety,
+    }
+
+
+def _run_concurrent_case_probe(
+    distributed: ServiceRegistry,
+    *,
+    journal_path: Path,
+    artifacts: ArtifactStore,
+    base_case_id: str,
+) -> dict[str, Any]:
+    """Run several isolated cases concurrently through shared remote workers."""
+
+    case_ids = [
+        f"{base_case_id}-CONCURRENT-A",
+        f"{base_case_id}-CONCURRENT-B",
+        f"{base_case_id}-CONCURRENT-C",
+    ]
+    submission_order = list(case_ids)
+    delay_by_case = {
+        case_ids[0]: 0.0,
+        case_ids[1]: 0.05,
+        case_ids[2]: 0.10,
+    }
+
+    journal = CaseJournal(journal_path)
+    queue = JobQueue(journal_path)
+    job_ids: dict[str, str] = {}
+    for index, concurrent_case_id in enumerate(case_ids):
+        rows = _rows_for_case(
+            concurrent_case_id,
+            n=18,
+            prefix=f"C{index}",
+        )
+        input_payload = {
+            "probe": "multi-case-isolation",
+            "case_id": concurrent_case_id,
+            "rows_sha256": sha256(rows),
+        }
+        journal.begin_case(concurrent_case_id, input_payload)
+        job_payload = {
+            "case_id": concurrent_case_id,
+            "rows_sha256": input_payload["rows_sha256"],
+            "delay_seconds": delay_by_case[concurrent_case_id],
+        }
+        job_ids[concurrent_case_id] = queue.enqueue(
+            concurrent_case_id,
+            "concurrent-workflow",
+            job_payload,
+        )
+        if index == 0:
+            duplicate = queue.enqueue(
+                concurrent_case_id,
+                "concurrent-workflow",
+                job_payload,
+            )
+            if duplicate != job_ids[concurrent_case_id]:
+                raise RuntimeError(
+                    "Duplicate concurrent submission was not idempotently collapsed"
+                )
+
+    if len(queue.list_jobs()) != len(case_ids):
+        raise RuntimeError("Duplicate submission created an extra queue job")
+
+    # Simulate the coordinator process disappearing after enqueue but before work.
+    del queue
+    del journal
+    queue = JobQueue(journal_path)
+    journal = CaseJournal(journal_path)
+
+    completion_order: list[str] = []
+    completion_lock = __import__("threading").Lock()
+    secondary_completed = __import__("threading").Event()
+
+    def process_one(worker_id: str) -> dict[str, Any] | None:
+        claim = queue.claim(worker_id, lease_seconds=180.0)
+        if claim is None:
+            return None
+
+        job_id = str(claim["job_id"])
+        concurrent_case_id = str(claim["case_id"])
+        payload = dict(claim["payload"])
+        rows = _rows_for_case(
+            concurrent_case_id,
+            n=18,
+            prefix=concurrent_case_id.rsplit("-", 1)[-1],
+        )
+        expected_sha = sha256(rows)
+        if payload.get("rows_sha256") != expected_sha:
+            queue.fail(job_id, worker_id, "rows fingerprint mismatch")
+            raise RuntimeError(
+                f"Queued rows fingerprint changed for {concurrent_case_id}"
+            )
+
+        time.sleep(float(payload.get("delay_seconds", 0.0)))
+        observations = [
+            _observation(
+                concurrent_case_id,
+                "molecular",
+                {
+                    "gene_a": 0.4,
+                    "gene_b": 0.6,
+                    "concurrent_case": concurrent_case_id,
+                },
+            ),
+            _observation(
+                concurrent_case_id,
+                "structural",
+                {
+                    "region": "left_ventricle",
+                    "zone": "IZ",
+                    "concurrent_case": concurrent_case_id,
+                },
+            ),
+            _observation(
+                concurrent_case_id,
+                "clinical",
+                {
+                    "condition": "concurrent_rehearsal",
+                    "concurrent_case": concurrent_case_id,
+                },
+            ),
+        ]
+
+        workflow_payload = {
+            "case_id": concurrent_case_id,
+            "rows_sha256": expected_sha,
+            "observations": [
+                item.model_dump(mode="json")
+                for item in observations
+            ],
+        }
+
+        def execute() -> dict[str, Any]:
+            run = run_multimodal_workflow(
+                distributed,
+                entity_id=concurrent_case_id,
+                observations=observations,
+                benchmark_samples=[
+                    {
+                        "sample_id": row["sample_id"],
+                        "group_id": row["group_id"],
+                        "study_id": row["study_id"],
+                        "label": row["label"],
+                        "region": "IZ" if row["target"] else "remote",
+                    }
+                    for row in rows
+                ],
+                learning_data=rows,
+                feature_columns=["gene_a", "gene_b"],
+                reference_labels={
+                    row["sample_id"]: row["target"]
+                    for row in rows
+                },
+                simulation={
+                    "preset": "mi",
+                    "n_cells": 6,
+                    "duration": 0.75,
+                    "dt": 0.25,
+                },
+                seed=2718,
+            )
+            return run.model_dump(mode="json")
+
+        try:
+            result, reused = journal.run_stage(
+                concurrent_case_id,
+                "concurrent-workflow",
+                workflow_payload,
+                execute,
+                max_attempts=1,
+            )
+            if reused:
+                raise RuntimeError(
+                    f"First concurrent execution was cached for {concurrent_case_id}"
+                )
+
+            # Force A to finish after at least one sibling, regardless of compute timing.
+            if concurrent_case_id == case_ids[0]:
+                if not secondary_completed.wait(timeout=120):
+                    raise RuntimeError(
+                        "Could not force out-of-order concurrent completion"
+                    )
+            else:
+                secondary_completed.set()
+
+            state = result.get("state") or {}
+            canonical = state.get("cardiac_state") or {}
+            if result.get("entity_id") != concurrent_case_id:
+                raise RuntimeError("Concurrent workflow changed top-level case identity")
+            if state.get("entity_id") != concurrent_case_id:
+                raise RuntimeError("Concurrent WorkflowState crossed case boundaries")
+            if canonical.get("entity_id") != concurrent_case_id:
+                raise RuntimeError("Concurrent CardiacState crossed case boundaries")
+            if not canonical.get("state_fingerprint"):
+                raise RuntimeError("Concurrent CardiacState has no fingerprint")
+
+            atlas = state.get("atlas") or {}
+            if atlas.get("context_id") != f"{concurrent_case_id}-context":
+                raise RuntimeError("Concurrent atlas context crossed case boundaries")
+
+            trace = state.get("trace") or {}
+            if not trace.get("run_id") or not trace.get("input_artifact_id"):
+                raise RuntimeError("Concurrent trace output is incomplete")
+
+            output = artifacts.put_json(
+                f"workflow-run-{concurrent_case_id}",
+                result,
+            )
+            if not artifacts.verify(output):
+                raise RuntimeError("Concurrent output artifact failed verification")
+            journal.complete_case(concurrent_case_id, output)
+            queue.complete(
+                job_id,
+                worker_id,
+                {
+                    "case_id": concurrent_case_id,
+                    "workflow_run_id": result["run_id"],
+                    "artifact_sha256": output.sha256,
+                },
+            )
+            with completion_lock:
+                completion_order.append(concurrent_case_id)
+            return {
+                "case_id": concurrent_case_id,
+                "workflow_run_id": result["run_id"],
+                "state_fingerprint": canonical["state_fingerprint"],
+                "trace_run_id": trace["run_id"],
+                "trace_input_artifact_id": trace["input_artifact_id"],
+                "artifact": output.model_dump(),
+            }
+        except Exception as exc:
+            try:
+                queue.fail(job_id, worker_id, str(exc))
+            except Exception:
+                pass
+            journal.fail_case(concurrent_case_id, str(exc))
+            raise
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        futures = [
+            pool.submit(process_one, f"case-worker-{index}")
+            for index in range(3)
+        ]
+        results = [
+            future.result()
+            for future in as_completed(futures)
+            if future.result() is not None
+        ]
+
+    if len(results) != len(case_ids):
+        raise RuntimeError("Not every concurrent case completed")
+    if completion_order == submission_order:
+        raise RuntimeError("Concurrent cases did not complete out of order")
+
+    result_by_case = {item["case_id"]: item for item in results}
+    if set(result_by_case) != set(case_ids):
+        raise RuntimeError("Concurrent case result set is incomplete")
+
+    fingerprints = {
+        item["state_fingerprint"]
+        for item in results
+    }
+    workflow_run_ids = {
+        item["workflow_run_id"]
+        for item in results
+    }
+    trace_run_ids = {
+        item["trace_run_id"]
+        for item in results
+    }
+    trace_artifacts = {
+        item["trace_input_artifact_id"]
+        for item in results
+    }
+    if len(fingerprints) != len(case_ids):
+        raise RuntimeError("Concurrent cases shared a canonical-state fingerprint")
+    if len(workflow_run_ids) != len(case_ids):
+        raise RuntimeError("Concurrent cases shared a workflow run ID")
+    if len(trace_run_ids) != len(case_ids):
+        raise RuntimeError("Concurrent cases shared a trace run ID")
+    if len(trace_artifacts) != len(case_ids):
+        raise RuntimeError("Concurrent cases shared a trace input artifact")
+
+    fresh_journal = CaseJournal(journal_path)
+    for concurrent_case_id in case_ids:
+        snapshot = fresh_journal.snapshot(concurrent_case_id)
+        if snapshot["case"]["status"] != "ok":
+            raise RuntimeError(
+                f"Concurrent case did not persist as ok: {concurrent_case_id}"
+            )
+        event_case_ids = {
+            event["case_id"]
+            for event in snapshot["events"]
+        }
+        if event_case_ids != {concurrent_case_id}:
+            raise RuntimeError("Journal events crossed case boundaries")
+
+    jobs = queue.list_jobs()
+    concurrent_jobs = [
+        item
+        for item in jobs
+        if item["job_type"] == "concurrent-workflow"
+    ]
+    if len(concurrent_jobs) != len(case_ids):
+        raise RuntimeError("Unexpected concurrent queue job count")
+    if any(item["status"] != "ok" for item in concurrent_jobs):
+        raise RuntimeError("At least one concurrent queue job is not complete")
+
+    return {
+        "case_ids": case_ids,
+        "submission_order": submission_order,
+        "completion_order": completion_order,
+        "duplicate_submission_collapsed": True,
+        "coordinator_restart_recovered": True,
+        "case_isolation_verified": True,
+        "unique_state_fingerprints": len(fingerprints),
+        "unique_workflow_run_ids": len(workflow_run_ids),
+        "unique_trace_run_ids": len(trace_run_ids),
+        "unique_trace_artifacts": len(trace_artifacts),
     }
 
 
@@ -327,6 +656,13 @@ def run_operational_rehearsal(
         for worker in workers.values():
             worker.start()
         distributed = _distributed_registry(base, endpoints)
+
+        concurrent_probe = _run_concurrent_case_probe(
+            distributed,
+            journal_path=journal_path,
+            artifacts=artifacts,
+            base_case_id=case_id,
+        )
 
         def execute_branch_probes() -> dict[str, Any]:
             probes: dict[str, Any] = {}
@@ -622,6 +958,16 @@ def run_operational_rehearsal(
             "queue_job_id": queue_job_id,
             "queue_attempts": queue_state["attempts"],
             "branch_probes_passed": sorted(branch_probes),
+            "concurrent_cases": concurrent_probe,
+            "multi_case_isolation_verified": concurrent_probe[
+                "case_isolation_verified"
+            ],
+            "duplicate_case_submission_collapsed": concurrent_probe[
+                "duplicate_submission_collapsed"
+            ],
+            "coordinator_restart_recovered": concurrent_probe[
+                "coordinator_restart_recovered"
+            ],
             "journal_event_count": len(snapshot["events"]),
             "journal_stage_count": len(snapshot["stages"]),
         }
