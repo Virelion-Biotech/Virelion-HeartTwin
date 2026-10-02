@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import sqlite3
 import tempfile
+import time
 from typing import Any, Callable
 
 from .provenance import sha256
@@ -318,3 +319,254 @@ class CaseJournal:
             "stages": [dict(row) for row in stages],
             "events": [dict(row) for row in events],
         }
+
+
+
+class JobQueue:
+    """SQLite lease-based queue for crash/reclaim rehearsal semantics."""
+
+    def __init__(self, path: str | Path):
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._initialize()
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.path, timeout=30.0)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute("PRAGMA busy_timeout=30000")
+        return connection
+
+    def _initialize(self) -> None:
+        with self._connect() as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS jobs (
+                    job_id TEXT PRIMARY KEY,
+                    case_id TEXT NOT NULL,
+                    job_type TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    lease_owner TEXT,
+                    lease_expires_at REAL,
+                    result_json TEXT,
+                    error TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+                """
+            )
+            db.execute(
+                """
+                CREATE INDEX IF NOT EXISTS idx_jobs_status_created
+                ON jobs(status, created_at)
+                """
+            )
+
+    def enqueue(
+        self,
+        case_id: str,
+        job_type: str,
+        payload: Any,
+        *,
+        idempotency_key: str | None = None,
+    ) -> str:
+        key = idempotency_key or sha256(
+            {
+                "case_id": case_id,
+                "job_type": job_type,
+                "payload": payload,
+            }
+        )
+        job_id = f"job-{key[:24]}"
+        encoded = _canonical_json(payload)
+        now = _now()
+        with self._connect() as db:
+            existing = db.execute(
+                "SELECT case_id,job_type,payload_json FROM jobs WHERE job_id=?",
+                (job_id,),
+            ).fetchone()
+            if existing is not None:
+                if (
+                    existing["case_id"] != case_id
+                    or existing["job_type"] != job_type
+                    or existing["payload_json"] != encoded
+                ):
+                    raise RuntimeError(
+                        f"job_id collision for idempotency key {key}"
+                    )
+                return job_id
+            db.execute(
+                """
+                INSERT INTO jobs(
+                    job_id,case_id,job_type,payload_json,status,created_at,updated_at
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (job_id, case_id, job_type, encoded, "queued", now, now),
+            )
+        return job_id
+
+    def _requeue_expired(self, db: sqlite3.Connection, now: float) -> int:
+        cursor = db.execute(
+            """
+            UPDATE jobs SET
+                status='queued',
+                lease_owner=NULL,
+                lease_expires_at=NULL,
+                updated_at=?
+            WHERE status='leased'
+              AND lease_expires_at IS NOT NULL
+              AND lease_expires_at <= ?
+            """,
+            (_now(), now),
+        )
+        return int(cursor.rowcount)
+
+    def claim(
+        self,
+        worker_id: str,
+        *,
+        lease_seconds: float = 30.0,
+    ) -> dict[str, Any] | None:
+        if not worker_id:
+            raise ValueError("worker_id must not be empty")
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
+
+        now = time.time()
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            self._requeue_expired(db, now)
+            row = db.execute(
+                """
+                SELECT * FROM jobs
+                WHERE status='queued'
+                ORDER BY created_at, job_id
+                LIMIT 1
+                """
+            ).fetchone()
+            if row is None:
+                db.commit()
+                return None
+            expires = now + lease_seconds
+            db.execute(
+                """
+                UPDATE jobs SET
+                    status='leased',
+                    attempts=attempts+1,
+                    lease_owner=?,
+                    lease_expires_at=?,
+                    error=NULL,
+                    updated_at=?
+                WHERE job_id=? AND status='queued'
+                """,
+                (worker_id, expires, _now(), row["job_id"]),
+            )
+            claimed = db.execute(
+                "SELECT * FROM jobs WHERE job_id=?",
+                (row["job_id"],),
+            ).fetchone()
+            db.commit()
+
+        assert claimed is not None
+        result = dict(claimed)
+        result["payload"] = json.loads(result.pop("payload_json"))
+        return result
+
+    def heartbeat(
+        self,
+        job_id: str,
+        worker_id: str,
+        *,
+        lease_seconds: float = 30.0,
+    ) -> None:
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
+        with self._connect() as db:
+            cursor = db.execute(
+                """
+                UPDATE jobs SET lease_expires_at=?,updated_at=?
+                WHERE job_id=? AND status='leased' AND lease_owner=?
+                """,
+                (time.time() + lease_seconds, _now(), job_id, worker_id),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError("Cannot heartbeat an unowned or inactive job")
+
+    def complete(
+        self,
+        job_id: str,
+        worker_id: str,
+        result: Any,
+    ) -> None:
+        encoded = _canonical_json(result)
+        with self._connect() as db:
+            cursor = db.execute(
+                """
+                UPDATE jobs SET
+                    status='ok',
+                    result_json=?,
+                    lease_owner=NULL,
+                    lease_expires_at=NULL,
+                    error=NULL,
+                    updated_at=?
+                WHERE job_id=? AND status='leased' AND lease_owner=?
+                """,
+                (encoded, _now(), job_id, worker_id),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError("Cannot complete an unowned or inactive job")
+
+    def fail(
+        self,
+        job_id: str,
+        worker_id: str,
+        error: str,
+        *,
+        requeue: bool = False,
+    ) -> None:
+        status = "queued" if requeue else "error"
+        with self._connect() as db:
+            cursor = db.execute(
+                """
+                UPDATE jobs SET
+                    status=?,
+                    error=?,
+                    lease_owner=NULL,
+                    lease_expires_at=NULL,
+                    updated_at=?
+                WHERE job_id=? AND status='leased' AND lease_owner=?
+                """,
+                (status, error, _now(), job_id, worker_id),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError("Cannot fail an unowned or inactive job")
+
+    def get(self, job_id: str) -> dict[str, Any]:
+        with self._connect() as db:
+            row = db.execute(
+                "SELECT * FROM jobs WHERE job_id=?",
+                (job_id,),
+            ).fetchone()
+        if row is None:
+            raise KeyError(job_id)
+        result = dict(row)
+        result["payload"] = json.loads(result.pop("payload_json"))
+        if result.get("result_json") is not None:
+            result["result"] = json.loads(result["result_json"])
+        return result
+
+    def list_jobs(self) -> list[dict[str, Any]]:
+        with self._connect() as db:
+            rows = db.execute(
+                "SELECT * FROM jobs ORDER BY created_at,job_id"
+            ).fetchall()
+        output = []
+        for row in rows:
+            item = dict(row)
+            item["payload"] = json.loads(item.pop("payload_json"))
+            if item.get("result_json") is not None:
+                item["result"] = json.loads(item["result_json"])
+            output.append(item)
+        return output
