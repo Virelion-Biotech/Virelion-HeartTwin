@@ -243,6 +243,11 @@ def _run_concurrent_case_probe(
         case_ids[1]: 0.05,
         case_ids[2]: 0.10,
     }
+    seed_by_case = {
+        case_ids[0]: 3,
+        case_ids[1]: 3,
+        case_ids[2]: 1,
+    }
 
     journal = CaseJournal(journal_path)
     queue = JobQueue(journal_path)
@@ -263,6 +268,7 @@ def _run_concurrent_case_probe(
             "case_id": concurrent_case_id,
             "rows_sha256": input_payload["rows_sha256"],
             "delay_seconds": delay_by_case[concurrent_case_id],
+            "seed": seed_by_case[concurrent_case_id],
         }
         job_ids[concurrent_case_id] = queue.enqueue(
             concurrent_case_id,
@@ -312,6 +318,7 @@ def _run_concurrent_case_probe(
             prefix=concurrent_case_id.rsplit("-", 1)[-1],
         )
         expected_sha = sha256(rows)
+        case_seed = int(payload["seed"])
         if payload.get("rows_sha256") != expected_sha:
             queue.fail(job_id, worker_id, "rows fingerprint mismatch")
             raise RuntimeError(
@@ -384,7 +391,7 @@ def _run_concurrent_case_probe(
                     "duration": 0.75,
                     "dt": 0.25,
                 },
-                seed=2718,
+                seed=case_seed,
             )
             return run.model_dump(mode="json")
 
