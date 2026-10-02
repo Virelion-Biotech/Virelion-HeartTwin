@@ -204,6 +204,14 @@ def main() -> None:
         learning_data=rows,
         feature_columns=["gene_a", "gene_b"],
         reference_labels={row["sample_id"]: row["target"] for row in rows},
+        benchmark_validation_values=[
+            rows[-4]["group_id"],
+            rows[-3]["group_id"],
+        ],
+        benchmark_test_values=[
+            rows[-2]["group_id"],
+            rows[-1]["group_id"],
+        ],
         simulation={"preset": "mi", "n_cells": 16, "duration": 1.0, "dt": 0.25},
         seed=42,
     )
