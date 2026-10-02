@@ -88,6 +88,9 @@ jobs:
               "artifact_corruption_detected": True,
               "durable_replay_reused": True,
               "queue_lease_recovered": True,
+              "multi_case_isolation_verified": True,
+              "duplicate_case_submission_collapsed": True,
+              "coordinator_restart_recovered": True,
           }
           for key, expected in required.items():
               if data.get(key) != expected:
@@ -109,6 +112,23 @@ jobs:
                   "Distributed branch probes incomplete: "
                   f"{data.get('branch_probes_passed')!r}"
               )
+          concurrent = data.get("concurrent_cases") or {}
+          case_ids = concurrent.get("case_ids") or []
+          if len(case_ids) != 3:
+              raise SystemExit(f"Expected 3 concurrent cases, got {case_ids!r}")
+          if concurrent.get("completion_order") == concurrent.get("submission_order"):
+              raise SystemExit("Concurrent cases did not complete out of order")
+          for field in (
+              "unique_state_fingerprints",
+              "unique_workflow_run_ids",
+              "unique_trace_run_ids",
+              "unique_trace_artifacts",
+          ):
+              if concurrent.get(field) != 3:
+                  raise SystemExit(
+                      f"Concurrent isolation failed {field}: "
+                      f"{concurrent.get(field)!r}"
+                  )
           print(json.dumps(data, indent=2, sort_keys=True))
           PY
 
@@ -134,6 +154,14 @@ jobs:
               row["event_type"] == "fault.queue_lease_recovered"
               for row in state["events"]
           )
+          for suffix in ("A", "B", "C"):
+              concurrent_case = f"HT-OPS-CI-CONCURRENT-{suffix}"
+              concurrent_state = journal.snapshot(concurrent_case)
+              assert concurrent_state["case"]["status"] == "ok"
+              assert {
+                  event["case_id"]
+                  for event in concurrent_state["events"]
+              } == {concurrent_case}
           print(
               f"reopened {len(state['stages'])} stages and "
               f"{len(state['events'])} durable events"
