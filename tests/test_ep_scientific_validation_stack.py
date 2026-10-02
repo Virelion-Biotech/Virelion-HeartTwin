@@ -26,6 +26,11 @@ def test_cardiep_niederer_contract_is_available_through_stack_pin() -> None:
     assert report["status"] == "pass"
     assert report["metrics"]["rmse_ms"] == pytest.approx(0.0)
 
+    refinement = cardiep.run_eikonal_refinement_validation()
+    assert refinement["passed"] is True
+    assert refinement["validation_status"] == "numerical_refinement_check"
+    assert refinement["metrics"]["monotone_error_reduction"] is True
+
 
 def test_cardiinfer_recovery_calibration_primitives_are_available() -> None:
     assert cardiinfer.posterior_cdf_at_truth(
