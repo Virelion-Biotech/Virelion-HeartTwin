@@ -236,6 +236,8 @@ def run_multimodal_workflow(
     learning_data: list[dict[str, Any]],
     feature_columns: list[str],
     reference_labels: dict[str, int],
+    benchmark_test_values: list[str] | None = None,
+    benchmark_validation_values: list[str] | None = None,
     atlas_record_ids: list[str] | None = None,
     atlas_records: list[dict[str, Any]] | None = None,
     simulation: dict[str, Any] | None = None,
@@ -250,6 +252,10 @@ def run_multimodal_workflow(
             "learning_data": learning_data,
             "feature_columns": feature_columns,
             "reference_labels": reference_labels,
+            "benchmark_test_values": sorted(benchmark_test_values or []),
+            "benchmark_validation_values": sorted(
+                benchmark_validation_values or []
+            ),
             "simulation": simulation,
             "atlas_record_ids": atlas_record_ids,
             "atlas_records": atlas_records,
@@ -291,13 +297,38 @@ def run_multimodal_workflow(
     # Freeze the benchmark before fitting. The learner cannot choose evaluation IDs.
     benchmark_result = _call(
         registry, "benchmark.resolve", entity_id,
-        {"benchmark_id": "hearttwin-multimodal", "version": "1.0",
-         "policy": "subject_heldout", "seed": seed, "samples": benchmark_samples},
+        {
+            "benchmark_id": "hearttwin-multimodal",
+            "version": "1.0",
+            "policy": "subject_heldout",
+            "seed": seed,
+            "samples": benchmark_samples,
+            "test_values": list(benchmark_test_values or []),
+            "validation_values": list(benchmark_validation_values or []),
+        },
     )
     state.benchmark = _as_benchmark(benchmark_result.data)
     assignments = state.benchmark.assignments
     if set(reference_labels) != set(assignments) or any(type(v) is not int or v not in (0, 1) for v in reference_labels.values()):
         raise WorkflowError("reference_labels must provide explicit 0/1 labels for exactly the benchmark samples")
+    test_ids = [
+        sample_id
+        for sample_id, partition in assignments.items()
+        if partition == "test"
+    ]
+    if not test_ids:
+        raise WorkflowError(
+            "Benchmark test partition is empty; predeclare benchmark_test_values "
+            "or use a split policy that yields held-out samples"
+        )
+    test_classes = {reference_labels[sample_id] for sample_id in test_ids}
+    if len(test_classes) < 2:
+        raise WorkflowError(
+            "Binary evaluation test partition must contain both reference classes; "
+            "balanced accuracy and ROC AUC are undefined for a one-class holdout. "
+            "Predeclare class-valid benchmark_test_values before fitting."
+        )
+
     rows_by_id = {str(row["sample_id"]): row for row in learning_data}
     if len(rows_by_id) != len(learning_data) or set(rows_by_id) != set(assignments):
         raise WorkflowError("Learning data must contain exactly the unique benchmark sample IDs")
