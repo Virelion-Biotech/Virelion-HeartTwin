@@ -314,3 +314,142 @@ def test_disconnected_native_branches_resolve_without_route_aliasing() -> None:
         },
     )
     assert atlas_result["query"] == CANARY
+
+
+
+def test_specialist_side_pipes_return_the_same_canary(
+    tmp_path,
+) -> None:
+    registry = load_registry()
+    _require_full_stack(registry)
+
+    import numpy as np
+    import pandas as pd
+
+    # ElectroTrace: deterministic ECG-like CSV.
+    ecg_path = tmp_path / "canary_ecg.csv"
+    fs = 100.0
+    time = np.arange(0.0, 2.0, 1.0 / fs)
+    pd.DataFrame(
+        {
+            "time": time,
+            "lead_I": np.sin(2 * np.pi * 1.2 * time),
+        }
+    ).to_csv(ecg_path, index=False)
+    electrical = registry.capability("electrical.analyze")
+    assert electrical is not None
+    electrical_result = electrical.invoke(
+        "electrical.analyze",
+        {
+            "entity_id": CANARY,
+            "observations": [
+                {
+                    "modality": "electrical",
+                    "values": {
+                        "input_path": str(ecg_path),
+                        "time_col": "time",
+                    },
+                }
+            ],
+        },
+    )
+    assert electrical_result["entity_id"] == CANARY
+
+    # MyoTrace: small deterministic moving-disc AVI.
+    cv2 = pytest.importorskip("cv2")
+    video_path = tmp_path / "canary_motion.avi"
+    writer = cv2.VideoWriter(
+        str(video_path),
+        cv2.VideoWriter_fourcc(*"MJPG"),
+        20.0,
+        (64, 64),
+        isColor=False,
+    )
+    assert writer.isOpened(), "OpenCV could not create the canary AVI"
+    try:
+        for frame_index in range(60):
+            frame = np.zeros((64, 64), dtype=np.uint8)
+            phase = frame_index / 20.0 * 2.0 * np.pi
+            radius = int(12 + 3 * np.sin(phase))
+            cv2.circle(frame, (32, 32), radius, 220, -1)
+            writer.write(frame)
+    finally:
+        writer.release()
+
+    mechanical = registry.capability("mechanical.analyze")
+    assert mechanical is not None
+    mechanical_result = mechanical.invoke(
+        "mechanical.analyze",
+        {
+            "entity_id": CANARY,
+            "observations": [
+                {
+                    "modality": "mechanical",
+                    "values": {
+                        "input_path": str(video_path),
+                        "fps": 20,
+                        "allow_qc_fail": True,
+                    },
+                }
+            ],
+        },
+    )
+    assert mechanical_result["sample_id"] == CANARY
+
+    # OptiCell: simple microscopy-like image.
+    image_path = tmp_path / "canary_cells.png"
+    image = np.zeros((96, 96), dtype=np.uint8)
+    cv2.circle(image, (32, 48), 12, 180, -1)
+    cv2.circle(image, (64, 48), 10, 220, -1)
+    assert cv2.imwrite(str(image_path), image)
+
+    imaging = registry.capability("imaging.qc")
+    assert imaging is not None
+    imaging_result = imaging.invoke(
+        "imaging.qc",
+        {
+            "entity_id": CANARY,
+            "observations": [
+                {
+                    "modality": "imaging",
+                    "values": {
+                        "input_path": str(image_path),
+                        "cell_method": "threshold",
+                        "adaptive_qc": False,
+                    },
+                }
+            ],
+        },
+    )
+    assert imaging_result["entity_id"] == CANARY
+    assert imaging_result["n_rows"] == 1
+
+    # CardioScore: use its own deterministic synthetic MEA feature generator.
+    from virelion_cardioscore.io.synthetic import load_synthetic_dataset
+
+    safety_path = tmp_path / "canary_mea.csv"
+    safety_dataset = load_synthetic_dataset(
+        n_compounds=1,
+        n_concentrations=4,
+        seed=2718,
+    )
+    safety_dataset.features.to_csv(safety_path, index=False)
+
+    safety = registry.capability("safety.score")
+    assert safety is not None
+    safety_result = safety.invoke(
+        "safety.score",
+        {
+            "entity_id": CANARY,
+            "observations": [
+                {
+                    "modality": "safety",
+                    "values": {
+                        "input_path": str(safety_path),
+                    },
+                }
+            ],
+        },
+    )
+    assert safety_result["entity_id"] == CANARY
+    assert safety_result["summary"]
