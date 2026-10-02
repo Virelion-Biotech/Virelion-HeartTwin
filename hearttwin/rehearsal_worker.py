@@ -25,6 +25,8 @@ class RehearsalWorker:
         self.cache: dict[str, dict[str, Any]] = {}
         self.inflight: dict[str, dict[str, Any]] = {}
         self.cache_lock = threading.Lock()
+        self.response_drop_keys: set[str] = set()
+        self.response_drop_lock = threading.Lock()
         store_path = os.environ.get("HEARTTWIN_REHEARSAL_IDEMPOTENCY_DB")
         self.idempotency_store = (
             IdempotencyStore(store_path)
@@ -239,10 +241,21 @@ def _handler(worker: RehearsalWorker):
                 payload = json.loads(self.rfile.read(length) or b"{}")
                 if not isinstance(payload, dict):
                     raise ValueError("request payload must be a JSON object")
+                drop_response_once = payload.pop(
+                    "_rehearsal_drop_response_once",
+                    False,
+                )
+                if not isinstance(drop_response_once, bool):
+                    raise ValueError(
+                        "_rehearsal_drop_response_once must be a boolean"
+                    )
+                idempotency_key = self.headers.get(
+                    "X-HeartTwin-Idempotency-Key"
+                )
                 result, cached = worker.invoke(
                     capability,
                     payload,
-                    self.headers.get("X-HeartTwin-Idempotency-Key"),
+                    idempotency_key,
                 )
             except Exception as exc:  # noqa: BLE001
                 self._json(
@@ -253,6 +266,28 @@ def _handler(worker: RehearsalWorker):
                     },
                 )
                 return
+
+            if drop_response_once:
+                if not idempotency_key:
+                    self._json(
+                        400,
+                        {"error": "drop-response probe requires idempotency key"},
+                    )
+                    return
+                with worker.response_drop_lock:
+                    should_drop = (
+                        idempotency_key not in worker.response_drop_keys
+                    )
+                    if should_drop:
+                        worker.response_drop_keys.add(idempotency_key)
+                if should_drop:
+                    try:
+                        self.connection.shutdown(2)
+                    except OSError:
+                        pass
+                    self.connection.close()
+                    return
+
             self._json(200, result, cached=cached)
 
     return Handler
