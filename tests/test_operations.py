@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from hearttwin.operations import ArtifactStore, CaseJournal
+from hearttwin.operations import ArtifactStore, CaseJournal, JobQueue
 
 
 def test_artifact_store_detects_corruption_and_repairs(tmp_path: Path) -> None:
@@ -109,3 +109,58 @@ def test_case_id_cannot_be_reused_for_different_input(tmp_path: Path) -> None:
     journal.begin_case("C1", {"input": 1})
     with pytest.raises(RuntimeError, match="different input"):
         journal.begin_case("C1", {"input": 2})
+
+
+def test_job_queue_reclaims_expired_lease_after_worker_crash(tmp_path: Path) -> None:
+    import time
+
+    queue = JobQueue(tmp_path / "journal.sqlite3")
+    job_id = queue.enqueue("C1", "simulate", {"value": 7})
+
+    first = queue.claim("worker-a", lease_seconds=0.05)
+    assert first is not None
+    assert first["job_id"] == job_id
+    assert first["attempts"] == 1
+
+    time.sleep(0.08)
+    second = queue.claim("worker-b", lease_seconds=1.0)
+    assert second is not None
+    assert second["job_id"] == job_id
+    assert second["attempts"] == 2
+    assert second["lease_owner"] == "worker-b"
+
+    queue.complete(job_id, "worker-b", {"ok": True})
+    final = queue.get(job_id)
+    assert final["status"] == "ok"
+    assert final["attempts"] == 2
+    assert final["result"] == {"ok": True}
+
+
+def test_job_queue_idempotent_enqueue_returns_same_job(tmp_path: Path) -> None:
+    queue = JobQueue(tmp_path / "queue.sqlite3")
+    first = queue.enqueue("C1", "stage", {"x": 1})
+    second = queue.enqueue("C1", "stage", {"x": 1})
+    assert first == second
+    assert len(queue.list_jobs()) == 1
+
+
+def test_job_queue_rejects_wrong_worker_completion(tmp_path: Path) -> None:
+    queue = JobQueue(tmp_path / "queue.sqlite3")
+    job_id = queue.enqueue("C1", "stage", {"x": 1})
+    claimed = queue.claim("worker-a")
+    assert claimed is not None
+    with pytest.raises(RuntimeError, match="unowned"):
+        queue.complete(job_id, "worker-b", {"ok": True})
+
+
+def test_job_queue_can_requeue_explicit_failure(tmp_path: Path) -> None:
+    queue = JobQueue(tmp_path / "queue.sqlite3")
+    job_id = queue.enqueue("C1", "stage", {"x": 1})
+    claimed = queue.claim("worker-a")
+    assert claimed is not None
+    queue.fail(job_id, "worker-a", "transient", requeue=True)
+
+    reclaimed = queue.claim("worker-b")
+    assert reclaimed is not None
+    assert reclaimed["job_id"] == job_id
+    assert reclaimed["attempts"] == 2
