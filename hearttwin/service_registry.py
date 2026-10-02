@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import shlex
 import subprocess
 import time
 import urllib.error
@@ -158,10 +159,13 @@ class ServiceAdapter:
                 env["HEARTTWIN_PAYLOAD_STDIN"] = "1"
             else:
                 env["HEARTTWIN_PAYLOAD"] = raw
+            argv = shlex.split(self.spec.command)
+            if not argv:
+                raise RuntimeError(f"Service {self.spec.name} has an empty command")
             process = subprocess.run(
-                self.spec.command,
+                argv,
                 input=raw if env.get("HEARTTWIN_PAYLOAD_STDIN") == "1" else None,
-                shell=True,
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=600,
