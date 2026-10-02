@@ -37,8 +37,8 @@ MyoTrace/CMR --- mechanics observations --------┤
 
 ## Reproducibility
 
-`requirements-services.txt` pins CardiMech to commit `8bb2f9296f4475e1448c62b2a8e1509aa4a54600`.
+`requirements-services.txt` pins CardiMech to commit `ceaa3b42d77fbdea4743ed27b8a29fa478d68a0b`.
 
-## Scientific boundary
+The pinned revision is the merged, Python 3.10-3.12 CI-verified CardiMech 0.2.0 stack rather than an unmerged feature-branch SHA.\n\n## Scientific boundary
 
 The built-in `numpy-lumped-v1` backend is a deterministic non-spatial software/reference model for integration, regression, fast sweeps, and inference plumbing. Spatial finite-element mechanics and empirical patient validation require explicit higher-fidelity backends and separate validation evidence.
