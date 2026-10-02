@@ -47,6 +47,18 @@ def main() -> None:
     demo.add_argument("--output", default="outputs/demo-state.json")
     workflow = sub.add_parser("workflow-demo")
     workflow.add_argument("--output", default="outputs/workflow-demo.json")
+    rehearsal = sub.add_parser(
+        "operational-rehearsal",
+        help="Run the distributed production-topology rehearsal",
+    )
+    rehearsal.add_argument(
+        "--workdir",
+        default="outputs/operational-rehearsal",
+    )
+    rehearsal.add_argument(
+        "--case-id",
+        default="HEARTTWIN-OPERATIONAL-REHEARSAL",
+    )
     args = parser.parse_args()
     registry = load_registry()
 
@@ -62,6 +74,15 @@ def main() -> None:
         run = HeartTwin(registry).run("demo-entity", capabilities=[])
         Path(args.output).write_text(run.model_dump_json(indent=2), encoding="utf-8")
         print(args.output)
+        return
+    if args.cmd == "operational-rehearsal":
+        from .rehearsal import run_operational_rehearsal
+
+        summary = run_operational_rehearsal(
+            args.workdir,
+            case_id=args.case_id,
+        )
+        print(json.dumps(summary, indent=2, sort_keys=True))
         return
 
     rows = _demo_rows()
