@@ -4,6 +4,8 @@ import json
 import os
 import shutil
 import subprocess
+import time
+import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from typing import Any
@@ -81,14 +83,56 @@ class ServiceAdapter:
     def _invoke_http(self, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         if not self.spec.endpoint:
             raise RuntimeError(f"Service {self.spec.name} has no HTTP endpoint")
-        req = urllib.request.Request(
-            self.spec.endpoint.rstrip("/") + self._request_path(capability),
-            data=json.dumps(payload).encode(),
-            headers={"Content-Type": "application/json"},
-            method="POST",
+        from .provenance import sha256
+
+        raw = json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+        idempotency_key = sha256(
+            {
+                "service": self.spec.name,
+                "capability": capability,
+                "payload": payload,
+            }
         )
-        with urllib.request.urlopen(req, timeout=120) as response:
-            return json.loads(response.read())
+        timeout = float(os.getenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "120"))
+        attempts = int(os.getenv("HEARTTWIN_HTTP_ATTEMPTS", "3"))
+        backoff = float(os.getenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0.2"))
+        if timeout <= 0 or attempts < 1 or backoff < 0:
+            raise ValueError("Invalid HeartTwin HTTP retry configuration")
+
+        url = self.spec.endpoint.rstrip("/") + self._request_path(capability)
+        last_error: Exception | None = None
+        for attempt in range(1, attempts + 1):
+            req = urllib.request.Request(
+                url,
+                data=raw,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-HeartTwin-Idempotency-Key": idempotency_key,
+                    "X-HeartTwin-Attempt": str(attempt),
+                },
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as response:
+                    return json.loads(response.read())
+            except urllib.error.HTTPError as exc:
+                last_error = exc
+                if exc.code < 500 or attempt == attempts:
+                    raise
+            except (urllib.error.URLError, TimeoutError) as exc:
+                last_error = exc
+                if attempt == attempts:
+                    raise
+            if backoff:
+                time.sleep(backoff * attempt)
+
+        assert last_error is not None
+        raise last_error
 
     def invoke(self, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         if capability not in self.spec.capabilities:
