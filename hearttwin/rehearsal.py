@@ -17,7 +17,7 @@ import numpy as np
 
 from .config import load_registry
 from .contracts import Observation, Provenance
-from .operations import ArtifactStore, CaseJournal, JobQueue
+from .operations import ArtifactStore, CaseJournal, IdempotencyStore, JobQueue
 from .provenance import sha256
 from .service_registry import ServiceRegistry, ServiceSpec
 from .workflow import run_multimodal_workflow
@@ -907,6 +907,47 @@ def run_operational_rehearsal(
             {"service": "CardiAnatomy"},
         )
 
+        drop_payload = {
+            "entity_id": case_id,
+            "_rehearsal_drop_response_once": True,
+        }
+        anatomy_health = distributed.capability("anatomy.health")
+        if anatomy_health is None:
+            raise RuntimeError("anatomy.health route disappeared")
+        drop_result = anatomy_health.invoke(
+            "anatomy.health",
+            drop_payload,
+        )
+        if drop_result.get("status") != "ok":
+            raise RuntimeError(
+                "Dropped-response retry did not recover a valid anatomy health result"
+            )
+        drop_key = sha256(
+            {
+                "service": "CardiAnatomy",
+                "capability": "anatomy.health",
+                "payload": drop_payload,
+            }
+        )
+        durable_idempotency = IdempotencyStore(
+            root / "worker-idempotency.sqlite3"
+        )
+        persisted_drop = durable_idempotency.get(
+            "CardiAnatomy",
+            drop_key,
+            "anatomy.health",
+            {"entity_id": case_id},
+        )
+        if persisted_drop != drop_result:
+            raise RuntimeError(
+                "Dropped-response result was not recovered from durable idempotency"
+            )
+        journal.event(
+            case_id,
+            "fault.response_drop_recovered",
+            {"service": "CardiAnatomy", "idempotency_key": drop_key},
+        )
+
         observations = [
             _observation(
                 case_id,
@@ -1068,6 +1109,7 @@ def run_operational_rehearsal(
             "http_retry_recovered": True,
             "duplicate_suppressed": second_cached,
             "idempotency_survived_worker_restart": third_cached,
+            "response_drop_recovered_from_durable_result": True,
             "artifact_corruption_detected": True,
             "durable_replay_reused": replay_reused,
             "queue_lease_recovered": True,

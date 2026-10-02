@@ -87,6 +87,7 @@ jobs:
               "http_retry_recovered": True,
               "duplicate_suppressed": True,
               "idempotency_survived_worker_restart": True,
+              "response_drop_recovered_from_durable_result": True,
               "artifact_corruption_detected": True,
               "durable_replay_reused": True,
               "queue_lease_recovered": True,
@@ -163,6 +164,10 @@ jobs:
           )
           assert any(
               row["event_type"] == "fault.idempotency_survived_restart"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.response_drop_recovered"
               for row in state["events"]
           )
           for suffix in ("A", "B", "C"):

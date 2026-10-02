@@ -143,10 +143,8 @@ class ServiceAdapter:
             except (
                 urllib.error.URLError,
                 TimeoutError,
-                http.client.RemoteDisconnected,
-                ConnectionResetError,
-                ConnectionAbortedError,
-                BrokenPipeError,
+                ConnectionError,
+                http.client.HTTPException,
             ) as exc:
                 last_error = exc
                 if attempt == attempts:
