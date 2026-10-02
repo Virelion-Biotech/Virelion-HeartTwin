@@ -61,3 +61,28 @@ def test_undefined_learning_metrics_become_warnings_not_nan() -> None:
     assert len(warnings) == 2
     assert any("validation.roc_auc" in item for item in warnings)
     assert any("validation.loss" in item for item in warnings)
+
+
+
+def test_pinned_cardilearn_uses_json_null_for_undefined_metrics() -> None:
+    pytest.importorskip("cardilearn")
+    import json
+    import numpy as np
+    from cardilearn.metrics import classification_metrics, regression_metrics
+
+    classification = classification_metrics(
+        np.asarray([1, 1, 1]),
+        np.asarray([1, 1, 1]),
+        np.asarray([0.7, 0.8, 0.9]),
+    )
+    regression = regression_metrics(
+        np.asarray([2.0]),
+        np.asarray([2.0]),
+    )
+
+    assert classification["auroc"] is None
+    assert regression["r2"] is None
+    json.dumps(
+        {"classification": classification, "regression": regression},
+        allow_nan=False,
+    )
