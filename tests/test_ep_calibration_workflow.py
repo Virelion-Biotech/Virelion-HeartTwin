@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -136,7 +137,7 @@ def _activation_observation(path: Path, *, entity: str = "S1") -> Observation:
 def _ep_geometry(tmp_path: Path) -> Path:
     path = tmp_path / "geometry.json"
     path.write_text(
-        __import__("json").dumps(
+        json.dumps(
             {
                 "units": "cm",
                 "node_xyz": [
