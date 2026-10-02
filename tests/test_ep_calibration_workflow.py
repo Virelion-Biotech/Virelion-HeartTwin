@@ -10,6 +10,7 @@ pytest.importorskip("cardiep")
 pytest.importorskip("cardiinfer")
 
 from hearttwin import (
+    EPCalibrationWorkflowError,
     Observation,
     Provenance,
     load_registry,
@@ -178,3 +179,65 @@ def test_generic_abc_smc_runs_native_cardiep_through_hearttwin(tmp_path: Path) -
     assert result["posterior_samples"] is not None
     assert len(result["posterior_samples"]["sha256"]) == 64
     assert result["diagnostics"]["n_forward_evaluations"] == 16
+
+
+
+class _WrongSubjectAdapter:
+    def available(self) -> bool:
+        return True
+
+    def invoke(self, capability: str, payload: dict) -> dict:
+        assert capability == "electrical.prepare_calibration"
+        return {
+            "contract_version": "1.0",
+            "schema_version": "electrotrace-ep-calibration-v1",
+            "entity_id": "OTHER-SUBJECT",
+            "observations": [],
+        }
+
+
+class _WrongSubjectRegistry:
+    def capability(self, capability: str):
+        if capability == "electrical.prepare_calibration":
+            return _WrongSubjectAdapter()
+        return None
+
+
+def test_prepare_ep_problem_rejects_cross_subject_handoff(tmp_path: Path) -> None:
+    observed = tmp_path / "activation-cross-subject.json"
+    observed.write_text(
+        json.dumps({"values_ms": [0.0, 10.0, 20.0, 40.0]}) + "\n",
+        encoding="utf-8",
+    )
+    observation = Observation(
+        observation_id="cross-subject-activation",
+        modality="electrical",
+        values={
+            "input_path": str(observed),
+            "observation_kind": "activation_map",
+            "coordinate_frame": "ep_geometry",
+            "units": "ms",
+        },
+        provenance=Provenance(source_service="test", run_id="cross-subject-source"),
+    )
+
+    with pytest.raises(EPCalibrationWorkflowError, match="does not match"):
+        prepare_ep_inference_problem(
+            _WrongSubjectRegistry(),
+            entity_id="S1",
+            electrical_observation=observation,
+            anatomy_ref={
+                "artifact_id": "geometry",
+                "kind": "ep_geometry",
+                "uri": (tmp_path / "geometry.json").resolve().as_uri(),
+            },
+            priors=[
+                {
+                    "name": "fibre_speed",
+                    "distribution": "uniform",
+                    "bounds": [0.05, 0.15],
+                }
+            ],
+            inference_backend="cardiep-abc-rejection-v1",
+            ep_backend="numpy-eikonal-v1",
+        )
