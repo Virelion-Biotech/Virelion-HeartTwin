@@ -9,7 +9,14 @@ pytest.importorskip("electrotrace")
 pytest.importorskip("cardiep")
 pytest.importorskip("cardiinfer")
 
-from hearttwin import (\n    EPCalibrationWorkflowError,\n    Observation,\n    Provenance,\n    load_registry,\n    prepare_ep_inference_problem,\n    run_ep_calibration,\n)
+from hearttwin import (
+    EPCalibrationWorkflowError,
+    Observation,
+    Provenance,
+    load_registry,
+    prepare_ep_inference_problem,
+    run_ep_calibration,
+)
 
 
 def test_ecg_becomes_cardiinfer_likelihood_input(tmp_path: Path) -> None:
