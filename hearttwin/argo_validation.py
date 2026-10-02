@@ -302,7 +302,11 @@ def load_argo_patient(
     voltage, map_lat = _read_coloring(root / "MESHcoloring.txt", len(vertices))
     point_ids, positions = _read_positions(root / "POS_POINTS.txt")
 
-    if strict_official_counts and patient_id in _EXPECTED_POINT_COUNTS:
+    if strict_official_counts:
+        if patient_id not in _EXPECTED_POINT_COUNTS:
+            raise ValueError(
+                "Official ARGO v1 patient directory must be named Pt1 through Pt9"
+            )
         expected = _EXPECTED_POINT_COUNTS[patient_id]
         if len(point_ids) != expected:
             raise ValueError(
@@ -498,7 +502,6 @@ def prepare_argo_empirical_study(
         "extraction": extraction,
     }
     split_payload = {
-        "schema_version": "hearttwin-argo-split-v1",
         **split_identity,
         "schema_version": "hearttwin-argo-split-v1",
         "patient_dir": str(Path(patient_dir).expanduser().resolve()),
