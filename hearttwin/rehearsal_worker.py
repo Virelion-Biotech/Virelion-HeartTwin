@@ -146,12 +146,13 @@ def _handler(worker: RehearsalWorker):
             if self.path != "/health":
                 self._json(404, {"error": "not found"})
                 return
+            available = worker.adapter.available()
             self._json(
-                200,
+                200 if available else 503,
                 {
                     "service": worker.service_name,
-                    "status": "ok",
-                    "native_available": worker.adapter.available(),
+                    "status": "ok" if available else "unavailable",
+                    "native_available": available,
                 },
             )
 
