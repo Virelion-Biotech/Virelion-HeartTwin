@@ -10,8 +10,11 @@ from typing import Any
 import urllib.request
 
 from .config import load_registry
+from .contracts import CONTRACT_VERSION
 from .operations import IdempotencyStore
 from .provenance import sha256
+
+REHEARSAL_PROTOCOL_VERSION = "1.0"
 
 
 class RehearsalWorker:
@@ -220,12 +223,29 @@ def _handler(worker: RehearsalWorker):
                 self._json(404, {"error": "not found"})
                 return
             available = worker.adapter.available()
+            spec = worker.adapter.spec
+            protocol_version = os.environ.get(
+                "HEARTTWIN_REHEARSAL_PROTOCOL_OVERRIDE",
+                REHEARSAL_PROTOCOL_VERSION,
+            )
+            service_fingerprint = sha256(
+                {
+                    "service": spec.name,
+                    "repository": spec.repository,
+                    "capabilities": sorted(spec.capabilities),
+                    "path_template": spec.path_template,
+                }
+            )
             self._json(
                 200 if available else 503,
                 {
                     "service": worker.service_name,
                     "status": "ok" if available else "unavailable",
                     "native_available": available,
+                    "protocol_version": protocol_version,
+                    "hearttwin_contract_version": CONTRACT_VERSION,
+                    "service_fingerprint": service_fingerprint,
+                    "capabilities": sorted(spec.capabilities),
                 },
             )
 
