@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import http.client
 import json
 import threading
 import urllib.error
@@ -11,7 +12,7 @@ from hearttwin.service_registry import ServiceAdapter, ServiceSpec
 
 
 class _Server:
-    def __init__(self, statuses: list[int]):
+    def __init__(self, statuses: list[int | None]):
         self.statuses = list(statuses)
         self.requests: list[dict[str, str]] = []
         parent = self
@@ -39,6 +40,10 @@ class _Server:
                     if parent.statuses
                     else 200
                 )
+                if status is None:
+                    self.connection.shutdown(2)
+                    self.connection.close()
+                    return
                 payload = (
                     {"error": "transient"}
                     if status >= 400
@@ -147,3 +152,27 @@ def test_invalid_http_retry_configuration_fails_closed(
             )
 
     assert server.requests == []
+
+
+
+def test_http_remote_disconnect_is_retried_with_same_idempotency_key(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("HEARTTWIN_HTTP_ATTEMPTS", "3")
+    monkeypatch.setenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0")
+    monkeypatch.setenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "2")
+
+    with _Server([None, 200]) as server:
+        result = _adapter(server.endpoint).invoke(
+            "atlas.search",
+            {"entity_id": "C1", "query": "worker-restart"},
+        )
+
+    assert result == {"ok": True}
+    assert len(server.requests) == 2
+    assert [item["attempt"] for item in server.requests] == ["1", "2"]
+    assert (
+        server.requests[0]["idempotency"]
+        == server.requests[1]["idempotency"]
+    )
+    assert server.requests[0]["body"] == server.requests[1]["body"]
