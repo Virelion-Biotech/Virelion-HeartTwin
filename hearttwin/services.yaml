@@ -47,7 +47,7 @@ services:
     endpoint: ${CARDIEP_URL}
   - name: CardiInfer
     repository: Virelion-Biotech/Virelion-CardiInfer
-    capabilities: [infer.health, infer.backends, infer.run, infer.propagate]
+    capabilities: [infer.health, infer.backends, infer.ecosystem, infer.run, infer.propagate]
     builtin: cardiinfer
     endpoint: ${CARDIINFER_URL}
   - name: CardiSim
