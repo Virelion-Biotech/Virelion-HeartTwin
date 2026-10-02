@@ -328,6 +328,66 @@ def run_operational_rehearsal(
             worker.start()
         distributed = _distributed_registry(base, endpoints)
 
+        def execute_branch_probes() -> dict[str, Any]:
+            probes: dict[str, Any] = {}
+            probes["CardiAnatomy"] = distributed.capability(
+                "anatomy.presets"
+            ).invoke("anatomy.presets", {})
+            probes["CardiEP"] = distributed.capability(
+                "ep.backends"
+            ).invoke("ep.backends", {})
+            probes["CardiInfer"] = distributed.capability(
+                "infer.backends"
+            ).invoke("infer.backends", {})
+            probes["CardiStudio"] = distributed.capability(
+                "design.generate"
+            ).invoke(
+                "design.generate",
+                {
+                    "entity_id": case_id,
+                    "factors": {"condition": ["probe"]},
+                    "replicates": 1,
+                },
+            )
+            probes["DCCP"] = distributed.capability(
+                "host.map"
+            ).invoke(
+                "host.map",
+                {
+                    "entity_id": case_id,
+                    "module_scores": {},
+                },
+            )
+
+            if "cine_cmr_biventricular" not in probes["CardiAnatomy"].get(
+                "presets", {}
+            ):
+                raise RuntimeError("CardiAnatomy distributed probe failed")
+            if not probes["CardiEP"].get("backends"):
+                raise RuntimeError("CardiEP distributed probe failed")
+            if not probes["CardiInfer"].get("backends"):
+                raise RuntimeError("CardiInfer distributed probe failed")
+            if probes["CardiStudio"].get("n_runs") != 1:
+                raise RuntimeError("CardiStudio distributed probe failed")
+            if not isinstance(probes["DCCP"], dict):
+                raise RuntimeError("DCCP distributed probe failed")
+            return probes
+
+        branch_probes, _ = journal.run_stage(
+            case_id,
+            "distributed-branch-probes",
+            {
+                "services": [
+                    "CardiAnatomy",
+                    "CardiEP",
+                    "CardiInfer",
+                    "CardiStudio",
+                    "DCCP",
+                ]
+            },
+            execute_branch_probes,
+        )
+
         health, _ = journal.run_stage(
             case_id,
             "health-fanout",
@@ -561,6 +621,7 @@ def run_operational_rehearsal(
             "queue_lease_recovered": True,
             "queue_job_id": queue_job_id,
             "queue_attempts": queue_state["attempts"],
+            "branch_probes_passed": sorted(branch_probes),
             "journal_event_count": len(snapshot["events"]),
             "journal_stage_count": len(snapshot["stages"]),
         }
