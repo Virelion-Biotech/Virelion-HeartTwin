@@ -37,6 +37,8 @@ HeartTwin owns orchestration, common state, capability discovery, provenance att
 | `imaging.*` | OptiCell |
 | `safety.*` | CardioScore |
 | `learn.*` | CardiLearn |
+| `ep.*` | CardiEP |
+| `infer.*` | CardiInfer |
 | `simulation.*` | CardiSim |
 | `trace.*` | CardiTrace |
 | `bridge.*` | CardiBridge |
@@ -89,3 +91,18 @@ Most HTTP services use the default `/v1/{capability}` route transformation, wher
 ## Fail-closed scientific behavior
 
 A missing modality is represented as missing. It is never converted to zero, negative, healthy, normal or any other biological conclusion. Adapter errors are recorded as errors and remain visible in the run report.
+
+
+## CardiInfer inverse-model boundary
+
+HeartTwin advertises CardiInfer's `infer.health`, `infer.backends`, `infer.ecosystem`,
+`infer.run`, and `infer.propagate` capabilities. HeartTwin selects and routes the
+inverse problem; CardiInfer owns priors, observation likelihood/discrepancy semantics,
+posterior or MAP artifacts, convergence/identifiability diagnostics, and posterior
+uncertainty propagation.
+
+Generic CardiInfer backends may call another HeartTwin-compatible model service through
+the forward-model contract embedded in `InferenceRequest.model_context.forward_model`.
+That keeps forward physics in domain services such as CardiEP/CardiMech/CardiFlow while
+CardiInfer remains solver-neutral. The stack integration CI pins the exact CardiInfer
+revision used for these contracts.
