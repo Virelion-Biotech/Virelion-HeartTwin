@@ -22,6 +22,7 @@ class RehearsalWorker:
             raise ValueError(f"Unknown HeartTwin service: {service_name}") from exc
         self.service_name = service_name
         self.cache: dict[str, dict[str, Any]] = {}
+        self.inflight: dict[str, dict[str, Any]] = {}
         self.cache_lock = threading.Lock()
         if service_name == "CardiBridge":
             self._configure_remote_vex()
@@ -108,13 +109,55 @@ class RehearsalWorker:
         )
         with self.cache_lock:
             cached = self.cache.get(key)
-        if cached is not None:
-            return cached, True
+            if cached is not None:
+                return cached, True
+            entry = self.inflight.get(key)
+            if entry is None:
+                entry = {
+                    "event": threading.Event(),
+                    "result": None,
+                    "error": None,
+                }
+                self.inflight[key] = entry
+                leader = True
+            else:
+                leader = False
 
-        result = self.adapter.invoke(capability, payload)
-        with self.cache_lock:
-            self.cache[key] = result
-        return result, False
+        if not leader:
+            if not entry["event"].wait(timeout=180.0):
+                raise TimeoutError(
+                    f"Timed out waiting for in-flight duplicate {key}"
+                )
+            if entry["error"] is not None:
+                raise RuntimeError(
+                    f"Original idempotent request failed: {entry['error']}"
+                ) from entry["error"]
+            result = entry["result"]
+            if not isinstance(result, dict):
+                raise RuntimeError(
+                    "In-flight idempotent request completed without a result"
+                )
+            return result, True
+
+        try:
+            result = self.adapter.invoke(capability, payload)
+            if not isinstance(result, dict):
+                raise TypeError(
+                    f"{self.service_name} returned a non-object response"
+                )
+        except Exception as exc:
+            entry["error"] = exc
+            raise
+        else:
+            entry["result"] = result
+            with self.cache_lock:
+                self.cache[key] = result
+            return result, False
+        finally:
+            entry["event"].set()
+            with self.cache_lock:
+                if self.inflight.get(key) is entry:
+                    self.inflight.pop(key, None)
 
 
 def _handler(worker: RehearsalWorker):
