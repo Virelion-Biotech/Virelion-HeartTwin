@@ -134,6 +134,33 @@ See `docs/CARDIAC_DIGITAL_TWIN_INTEGRATION.md` for the architecture, provenance,
 
 The audited upstream reference is `juliacamps/Cardiac-Digital-Twin` at commit `816d51fab0837cfe9e20c7d3a318429e9acf0733`. The upstream repository is MIT licensed. See `hearttwin/cdt_manifest.py` and `THIRD_PARTY_NOTICES.md`.
 
+
+## ARGO empirical EP validation
+
+HeartTwin now includes a blinded validation workflow for the public ARGO post-ischemic VT dataset.
+
+```bash
+hearttwin argo-validate /data/ARGODataset_Folder/Pt1
+
+hearttwin argo-prepare \
+  /data/ARGODataset_Folder/Pt1 \
+  outputs/argo/Pt1 \
+  --holdout-fraction 0.20 \
+  --seed 42
+
+hearttwin argo-score \
+  outputs/argo/Pt1/split.json \
+  outputs/argo/Pt1/predictions.json \
+  --gates argo-gates.json \
+  --output outputs/argo/Pt1/holdout-report.json
+```
+
+The split is created at the raw mapping-record level before target extraction. Calibration artifacts never contain held-out target values; the scorer later reloads the held-out WFDB records and recomputes signal-based LAT/ECG observables. Predictions are bound to the exact split by `split_sha256`.
+
+The reconstructed CARTO LAT map is treated as a secondary concordance target because it is spatially reconstructed/interpolated and should not be mistaken for an independent held-out observation.
+
+See `docs/ARGO_EMPIRICAL_VALIDATION.md` for the full data contract, signal extraction rules, cohort-level analysis plan, and scientific limitations.
+
 ## Validation
 
 There are two CI layers:
