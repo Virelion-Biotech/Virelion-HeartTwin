@@ -17,6 +17,7 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | OptiCell | microscopy QC and cell analysis | HeartTwin command adapter |
 | CardioScore | MEA-based cardiac safety scoring | HeartTwin command adapter |
 | CardiLearn | molecular-state learning | Native + HTTP fallback |
+| CardiMech | cardiac mechanics, EP-to-mechanics handoff, circulation coupling, and mechanics calibration forward model | HeartTwin command adapter |
 | CardiSim | synthetic trajectories | Native + HTTP fallback |
 | CardiSimNative | CDT-compatible reference digital twin | Built into HeartTwin |
 | CardiStudio | experimental design, populations, constraints, power | Native + HTTP fallback |
@@ -85,7 +86,7 @@ The repository includes:
 
 - typed cardiac-state and workflow contracts;
 - native adapters for CardiAnatomy, CardiAtlas, CardiBench, CardiEval, CardiLearn, CardiSim, CardiVex, CardiStudio, and DCCP;
-- command adapters for ElectroTrace, MyoTrace, OptiCell, CardioScore, CardiTrace, and CardiAgent;
+- command adapters for ElectroTrace, MyoTrace, OptiCell, CardioScore, CardiMech, CardiTrace, and CardiAgent;
 - in-process CardiBridge routing with HTTP fallback;
 - native CDT-compatible cardiac digital-twin backend;
 - canonical CardiacState reduction for both low-level and explicit workflow execution;
@@ -110,7 +111,7 @@ Install the component repositories for the complete native stack:
 ```bash
 for repo in \
   Virelion-CardiAnatomy Virelion-CardiAtlas Virelion-CardiBench Virelion-CardiEval Virelion-CardiLearn \
-  Virelion-CardiSim Virelion-CardiVex Virelion-CardiStudio Virelion-DCCP \
+  Virelion-CardiSim Virelion-CardiMech Virelion-CardiVex Virelion-CardiStudio Virelion-DCCP \
   Virelion-ElectroTrace Virelion-MyoTrace Virelion-OptiCell Virelion-CardioScore \
   Virelion-CardiTrace Virelion-CardiBridge Virelion-CardiAgent; do
   python -m pip install "git+https://github.com/Virelion-Biotech/${repo}.git@main"
@@ -147,7 +148,7 @@ The CardiacState tests additionally validate the published Draft 2020-12 JSON sc
 1. Expand modality-specific typed observation contracts and artifact references.
 2. Replace the reference pseudo-ECG with a validated observation model and integrate it with ElectroTrace outputs.
 3. Expand scar modelling to calibrated tissue tensors and border-zone cellular models.
-4. Add mechanics/hemodynamics and Echo/CMR anatomy backends.
+4. Expand CardiMech from its integration-grade reference mechanics backend to verified spatial mechanics/hemodynamics and Echo/CMR-driven calibration backends.
 5. Add posterior/uncertainty objects and surrogate acceleration.
 6. Add external CardiBench/CardiEval scientific validation gates.
 7. Add persistent jobs/artifacts, compatibility gates, API, and research UI.
