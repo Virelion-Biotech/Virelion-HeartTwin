@@ -75,6 +75,7 @@ jobs:
               "duplicate_suppressed": True,
               "artifact_corruption_detected": True,
               "durable_replay_reused": True,
+              "queue_lease_recovered": True,
           }
           for key, expected in required.items():
               if data.get(key) != expected:
@@ -103,6 +104,10 @@ jobs:
           )
           assert any(
               row["event_type"] == "fault.artifact_corruption_detected"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.queue_lease_recovered"
               for row in state["events"]
           )
           print(
