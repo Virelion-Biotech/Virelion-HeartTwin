@@ -19,8 +19,8 @@ def _strict_json_object(raw: str | bytes, *, source: str) -> dict[str, Any]:
 
     payload = json.loads(raw, parse_constant=reject_constant)
     if not isinstance(payload, dict):
-        raise TypeError(
-            f"{source} returned {type(payload).__name__}; expected a JSON object"
+        raise RuntimeError(
+            f"{source} returned {type(payload).__name__}; must be a JSON object"
         )
     return payload
 
