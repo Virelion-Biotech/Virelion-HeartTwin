@@ -270,3 +270,56 @@ def test_idempotency_store_rejects_conflicting_result(
             payload,
             {"ok": False},
         )
+
+
+
+def test_job_queue_heartbeat_prevents_premature_reclaim(tmp_path: Path) -> None:
+    import time
+
+    queue = JobQueue(tmp_path / "queue.sqlite3")
+    job_id = queue.enqueue("C1", "long-stage", {"x": 1})
+    claimed = queue.claim("worker-a", lease_seconds=0.08)
+    assert claimed is not None
+
+    time.sleep(0.04)
+    queue.heartbeat(job_id, "worker-a", lease_seconds=0.20)
+    time.sleep(0.08)
+
+    assert queue.claim("worker-b", lease_seconds=1.0) is None
+    queue.complete(job_id, "worker-a", {"ok": True})
+    assert queue.get(job_id)["status"] == "ok"
+
+
+def test_job_queue_heartbeat_rejects_wrong_owner(tmp_path: Path) -> None:
+    queue = JobQueue(tmp_path / "queue.sqlite3")
+    job_id = queue.enqueue("C1", "stage", {"x": 1})
+    assert queue.claim("worker-a") is not None
+
+    with pytest.raises(RuntimeError, match="unowned"):
+        queue.heartbeat(job_id, "worker-b")
+
+
+def test_artifact_atomic_write_failure_preserves_existing_content(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    import os
+
+    store = ArtifactStore(tmp_path / "artifacts")
+    payload = {"stable": True}
+    record = store.put_json("result", payload)
+    before = Path(record.path).read_bytes()
+
+    original_replace = os.replace
+
+    def fail_replace(src, dst):
+        if Path(dst) == Path(record.path):
+            raise OSError("simulated disk/rename failure")
+        return original_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated"):
+        store.put_json("result", payload)
+
+    assert Path(record.path).read_bytes() == before
+    assert store.verify(record)
