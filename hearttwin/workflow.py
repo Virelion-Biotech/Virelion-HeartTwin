@@ -56,6 +56,30 @@ def _call(registry: ServiceRegistry, capability: str, entity_id: str, payload: d
     )
 
 
+
+def _validate_binary_test_partition(
+    assignments: dict[str, str],
+    reference_labels: dict[str, int],
+) -> list[str]:
+    test_ids = [
+        sample_id
+        for sample_id, partition in assignments.items()
+        if partition == "test"
+    ]
+    if not test_ids:
+        raise WorkflowError(
+            "Benchmark test partition is empty; predeclare benchmark_test_values "
+            "or use a split policy that yields held-out samples"
+        )
+    test_classes = {reference_labels[sample_id] for sample_id in test_ids}
+    if len(test_classes) < 2:
+        raise WorkflowError(
+            "Binary evaluation test partition must contain both reference classes; "
+            "balanced accuracy and ROC AUC are undefined for a one-class holdout. "
+            "Predeclare class-valid benchmark_test_values before fitting."
+        )
+    return test_ids
+
 def _as_atlas(data: dict[str, Any]) -> AtlasContextPayload:
     try:
         return AtlasContextPayload.model_validate(data)
@@ -311,23 +335,7 @@ def run_multimodal_workflow(
     assignments = state.benchmark.assignments
     if set(reference_labels) != set(assignments) or any(type(v) is not int or v not in (0, 1) for v in reference_labels.values()):
         raise WorkflowError("reference_labels must provide explicit 0/1 labels for exactly the benchmark samples")
-    test_ids = [
-        sample_id
-        for sample_id, partition in assignments.items()
-        if partition == "test"
-    ]
-    if not test_ids:
-        raise WorkflowError(
-            "Benchmark test partition is empty; predeclare benchmark_test_values "
-            "or use a split policy that yields held-out samples"
-        )
-    test_classes = {reference_labels[sample_id] for sample_id in test_ids}
-    if len(test_classes) < 2:
-        raise WorkflowError(
-            "Binary evaluation test partition must contain both reference classes; "
-            "balanced accuracy and ROC AUC are undefined for a one-class holdout. "
-            "Predeclare class-valid benchmark_test_values before fitting."
-        )
+    _validate_binary_test_partition(assignments, reference_labels)
 
     rows_by_id = {str(row["sample_id"]): row for row in learning_data}
     if len(rows_by_id) != len(learning_data) or set(rows_by_id) != set(assignments):
