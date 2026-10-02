@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -8,7 +9,13 @@ pytest.importorskip("electrotrace")
 pytest.importorskip("cardiep")
 pytest.importorskip("cardiinfer")
 
-from hearttwin import Observation, Provenance, load_registry, prepare_ep_inference_problem
+from hearttwin import (
+    Observation,
+    Provenance,
+    load_registry,
+    prepare_ep_inference_problem,
+    run_ep_calibration,
+)
 
 
 def test_ecg_becomes_cardiinfer_likelihood_input(tmp_path: Path) -> None:
@@ -82,3 +89,92 @@ def test_ecg_becomes_cardiinfer_likelihood_input(tmp_path: Path) -> None:
 
     artifact_path = Path(urlparse(handoff_observation["artifact"]["uri"]).path)
     assert artifact_path.is_file()
+
+
+
+def test_generic_abc_smc_runs_native_cardiep_through_hearttwin(tmp_path: Path) -> None:
+    geometry = tmp_path / "geometry.json"
+    geometry.write_text(
+        json.dumps(
+            {
+                "units": "cm",
+                "node_xyz": [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                ],
+                "tetrahedra": [[0, 1, 2, 3]],
+                "fibre": [[1.0, 0.0, 0.0]] * 4,
+                "sheet": [[0.0, 1.0, 0.0]] * 4,
+                "normal": [[0.0, 0.0, 1.0]] * 4,
+                "root_nodes": [0],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    activation = tmp_path / "activation.json"
+    activation.write_text(
+        json.dumps({"values_ms": [0.0, 10.0, 20.0, 40.0]}) + "\n",
+        encoding="utf-8",
+    )
+    observation = Observation(
+        observation_id="measured-activation",
+        modality="electrical",
+        values={
+            "input_path": str(activation),
+            "observation_kind": "activation_map",
+            "coordinate_frame": "ep_geometry",
+            "units": "ms",
+            "discrepancy": "rmse",
+        },
+        provenance=Provenance(
+            source_service="test",
+            run_id="activation-map-run",
+        ),
+    )
+
+    run = run_ep_calibration(
+        load_registry(),
+        entity_id="S-generic-abc",
+        electrical_observation=observation,
+        anatomy_ref={
+            "artifact_id": "geometry",
+            "kind": "ep_geometry",
+            "uri": geometry.resolve().as_uri(),
+        },
+        priors=[
+            {
+                "name": "fibre_speed",
+                "distribution": "uniform",
+                "bounds": [0.05, 0.15],
+                "unit": "cm/ms",
+            }
+        ],
+        inference_backend="native-abc-smc-v1",
+        ep_backend="numpy-eikonal-v1",
+        ep_settings={"root_nodes": [0]},
+        fixed_parameters={
+            "sheet_speed": 0.05,
+            "normal_speed": 0.025,
+            "apd_ms": 280.0,
+        },
+        sampler_settings={
+            "n_particles": 8,
+            "n_generations": 1,
+            "initial_oversample": 2,
+            "output_dir": str(tmp_path / "posterior"),
+        },
+        seed=19,
+    )
+
+    result = run["inference_result"]
+    assert result["contract_version"] == "1.1"
+    assert result["backend"] == "native-abc-smc-v1"
+    assert result["model_service"] == "CardiEP"
+    assert result["model_capability"] == "ep.simulate"
+    assert result["provenance"]["forward_transport"] == "cardiep-native-v1"
+    assert result["posterior_samples"] is not None
+    assert len(result["posterior_samples"]["sha256"]) == 64
+    assert result["diagnostics"]["n_forward_evaluations"] == 16
