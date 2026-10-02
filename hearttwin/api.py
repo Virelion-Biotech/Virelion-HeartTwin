@@ -15,11 +15,28 @@ class VirelionServices:
         self.registry = registry
         self.twin = HeartTwin(registry)
 
-    def call(self, capability: str, entity_id: str, **payload: Any) -> dict[str, Any]:
+    def _invoke(self, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         adapter = self.registry.capability(capability)
         if adapter is None:
             raise RuntimeError(f"Capability unavailable: {capability}")
-        return adapter.invoke(capability, {"entity_id": entity_id, **payload})
+        return adapter.invoke(capability, payload)
+
+    def call(self, capability: str, entity_id: str, **payload: Any) -> dict[str, Any]:
+        return self._invoke(capability, {"entity_id": entity_id, **payload})
+
+    def infer(self, subject_id: str, **payload: Any) -> dict[str, Any]:
+        """Run a CardiInfer request using the subject-oriented inference contract."""
+        return self._invoke("infer.run", {"subject_id": subject_id, **payload})
+
+    def propagate_inference(self, subject_id: str, **payload: Any) -> dict[str, Any]:
+        """Propagate a CardiInfer posterior without injecting an entity_id field."""
+        return self._invoke("infer.propagate", {"subject_id": subject_id, **payload})
+
+    def inference_backends(self) -> dict[str, Any]:
+        return self._invoke("infer.backends", {})
+
+    def inference_ecosystem(self) -> dict[str, Any]:
+        return self._invoke("infer.ecosystem", {})
 
     def run_twin(self, entity_id: str, **kwargs: Any):
         return self.twin.run(entity_id, **kwargs)
