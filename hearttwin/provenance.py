@@ -2,12 +2,35 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+from collections.abc import Mapping, Sequence
 from typing import Any
+
+
+def _canonicalize(value: Any) -> Any:
+    if isinstance(value, float):
+        if math.isnan(value):
+            return {"__hearttwin_nonfinite_float__": "nan"}
+        if math.isinf(value):
+            return {
+                "__hearttwin_nonfinite_float__": (
+                    "positive_infinity" if value > 0 else "negative_infinity"
+                )
+            }
+        return value
+    if isinstance(value, Mapping):
+        return {
+            str(key): _canonicalize(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [_canonicalize(item) for item in value]
+    return value
 
 
 def canonical_json(value: Any) -> bytes:
     return json.dumps(
-        value,
+        _canonicalize(value),
         sort_keys=True,
         separators=(",", ":"),
         allow_nan=False,
