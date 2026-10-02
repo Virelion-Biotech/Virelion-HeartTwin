@@ -114,8 +114,9 @@ class RehearsalWorker:
                 "payload": payload,
             }
         )
-        if self.idempotency_store is not None:
-            persisted = self.idempotency_store.get(
+        idempotency_store = getattr(self, "idempotency_store", None)
+        if idempotency_store is not None:
+            persisted = idempotency_store.get(
                 self.service_name,
                 key,
                 capability,
@@ -169,8 +170,8 @@ class RehearsalWorker:
             raise
         else:
             entry["result"] = result
-            if self.idempotency_store is not None:
-                self.idempotency_store.put(
+            if idempotency_store is not None:
+                idempotency_store.put(
                     self.service_name,
                     key,
                     capability,
