@@ -50,6 +50,16 @@ def prepare_ep_inference_problem(
             "observations": [electrical_observation.model_dump(mode="json")],
         },
     )
+    if not isinstance(handoff, dict):
+        raise EPCalibrationWorkflowError(
+            "ElectroTrace calibration capability returned a non-object payload"
+        )
+    handoff_entity = handoff.get("entity_id")
+    if handoff_entity is not None and str(handoff_entity) != str(entity_id):
+        raise EPCalibrationWorkflowError(
+            f"ElectroTrace handoff entity_id {handoff_entity!r} does not match "
+            f"requested entity_id {entity_id!r}"
+        )
 
     try:
         from cardiep import observations_from_electrotrace
