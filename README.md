@@ -170,3 +170,20 @@ The workflow now requires explicit `feature_columns`, a `reference_labels` mappi
 The current workflow is a research integration pipeline. Specialist analyses are recorded in the shared state, but do not yet calibrate a patient-specific model. Classification evaluation does not change a simulated state into a biologically validated state. CardiSim-to-CardiVex domain mappings are explicitly extrapolated and have no calibrated uncertainty estimate.
 
 See [the repair audit](docs/REPAIR_AUDIT_2026-09-28.md) for verified defects, test coverage and unresolved product/scientific gaps. Command adapters accept large JSON payloads through stdin when `HEARTTWIN_PAYLOAD_STDIN=1`; small payloads retain the existing environment-variable protocol.
+
+
+## Operational rehearsal
+
+HeartTwin includes a distributed production-topology rehearsal that runs the pinned
+Virelion stack behind real localhost HTTP worker processes, persists case/stage/job
+state in SQLite, writes content-addressed artifacts, and injects worker restart,
+timeout, duplicate-request, queue-lease, and artifact-corruption failures.
+
+```bash
+hearttwin operational-rehearsal \
+  --workdir outputs/operational-rehearsal \
+  --case-id HT-OPS-LOCAL
+```
+
+See `docs/OPERATIONAL_REHEARSAL.md` for the topology, fault model, persistence
+semantics, and CI acceptance gates.
