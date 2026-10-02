@@ -491,7 +491,7 @@ def test_http_transport_requires_json_object_response(
     thread.start()
     try:
         host, port = server.server_address
-        with pytest.raises(TypeError, match="expected a JSON object"):
+        with pytest.raises(RuntimeError, match="must be a JSON object"):
             _adapter(f"http://{host}:{port}").invoke(
                 "atlas.search",
                 {"entity_id": "C1", "query": "object-only"},
