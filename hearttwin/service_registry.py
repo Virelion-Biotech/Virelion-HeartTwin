@@ -103,8 +103,16 @@ class ServiceAdapter:
         timeout = float(os.getenv("HEARTTWIN_HTTP_TIMEOUT_SECONDS", "120"))
         attempts = int(os.getenv("HEARTTWIN_HTTP_ATTEMPTS", "3"))
         backoff = float(os.getenv("HEARTTWIN_HTTP_BACKOFF_SECONDS", "0.2"))
-        if timeout <= 0 or attempts < 1 or backoff < 0:
-            raise ValueError("Invalid HeartTwin HTTP retry configuration")
+        max_response_bytes = int(
+            os.getenv("HEARTTWIN_HTTP_MAX_RESPONSE_BYTES", str(32 * 1024 * 1024))
+        )
+        if (
+            timeout <= 0
+            or attempts < 1
+            or backoff < 0
+            or max_response_bytes < 1
+        ):
+            raise ValueError("Invalid HeartTwin HTTP retry/size configuration")
 
         url = self.spec.endpoint.rstrip("/") + self._request_path(capability)
         last_error: Exception | None = None
@@ -121,7 +129,33 @@ class ServiceAdapter:
             )
             try:
                 with urllib.request.urlopen(req, timeout=timeout) as response:
-                    return json.loads(response.read())
+                    content_length = response.headers.get("Content-Length")
+                    if content_length is not None:
+                        try:
+                            declared = int(content_length)
+                        except ValueError as exc:
+                            raise RuntimeError(
+                                f"Invalid Content-Length from "
+                                f"{self.spec.name}/{capability}"
+                            ) from exc
+                        if declared > max_response_bytes:
+                            raise RuntimeError(
+                                f"HTTP response from {self.spec.name}/{capability} "
+                                f"exceeds {max_response_bytes} bytes"
+                            )
+                    body = response.read(max_response_bytes + 1)
+                    if len(body) > max_response_bytes:
+                        raise RuntimeError(
+                            f"HTTP response from {self.spec.name}/{capability} "
+                            f"exceeds {max_response_bytes} bytes"
+                        )
+                    decoded = json.loads(body)
+                    if not isinstance(decoded, dict):
+                        raise RuntimeError(
+                            f"HTTP response from {self.spec.name}/{capability} "
+                            "must be a JSON object"
+                        )
+                    return decoded
             except urllib.error.HTTPError as exc:
                 try:
                     body = exc.read().decode("utf-8", errors="replace")
