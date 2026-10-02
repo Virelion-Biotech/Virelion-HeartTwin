@@ -280,7 +280,12 @@ def _run_concurrent_case_probe(
                     "Duplicate concurrent submission was not idempotently collapsed"
                 )
 
-    if len(queue.list_jobs()) != len(case_ids):
+    concurrent_enqueued = [
+        item
+        for item in queue.list_jobs()
+        if item["job_type"] == "concurrent-workflow"
+    ]
+    if len(concurrent_enqueued) != len(case_ids):
         raise RuntimeError("Duplicate submission created an extra queue job")
 
     # Simulate the coordinator process disappearing after enqueue but before work.
