@@ -59,8 +59,105 @@ def main() -> None:
         "--case-id",
         default="HEARTTWIN-OPERATIONAL-REHEARSAL",
     )
+    argo_validate = sub.add_parser(
+        "argo-validate",
+        help="Validate one ARGO v1 patient directory and raw WFDB/EAM contracts",
+    )
+    argo_validate.add_argument("patient_dir")
+    argo_validate.add_argument(
+        "--allow-nonofficial-count",
+        action="store_true",
+        help="Skip the published ARGO v1 patient/count checks (fixtures only)",
+    )
+    argo_prepare = sub.add_parser(
+        "argo-prepare",
+        help="Create a blinded ARGO calibration/holdout split",
+    )
+    argo_prepare.add_argument("patient_dir")
+    argo_prepare.add_argument("output_dir")
+    argo_prepare.add_argument("--holdout-fraction", type=float, default=0.2)
+    argo_prepare.add_argument("--seed", type=int, default=42)
+    argo_prepare.add_argument(
+        "--allow-nonofficial-count",
+        action="store_true",
+        help="Skip the published ARGO v1 patient/count checks (fixtures only)",
+    )
+    argo_score = sub.add_parser(
+        "argo-score",
+        help="Score predictions against blinded held-out ARGO raw measurements",
+    )
+    argo_score.add_argument("split")
+    argo_score.add_argument("predictions")
+    argo_score.add_argument("--gates")
+    argo_score.add_argument("--output")
     args = parser.parse_args()
     registry = load_registry()
+
+    if args.cmd == "argo-validate":
+        from .argo_validation import load_argo_patient
+
+        patient = load_argo_patient(
+            args.patient_dir,
+            strict_official_counts=not args.allow_nonofficial_count,
+        )
+        print(
+            json.dumps(
+                {
+                    "dataset": patient["dataset"],
+                    "dataset_version": patient["dataset_version"],
+                    "doi": patient["doi"],
+                    "patient_id": patient["patient_id"],
+                    "n_vertices": patient["n_vertices"],
+                    "n_triangles": patient["n_triangles"],
+                    "n_points": patient["n_points"],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    if args.cmd == "argo-prepare":
+        from .argo_validation import prepare_argo_empirical_study
+
+        result = prepare_argo_empirical_study(
+            args.patient_dir,
+            args.output_dir,
+            holdout_fraction=args.holdout_fraction,
+            seed=args.seed,
+            strict_official_counts=not args.allow_nonofficial_count,
+        )
+        print(json.dumps(result["split"], indent=2, sort_keys=True))
+        return
+    if args.cmd == "argo-score":
+        from .argo_validation import score_argo_holdout
+
+        gates = {}
+        if args.gates:
+            gates_raw = json.loads(Path(args.gates).read_text(encoding="utf-8"))
+            if not isinstance(gates_raw, dict):
+                raise TypeError("ARGO gates JSON must contain an object")
+            gates = gates_raw
+        report = score_argo_holdout(
+            args.split,
+            args.predictions,
+            gates=gates,
+        )
+        encoded = json.dumps(
+            report,
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        ) + "\n"
+        if args.output:
+            output = Path(args.output).expanduser().resolve()
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(encoded, encoding="utf-8")
+            print(output)
+        else:
+            print(encoded, end="")
+        if report["status"] == "fail":
+            raise SystemExit(2)
+        return
 
     if args.cmd == "services":
         for service in registry.services():
