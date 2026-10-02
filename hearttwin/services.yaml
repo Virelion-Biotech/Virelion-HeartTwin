@@ -45,6 +45,10 @@ services:
     capabilities: [ep.health, ep.backends, ep.simulate, ep.calibrate, ep.validate.reference, ep.ecosystem]
     builtin: cardiep
     endpoint: ${CARDIEP_URL}
+  - name: CardiMech
+    repository: Virelion-Biotech/Virelion-CardiMech
+    capabilities: [mechanics.health, mechanics.backends, mechanics.materials, mechanics.simulate, mechanics.prepare_calibration, mechanics.validate.reference, mechanics.ecosystem]
+    command: cardimech-hearttwin
   - name: CardiInfer
     repository: Virelion-Biotech/Virelion-CardiInfer
     capabilities: [infer.health, infer.backends, infer.ecosystem, infer.run, infer.propagate]
