@@ -20,6 +20,10 @@ on:
 # The forward gate is intentionally exact: it must compare the native reconstruction
 # against the pinned upstream fixture without silently relaxing numerical tolerances.
 
+concurrency:
+  group: hearttwin-cdt-reference-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   forward-equivalence:
     runs-on: ubuntu-latest
