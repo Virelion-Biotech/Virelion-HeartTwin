@@ -70,6 +70,50 @@ def test_cardibench_native_smoke() -> None:
     assert set(result["assignments"]) == {item["sample_id"] for item in samples}
 
 
+def test_cardibench_intelligence_control_plane_smoke() -> None:
+    registry = load_registry()
+    _require_native(registry)
+
+    health = registry.capability("benchmark.health").invoke("benchmark.health", {})
+    expected = {
+        "benchmark.health",
+        "benchmark.resolve",
+        "benchmark.search",
+        "benchmark.catalog",
+        "benchmark.discover",
+        "benchmark.result.record",
+        "benchmark.results",
+    }
+    assert expected <= set(health["capabilities"])
+
+    records = [
+        {
+            "record_id": "cbx-hearttwin-smoke",
+            "canonical_name": "Myocardial infarction cardiac benchmark",
+            "record_type": "benchmark",
+            "aliases": ["MI cardiac benchmark"],
+            "identifiers": {"doi": "10.1000/hearttwin-smoke"},
+            "observation_ids": ["obs-hearttwin-smoke"],
+            "sources": ["crossref"],
+            "evidence_state": "verified",
+            "metadata": {"fixture": True},
+        }
+    ]
+    search = registry.capability("benchmark.search").invoke(
+        "benchmark.search",
+        {"query": "myocardial infarction benchmark", "records": records},
+    )
+    assert search["full_match_count"] == 1
+    assert search["results"][0]["record"]["record_id"] == "cbx-hearttwin-smoke"
+
+    catalog = registry.capability("benchmark.catalog").invoke(
+        "benchmark.catalog",
+        {"records": records, "record_type": "benchmark"},
+    )
+    assert catalog["count"] == 1
+    assert catalog["records"][0]["evidence_state"] == "verified"
+
+
 def test_cardianatomy_native_smoke() -> None:
     registry = load_registry()
     _require_native(registry)
