@@ -39,7 +39,9 @@ HeartTwin owns orchestration, common state, capability discovery, provenance att
 | `learn.*` | CardiLearn |
 | `ep.*` | CardiEP |
 | `infer.*` | CardiInfer |
+| `flow.*` | CardiFlow |
 | `simulation.*` | CardiSim |
+| `therapy.*` | CardiTherapy |
 | `trace.*` | CardiTrace |
 | `bridge.*` | CardiBridge |
 | `agent.*` | CardiAgent |
@@ -106,3 +108,12 @@ the forward-model contract embedded in `InferenceRequest.model_context.forward_m
 That keeps forward physics in domain services such as CardiEP/CardiMech/CardiFlow while
 CardiInfer remains solver-neutral. The stack integration CI pins the exact CardiInfer
 revision used for these contracts.
+
+
+## Flow and therapy readiness boundary
+
+CardiFlow and CardiTherapy are registered as native/HTTP-capable services so their
+contracts are part of the stack before numerical backends are available. Their
+health capabilities are valid with zero registered backends. Execution capabilities
+(`flow.simulate` and `therapy.run`) fail closed until an explicit backend is
+registered; HeartTwin must not fabricate hemodynamic or intervention outcomes.

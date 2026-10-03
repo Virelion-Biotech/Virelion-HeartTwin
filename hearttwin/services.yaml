@@ -45,6 +45,11 @@ services:
     capabilities: [ep.health, ep.backends, ep.simulate, ep.calibrate, ep.validate.reference, ep.ecosystem]
     builtin: cardiep
     endpoint: ${CARDIEP_URL}
+  - name: CardiFlow
+    repository: Virelion-Biotech/Virelion-CardiFlow
+    capabilities: [flow.health, flow.simulate]
+    builtin: cardiflow
+    endpoint: ${CARDIFLOW_URL}
   - name: CardiMech
     repository: Virelion-Biotech/Virelion-CardiMech
     capabilities: [mechanics.health, mechanics.backends, mechanics.materials, mechanics.simulate, mechanics.prepare_calibration, mechanics.validate.reference, mechanics.ecosystem]
@@ -63,6 +68,11 @@ services:
     repository: Virelion-Biotech/Virelion-HeartTwin
     capabilities: [simulation.cardiac_twin]
     builtin: cardiac_digital_twin
+  - name: CardiTherapy
+    repository: Virelion-Biotech/Virelion-CardiTherapy
+    capabilities: [therapy.health, therapy.run]
+    builtin: carditherapy
+    endpoint: ${CARDITHERAPY_URL}
   - name: CardiTrace
     repository: Virelion-Biotech/Virelion-CardiTrace
     capabilities: [trace.record]

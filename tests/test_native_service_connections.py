@@ -13,10 +13,12 @@ NATIVE_SERVICES = {
     "CardiAtlas",
     "CardiBench",
     "CardiEval",
+    "CardiFlow",
     "CardiLearn",
     "CardiSim",
     "CardiVex",
     "CardiStudio",
+    "CardiTherapy",
     "DCCP",
 }
 
@@ -165,3 +167,63 @@ def test_dccp_host_map_native_result_is_json_boundary_safe() -> None:
     encoded = json.dumps(result, allow_nan=False)
     assert '"continuous"' in encoded
     assert isinstance(result["axes"]["ordinal"], dict)
+
+
+def test_cardiflow_and_carditherapy_are_registered_but_fail_closed_without_backends() -> None:
+    registry = load_registry()
+    _require_native(registry)
+
+    flow_health = registry.capability("flow.health").invoke("flow.health", {})
+    assert flow_health["service"] == "CardiFlow"
+    assert flow_health["backends"] == []
+
+    therapy_health = registry.capability("therapy.health").invoke("therapy.health", {})
+    assert therapy_health["service"] == "CardiTherapy"
+    assert therapy_health["backends"] == []
+
+    flow = registry.capability("flow.simulate")
+    assert flow is not None
+    with pytest.raises(Exception, match="backend unavailable"):
+        flow.invoke(
+            "flow.simulate",
+            {
+                "subject_id": "smoke",
+                "domain": {
+                    "domain_id": "lv",
+                    "anatomy_ref": {
+                        "artifact_id": "anatomy",
+                        "kind": "surface_mesh",
+                        "uri": "file:///lv.vtp",
+                    },
+                    "region": "left_ventricle",
+                },
+                "backend": "missing",
+                "fluid": {"density": 1060.0, "dynamic_viscosity": 0.0035},
+                "boundary_conditions": [
+                    {"boundary_id": "wall", "kind": "wall", "region": "endocardium"}
+                ],
+            },
+        )
+
+    therapy = registry.capability("therapy.run")
+    assert therapy is not None
+    with pytest.raises(Exception, match="backend unavailable"):
+        therapy.invoke(
+            "therapy.run",
+            {
+                "subject_id": "smoke",
+                "backend": "missing",
+                "twin_state_ref": {
+                    "artifact_id": "twin",
+                    "kind": "cardiac_state",
+                    "uri": "file:///state.json",
+                },
+                "plan": {
+                    "plan_id": "P1",
+                    "arms": [
+                        {"arm_id": "control", "label": "Control", "is_comparator": True}
+                    ],
+                    "endpoints": ["ejection_fraction"],
+                },
+            },
+        )

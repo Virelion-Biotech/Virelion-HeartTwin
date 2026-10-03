@@ -18,10 +18,12 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | CardioScore | MEA-based cardiac safety scoring | HeartTwin command adapter |
 | CardiLearn | molecular-state learning | Native + HTTP fallback |
 | CardiMech | cardiac mechanics, EP-to-mechanics handoff, circulation coupling, and mechanics calibration forward model | HeartTwin command adapter |
+| CardiFlow | hemodynamics/flow contracts and fail-closed backend orchestration | Native + HTTP fallback; no default numerical backend |
 | CardiSim | synthetic trajectories | Native + HTTP fallback |
 | CardiSimNative | CDT-compatible reference digital twin | Built into HeartTwin |
 | CardiStudio | experimental design, populations, constraints, power | Native + HTTP fallback |
 | DCCP | defensive challenge scenarios and resilience scoring | Native + HTTP fallback |
+| CardiTherapy | virtual-intervention contracts and fail-closed backend orchestration | Native + HTTP fallback; no default intervention backend |
 | CardiTrace | provenance and reproducibility | HeartTwin command adapter |
 | CardiBridge | typed interoperability and delivery | In-process + HTTP fallback |
 | CardiAgent | phenotype-level challenge generation | HeartTwin command adapter |
@@ -85,7 +87,7 @@ See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.1.0.schema.json` for th
 The repository includes:
 
 - typed cardiac-state and workflow contracts;
-- native adapters for CardiAnatomy, CardiAtlas, CardiBench, CardiEval, CardiLearn, CardiSim, CardiVex, CardiStudio, and DCCP;
+- native adapters for CardiAnatomy, CardiAtlas, CardiBench, CardiEval, CardiFlow, CardiLearn, CardiSim, CardiTherapy, CardiVex, CardiStudio, and DCCP;
 - command adapters for ElectroTrace, MyoTrace, OptiCell, CardioScore, CardiMech, CardiTrace, and CardiAgent;
 - in-process CardiBridge routing with HTTP fallback;
 - native CDT-compatible cardiac digital-twin backend;

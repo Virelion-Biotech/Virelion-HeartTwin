@@ -57,12 +57,14 @@ def invoke_native(service: str, capability: str, payload: dict[str, Any]) -> dic
         "CardiAtlas": _cardiatlas,
         "CardiBench": _cardibench,
         "CardiEval": _cardieval,
+        "CardiFlow": _cardiflow,
         "CardiLearn": _cardilearn,
         "CardiEP": _cardiep,
         "CardiInfer": _cardiinfer,
         "CardiSim": _cardisim,
         "CardiVex": _cardivex,
         "CardiStudio": _cardistudio,
+        "CardiTherapy": _carditherapy,
         "DCCP": _dccp,
     }
     try:
@@ -99,6 +101,32 @@ def _cardiep(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     if capability == "ep.calibrate":
         return api.calibrate(payload)
     raise ValueError(f"CardiEP does not support {capability}")
+
+
+def _cardiflow(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from cardiflow.api import FlowAPI
+    except Exception as exc:  # pragma: no cover
+        raise _native_unavailable("CardiFlow", exc)
+    api = FlowAPI()
+    if capability == "flow.health":
+        return api.health()
+    if capability == "flow.simulate":
+        return api.simulate(payload)
+    raise ValueError(f"CardiFlow does not support {capability}")
+
+
+def _carditherapy(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from carditherapy.api import TherapyAPI
+    except Exception as exc:  # pragma: no cover
+        raise _native_unavailable("CardiTherapy", exc)
+    api = TherapyAPI()
+    if capability == "therapy.health":
+        return api.health()
+    if capability == "therapy.run":
+        return api.run(payload)
+    raise ValueError(f"CardiTherapy does not support {capability}")
 
 
 def _cardiinfer(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
