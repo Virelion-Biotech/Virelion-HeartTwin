@@ -1033,6 +1033,80 @@ def prepare_argo_cohort(
     return {"manifest_path": str(manifest_path), "manifest": manifest}
 
 
+
+def run_argo_surface_cohort_baseline(
+    registry: Any,
+    cohort_manifest_path: str | Path,
+    output_root: str | Path,
+    *,
+    coordinate_unit: str,
+    speed_min_cm_per_ms: float,
+    speed_max_cm_per_ms: float,
+    gates: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Run the same prespecified surface-Eikonal baseline independently per patient."""
+    manifest_path = Path(cohort_manifest_path).expanduser().resolve()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != "hearttwin-argo-cohort-v1":
+        raise ValueError("Unsupported ARGO cohort schema")
+    output = Path(output_root).expanduser().resolve()
+    output.mkdir(parents=True, exist_ok=True)
+
+    patient_results = []
+    for item in manifest.get("patients", []):
+        patient_id = str(item["patient_id"])
+        result = run_argo_surface_baseline(
+            registry,
+            item["split_path"],
+            output / patient_id,
+            coordinate_unit=coordinate_unit,
+            speed_min_cm_per_ms=speed_min_cm_per_ms,
+            speed_max_cm_per_ms=speed_max_cm_per_ms,
+            gates=dict(gates or {}),
+        )
+        calibration = result["calibration"]
+        patient_results.append(
+            {
+                "patient_id": patient_id,
+                "split_sha256": result["split_sha256"],
+                "calibration_objective": calibration.get("objective"),
+                "calibration_converged": calibration.get("converged"),
+                "calibration_diagnostics": calibration.get("diagnostics", {}),
+                "holdout_status": result["holdout_report"]["status"],
+                "predictions_path": result["predictions_path"],
+            }
+        )
+
+    cohort_report = score_argo_cohort(
+        manifest_path,
+        output,
+        gates=dict(gates or {}),
+        output_dir=output / "cohort-reports",
+    )
+    result = {
+        "schema_version": "hearttwin-argo-surface-cohort-v1",
+        "cohort_sha256": manifest["cohort_sha256"],
+        "coordinate_unit": coordinate_unit,
+        "speed_bounds_cm_per_ms": [
+            float(speed_min_cm_per_ms),
+            float(speed_max_cm_per_ms),
+        ],
+        "patients": patient_results,
+        "cohort_report": cohort_report,
+        "scientific_boundary": (
+            "Every patient is calibrated independently on calibration points and "
+            "scored on that patient's held-out measurements. Cohort aggregation "
+            "uses equal patient weight and does not turn mapping points into "
+            "independent subjects."
+        ),
+    }
+    (output / "surface-cohort-report.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return result
+
+
 def _patient_mean(
     reports: list[dict[str, Any]],
     section: str,

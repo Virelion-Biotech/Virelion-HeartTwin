@@ -295,3 +295,23 @@ root, one global speed, and one timing offset. It does not model transmural
 propagation, myocardial fibres, scar depth, Purkinje anatomy, or ECG forward
 physics. It therefore provides a leakage-resistant ARGO LAT baseline, not a
 replacement for volumetric patient-specific CardiEP.
+
+
+### Full-cohort surface baseline
+
+After `argo-cohort-prepare`, the same surface model can be run independently
+for every patient:
+
+```bash
+hearttwin argo-surface-cohort \
+  outputs/argo-cohort/cohort.json \
+  outputs/argo-surface-cohort \
+  --coordinate-unit <verified-unit> \
+  --speed-min-cm-per-ms <prespecified-lower-bound> \
+  --speed-max-cm-per-ms <prespecified-upper-bound> \
+  --gates argo-lat-gates.json
+```
+
+This command does not pool calibration data between patients. It writes one
+prediction manifest and holdout report per patient, then produces the same
+equal-patient cohort aggregate used by `argo-cohort-score`.
