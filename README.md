@@ -193,7 +193,7 @@ GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later).
 
 ## Verified integration and remaining gaps
 
-Install the component revisions tested together with `python -m pip install -r requirements-services.txt`.
+Install the component revisions tested together with `python -m pip install -r requirements-services.txt`. `configs/compatibility-lock.json` mirrors those exact repository SHAs and is regression-tested against the install matrix so component-contract upgrades cannot silently drift.
 The workflow now requires explicit `feature_columns`, a `reference_labels` mapping for every benchmark sample, and a simulation `preset`. Benchmark assignments are fixed before training; identifiers and outcome metadata are excluded from features. These checks do not establish that user-supplied labels are scientifically valid or that selected features are free of all confounding.
 
 The current workflow is a research integration pipeline. Specialist analyses are recorded in the shared state, but do not yet calibrate a patient-specific model. Classification evaluation does not change a simulated state into a biologically validated state. CardiSim-to-CardiVex domain mappings are explicitly extrapolated and have no calibrated uncertainty estimate.
