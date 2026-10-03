@@ -17,17 +17,26 @@ import zipfile
 from pathlib import Path
 
 RECORD_API = "https://zenodo.org/api/records/{record_id}"
-REQUIRED_DIRS = ("clinical_data", "cellular_data")
 GEOMETRY_DIRS = ("geometric_data", "geometric_data_ruben")
 
 
-def _download_priority(item: dict) -> tuple[int, str]:
-    """Prefer the published metadata/input archive before large result bundles."""
+def _download_priority(item: dict, layout: str) -> tuple[int, str]:
+    """Prefer the smallest plausible input bundle for the requested layout."""
     key = str(item.get("key") or item.get("filename") or "")
     lowered = key.lower()
-    if "meta_data" in lowered or "metadata" in lowered:
+    is_geometry = any(token in lowered for token in ("geometric", "geometry"))
+    is_metadata = "meta_data" in lowered or "metadata" in lowered
+    if layout == "geometry":
+        if is_geometry:
+            return (0, lowered)
+        if is_metadata:
+            return (1, lowered)
+        if any(token in lowered for token in ("clinical", "cellular")):
+            return (3, lowered)
+        return (2, lowered)
+    if is_metadata:
         return (0, lowered)
-    if any(token in lowered for token in ("clinical", "geometric", "cellular")):
+    if any(token in lowered for token in ("clinical", "geometric", "geometry", "cellular")):
         return (1, lowered)
     return (2, lowered)
 
@@ -85,16 +94,42 @@ def maybe_extract(path: Path, root: Path) -> None:
         _safe_extract_tar(path, root)
 
 
-def find_required_root(root: Path) -> Path:
-    candidates = [root] + [p for p in root.rglob("clinical_data") if p.is_dir()]
-    for clinical in candidates:
-        candidate = clinical if clinical.name != "clinical_data" else clinical.parent
+def find_required_root(root: Path, *, layout: str = "full") -> Path:
+    if layout not in {"geometry", "full"}:
+        raise ValueError("layout must be 'geometry' or 'full'")
+
+    candidates: list[Path] = [root]
+    for name in GEOMETRY_DIRS:
+        candidates.extend(path.parent for path in root.rglob(name) if path.is_dir())
+    candidates.extend(
+        path.parent for path in root.rglob("clinical_data") if path.is_dir()
+    )
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
         has_geometry = any((candidate / item).is_dir() for item in GEOMETRY_DIRS)
-        if has_geometry and (candidate / "cellular_data").is_dir() and (candidate / "clinical_data").is_dir():
+        if not has_geometry:
+            continue
+        if layout == "geometry":
             return candidate
+        if (
+            (candidate / "cellular_data").is_dir()
+            and (candidate / "clinical_data").is_dir()
+        ):
+            return candidate
+
+    if layout == "geometry":
+        raise RuntimeError(
+            "Unable to locate the published CDT geometry layout. Expected "
+            "geometric_data or geometric_data_ruben."
+        )
     raise RuntimeError(
-        "Unable to locate the published CDT input layout. Expected clinical_data, "
-        "cellular_data and geometric_data/geometric_data_ruben."
+        "Unable to locate the published CDT full input layout. Expected "
+        "clinical_data, cellular_data and geometric_data/geometric_data_ruben."
     )
 
 
@@ -102,6 +137,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--record", default="14034739")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--layout",
+        choices=("geometry", "full"),
+        default="full",
+        help="Minimum published input layout required by the caller",
+    )
     args = parser.parse_args()
 
     args.output.mkdir(parents=True, exist_ok=True)
@@ -113,7 +154,7 @@ def main() -> None:
     files = record.get("files", [])
     if not files:
         raise RuntimeError(f"Zenodo record {args.record} contains no downloadable files")
-    files = sorted(files, key=_download_priority)
+    files = sorted(files, key=lambda item: _download_priority(item, args.layout))
 
     downloads = args.output / "downloads"
     extracts = args.output / "extracted"
@@ -148,11 +189,11 @@ def main() -> None:
         )
         maybe_extract(destination, extracts)
 
-        # This workflow needs the published input layout, not every result bundle
-        # attached to the Zenodo record. Stop once all required input directories
-        # coexist under one extracted root.
+        # Stop as soon as the caller's minimum input layout is present. The
+        # forward-equivalence gate needs geometry only; full personalization
+        # explicitly requests the complete clinical/cellular/geometry layout.
         try:
-            reference_root = find_required_root(extracts)
+            reference_root = find_required_root(extracts, layout=args.layout)
         except RuntimeError:
             reference_root = None
         if reference_root is not None:
@@ -164,7 +205,8 @@ def main() -> None:
     )
     if reference_root is None:
         reference_root = find_required_root(
-            extracts if any(extracts.iterdir()) else downloads
+            extracts if any(extracts.iterdir()) else downloads,
+            layout=args.layout,
         )
     (args.output / "reference_root.txt").write_text(str(reference_root.resolve()), encoding="utf-8")
     print(reference_root.resolve())
