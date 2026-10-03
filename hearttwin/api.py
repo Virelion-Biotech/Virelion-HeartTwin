@@ -71,5 +71,6 @@ class VirelionServices:
     def benchmark_search(self, query: str, **p: Any): return self._invoke("benchmark.search", {"query": query, **p})
     def benchmark_catalog(self, **p: Any): return self._invoke("benchmark.catalog", p)
     def benchmark_discover(self, **p: Any): return self._invoke("benchmark.discover", p)
+    def benchmark_admission(self, **p: Any): return self._invoke("benchmark.admission.assess", p)
     def benchmark_record_result(self, entity_id: str, **p: Any): return self.call("benchmark.result.record", entity_id, **p)
     def benchmark_results(self, **p: Any): return self._invoke("benchmark.results", p)

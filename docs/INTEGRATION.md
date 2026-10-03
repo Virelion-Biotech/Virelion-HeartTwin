@@ -117,7 +117,7 @@ CardiFlow and CardiTherapy are registered as native/HTTP-capable services. Cardi
 
 ## CardiBench intelligence boundary
 
-HeartTwin routes `benchmark.health`, `benchmark.search`, `benchmark.catalog`, `benchmark.discover`, `benchmark.result.record`, and `benchmark.results` in addition to `benchmark.resolve`. Discovery/search/catalog are control-plane capabilities and never become biological observations. Only a resolved benchmark used by the current workflow enters `CardiacState`.
+HeartTwin routes `benchmark.health`, `benchmark.search`, `benchmark.catalog`, `benchmark.discover`, `benchmark.admission.assess`, `benchmark.result.record`, and `benchmark.results` in addition to `benchmark.resolve`. Discovery/search/catalog/admission are control-plane capabilities and never become biological observations. `benchmark.admission.assess` is fail-closed and may return only a software-level `ready_for_review`, never automatic scientific approval. Only a resolved benchmark used by the current workflow enters `CardiacState`.
 
 The multimodal workflow closes the loop as `CardiBench → CardiLearn → CardiEval → CardiBench result history → CardiTrace`. CardiBench owns benchmark/result identity; CardiEval scoring; CardiBridge transport; CardiTrace lineage; HeartTwin orchestration.
 

@@ -82,6 +82,7 @@ def test_cardibench_intelligence_control_plane_smoke() -> None:
         "benchmark.search",
         "benchmark.catalog",
         "benchmark.discover",
+        "benchmark.admission.assess",
         "benchmark.result.record",
         "benchmark.results",
     }
@@ -113,6 +114,39 @@ def test_cardibench_intelligence_control_plane_smoke() -> None:
     )
     assert catalog["count"] == 1
     assert catalog["records"][0]["evidence_state"] == "verified"
+
+
+    admission_samples = [
+        {"sample_id": "A1", "group_id": "G1", "study_id": "ST1", "label": "reference"},
+        {"sample_id": "A2", "group_id": "G2", "study_id": "ST1", "label": "myocardial_injury"},
+        {"sample_id": "A3", "group_id": "G3", "study_id": "ST1", "label": "reference"},
+        {"sample_id": "A4", "group_id": "G4", "study_id": "ST1", "label": "myocardial_injury"},
+        {"sample_id": "A5", "group_id": "G5", "study_id": "ST1", "label": "reference"},
+        {"sample_id": "A6", "group_id": "G6", "study_id": "ST1", "label": "myocardial_injury"},
+    ]
+    admission = registry.capability("benchmark.admission.assess").invoke(
+        "benchmark.admission.assess",
+        {
+            "samples": admission_samples,
+            "benchmark_id": "hearttwin-admission-smoke",
+            "test_values": ["G1", "G2"],
+            "validation_values": ["G3", "G4"],
+            "seed": 7,
+        },
+    )
+    assert admission["status"] == "ready_for_review"
+    assert admission["ready_for_review"] is True
+    assert admission["materialization_preview"]["sample_count"] == 6
+
+    blocked_samples = [dict(item) for item in admission_samples]
+    blocked_samples[0]["group_id"] = ""
+    blocked = registry.capability("benchmark.admission.assess").invoke(
+        "benchmark.admission.assess",
+        {"samples": blocked_samples, "benchmark_id": "blocked-smoke"},
+    )
+    assert blocked["status"] == "blocked"
+    assert blocked["ready_for_review"] is False
+    assert "group_id" in blocked["missing_by_field"]
 
 
 def test_cardianatomy_native_smoke() -> None:
