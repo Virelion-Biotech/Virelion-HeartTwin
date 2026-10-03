@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+import hearttwin.operations as operations
 from hearttwin.operations import (
     ArtifactStore,
     CaseJournal,
@@ -116,19 +117,23 @@ def test_case_id_cannot_be_reused_for_different_input(tmp_path: Path) -> None:
         journal.begin_case("C1", {"input": 2})
 
 
-def test_job_queue_reclaims_expired_lease_after_worker_crash(tmp_path: Path) -> None:
-    import time
+def test_job_queue_reclaims_expired_lease_after_worker_crash(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clock = {"now": 1_000.0}
+    monkeypatch.setattr(operations.time, "time", lambda: clock["now"])
 
     queue = JobQueue(tmp_path / "journal.sqlite3")
     job_id = queue.enqueue("C1", "simulate", {"value": 7})
 
-    first = queue.claim("worker-a", lease_seconds=0.05)
+    first = queue.claim("worker-a", lease_seconds=5.0)
     assert first is not None
     assert first["job_id"] == job_id
     assert first["attempts"] == 1
 
-    time.sleep(0.08)
-    second = queue.claim("worker-b", lease_seconds=1.0)
+    clock["now"] += 6.0
+    second = queue.claim("worker-b", lease_seconds=10.0)
     assert second is not None
     assert second["job_id"] == job_id
     assert second["attempts"] == 2
@@ -273,19 +278,23 @@ def test_idempotency_store_rejects_conflicting_result(
 
 
 
-def test_job_queue_heartbeat_prevents_premature_reclaim(tmp_path: Path) -> None:
-    import time
+def test_job_queue_heartbeat_prevents_premature_reclaim(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clock = {"now": 2_000.0}
+    monkeypatch.setattr(operations.time, "time", lambda: clock["now"])
 
     queue = JobQueue(tmp_path / "queue.sqlite3")
     job_id = queue.enqueue("C1", "long-stage", {"x": 1})
-    claimed = queue.claim("worker-a", lease_seconds=0.08)
+    claimed = queue.claim("worker-a", lease_seconds=5.0)
     assert claimed is not None
 
-    time.sleep(0.04)
-    queue.heartbeat(job_id, "worker-a", lease_seconds=0.20)
-    time.sleep(0.08)
+    clock["now"] += 2.0
+    queue.heartbeat(job_id, "worker-a", lease_seconds=10.0)
+    clock["now"] += 5.0
 
-    assert queue.claim("worker-b", lease_seconds=1.0) is None
+    assert queue.claim("worker-b", lease_seconds=10.0) is None
     queue.complete(job_id, "worker-a", {"ok": True})
     assert queue.get(job_id)["status"] == "ok"
 
