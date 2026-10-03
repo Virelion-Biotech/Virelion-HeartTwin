@@ -1,0 +1,233 @@
+name: Operational rehearsal
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/operational-rehearsal.yml"
+      - "hearttwin/rehearsal.py"
+      - "hearttwin/rehearsal_worker.py"
+      - "hearttwin/contracts.py"
+      - "hearttwin/alignment.py"
+      - "schemas/cardiac-state-1.2.0.schema.json"
+      - "tests/test_alignment.py"
+      - "hearttwin/native_services.py"
+      - "hearttwin/operations.py"
+      - "hearttwin/service_registry.py"
+      - "hearttwin/workflow.py"
+      - "hearttwin/state.py"
+      - "hearttwin/state_crosswalk.py"
+      - "hearttwin/validation_gate.py"
+      - "hearttwin/services.yaml"
+      - "configs/compatibility-lock.json"
+      - "configs/services.yaml"
+      - "tests/test_native_service_connections.py"
+      - "tests/test_compatibility_lock.py"
+      - "requirements-services.txt"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/operational-rehearsal.yml"
+      - "hearttwin/rehearsal.py"
+      - "hearttwin/rehearsal_worker.py"
+      - "hearttwin/contracts.py"
+      - "hearttwin/alignment.py"
+      - "schemas/cardiac-state-1.2.0.schema.json"
+      - "tests/test_alignment.py"
+      - "hearttwin/native_services.py"
+      - "hearttwin/operations.py"
+      - "hearttwin/service_registry.py"
+      - "hearttwin/workflow.py"
+      - "hearttwin/state.py"
+      - "hearttwin/state_crosswalk.py"
+      - "hearttwin/validation_gate.py"
+      - "hearttwin/services.yaml"
+      - "configs/compatibility-lock.json"
+      - "configs/services.yaml"
+      - "tests/test_native_service_connections.py"
+      - "tests/test_compatibility_lock.py"
+      - "requirements-services.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hearttwin-operational-rehearsal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rehearsal:
+    name: Distributed production-topology rehearsal
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HEARTTWIN_REQUIRE_NATIVE: "1"
+      HEARTTWIN_HTTP_ATTEMPTS: "3"
+      HEARTTWIN_HTTP_TIMEOUT_SECONDS: "120"
+      HEARTTWIN_HTTP_BACKOFF_SECONDS: "0.1"
+    steps:
+      - name: Checkout HeartTwin
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Upgrade packaging tools
+        run: python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install HeartTwin
+        run: python -m pip install -e '.[dev]'
+
+      - name: Install pinned Virelion services
+        run: python -m pip install -r requirements-services.txt
+
+      - name: Validate native stack before distribution
+        run: hearttwin doctor
+
+      - name: Run distributed operational rehearsal
+        run: >-
+          hearttwin operational-rehearsal
+          --workdir outputs/operational-rehearsal
+          --case-id HT-OPS-CI
+
+      - name: Verify rehearsal summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("outputs/operational-rehearsal/rehearsal-summary.json")
+          data = json.loads(path.read_text())
+          required = {
+              "status": "ok",
+              "timeout_observed": True,
+              "worker_restart_recovered": True,
+              "version_skew_rejected": True,
+              "oversized_response_rejected": True,
+              "http_retry_recovered": True,
+              "duplicate_suppressed": True,
+              "idempotency_survived_worker_restart": True,
+              "response_drop_recovered_from_durable_result": True,
+              "artifact_corruption_detected": True,
+              "durable_replay_reused": True,
+              "queue_lease_recovered": True,
+              "multi_case_isolation_verified": True,
+              "duplicate_case_submission_collapsed": True,
+              "coordinator_restart_recovered": True,
+          }
+          for key, expected in required.items():
+              if data.get(key) != expected:
+                  raise SystemExit(
+                      f"Operational rehearsal failed {key}: "
+                      f"{data.get(key)!r} != {expected!r}"
+                  )
+          if data.get("distributed_service_count", 0) < 15:
+              raise SystemExit("Too few services crossed real HTTP worker boundaries")
+          expected_branches = {
+              "CardiAnatomy",
+              "CardiEP",
+              "CardiInfer",
+              "CardiMech",
+              "CardiStudio",
+              "DCCP",
+          }
+          if set(data.get("branch_probes_passed", [])) != expected_branches:
+              raise SystemExit(
+                  "Distributed branch probes incomplete: "
+                  f"{data.get('branch_probes_passed')!r}"
+              )
+          concurrent = data.get("concurrent_cases") or {}
+          case_ids = concurrent.get("case_ids") or []
+          if len(case_ids) != 3:
+              raise SystemExit(f"Expected 3 concurrent cases, got {case_ids!r}")
+          if concurrent.get("completion_order") == concurrent.get("submission_order"):
+              raise SystemExit("Concurrent cases did not complete out of order")
+          for field in (
+              "unique_state_fingerprints",
+              "unique_workflow_run_ids",
+              "unique_trace_run_ids",
+              "unique_trace_artifacts",
+          ):
+              if concurrent.get(field) != 3:
+                  raise SystemExit(
+                      f"Concurrent isolation failed {field}: "
+                      f"{concurrent.get(field)!r}"
+                  )
+          print(json.dumps(data, indent=2, sort_keys=True))
+          PY
+
+      - name: Reopen durable journal in a fresh process
+        run: |
+          python - <<'PY'
+          from hearttwin.operations import CaseJournal
+
+          journal = CaseJournal(
+              "outputs/operational-rehearsal/journal.sqlite3"
+          )
+          state = journal.snapshot("HT-OPS-CI")
+          assert state["case"]["status"] == "ok"
+          assert any(
+              row["event_type"] == "fault.worker_recovered"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.artifact_corruption_detected"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.queue_lease_recovered"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.version_skew_rejected"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.oversized_response_rejected"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.http_retry_recovered"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.idempotency_survived_restart"
+              for row in state["events"]
+          )
+          assert any(
+              row["event_type"] == "fault.response_drop_recovered"
+              for row in state["events"]
+          )
+          for suffix in ("A", "B", "C"):
+              concurrent_case = f"HT-OPS-CI-CONCURRENT-{suffix}"
+              concurrent_state = journal.snapshot(concurrent_case)
+              assert concurrent_state["case"]["status"] == "ok"
+              assert {
+                  event["case_id"]
+                  for event in concurrent_state["events"]
+              } == {concurrent_case}
+          print(
+              f"reopened {len(state['stages'])} stages and "
+              f"{len(state['events'])} durable events"
+          )
+          PY
+
+      - name: Run HeartTwin suite after rehearsal
+        run: python -m pytest -q
+
+      - name: Upload rehearsal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearttwin-operational-rehearsal
+          path: |
+            outputs/operational-rehearsal/rehearsal-summary.json
+            outputs/operational-rehearsal/journal.sqlite3
+            outputs/operational-rehearsal/logs/
+          if-no-files-found: warn
