@@ -9,7 +9,7 @@
     },
     {
       "name": "Virelion-CardiAtlas",
-      "sha": "a006ad9e2f59ceeabe3ff3eec0a871160f951591",
+      "sha": "b7e1425aaa0a73434c097403b47e2d5a613c13c7",
       "role": "native"
     },
     {
@@ -94,12 +94,12 @@
     },
     {
       "name": "Virelion-CardiTrace",
-      "sha": "0bbfcf7669935da6f33ea9547338f27088e9a469",
+      "sha": "9c84b683293e1eaf3c7fd135d29502be8acc9b41",
       "role": "command"
     },
     {
       "name": "Virelion-CardiBridge",
-      "sha": "094242f2b3350ac50a6b32749811c3b8bb4f505a",
+      "sha": "7adda3447723130a15026b4807ab445bd630e7ef",
       "role": "native"
     },
     {
