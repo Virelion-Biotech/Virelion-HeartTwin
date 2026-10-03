@@ -26,6 +26,7 @@ from .contracts import (
     StateTransition,
     StateValue,
     ValidationArtifact,
+    ValidationGateArtifact,
     VexObservationPayload,
 )
 from .provenance import sha256
@@ -292,6 +293,17 @@ class CardiacStateStore:
         self.state.validation = {"evaluation": payload.model_dump(mode="json")}
         return artifact
 
+    def record_validation_gate(
+        self,
+        artifact: ValidationGateArtifact,
+        provenance: Provenance | None = None,
+    ) -> None:
+        provenance_ids = self._add_provenance(provenance)
+        artifact = artifact.model_copy(
+            update={"provenance_ids": sorted(set(artifact.provenance_ids) | set(provenance_ids))}
+        )
+        self._append_unique(self.state.validation_gates, artifact, "gate_id", artifact.gate_id)
+
     def record_trace(self, data: Mapping[str, Any], provenance: Provenance | None = None) -> None:
         self.state.trace_records.append(dict(data))
         self.state.validation["trace"] = dict(data)
@@ -413,6 +425,7 @@ class CardiacStateStore:
         self._assert_unique([item.prediction_id for item in state.prediction_artifacts], "prediction_id")
         self._assert_unique([item.posterior_id for item in state.posterior_artifacts], "posterior_id")
         self._assert_unique([item.validation_id for item in state.evaluation_artifacts], "validation_id")
+        self._assert_unique([item.gate_id for item in state.validation_gates], "gate_id")
         self._assert_unique([item.message_id for item in state.bridge_publications], "message_id")
         self._assert_unique([item.transition_id for item in state.transitions], "transition_id")
 
@@ -425,6 +438,7 @@ class CardiacStateStore:
             state.prediction_artifacts,
             state.posterior_artifacts,
             state.evaluation_artifacts,
+            state.validation_gates,
             state.transitions,
         ):
             for item in collection:

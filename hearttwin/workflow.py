@@ -28,6 +28,7 @@ from .contracts import (
 from .provenance import new_run_id, sha256
 from .service_registry import ServiceRegistry
 from .state import CardiacStateStore
+from .state_crosswalk import CrosswalkError, cardisim_summary_to_cardivex
 
 
 class WorkflowError(RuntimeError):
@@ -178,33 +179,19 @@ def _run_specialist_modalities(
 
 
 def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload) -> dict[str, Any]:
-    """Translate a simulation summary into a phenotype-level CardiVex proxy scenario."""
-    # These are explicit model-variable proxies, not measured disease states.
-    mapping = {
-        "inflammatory_activation": ("inflammation", False),
-        "metabolic_stress": ("metabolism", True),
-        "mitochondrial_dysfunction": ("mitochondrial_health", True),
-        "oxidative_stress": ("oxidative_stress", False),
-        "viability_burden": ("viability", True),
-        "fibrosis_remodeling": ("fibrosis", False),
-        "contractile_impairment": ("contractility", True),
-        "electrophysiologic_disturbance": ("electrophysiology", True),
+    """Translate only direct identity/sign-inversion phenotypes into CardiVex."""
+    try:
+        initial_values, final_values, _ = cardisim_summary_to_cardivex(simulation.summary)
+    except CrosswalkError as exc:
+        raise WorkflowError(f"CardiSim/CardiVex state crosswalk failed: {exc}") from exc
+    initial = {
+        name: {"value": value, "evidence_status": "extrapolated"}
+        for name, value in initial_values.items()
     }
-
-    def domains(key: str) -> dict[str, Any]:
-        values = simulation.summary.get(key)
-        if not isinstance(values, dict):
-            raise WorkflowError(f"Simulation summary is missing {key} phenotype values")
-        output = {}
-        for domain, (variable, invert) in mapping.items():
-            value = float(values[variable])
-            if not isfinite(value) or not 0 <= value <= 1:
-                raise WorkflowError(f"Invalid normalized simulation variable: {variable}")
-            output[domain] = {"value": 1.0 - value if invert else value,
-                              "evidence_status": "extrapolated"}
-        return output
-
-    initial, final = domains("initial"), domains("final")
+    final = {
+        name: {"value": value, "evidence_status": "extrapolated"}
+        for name, value in final_values.items()
+    }
     duration = float(simulation.summary["duration"])
     return {
         "scenario_id": f"CVX-HT-{sha256({'entity': entity_id, 'simulation': simulation.model_dump(mode='json')})[:12].upper()}",
@@ -222,9 +209,10 @@ def _scenario_from_workflow(entity_id: str, simulation: SimulationResultPayload)
         "severity_profile": {key: item["value"] for key, item in final.items()},
         "ood_status": "validation",
         "provenance_sources": ["Virelion-CardiSim", "Virelion-HeartTwin"],
-        "provenance_transformations": ["Named normalized model variables; health variables complemented to burden. No fitted biological calibration or uncertainty estimate."],
+        "provenance_transformations": [
+            "HeartTwin state_crosswalk 0.1.0: direct identity mappings and complements only; no fitted biological calibration."
+        ],
     }
-
 
 def _register_local_vex_handler(registry: ServiceRegistry, entity_id: str, scenario: dict[str, Any]) -> None:
     """Route a real ``agent.challenge`` BridgeEnvelope into CardiVex in-process."""

@@ -118,6 +118,22 @@ class PosteriorArtifact(BaseModel):
     provenance_ids: list[str] = Field(default_factory=list)
 
 
+class ValidationGateArtifact(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    gate_id: str
+    policy_id: str
+    evidence_level: Literal[
+        "numerical_verification", "synthetic_recovery",
+        "empirical_validation", "clinical_validation",
+    ]
+    passed: bool
+    criteria: list[dict[str, Any]] = Field(default_factory=list)
+    observed_metrics: dict[str, float] = Field(default_factory=dict)
+    evidence_ids: list[str] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
 class ValidationArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid")
     validation_id: str
@@ -339,6 +355,7 @@ class CardiacState(BaseModel):
     prediction_artifacts: list[PredictionArtifact] = Field(default_factory=list)
     posterior_artifacts: list[PosteriorArtifact] = Field(default_factory=list)
     evaluation_artifacts: list[ValidationArtifact] = Field(default_factory=list)
+    validation_gates: list[ValidationGateArtifact] = Field(default_factory=list)
     challenges: list[AgentChallengePayload] = Field(default_factory=list)
     vex_observations: list[VexObservationPayload] = Field(default_factory=list)
     bridge_publications: list[BridgePublicationPayload] = Field(default_factory=list)

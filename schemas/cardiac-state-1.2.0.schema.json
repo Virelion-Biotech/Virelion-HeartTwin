@@ -147,6 +147,12 @@
       "items": {
         "$ref": "#/$defs/posteriorArtifact"
       }
+    },
+    "validation_gates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/validationGate"
+      }
     }
   },
   "$defs": {
@@ -1060,6 +1066,66 @@
             "synthetic_recovery_checked",
             "empirically_checked"
           ]
+        },
+        "provenance_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "validationGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_id",
+        "policy_id",
+        "evidence_level",
+        "passed"
+      ],
+      "properties": {
+        "gate_id": {
+          "type": "string"
+        },
+        "policy_id": {
+          "type": "string"
+        },
+        "evidence_level": {
+          "type": "string",
+          "enum": [
+            "numerical_verification",
+            "synthetic_recovery",
+            "empirical_validation",
+            "clinical_validation"
+          ]
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "criteria": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "observed_metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "provenance_ids": {
           "type": "array",

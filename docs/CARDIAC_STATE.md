@@ -24,6 +24,7 @@ CardiacState
 ├── prediction_artifacts
 ├── posterior_artifacts
 ├── evaluation_artifacts
+├── validation_gates
 ├── challenges / vex_observations
 ├── bridge_publications
 ├── transitions
@@ -54,3 +55,8 @@ The state layer validates structural invariants: IDs, typed artifacts, provenanc
 ## Schema
 
 The versioned JSON schema is `schemas/cardiac-state-1.2.0.schema.json`. The previous 1.0.0 schema is retained for compatibility. New producers should emit `contract_version = 1.2.0`.
+
+
+## Scientific evidence gates
+
+Evaluation artifacts and scientific validation are separate. `validation_gates` record prespecified criteria, evidence identifiers, observed metrics, pass/fail state, and provenance without changing the biological/execution phase. Numerical, synthetic-recovery, empirical, and clinical evidence therefore remain explicit rather than being inferred from successful workflow execution.

@@ -128,7 +128,7 @@ hearttwin workflow-demo --output outputs/workflow-demo.json
 
 The integration matrix installs the actual repositories from clean environments and fails hard if a required native service cannot be imported. Component compatibility fixes are kept in the component repositories rather than hidden by HeartTwin fallbacks.
 
-The workflow is computational test infrastructure. Its generated states are not patient measurements, and passing software integration tests does not establish clinical or biological validity.
+The workflow is computational test infrastructure. Its generated states are not patient measurements, and passing software integration tests does not establish clinical or biological validity. Scientific validation gates are recorded separately with prespecified criteria, evidence IDs, and provenance; a successful evaluation does not silently promote a state to biological or clinical validity.
 
 ## Cardiac-Digital-Twin integration
 
