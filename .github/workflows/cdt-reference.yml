@@ -82,7 +82,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: .cdt_reference/data
-          key: cdt-zenodo-14034739-v1
+          key: cdt-zenodo-14034739-geometry-v2
       - name: Checkout pinned upstream CDT
         run: |
           git clone --no-checkout https://github.com/juliacamps/Cardiac-Digital-Twin.git .cdt_reference/upstream
@@ -132,7 +132,11 @@ jobs:
         with:
           python-version: "3.11"
       - name: Fetch published CDT data
-        run: python scripts/fetch_cdt_zenodo.py --record 14034739 --output .cdt_reference/data
+        run: >-
+          python scripts/fetch_cdt_zenodo.py
+          --record 14034739
+          --output .cdt_reference/data
+          --layout full
       - name: Run pinned upstream personalization workflow
         run: |
           DATA_ROOT="$(cat .cdt_reference/data/reference_root.txt)"
