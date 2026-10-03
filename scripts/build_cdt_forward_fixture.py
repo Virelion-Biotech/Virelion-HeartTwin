@@ -68,7 +68,10 @@ def main() -> None:
         geometric_data_dir=str(geometry_root) + os.sep,
         resolution="coarse",
         subject_name=args.subject,
-        vc_name_list=["ab", "tm", "rt", "tv"],
+        # EikonalGeometry's dense/sparse endocardial classification hard-requires
+        # the modern apex-to-base-cut and rotational ventricular coordinates.
+        # The published DTI004 bundle carries these as ab_cut and rt.
+        vc_name_list=["ab_cut", "rt"],
         verbose=False,
     )
     conduction = conduction_mod.PurkinjeSystemVC(
@@ -103,11 +106,23 @@ def main() -> None:
     root_times = np.asarray(geometry.get_candidate_root_node_time(purkinje_speed=0.300), dtype=np.float64)
     edges = np.asarray(geometry.edge, dtype=np.int64)
     basis = np.asarray(geometry.edge_fibre_sheet_normal, dtype=np.float64)
+    dense_endocardial = np.asarray(geometry.is_dense_endocardial, dtype=bool)
+    sparse_endocardial = np.asarray(geometry.is_sparse_endocardial, dtype=bool)
 
     if edges.ndim != 2 or edges.shape[1] != 2:
         raise RuntimeError(f"Unexpected upstream edge shape: {edges.shape}")
     if basis.ndim != 3 or basis.shape[1:] != (3, 3) or len(basis) != len(edges):
         raise RuntimeError(f"Unexpected upstream edge basis shape: {basis.shape}")
+    if dense_endocardial.shape != (len(edges),):
+        raise RuntimeError(
+            f"Unexpected upstream dense-endocardial mask shape: {dense_endocardial.shape}"
+        )
+    if sparse_endocardial.shape != (len(edges),):
+        raise RuntimeError(
+            f"Unexpected upstream sparse-endocardial mask shape: {sparse_endocardial.shape}"
+        )
+    if np.any(dense_endocardial & sparse_endocardial):
+        raise RuntimeError("Upstream dense/sparse endocardial edge masks overlap")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
@@ -117,6 +132,8 @@ def main() -> None:
         tetrahedra=np.asarray(geometry.get_tetra(), dtype=np.int64),
         edge_nodes=edges,
         edge_fibre_sheet_normal=basis,
+        dense_endocardial=dense_endocardial,
+        sparse_endocardial=sparse_endocardial,
         root_nodes=root_nodes,
         root_activation_ms=root_times,
         parameter_values=values,
@@ -131,6 +148,9 @@ def main() -> None:
         "root_count": int(root_count),
         "node_count": int(len(geometry.get_node_xyz())),
         "edge_count": int(len(edges)),
+        "vc_name_list": ["ab_cut", "rt"],
+        "dense_endocardial_edge_count": int(np.sum(dense_endocardial)),
+        "sparse_endocardial_edge_count": int(np.sum(sparse_endocardial)),
         "activation_shape": list(activation.shape),
         "activation_min_ms": float(activation.min()),
         "activation_max_ms": float(activation.max()),

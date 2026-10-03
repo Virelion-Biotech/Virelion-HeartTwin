@@ -19,7 +19,7 @@ The published personalization scripts contain stochastic SMC-ABC inference and e
 
 The upstream Eikonal/Dijkstra implementation constructs anisotropic edge costs from a fibre-sheet-normal metric, injects Purkinje root activation times, runs Dijkstra propagation and returns rounded millisecond LAT values. The fixture records the exact upstream edge ordering, edge fibre basis, node coordinates, tetrahedra, root nodes and root activation times required to reproduce that calculation.
 
-## Reproduction pipeline
+The pinned upstream modules import a broader scientific stack at module import time, including `pymp`, SciPy, pandas, numba, matplotlib/seaborn and VTK. HeartTwin therefore keeps those reference-only packages in `requirements-cdt-reference.txt`. They are isolated from the normal HeartTwin runtime dependency set and are installed only for the numerical-equivalence/full-personalisation reference workflows.\n\n## Reproduction pipeline
 
 ```text
 Zenodo DOI

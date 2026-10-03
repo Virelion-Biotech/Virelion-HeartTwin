@@ -11,6 +11,7 @@ from pathlib import Path
 
 UPSTREAM_REPO = "https://github.com/juliacamps/Cardiac-Digital-Twin.git"
 UPSTREAM_COMMIT = "816d51fab0837cfe9e20c7d3a318429e9acf0733"
+REFERENCE_REQUIREMENTS = Path(__file__).resolve().parents[1] / "requirements-cdt-reference.txt"
 
 
 def run(cmd: list[str], cwd: Path | None = None, timeout: int = 3600) -> None:
@@ -48,10 +49,21 @@ def main() -> None:
         raise RuntimeError("Published CDT dataset is incomplete; missing: " + ", ".join(missing))
 
     if not args.skip_install:
-        run([
-            sys.executable, "-m", "pip", "install", "numpy", "scipy", "pandas", "numba",
-            "pymp-pypi", "SALib", "pyDOE", "matplotlib", "plotly"
-        ], timeout=1800)
+        if not REFERENCE_REQUIREMENTS.is_file():
+            raise RuntimeError(
+                f"Pinned-reference dependency file is missing: {REFERENCE_REQUIREMENTS}"
+            )
+        run(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "-r",
+                str(REFERENCE_REQUIREMENTS),
+            ],
+            timeout=1800,
+        )
 
     custom = upstream / ".custom_config"
     custom.mkdir(exist_ok=True)
