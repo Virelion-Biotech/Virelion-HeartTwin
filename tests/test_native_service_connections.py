@@ -169,22 +169,49 @@ def test_dccp_host_map_native_result_is_json_boundary_safe() -> None:
     assert isinstance(result["axes"]["ordinal"], dict)
 
 
-def test_cardiflow_and_carditherapy_are_registered_but_fail_closed_without_backends() -> None:
+def test_cardiflow_reference_backend_and_carditherapy_fail_closed() -> None:
     registry = load_registry()
     _require_native(registry)
 
     flow_health = registry.capability("flow.health").invoke("flow.health", {})
     assert flow_health["service"] == "CardiFlow"
-    assert flow_health["backends"] == []
+    assert "windkessel-3element-v1" in flow_health["backends"]
 
-    therapy_health = registry.capability("therapy.health").invoke("therapy.health", {})
-    assert therapy_health["service"] == "CardiTherapy"
-    assert therapy_health["backends"] == []
+    flow_result = registry.capability("flow.simulate").invoke(
+        "flow.simulate",
+        {
+            "subject_id": "smoke",
+            "domain": {
+                "domain_id": "systemic",
+                "anatomy_ref": {
+                    "artifact_id": "anatomy",
+                    "kind": "reduced_order_domain",
+                    "uri": "memory://systemic",
+                },
+                "region": "systemic_circulation",
+            },
+            "backend": "windkessel-3element-v1",
+            "fluid": {"density": 1060.0, "dynamic_viscosity": 0.0035},
+            "boundary_conditions": [
+                {
+                    "boundary_id": "afterload",
+                    "kind": "windkessel",
+                    "region": "aorta",
+                    "parameters": {
+                        "proximal_resistance": 1.0,
+                        "distal_resistance": 4.0,
+                        "compliance": 0.5,
+                    },
+                }
+            ],
+            "settings": {"dt_s": 0.01, "inlet_flow": [2.0, 2.0, 2.0]},
+        },
+    )
+    assert flow_result["validation_status"] == "software_checked"
+    assert flow_result["qc"]["passed"] is True
 
-    flow = registry.capability("flow.simulate")
-    assert flow is not None
     with pytest.raises(Exception, match="backend unavailable"):
-        flow.invoke(
+        registry.capability("flow.simulate").invoke(
             "flow.simulate",
             {
                 "subject_id": "smoke",
@@ -205,10 +232,12 @@ def test_cardiflow_and_carditherapy_are_registered_but_fail_closed_without_backe
             },
         )
 
-    therapy = registry.capability("therapy.run")
-    assert therapy is not None
+    therapy_health = registry.capability("therapy.health").invoke("therapy.health", {})
+    assert therapy_health["service"] == "CardiTherapy"
+    assert therapy_health["backends"] == []
+
     with pytest.raises(Exception, match="backend unavailable"):
-        therapy.invoke(
+        registry.capability("therapy.run").invoke(
             "therapy.run",
             {
                 "subject_id": "smoke",
