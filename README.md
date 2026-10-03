@@ -18,7 +18,7 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | CardioScore | MEA-based cardiac safety scoring | HeartTwin command adapter |
 | CardiLearn | molecular-state learning | Native + HTTP fallback |
 | CardiMech | cardiac mechanics, EP-to-mechanics handoff, circulation coupling, and mechanics calibration forward model | HeartTwin command adapter |
-| CardiFlow | hemodynamics/flow contracts and fail-closed backend orchestration | Native + HTTP fallback; no default numerical backend |
+| CardiFlow | hemodynamics/flow contracts plus deterministic 0D Windkessel reference backend | Native + HTTP fallback; software-checked reduced-order backend, not CFD/clinical validation |
 | CardiSim | synthetic trajectories | Native + HTTP fallback |
 | CardiSimNative | CDT-compatible reference digital twin | Built into HeartTwin |
 | CardiStudio | experimental design, populations, constraints, power | Native + HTTP fallback |
