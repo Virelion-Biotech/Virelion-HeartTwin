@@ -94,6 +94,7 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
         "atlas.context",
         "learn.infer",
         "benchmark.resolve",
+        "benchmark.result.record",
         "simulation.run",
         "agent.challenge",
         "bridge.publish",
