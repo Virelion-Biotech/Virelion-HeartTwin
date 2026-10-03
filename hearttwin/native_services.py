@@ -311,8 +311,53 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def _cardibench(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
+    # New CardiBench exposes the stable JSON-shaped API. Keep benchmark.resolve
+    # compatible with 0.9.x during rolling upgrades so deployment order never
+    # breaks the core twin workflow.
     try:
         from cardi_bench.api import CardiBenchAPI
+    except (ImportError, ModuleNotFoundError):
+        try:
+            from cardi_bench import Sample, materialize
+        except Exception as exc:  # pragma: no cover
+            raise _native_unavailable("CardiBench", exc)
+        if capability == "benchmark.health":
+            return {
+                "contract_version": "0.9-compat",
+                "status": "ok",
+                "capabilities": ["benchmark.health", "benchmark.resolve"],
+            }
+        if capability != "benchmark.resolve":
+            raise ValueError(
+                f"Installed CardiBench supports benchmark.resolve only; upgrade for {capability}"
+            )
+        raw_samples = payload.get("samples") or []
+        samples = [
+            Sample(
+                sample_id=str(item["sample_id"]),
+                group_id=str(item["group_id"]),
+                study_id=str(item["study_id"]),
+                label=str(item["label"]),
+                technical_group=item.get("technical_group"),
+                organism=item.get("organism"),
+                timepoint=item.get("timepoint"),
+                cell_context=item.get("cell_context"),
+                region=item.get("region"),
+            )
+            for item in raw_samples
+        ]
+        result = materialize(
+            samples,
+            benchmark_id=str(payload.get("benchmark_id", "hearttwin-e2e")),
+            version=str(payload.get("version", "1.0")),
+            policy=str(payload.get("policy", "subject_heldout")),
+            test_values={str(item) for item in payload.get("test_values", [])},
+            validation_values={str(item) for item in payload.get("validation_values", [])},
+            seed=int(payload.get("seed", 0)),
+        )
+        data = result.to_dict()
+        data.pop("label_counts", None)
+        return {"contract_version": "1.0", **data, "samples": raw_samples}
     except Exception as exc:  # pragma: no cover
         raise _native_unavailable("CardiBench", exc)
     return CardiBenchAPI().invoke(capability, payload)

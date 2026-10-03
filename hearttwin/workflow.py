@@ -451,7 +451,19 @@ def run_multimodal_workflow(
     # Close the benchmark lifecycle before CardiTrace seals the run. Discovery,
     # catalog, and search remain control-plane operations and never become
     # biological CardiacState observations.
-    if registry.capability("benchmark.result.record") is not None:
+    benchmark_history_supported = False
+    benchmark_health_adapter = registry.capability("benchmark.health")
+    if benchmark_health_adapter is not None:
+        try:
+            benchmark_health = benchmark_health_adapter.invoke(
+                "benchmark.health", {"entity_id": entity_id}
+            )
+            benchmark_history_supported = "benchmark.result.record" in set(
+                benchmark_health.get("capabilities") or []
+            )
+        except Exception:
+            benchmark_history_supported = False
+    if benchmark_history_supported:
         benchmark_history_result = _call(
             registry,
             "benchmark.result.record",
