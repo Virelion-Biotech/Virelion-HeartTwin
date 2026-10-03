@@ -237,3 +237,28 @@ Passing an ARGO holdout study supports a statement such as:
 > The model reproduced prespecified held-out electrical observables in the evaluated ARGO post-ischemic VT cohort under the declared extraction and scoring protocol.
 
 It does not support statements of diagnosis, treatment guidance, clinical benefit, prospective performance, or generalization outside this small CARTO-3 post-ischemic VT cohort.
+
+
+## Cohort automation
+
+HeartTwin can prepare the official Pt1-Pt9 study without manual split bookkeeping:
+
+```bash
+hearttwin argo-cohort-prepare /data/ARGODataset_Folder outputs/argo-cohort \
+  --holdout-fraction 0.20 --seed 42
+```
+
+This creates one blinded split per patient plus `cohort.json`. Predictions are
+then placed under `<predictions-root>/PtN/predictions.json` and scored with:
+
+```bash
+hearttwin argo-cohort-score outputs/argo-cohort/cohort.json \
+  outputs/argo-predictions \
+  --gates argo-gates.json \
+  --output-dir outputs/argo-reports
+```
+
+The cohort report is **equal-patient weighted**. It records every patient report
+and the IDs of any patients that fail prespecified gates. HeartTwin deliberately
+does not use a mapping-point-weighted aggregate as the primary cohort result,
+because the ARGO patient point counts are highly imbalanced.

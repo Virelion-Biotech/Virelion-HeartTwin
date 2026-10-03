@@ -749,6 +749,210 @@ def score_argo_holdout(
     }
 
 
+
+def prepare_argo_cohort(
+    dataset_root: str | Path,
+    output_root: str | Path,
+    *,
+    holdout_fraction: float = 0.2,
+    seed: int = 42,
+    patient_ids: list[str] | tuple[str, ...] | None = None,
+    strict_official_counts: bool = True,
+) -> dict[str, Any]:
+    """Prepare deterministic blinded splits for an ARGO patient cohort."""
+    root = Path(dataset_root).expanduser().resolve()
+    output = Path(output_root).expanduser().resolve()
+    ids = list(patient_ids or sorted(_EXPECTED_POINT_COUNTS, key=lambda x: int(x[2:])))
+    if not ids or len(ids) != len(set(ids)):
+        raise ValueError("patient_ids must contain unique patient identifiers")
+
+    patients = []
+    for patient_id in ids:
+        patient_dir = root / patient_id
+        if not patient_dir.is_dir():
+            raise FileNotFoundError(f"ARGO cohort is missing patient directory: {patient_dir}")
+        prepared = prepare_argo_empirical_study(
+            patient_dir,
+            output / patient_id,
+            holdout_fraction=holdout_fraction,
+            seed=seed,
+            strict_official_counts=strict_official_counts,
+        )
+        split = prepared["split"]
+        patients.append(
+            {
+                "patient_id": patient_id,
+                "split_path": prepared["split_path"],
+                "calibration_targets_path": prepared["calibration_targets_path"],
+                "split_sha256": split["split_sha256"],
+                "n_calibration": len(split["calibration_ids"]),
+                "n_holdout": len(split["holdout_ids"]),
+            }
+        )
+
+    identity = {
+        "schema_version": "hearttwin-argo-cohort-identity-v1",
+        "dataset": "ARGO",
+        "dataset_version": ARGO_VERSION,
+        "doi": ARGO_DOI,
+        "holdout_fraction": float(holdout_fraction),
+        "seed": int(seed),
+        "patients": [
+            {
+                "patient_id": item["patient_id"],
+                "split_sha256": item["split_sha256"],
+            }
+            for item in patients
+        ],
+    }
+    manifest = {
+        **identity,
+        "schema_version": "hearttwin-argo-cohort-v1",
+        "dataset_root": str(root),
+        "output_root": str(output),
+        "patient_count": len(patients),
+        "patients": patients,
+        "primary_weighting": "equal_patient",
+        "cohort_sha256": sha256(identity),
+        "scientific_boundary": (
+            "Patient-level held-out electrical-observable validation. Mapping points "
+            "are not treated as independent subjects and patient failures must not be "
+            "silently excluded."
+        ),
+    }
+    output.mkdir(parents=True, exist_ok=True)
+    manifest_path = output / "cohort.json"
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return {"manifest_path": str(manifest_path), "manifest": manifest}
+
+
+def _patient_mean(
+    reports: list[dict[str, Any]],
+    section: str,
+    metric: str,
+) -> float | None:
+    values = []
+    for report in reports:
+        payload = report.get(section)
+        if not isinstance(payload, dict):
+            continue
+        value = payload.get(metric)
+        if isinstance(value, (int, float)) and math.isfinite(float(value)):
+            values.append(float(value))
+    return None if not values else float(np.mean(values))
+
+
+def score_argo_cohort(
+    cohort_manifest_path: str | Path,
+    predictions_root: str | Path,
+    *,
+    gates: dict[str, Any] | None = None,
+    output_dir: str | Path | None = None,
+) -> dict[str, Any]:
+    """Score all cohort patients independently and aggregate with equal patient weight."""
+    manifest = json.loads(Path(cohort_manifest_path).read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != "hearttwin-argo-cohort-v1":
+        raise ValueError("Unsupported ARGO cohort schema")
+    identity = {
+        "schema_version": "hearttwin-argo-cohort-identity-v1",
+        "dataset": manifest.get("dataset"),
+        "dataset_version": manifest.get("dataset_version"),
+        "doi": manifest.get("doi"),
+        "holdout_fraction": manifest.get("holdout_fraction"),
+        "seed": manifest.get("seed"),
+        "patients": [
+            {
+                "patient_id": item["patient_id"],
+                "split_sha256": item["split_sha256"],
+            }
+            for item in manifest.get("patients", [])
+        ],
+    }
+    if sha256(identity) != manifest.get("cohort_sha256"):
+        raise ValueError("ARGO cohort manifest identity/hash mismatch")
+
+    prediction_root = Path(predictions_root).expanduser().resolve()
+    report_root = None if output_dir is None else Path(output_dir).expanduser().resolve()
+    reports: list[dict[str, Any]] = []
+    for item in manifest["patients"]:
+        patient_id = str(item["patient_id"])
+        predictions_path = prediction_root / patient_id / "predictions.json"
+        if not predictions_path.is_file():
+            raise FileNotFoundError(
+                f"Missing ARGO predictions for {patient_id}: {predictions_path}"
+            )
+        report = score_argo_holdout(
+            item["split_path"],
+            predictions_path,
+            gates=dict(gates or {}),
+        )
+        reports.append(report)
+        if report_root is not None:
+            patient_output = report_root / patient_id / "holdout-report.json"
+            patient_output.parent.mkdir(parents=True, exist_ok=True)
+            patient_output.write_text(
+                json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n",
+                encoding="utf-8",
+            )
+
+    statuses = [str(item["status"]) for item in reports]
+    if all(status == "not_gated" for status in statuses):
+        status = "not_gated"
+    else:
+        status = "pass" if all(item == "pass" for item in statuses) else "fail"
+
+    lat_equal_patient = {
+        name: _patient_mean(reports, "lat_signal_metrics", name)
+        for name in ("rmse_ms", "mae_ms", "bias_ms", "max_abs_ms", "correlation")
+    }
+    lat_equal_patient["mean_abs_patient_bias_ms"] = float(
+        np.mean([abs(float(item["lat_signal_metrics"]["bias_ms"])) for item in reports])
+    )
+    ecg_equal_patient = {
+        name: _patient_mean(reports, "ecg_metrics", name)
+        for name in (
+            "mean_lead_correlation",
+            "median_lead_correlation",
+            "worst_record_min_lead_correlation",
+            "mean_normalized_rmse",
+        )
+    }
+    ecg_patient_count = sum(1 for item in reports if item.get("ecg_metrics") is not None)
+
+    result = {
+        "schema_version": "hearttwin-argo-cohort-report-v1",
+        "dataset": "ARGO",
+        "dataset_version": ARGO_VERSION,
+        "doi": ARGO_DOI,
+        "cohort_sha256": manifest["cohort_sha256"],
+        "patient_count": len(reports),
+        "primary_weighting": "equal_patient",
+        "lat_equal_patient": lat_equal_patient,
+        "ecg_equal_patient": ecg_equal_patient if ecg_patient_count else None,
+        "ecg_patient_count": ecg_patient_count,
+        "patient_reports": reports,
+        "failed_patients": [
+            item["patient_id"] for item in reports if item["status"] == "fail"
+        ],
+        "status": status,
+        "gates": dict(gates or {}),
+        "scientific_boundary": (
+            "Primary aggregation gives each patient equal weight. Point-weighted "
+            "aggregation is intentionally not reported as the cohort primary result."
+        ),
+    }
+    if report_root is not None:
+        report_root.mkdir(parents=True, exist_ok=True)
+        (report_root / "cohort-report.json").write_text(
+            json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            encoding="utf-8",
+        )
+    return result
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="hearttwin-argo")
     sub = parser.add_subparsers(dest="cmd", required=True)

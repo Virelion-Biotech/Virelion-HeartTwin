@@ -82,6 +82,22 @@ def main() -> None:
         action="store_true",
         help="Skip the published ARGO v1 patient/count checks (fixtures only)",
     )
+    argo_cohort_prepare = sub.add_parser(
+        "argo-cohort-prepare",
+        help="Prepare deterministic blinded splits for the full ARGO cohort",
+    )
+    argo_cohort_prepare.add_argument("dataset_root")
+    argo_cohort_prepare.add_argument("output_root")
+    argo_cohort_prepare.add_argument("--holdout-fraction", type=float, default=0.2)
+    argo_cohort_prepare.add_argument("--seed", type=int, default=42)
+    argo_cohort_score = sub.add_parser(
+        "argo-cohort-score",
+        help="Score all ARGO patients and aggregate with equal patient weighting",
+    )
+    argo_cohort_score.add_argument("cohort_manifest")
+    argo_cohort_score.add_argument("predictions_root")
+    argo_cohort_score.add_argument("--gates")
+    argo_cohort_score.add_argument("--output-dir")
     argo_score = sub.add_parser(
         "argo-score",
         help="Score predictions against blinded held-out ARGO raw measurements",
@@ -127,6 +143,36 @@ def main() -> None:
             strict_official_counts=not args.allow_nonofficial_count,
         )
         print(json.dumps(result["split"], indent=2, sort_keys=True))
+        return
+    if args.cmd == "argo-cohort-prepare":
+        from .argo_validation import prepare_argo_cohort
+
+        result = prepare_argo_cohort(
+            args.dataset_root,
+            args.output_root,
+            holdout_fraction=args.holdout_fraction,
+            seed=args.seed,
+        )
+        print(json.dumps(result["manifest"], indent=2, sort_keys=True))
+        return
+    if args.cmd == "argo-cohort-score":
+        from .argo_validation import score_argo_cohort
+
+        gates = {}
+        if args.gates:
+            gates_raw = json.loads(Path(args.gates).read_text(encoding="utf-8"))
+            if not isinstance(gates_raw, dict):
+                raise TypeError("ARGO gates JSON must contain an object")
+            gates = gates_raw
+        report = score_argo_cohort(
+            args.cohort_manifest,
+            args.predictions_root,
+            gates=gates,
+            output_dir=args.output_dir,
+        )
+        print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
+        if report["status"] == "fail":
+            raise SystemExit(2)
         return
     if args.cmd == "argo-score":
         from .argo_validation import score_argo_holdout

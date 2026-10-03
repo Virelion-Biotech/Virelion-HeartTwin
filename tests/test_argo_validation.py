@@ -10,8 +10,10 @@ from hearttwin.argo_validation import (
     extract_argo_measurement,
     load_argo_patient,
     parse_argo_header,
+    prepare_argo_cohort,
     prepare_argo_empirical_study,
     read_argo_record,
+    score_argo_cohort,
     score_argo_holdout,
 )
 
@@ -268,3 +270,94 @@ def test_official_argo_validation_rejects_unknown_patient_identity(tmp_path: Pat
     root = _synthetic_patient(tmp_path)
     with pytest.raises(ValueError, match="Pt1 through Pt9"):
         load_argo_patient(root, strict_official_counts=True)
+
+
+def test_argo_cohort_preserves_patient_level_weighting(tmp_path: Path) -> None:
+    source = _synthetic_patient(tmp_path)
+    dataset = tmp_path / "cohort-data"
+    dataset.mkdir()
+    patient_ids = ["PtA", "PtB"]
+    for patient_id in patient_ids:
+        shutil.copytree(source, dataset / patient_id)
+
+    prepared = prepare_argo_cohort(
+        dataset,
+        tmp_path / "cohort-study",
+        holdout_fraction=0.5,
+        seed=11,
+        patient_ids=patient_ids,
+        strict_official_counts=False,
+    )
+    manifest = prepared["manifest"]
+    assert manifest["patient_count"] == 2
+    assert manifest["primary_weighting"] == "equal_patient"
+
+    prediction_root = tmp_path / "cohort-predictions"
+    for item in manifest["patients"]:
+        patient_id = item["patient_id"]
+        split = json.loads(Path(item["split_path"]).read_text(encoding="utf-8"))
+        records = {}
+        patient_root = dataset / patient_id
+        for point_id in split["holdout_ids"]:
+            measurement = extract_argo_measurement(
+                read_argo_record(patient_root / point_id)
+            )
+            records[point_id] = {
+                "lat_ms": measurement["local_activation_ms"],
+                "ecg": {
+                    "lead_names": measurement["lead_names"],
+                    "relative_time_ms": measurement["relative_time_ms"].tolist(),
+                    "values": measurement["ecg_values"].tolist(),
+                },
+            }
+        out = prediction_root / patient_id
+        out.mkdir(parents=True)
+        (out / "predictions.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "hearttwin-argo-predictions-v1",
+                    "patient_id": patient_id,
+                    "split_sha256": split["split_sha256"],
+                    "records": records,
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    report = score_argo_cohort(
+        prepared["manifest_path"],
+        prediction_root,
+        gates={
+            "lat_rmse_ms_max": 1e-12,
+            "lat_abs_bias_ms_max": 1e-12,
+            "ecg_mean_correlation_min": 0.999999,
+        },
+        output_dir=tmp_path / "cohort-reports",
+    )
+    assert report["status"] == "pass"
+    assert report["patient_count"] == 2
+    assert report["failed_patients"] == []
+    assert report["lat_equal_patient"]["rmse_ms"] == pytest.approx(0.0)
+    assert report["lat_equal_patient"]["mean_abs_patient_bias_ms"] == pytest.approx(0.0)
+    assert report["ecg_patient_count"] == 2
+    assert report["ecg_equal_patient"]["mean_lead_correlation"] == pytest.approx(1.0)
+    assert (tmp_path / "cohort-reports" / "cohort-report.json").is_file()
+
+
+def test_argo_cohort_fails_closed_on_missing_patient_predictions(tmp_path: Path) -> None:
+    source = _synthetic_patient(tmp_path)
+    dataset = tmp_path / "cohort-data"
+    dataset.mkdir()
+    for patient_id in ("PtA", "PtB"):
+        shutil.copytree(source, dataset / patient_id)
+    prepared = prepare_argo_cohort(
+        dataset,
+        tmp_path / "cohort-study",
+        holdout_fraction=0.5,
+        seed=1,
+        patient_ids=["PtA", "PtB"],
+        strict_official_counts=False,
+    )
+    with pytest.raises(FileNotFoundError, match="Missing ARGO predictions"):
+        score_argo_cohort(prepared["manifest_path"], tmp_path / "empty-predictions")
