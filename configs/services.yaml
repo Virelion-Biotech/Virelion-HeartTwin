@@ -1,4 +1,9 @@
 services:
+  - name: CardiAnatomy
+    repository: Virelion-Biotech/Virelion-CardiAnatomy
+    capabilities: [anatomy.health, anatomy.build, anatomy.validate, anatomy.tools, anatomy.microstructure.reference, anatomy.scar.classify, anatomy.presets, anatomy.registration.rigid, anatomy.geometry.measure, anatomy.manifest.audit, anatomy.series.rank, anatomy.segmentation.qc, anatomy.cine.phases, anatomy.transforms.compose, anatomy.transforms.invert, anatomy.correspondence.compare, anatomy.motion.summarize, anatomy.validation.segmentation, anatomy.validation.points]
+    builtin: cardianatomy
+    endpoint: ${CARDIANATOMY_URL}
   - name: CardiAtlas
     repository: Virelion-Biotech/Virelion-CardiAtlas
     capabilities: [atlas.context, atlas.search]
@@ -16,7 +21,7 @@ services:
     endpoint: ${CARDIEVAL_URL}
   - name: ElectroTrace
     repository: Virelion-Biotech/Virelion-ElectroTrace
-    capabilities: [electrical.analyze]
+    capabilities: [electrical.analyze, electrical.prepare_calibration]
     command: electrotrace-hearttwin
   - name: MyoTrace
     repository: Virelion-Biotech/Virelion-MyoTrace
@@ -35,6 +40,25 @@ services:
     capabilities: [learn.infer, learn.predict]
     builtin: cardilearn
     endpoint: ${CARDILEARN_URL}
+  - name: CardiEP
+    repository: Virelion-Biotech/Virelion-CardiEP
+    capabilities: [ep.health, ep.backends, ep.simulate, ep.calibrate, ep.validate.reference, ep.ecosystem]
+    builtin: cardiep
+    endpoint: ${CARDIEP_URL}
+  - name: CardiFlow
+    repository: Virelion-Biotech/Virelion-CardiFlow
+    capabilities: [flow.health, flow.simulate]
+    builtin: cardiflow
+    endpoint: ${CARDIFLOW_URL}
+  - name: CardiMech
+    repository: Virelion-Biotech/Virelion-CardiMech
+    capabilities: [mechanics.health, mechanics.backends, mechanics.materials, mechanics.simulate, mechanics.prepare_calibration, mechanics.validate.reference, mechanics.ecosystem]
+    command: cardimech-hearttwin
+  - name: CardiInfer
+    repository: Virelion-Biotech/Virelion-CardiInfer
+    capabilities: [infer.health, infer.backends, infer.ecosystem, infer.run, infer.propagate]
+    builtin: cardiinfer
+    endpoint: ${CARDIINFER_URL}
   - name: CardiSim
     repository: Virelion-Biotech/Virelion-CardiSim
     capabilities: [simulation.run]
@@ -44,6 +68,11 @@ services:
     repository: Virelion-Biotech/Virelion-HeartTwin
     capabilities: [simulation.cardiac_twin]
     builtin: cardiac_digital_twin
+  - name: CardiTherapy
+    repository: Virelion-Biotech/Virelion-CardiTherapy
+    capabilities: [therapy.health, therapy.run]
+    builtin: carditherapy
+    endpoint: ${CARDITHERAPY_URL}
   - name: CardiTrace
     repository: Virelion-Biotech/Virelion-CardiTrace
     capabilities: [trace.record]
