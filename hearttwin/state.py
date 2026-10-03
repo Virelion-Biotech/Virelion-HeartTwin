@@ -12,6 +12,8 @@ from .contracts import (
     BridgePublicationPayload,
     CardiacState,
     EvaluationResultPayload,
+    FlowArtifact,
+    FlowResultPayload,
     LearningResultPayload,
     InferenceResultPayload,
     ModalityAnalysisPayload,
@@ -25,6 +27,8 @@ from .contracts import (
     StatePhase,
     StateTransition,
     StateValue,
+    TherapyArtifact,
+    TherapyResultPayload,
     ValidationArtifact,
     ValidationGateArtifact,
     VexObservationPayload,
@@ -178,6 +182,43 @@ class CardiacStateStore:
         self.state.predictions = [
             {"capability": capability, "data": payload.model_dump(mode="json"), "status": "inferred"}
         ]
+        return artifact
+
+    def record_flow(
+        self, payload: FlowResultPayload, provenance: Provenance | None = None
+    ) -> FlowArtifact:
+        artifact_id = f"flow-{sha256(payload.model_dump(mode='json'))[:16]}"
+        artifact = FlowArtifact(
+            flow_id=artifact_id,
+            subject_id=payload.subject_id,
+            backend=payload.backend,
+            scalar_outputs=payload.scalar_outputs,
+            series_outputs=payload.series_outputs,
+            qc=payload.qc,
+            validation_status=payload.validation_status,
+            provenance_ids=self._add_provenance(provenance),
+        )
+        self._append_unique(self.state.flow_artifacts, artifact, "flow_id", artifact_id)
+        return artifact
+
+    def record_therapy(
+        self, payload: TherapyResultPayload, provenance: Provenance | None = None
+    ) -> TherapyArtifact:
+        artifact_id = f"therapy-{sha256(payload.model_dump(mode='json'))[:16]}"
+        artifact = TherapyArtifact(
+            therapy_id=artifact_id,
+            subject_id=payload.subject_id,
+            backend=payload.backend,
+            plan_id=payload.plan_id,
+            outcomes=payload.outcomes,
+            artifacts=payload.artifacts,
+            validation_status=payload.validation_status,
+            warnings=payload.warnings,
+            provenance_ids=self._add_provenance(provenance),
+        )
+        self._append_unique(
+            self.state.therapy_artifacts, artifact, "therapy_id", artifact_id
+        )
         return artifact
 
     def record_inference(
@@ -360,6 +401,12 @@ class CardiacStateStore:
                     result.provenance,
                     capability=result.capability,
                 )
+            elif result.capability == "flow.simulate":
+                self.record_flow(FlowResultPayload.model_validate(data), result.provenance)
+            elif result.capability == "therapy.run":
+                self.record_therapy(
+                    TherapyResultPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "infer.run":
                 self.record_inference(
                     InferenceResultPayload.model_validate(data), result.provenance
@@ -423,6 +470,8 @@ class CardiacStateStore:
         self._assert_unique([item.value_id for item in state.derived_values], "value_id")
         self._assert_unique([item.simulation_id for item in state.simulation_artifacts], "simulation_id")
         self._assert_unique([item.prediction_id for item in state.prediction_artifacts], "prediction_id")
+        self._assert_unique([item.flow_id for item in state.flow_artifacts], "flow_id")
+        self._assert_unique([item.therapy_id for item in state.therapy_artifacts], "therapy_id")
         self._assert_unique([item.posterior_id for item in state.posterior_artifacts], "posterior_id")
         self._assert_unique([item.validation_id for item in state.evaluation_artifacts], "validation_id")
         self._assert_unique([item.gate_id for item in state.validation_gates], "gate_id")
@@ -436,6 +485,8 @@ class CardiacStateStore:
         for collection in (
             state.simulation_artifacts,
             state.prediction_artifacts,
+            state.flow_artifacts,
+            state.therapy_artifacts,
             state.posterior_artifacts,
             state.evaluation_artifacts,
             state.validation_gates,

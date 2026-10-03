@@ -153,6 +153,18 @@
       "items": {
         "$ref": "#/$defs/validationGate"
       }
+    },
+    "flow_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flowArtifact"
+      }
+    },
+    "therapy_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/therapyArtifact"
+      }
     }
   },
   "$defs": {
@@ -1122,6 +1134,109 @@
           }
         },
         "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provenance_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "flowArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flow_id",
+        "subject_id",
+        "backend",
+        "validation_status"
+      ],
+      "properties": {
+        "flow_id": {
+          "type": "string"
+        },
+        "subject_id": {
+          "type": "string"
+        },
+        "backend": {
+          "type": "string"
+        },
+        "scalar_outputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "series_outputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "qc": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "validation_status": {
+          "type": "string"
+        },
+        "provenance_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "therapyArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "therapy_id",
+        "subject_id",
+        "backend",
+        "plan_id",
+        "validation_status"
+      ],
+      "properties": {
+        "therapy_id": {
+          "type": "string"
+        },
+        "subject_id": {
+          "type": "string"
+        },
+        "backend": {
+          "type": "string"
+        },
+        "plan_id": {
+          "type": "string"
+        },
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "validation_status": {
+          "type": "string"
+        },
+        "warnings": {
           "type": "array",
           "items": {
             "type": "string"

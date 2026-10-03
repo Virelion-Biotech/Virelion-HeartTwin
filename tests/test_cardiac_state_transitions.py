@@ -90,3 +90,48 @@ def test_inference_result_becomes_first_class_posterior_artifact():
     assert artifact.subject_id == "entity-1"
     assert artifact.model_service == "CardiEP"
     assert artifact.validation_status == "synthetic_recovery_checked"
+
+
+def test_flow_and_therapy_results_become_typed_artifacts():
+    store = CardiacStateStore.new("entity-1")
+    store.reduce_service_result(
+        ServiceResult(
+            service="CardiFlow",
+            capability="flow.simulate",
+            status="ok",
+            data={
+                "contract_version": "1.0",
+                "subject_id": "entity-1",
+                "backend": "windkessel-3element-v1",
+                "outputs": [],
+                "scalar_outputs": {"mean_outlet_pressure": 10.0},
+                "series_outputs": {"outlet_pressure": [10.0, 10.0]},
+                "qc": {"passed": True},
+                "validation_status": "software_checked",
+                "provenance": {},
+            },
+            provenance=Provenance(source_service="CardiFlow", run_id="flow-1"),
+        )
+    )
+    store.reduce_service_result(
+        ServiceResult(
+            service="CardiTherapy",
+            capability="therapy.run",
+            status="ok",
+            data={
+                "contract_version": "1.0",
+                "subject_id": "entity-1",
+                "backend": "validated-delegate-example",
+                "plan_id": "plan-1",
+                "outcomes": [{"arm_id": "control", "endpoint": "x", "value": 1.0}],
+                "artifacts": [],
+                "validation_status": "unvalidated",
+                "warnings": ["fixture"],
+                "provenance": {},
+            },
+            provenance=Provenance(source_service="CardiTherapy", run_id="therapy-1"),
+        )
+    )
+    snapshot = store.snapshot()
+    assert snapshot.flow_artifacts[0].validation_status == "software_checked"
+    assert snapshot.therapy_artifacts[0].plan_id == "plan-1"

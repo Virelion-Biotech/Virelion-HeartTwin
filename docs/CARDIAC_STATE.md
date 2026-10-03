@@ -22,6 +22,8 @@ CardiacState
 │   └── typed variable + unit + region + uncertainty + evidence status
 ├── simulation_artifacts
 ├── prediction_artifacts
+├── flow_artifacts
+├── therapy_artifacts
 ├── posterior_artifacts
 ├── evaluation_artifacts
 ├── validation_gates

@@ -94,6 +94,31 @@ class PredictionArtifact(BaseModel):
     provenance_ids: list[str] = Field(default_factory=list)
 
 
+class FlowArtifact(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    flow_id: str
+    subject_id: str
+    backend: str
+    scalar_outputs: dict[str, float] = Field(default_factory=dict)
+    series_outputs: dict[str, list[float]] = Field(default_factory=dict)
+    qc: dict[str, Any] | None = None
+    validation_status: str = "unvalidated"
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
+class TherapyArtifact(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    therapy_id: str
+    subject_id: str
+    backend: str
+    plan_id: str
+    outcomes: list[dict[str, Any]] = Field(default_factory=list)
+    artifacts: list[dict[str, Any]] = Field(default_factory=list)
+    validation_status: str = "unvalidated"
+    warnings: list[str] = Field(default_factory=list)
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
 class PosteriorArtifact(BaseModel):
     """Canonical HeartTwin representation of one CardiInfer posterior result."""
 
@@ -235,6 +260,32 @@ class SimulationResultPayload(BaseModel):
     population_size: int
 
 
+class FlowResultPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "1.0"
+    subject_id: str
+    backend: str
+    outputs: list[dict[str, Any]] = Field(default_factory=list)
+    scalar_outputs: dict[str, float] = Field(default_factory=dict)
+    series_outputs: dict[str, list[float]] = Field(default_factory=dict)
+    qc: dict[str, Any] | None = None
+    validation_status: str = "unvalidated"
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+
+class TherapyResultPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "1.0"
+    subject_id: str
+    backend: str
+    plan_id: str
+    outcomes: list[dict[str, Any]] = Field(default_factory=list)
+    artifacts: list[dict[str, Any]] = Field(default_factory=list)
+    validation_status: str = "unvalidated"
+    warnings: list[str] = Field(default_factory=list)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+
 class InferenceResultPayload(BaseModel):
     """Transport view of CardiInfer's InferenceResult contract."""
 
@@ -353,6 +404,8 @@ class CardiacState(BaseModel):
     derived_values: list[StateValue] = Field(default_factory=list)
     simulation_artifacts: list[SimulationArtifact] = Field(default_factory=list)
     prediction_artifacts: list[PredictionArtifact] = Field(default_factory=list)
+    flow_artifacts: list[FlowArtifact] = Field(default_factory=list)
+    therapy_artifacts: list[TherapyArtifact] = Field(default_factory=list)
     posterior_artifacts: list[PosteriorArtifact] = Field(default_factory=list)
     evaluation_artifacts: list[ValidationArtifact] = Field(default_factory=list)
     validation_gates: list[ValidationGateArtifact] = Field(default_factory=list)
