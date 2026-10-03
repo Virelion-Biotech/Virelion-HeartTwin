@@ -396,6 +396,14 @@ def _run_concurrent_case_probe(
                     row["sample_id"]: row["target"]
                     for row in rows
                 },
+                benchmark_validation_values=[
+                    rows[-4]["group_id"],
+                    rows[-3]["group_id"],
+                ],
+                benchmark_test_values=[
+                    rows[-2]["group_id"],
+                    rows[-1]["group_id"],
+                ],
                 simulation=dict(simulation_config),
                 seed=case_seed,
             )
@@ -1154,6 +1162,14 @@ def run_operational_rehearsal(
                     row["sample_id"]: row["target"]
                     for row in rows
                 },
+                benchmark_validation_values=[
+                    rows[-4]["group_id"],
+                    rows[-3]["group_id"],
+                ],
+                benchmark_test_values=[
+                    rows[-2]["group_id"],
+                    rows[-1]["group_id"],
+                ],
                 simulation=dict(simulation_config),
                 seed=workflow_seed,
             )

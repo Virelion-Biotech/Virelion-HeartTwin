@@ -13,6 +13,18 @@ from dataclasses import dataclass
 from typing import Any
 
 
+def _strict_json_object(raw: str | bytes, *, source: str) -> dict[str, Any]:
+    def reject_constant(value: str) -> None:
+        raise ValueError(f"{source} returned non-standard JSON constant {value}")
+
+    payload = json.loads(raw, parse_constant=reject_constant)
+    if not isinstance(payload, dict):
+        raise RuntimeError(
+            f"{source} returned {type(payload).__name__}; must be a JSON object"
+        )
+    return payload
+
+
 @dataclass(frozen=True)
 class ServiceSpec:
     name: str
@@ -152,13 +164,10 @@ class ServiceAdapter:
                             f"HTTP response from {self.spec.name}/{capability} "
                             f"exceeds {max_response_bytes} bytes"
                         )
-                    decoded = json.loads(body)
-                    if not isinstance(decoded, dict):
-                        raise RuntimeError(
-                            f"HTTP response from {self.spec.name}/{capability} "
-                            "must be a JSON object"
-                        )
-                    return decoded
+                    return _strict_json_object(
+                        body,
+                        source=f"HTTP service {self.spec.name}/{capability}",
+                    )
             except urllib.error.HTTPError as exc:
                 try:
                     body = exc.read().decode("utf-8", errors="replace")
@@ -208,7 +217,12 @@ class ServiceAdapter:
             return self._invoke_http(capability, payload)
         if self.spec.command:
             env = os.environ.copy()
-            raw = json.dumps(payload)
+            raw = json.dumps(
+                payload,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
             env.pop("HEARTTWIN_PAYLOAD", None)
             env.pop("HEARTTWIN_PAYLOAD_STDIN", None)
             env["HEARTTWIN_CAPABILITY"] = capability
@@ -231,7 +245,12 @@ class ServiceAdapter:
             )
             if process.returncode:
                 raise RuntimeError(process.stderr.strip() or f"{self.spec.name} failed")
-            return json.loads(process.stdout) if process.stdout.strip() else {}
+            if not process.stdout.strip():
+                return {}
+            return _strict_json_object(
+                process.stdout,
+                source=f"Command service {self.spec.name}/{capability}",
+            )
         raise RuntimeError(f"Service {self.spec.name} has no endpoint, command, or builtin")
 
 

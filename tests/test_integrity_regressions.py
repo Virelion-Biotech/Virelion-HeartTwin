@@ -86,3 +86,42 @@ def test_pinned_cardilearn_uses_json_null_for_undefined_metrics() -> None:
         {"classification": classification, "regression": regression},
         allow_nan=False,
     )
+
+
+
+def _command_adapter(tmp_path, body: str) -> ServiceAdapter:
+    script = tmp_path / "transport_fixture.py"
+    script.write_text(
+        "import os, sys\n"
+        "_ = sys.stdin.read() if os.environ.get('HEARTTWIN_PAYLOAD_STDIN') == '1' "
+        "else os.environ.get('HEARTTWIN_PAYLOAD', '')\n"
+        + body
+        + "\n",
+        encoding="utf-8",
+    )
+    return ServiceAdapter(
+        ServiceSpec(
+            name="fixture",
+            repository="fixture",
+            capabilities=("trace.record",),
+            command=f"{shlex.quote(sys.executable)} {shlex.quote(str(script))}",
+        )
+    )
+
+
+def test_command_transport_rejects_nonfinite_request_before_spawn(tmp_path) -> None:
+    adapter = _command_adapter(tmp_path, "print('{}')")
+    with pytest.raises(ValueError, match="Out of range float values"):
+        adapter.invoke("trace.record", {"value": float("nan")})
+
+
+def test_command_transport_rejects_nonstandard_nan_response(tmp_path) -> None:
+    adapter = _command_adapter(tmp_path, "print('{\"value\": NaN}')")
+    with pytest.raises(ValueError, match="non-standard JSON constant"):
+        adapter.invoke("trace.record", {"value": 1.0})
+
+
+def test_command_transport_requires_json_object_response(tmp_path) -> None:
+    adapter = _command_adapter(tmp_path, "print('[1, 2, 3]')")
+    with pytest.raises(RuntimeError, match="must be a JSON object"):
+        adapter.invoke("trace.record", {"value": 1.0})

@@ -140,6 +140,14 @@ def test_same_canary_crosses_real_multimodal_pipe_without_misalignment(
             row["sample_id"]: row["target"]
             for row in rows
         },
+        benchmark_validation_values=[
+            rows[-4]["group_id"],
+            rows[-3]["group_id"],
+        ],
+        benchmark_test_values=[
+            rows[-2]["group_id"],
+            rows[-1]["group_id"],
+        ],
         simulation={
             "preset": "mi",
             "n_cells": 12,
