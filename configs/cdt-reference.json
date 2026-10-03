@@ -1,0 +1,33 @@
+{
+  "upstream": {
+    "repository": "juliacamps/Cardiac-Digital-Twin",
+    "commit": "816d51fab0837cfe9e20c7d3a318429e9acf0733",
+    "license": "MIT"
+  },
+  "data": {
+    "zenodo_record": "14034739",
+    "doi": "10.5281/zenodo.14034739"
+  },
+  "reference_workflow": {
+    "script": "src/personalise_to_QT.py",
+    "subject": "DTI004",
+    "random_seed": 7,
+    "expected_inputs": [
+      "clinical_data",
+      "geometric_data",
+      "cellular_data"
+    ],
+    "expected_outputs": [
+      "*_parameter_population.csv",
+      "*_personalisation_theta_population.csv"
+    ]
+  },
+  "comparison": {
+    "outputs": [
+      "activation_time_ms",
+      "repolarisation_time_ms",
+      "ecg"
+    ],
+    "status_policy": "FAIL_ON_REFERENCE_RUN_ERROR_OR_COMPARISON_FAILURE"
+  }
+}

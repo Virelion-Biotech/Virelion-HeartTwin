@@ -1,0 +1,104 @@
+services:
+  - name: CardiAnatomy
+    repository: Virelion-Biotech/Virelion-CardiAnatomy
+    capabilities: [anatomy.health, anatomy.build, anatomy.validate, anatomy.tools, anatomy.microstructure.reference, anatomy.scar.classify, anatomy.presets, anatomy.registration.rigid, anatomy.geometry.measure, anatomy.manifest.audit, anatomy.series.rank, anatomy.segmentation.qc, anatomy.cine.phases, anatomy.transforms.compose, anatomy.transforms.invert, anatomy.correspondence.compare, anatomy.motion.summarize, anatomy.validation.segmentation, anatomy.validation.points]
+    builtin: cardianatomy
+    endpoint: ${CARDIANATOMY_URL}
+  - name: CardiAtlas
+    repository: Virelion-Biotech/Virelion-CardiAtlas
+    capabilities: [atlas.context, atlas.search]
+    builtin: cardiatlas
+    endpoint: ${CARDIATLAS_URL}
+  - name: CardiBench
+    repository: Virelion-Biotech/Virelion-CardiBench
+    capabilities: [benchmark.health, benchmark.resolve, benchmark.search, benchmark.catalog, benchmark.discover, benchmark.admission.assess, benchmark.result.record, benchmark.results]
+    builtin: cardibench
+    endpoint: ${CARDIBENCH_URL}
+  - name: CardiEval
+    repository: Virelion-Biotech/Virelion-CardiEval
+    capabilities: [evaluation.run]
+    builtin: cardieval
+    endpoint: ${CARDIEVAL_URL}
+  - name: ElectroTrace
+    repository: Virelion-Biotech/Virelion-ElectroTrace
+    capabilities: [electrical.analyze, electrical.prepare_calibration]
+    command: electrotrace-hearttwin
+  - name: MyoTrace
+    repository: Virelion-Biotech/Virelion-MyoTrace
+    capabilities: [mechanical.analyze]
+    command: myotrace-hearttwin
+  - name: OptiCell
+    repository: Virelion-Biotech/Virelion-OptiCell
+    capabilities: [imaging.qc]
+    command: opticell-hearttwin
+  - name: CardioScore
+    repository: Virelion-Biotech/Virelion-CardioScore
+    capabilities: [safety.score]
+    command: cardioscore-hearttwin
+  - name: CardiLearn
+    repository: Virelion-Biotech/Virelion-CardiLearn
+    capabilities: [learn.infer, learn.predict]
+    builtin: cardilearn
+    endpoint: ${CARDILEARN_URL}
+  - name: CardiEP
+    repository: Virelion-Biotech/Virelion-CardiEP
+    capabilities: [ep.health, ep.backends, ep.simulate, ep.calibrate, ep.validate.reference, ep.ecosystem]
+    builtin: cardiep
+    endpoint: ${CARDIEP_URL}
+  - name: CardiFlow
+    repository: Virelion-Biotech/Virelion-CardiFlow
+    capabilities: [flow.health, flow.simulate]
+    builtin: cardiflow
+    endpoint: ${CARDIFLOW_URL}
+  - name: CardiMech
+    repository: Virelion-Biotech/Virelion-CardiMech
+    capabilities: [mechanics.health, mechanics.backends, mechanics.materials, mechanics.simulate, mechanics.prepare_calibration, mechanics.validate.reference, mechanics.ecosystem]
+    command: cardimech-hearttwin
+  - name: CardiInfer
+    repository: Virelion-Biotech/Virelion-CardiInfer
+    capabilities: [infer.health, infer.backends, infer.ecosystem, infer.run, infer.propagate]
+    builtin: cardiinfer
+    endpoint: ${CARDIINFER_URL}
+  - name: CardiSim
+    repository: Virelion-Biotech/Virelion-CardiSim
+    capabilities: [simulation.run]
+    builtin: cardisim
+    endpoint: ${CARDISIM_URL}
+  - name: CardiSimNative
+    repository: Virelion-Biotech/Virelion-HeartTwin
+    capabilities: [simulation.cardiac_twin]
+    builtin: cardiac_digital_twin
+  - name: CardiTherapy
+    repository: Virelion-Biotech/Virelion-CardiTherapy
+    capabilities: [therapy.health, therapy.run]
+    builtin: carditherapy
+    endpoint: ${CARDITHERAPY_URL}
+  - name: CardiTrace
+    repository: Virelion-Biotech/Virelion-CardiTrace
+    capabilities: [trace.record]
+    command: carditrace-hearttwin
+  - name: CardiBridge
+    repository: Virelion-Biotech/Virelion-CardiBridge
+    capabilities: [bridge.validate, bridge.publish, bridge.contracts, bridge.asyncapi, bridge.replay, bridge.health]
+    builtin: cardibridge
+    endpoint: ${CARDIBRIDGE_URL}
+    path_template: /v1/{capability_leaf}
+  - name: CardiAgent
+    repository: Virelion-Biotech/Virelion-CardiAgent
+    capabilities: [agent.challenge]
+    command: cardiagent-hearttwin
+  - name: CardiVex
+    repository: Virelion-Biotech/Virelion-CardiVex
+    capabilities: [vex.observe]
+    builtin: cardivex
+    endpoint: ${CARDIVEX_URL}
+  - name: CardiStudio
+    repository: Virelion-Biotech/Virelion-CardiStudio
+    capabilities: [design.generate, population.generate, design.validate, power.plan]
+    builtin: cardistudio
+    endpoint: ${CARDISTUDIO_URL}
+  - name: DCCP
+    repository: Virelion-Biotech/Virelion-DCCP
+    capabilities: [challenge.validate, challenge.assess, challenge.materialize, recovery.score, host.map]
+    builtin: dccp
+    endpoint: ${DCCP_URL}

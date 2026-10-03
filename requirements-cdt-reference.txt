@@ -1,0 +1,17 @@
+# Runtime dependencies required by the pinned juliacamps/Cardiac-Digital-Twin
+# reference implementation at commit 816d51fab0837cfe9e20c7d3a318429e9acf0733.
+#
+# These constraints deliberately keep NumPy on the 1.x ABI/API line used by the
+# upstream 2024 code while allowing security/bug-fix releases within compatible
+# package families. HeartTwin itself does not depend on these packages at runtime.
+numpy>=1.26,<2
+scipy>=1.11,<2
+pandas>=2.1,<3
+numba>=0.59,<1
+pymp-pypi>=0.5,<1
+SALib>=1.4,<2
+pyDOE>=0.3.8,<1
+matplotlib>=3.8,<4
+plotly>=5,<7
+seaborn>=0.13,<1
+vtk>=9.3,<10

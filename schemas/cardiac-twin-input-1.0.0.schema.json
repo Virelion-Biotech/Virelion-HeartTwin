@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://virelionbiotech.github.io/HeartTwin/schemas/cardiac-twin-input-1.0.0.schema.json",
+  "title": "HeartTwin Cardiac Digital Twin Input",
+  "type": "object",
+  "required": ["geometry", "root_nodes"],
+  "additionalProperties": true,
+  "properties": {
+    "entity_id": {"type": "string"},
+    "geometry": {
+      "type": "object",
+      "required": ["node_xyz", "tetrahedra"],
+      "properties": {
+        "node_xyz": {"type": "array", "items": {"type": "array", "prefixItems": [{"type":"number"},{"type":"number"},{"type":"number"}], "minItems":3,"maxItems":3}},
+        "tetrahedra": {"type": "array", "items": {"type": "array", "prefixItems": [{"type":"integer","minimum":0},{"type":"integer","minimum":0},{"type":"integer","minimum":0},{"type":"integer","minimum":0}], "minItems":4,"maxItems":4}},
+        "fibre": {"type": ["array","null"]},
+        "scar_labels": {"type": ["array","null"], "items": {"type":"integer","minimum":0,"maximum":2}}
+      }
+    },
+    "root_nodes": {"type":"array","minItems":1,"items":{"type":"integer","minimum":0}},
+    "parameters": {
+      "type":"object",
+      "properties": {
+        "fibre_speed":{"type":"number","exclusiveMinimum":0},
+        "sheet_speed":{"type":"number","exclusiveMinimum":0},
+        "normal_speed":{"type":"number","exclusiveMinimum":0},
+        "purkinje_speed":{"type":"number","exclusiveMinimum":0},
+        "endo_speed":{"type":"number","exclusiveMinimum":0},
+        "apd_min":{"type":"number","exclusiveMinimum":0},
+        "apd_max":{"type":"number","exclusiveMinimum":0}
+      }
+    },
+    "with_ecg":{"type":"boolean"}
+  }
+}
