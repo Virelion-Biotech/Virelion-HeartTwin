@@ -3,7 +3,7 @@
 git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@749b2069cca06970e48d795c67a8459fb302e2a2
 git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@a006ad9e2f59ceeabe3ff3eec0a871160f951591
 git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@877369106aa8f20eeae197cb667754dd39aea24c
-git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@a697906c0b64213bf2ee0e1f02d982dca7ca7b4a
+git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@a697906c4ff68bacfaf764eda566a92a67cb64f3
 git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@a62914807f31c97a77259fbb96c62dd18a1ae041
 git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@40557b015f4391b3d48419b9b27af9e551ded05c
 git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@ceaa3b42d77fbdea4743ed27b8a29fa478d68a0b
