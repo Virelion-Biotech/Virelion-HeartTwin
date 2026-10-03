@@ -71,3 +71,35 @@ def test_service_adapter_builtin_path():
     health = adapter.invoke("bridge.health", {})
     assert health.get("transport") in {"in-process", "http"}
     assert "status" in health or "store_ok" in health or "ok" in str(health).lower()
+
+
+def test_bridge_validate_benchmark_admission():
+    result = invoke_cardibridge(
+        "bridge.validate",
+        {
+            "entity_id": "admission-validate-1",
+            "message_type": "benchmark.admission",
+            "contract_payload": {
+                "assessment_id": "admission-1",
+                "benchmark_id": "candidate",
+                "benchmark_version": "1.0",
+                "policy": "subject_heldout",
+                "status": "blocked",
+                "ready_for_review": False,
+                "blockers": ["required metadata group_id missing for 1 samples"],
+                "warnings": [],
+                "required_fields": ["sample_id", "group_id", "study_id", "label"],
+                "missing_by_field": {"group_id": ["s1"]},
+                "statistics": {"samples": 6, "groups": 5},
+                "materialization_preview": None,
+                "trace": {
+                    "source": "CardiBench",
+                    "trace_id": "a" * 32,
+                    "span_id": "b" * 16,
+                    "created_at": "2026-10-03T20:00:00+00:00",
+                },
+            },
+        },
+    )
+    assert result["valid"] is True
+    assert result["transport"] == "in-process"
