@@ -120,3 +120,27 @@ CardiFlow and CardiTherapy are registered as native/HTTP-capable services. Cardi
 HeartTwin routes `benchmark.health`, `benchmark.search`, `benchmark.catalog`, `benchmark.discover`, `benchmark.result.record`, and `benchmark.results` in addition to `benchmark.resolve`. Discovery/search/catalog are control-plane capabilities and never become biological observations. Only a resolved benchmark used by the current workflow enters `CardiacState`.
 
 The multimodal workflow closes the loop as `CardiBench → CardiLearn → CardiEval → CardiBench result history → CardiTrace`. CardiBench owns benchmark/result identity; CardiEval scoring; CardiBridge transport; CardiTrace lineage; HeartTwin orchestration.
+
+
+## Observation identity and time alignment
+
+HeartTwin treats multimodal identity alignment as a caller-declared scientific
+input, not something the orchestrator can infer safely. `Observation` supports
+optional `subject_id` and `timepoint_id` fields. Any explicit subject ID that
+differs from the workflow entity is rejected even under the permissive default
+policy.
+
+For patient-specific studies, pass a strict policy:
+
+```python
+alignment_policy = {
+    "require_subject_id": True,
+    "require_timepoint_id": True,
+    "require_single_timepoint": True,
+    "required_modalities": ["electrical", "mechanical", "imaging"],
+}
+```
+
+This proves only declaration consistency. It does not prove that upstream
+sample labels, acquisition timestamps, coordinate transforms, or measurement
+units are scientifically correct.

@@ -62,3 +62,18 @@ The versioned JSON schema is `schemas/cardiac-state-1.2.0.schema.json`. The prev
 ## Scientific evidence gates
 
 Evaluation artifacts and scientific validation are separate. `validation_gates` record prespecified criteria, evidence identifiers, observed metrics, pass/fail state, and provenance without changing the biological/execution phase. Numerical, synthetic-recovery, empirical, and clinical evidence therefore remain explicit rather than being inferred from successful workflow execution.
+
+
+## Observation alignment
+
+Observations may declare `subject_id` and `timepoint_id`. HeartTwin never
+infers these identifiers from filenames, metadata similarity, or model output.
+An explicit subject declaration that disagrees with the workflow `entity_id`
+fails the alignment gate.
+
+`AlignmentPolicy` can additionally require every observation to declare a
+subject and timepoint, require a single common timepoint, and require named
+modalities. The resulting `AlignmentReport` is stored in the workflow view and
+inside the canonical state's `biological_context.observation_alignment`.
+Missing declarations remain visible as `incomplete`; they are not converted
+into an assumption that the data are aligned.

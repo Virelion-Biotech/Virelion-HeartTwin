@@ -8,9 +8,11 @@ from __future__ import annotations
 from math import isfinite
 from typing import Any
 
+from .alignment import assess_observation_alignment
 from .cardibridge_adapter import _local_router
 from .contracts import (
     AgentChallengePayload,
+    AlignmentPolicy,
     AtlasContextPayload,
     BenchmarkResolutionPayload,
     BridgePublicationPayload,
@@ -253,9 +255,20 @@ def run_multimodal_workflow(
     atlas_record_ids: list[str] | None = None,
     atlas_records: list[dict[str, Any]] | None = None,
     simulation: dict[str, Any] | None = None,
+    alignment_policy: AlignmentPolicy | dict[str, Any] | None = None,
     seed: int = 42,
 ) -> WorkflowRun:
     """Run a complete local multimodal HeartTwin workflow."""
+    alignment = assess_observation_alignment(
+        entity_id,
+        observations,
+        alignment_policy,
+    )
+    if not alignment.passed:
+        raise WorkflowError(
+            "Observation alignment gate failed: " + "; ".join(alignment.reasons)
+        )
+
     run_id = new_run_id(
         entity_id,
         {
@@ -271,17 +284,22 @@ def run_multimodal_workflow(
             "simulation": simulation,
             "atlas_record_ids": atlas_record_ids,
             "atlas_records": atlas_records,
+            "alignment": alignment.model_dump(mode="json"),
             "seed": seed,
         },
     )
     store = CardiacStateStore.new(
         entity_id,
         observations=observations,
-        biological_context={"workflow_run_id": run_id},
+        biological_context={
+            "workflow_run_id": run_id,
+            "observation_alignment": alignment.model_dump(mode="json"),
+        },
     )
     state = WorkflowState(
         entity_id=entity_id,
         observations=observations,
+        alignment=alignment,
         cardiac_state=store.state,
     )
     steps: list[ServiceResult] = []

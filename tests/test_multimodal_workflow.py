@@ -14,6 +14,8 @@ def _observation(entity_id: str, modality: str, values: dict) -> Observation:
         observation_id=f"obs-{entity_id}-{modality}",
         modality=modality,
         values=values,
+        subject_id=entity_id,
+        timepoint_id="baseline",
         provenance=Provenance(
             source_service="hearttwin-e2e-fixture",
             source_repository="Virelion-Biotech/Virelion-HeartTwin",
@@ -76,10 +78,17 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
             rows[-1]["group_id"],
         ],
         simulation={"preset": "mi", "n_cells": 16, "duration": 1.0, "dt": 0.25},
+        alignment_policy={
+            "require_subject_id": True,
+            "require_timepoint_id": True,
+            "require_single_timepoint": True,
+        },
         seed=42,
     )
 
     assert run.status == "ok"
+    assert run.state.alignment is not None
+    assert run.state.alignment.status == "consistent"
     assert run.state.atlas is not None
     assert run.state.learning is not None
     assert run.state.benchmark is not None
@@ -196,6 +205,11 @@ def test_real_specialist_modalities_feed_typed_workflow_state(tmp_path) -> None:
             rows[-1]["group_id"],
         ],
         simulation={"preset": "mi", "n_cells": 8, "duration": 1.0, "dt": 0.25},
+        alignment_policy={
+            "require_subject_id": True,
+            "require_timepoint_id": True,
+            "require_single_timepoint": True,
+        },
         seed=7,
     )
 

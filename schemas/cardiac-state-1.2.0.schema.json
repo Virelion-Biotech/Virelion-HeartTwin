@@ -297,6 +297,18 @@
         },
         "quality": {
           "type": "object"
+        },
+        "subject_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timepoint_id": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

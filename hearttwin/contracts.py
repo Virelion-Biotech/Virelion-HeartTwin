@@ -35,6 +35,34 @@ class Observation(BaseModel):
     anatomical_region: str | None = None
     measurement_method: str | None = None
     quality: dict[str, Any] = Field(default_factory=dict)
+    subject_id: str | None = None
+    timepoint_id: str | None = None
+
+
+class AlignmentPolicy(BaseModel):
+    """Caller-declared identity/time alignment requirements."""
+
+    model_config = ConfigDict(extra="forbid")
+    require_subject_id: bool = False
+    require_timepoint_id: bool = False
+    require_single_timepoint: bool = False
+    required_modalities: list[str] = Field(default_factory=list)
+
+
+class AlignmentReport(BaseModel):
+    """Result of checking explicit observation alignment declarations."""
+
+    model_config = ConfigDict(extra="forbid")
+    entity_id: str
+    passed: bool
+    status: Literal["consistent", "incomplete", "failed"]
+    observation_ids: list[str] = Field(default_factory=list)
+    declared_subject_ids: list[str] = Field(default_factory=list)
+    declared_timepoint_ids: list[str] = Field(default_factory=list)
+    missing_subject_ids: list[str] = Field(default_factory=list)
+    missing_timepoint_ids: list[str] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+    policy: AlignmentPolicy = Field(default_factory=AlignmentPolicy)
 
 
 class UncertaintySpec(BaseModel):
@@ -452,6 +480,7 @@ class WorkflowState(BaseModel):
     contract_version: str = CONTRACT_VERSION
     entity_id: str
     observations: list[Observation] = Field(default_factory=list)
+    alignment: AlignmentReport | None = None
     cardiac_state: CardiacState | None = None
     modality_analyses: list[ModalityAnalysisPayload] = Field(default_factory=list)
     atlas: AtlasContextPayload | None = None
