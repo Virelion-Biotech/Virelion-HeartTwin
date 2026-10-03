@@ -2,7 +2,7 @@
 # Transitive Python dependencies remain governed by component package constraints.
 git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@749b2069cca06970e48d795c67a8459fb302e2a2
 git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@b7e1425aaa0a73434c097403b47e2d5a613c13c7
-git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@6539df7f6b5215b803383350d3cc7ea4d274ab0d
+git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@353823356609aab4834bd0cb8289704a5876674d
 git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@a697906c4ff68bacfaf764eda566a92a67cb64f3
 git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@a62914807f31c97a77259fbb96c62dd18a1ae041
 git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@5c6d44807611e79c5161a305b1feebb0b9819d92
@@ -19,5 +19,5 @@ git+https://github.com/Virelion-Biotech/Virelion-OptiCell.git@2378c2bebd81824df0
 git+https://github.com/Virelion-Biotech/Virelion-CardioScore.git@a97afb0480c033f92354e21c59b368737f876d3f
 git+https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git@f6475fde70de9a408998fa33c9a942f44b989c14
 git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@9c84b683293e1eaf3c7fd135d29502be8acc9b41
-git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@df4b67fbcb9ae0ae6e5c516286d2a9b0da847418
+git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@6840055ffaa73a5f091cca2b81040fd2804d33d3
 git+https://github.com/Virelion-Biotech/Virelion-CardiAgent.git@1184edbda248beac3d5d7e630e262307912ec480
