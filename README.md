@@ -23,7 +23,7 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | CardiSimNative | CDT-compatible reference digital twin | Built into HeartTwin |
 | CardiStudio | experimental design, populations, constraints, power | Native + HTTP fallback |
 | DCCP | defensive challenge scenarios and resilience scoring | Native + HTTP fallback |
-| CardiTherapy | virtual-intervention contracts and fail-closed backend orchestration | Native + HTTP fallback; no default intervention backend |
+| CardiTherapy | virtual-intervention contracts plus CardiEP pacing-root experiments | Native + HTTP fallback; pacing backend is software-checked and activation-only, unsupported therapies fail closed |
 | CardiTrace | provenance and reproducibility | HeartTwin command adapter |
 | CardiBridge | typed interoperability and delivery | In-process + HTTP fallback |
 | CardiAgent | phenotype-level challenge generation | HeartTwin command adapter |

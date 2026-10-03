@@ -112,7 +112,7 @@ revision used for these contracts.
 
 ## Flow and therapy readiness boundary
 
-CardiFlow and CardiTherapy are registered as native/HTTP-capable services. CardiFlow ships the deterministic `windkessel-3element-v1` reduced-order afterload backend; its outputs are software-checked reference hemodynamics, not CFD or patient validation. CardiTherapy has zero default intervention backends and `therapy.run` fails closed. Unsupported Flow backends also fail closed.
+CardiFlow and CardiTherapy are registered as native/HTTP-capable services. CardiFlow ships the deterministic `windkessel-3element-v1` reduced-order afterload backend; its outputs are software-checked reference hemodynamics, not CFD or patient validation. CardiTherapy ships the narrow `cardiep-pacing-v1` backend, which delegates pacing-root changes to CardiEP and reports activation-timing endpoints only. Unsupported Flow, Therapy, clinical-outcome, and non-pacing intervention requests fail closed.
 
 
 ## CardiBench intelligence boundary

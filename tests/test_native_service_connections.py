@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 
 import pytest
 
@@ -213,7 +214,7 @@ def test_dccp_host_map_native_result_is_json_boundary_safe() -> None:
     assert isinstance(result["axes"]["ordinal"], dict)
 
 
-def test_cardiflow_reference_backend_and_carditherapy_fail_closed() -> None:
+def test_cardiflow_and_carditherapy_reference_backends(tmp_path: Path) -> None:
     registry = load_registry()
     _require_native(registry)
 
@@ -271,14 +272,98 @@ def test_cardiflow_reference_backend_and_carditherapy_fail_closed() -> None:
                 "backend": "missing",
                 "fluid": {"density": 1060.0, "dynamic_viscosity": 0.0035},
                 "boundary_conditions": [
-                    {"boundary_id": "wall", "kind": "wall", "region": "endocardium"}
+                    {
+                        "boundary_id": "wall",
+                        "kind": "wall",
+                        "region": "endocardium",
+                    }
                 ],
             },
         )
 
+    surface = tmp_path / "therapy-surface.json"
+    surface.write_text(
+        json.dumps(
+            {
+                "schema_version": "cardiep-surface-v1",
+                "coordinate_unit": "cm",
+                "vertices": [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [1.0, 1.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                ],
+                "triangles": [[0, 1, 2], [0, 2, 3]],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
     therapy_health = registry.capability("therapy.health").invoke("therapy.health", {})
     assert therapy_health["service"] == "CardiTherapy"
-    assert therapy_health["backends"] == []
+    assert "cardiep-pacing-v1" in therapy_health["backends"]
+
+    therapy_result = registry.capability("therapy.run").invoke(
+        "therapy.run",
+        {
+            "subject_id": "smoke",
+            "backend": "cardiep-pacing-v1",
+            "twin_state_ref": {
+                "artifact_id": "twin",
+                "kind": "cardiac_state",
+                "uri": "memory://state",
+            },
+            "baseline_refs": [
+                {
+                    "artifact_id": "ep-surface",
+                    "kind": "surface_mesh",
+                    "uri": surface.resolve().as_uri(),
+                    "metadata": {"coordinate_frame": "smoke"},
+                }
+            ],
+            "plan": {
+                "plan_id": "P1",
+                "arms": [
+                    {
+                        "arm_id": "control",
+                        "label": "Baseline",
+                        "is_comparator": True,
+                    },
+                    {
+                        "arm_id": "paced",
+                        "label": "Alternative pacing root",
+                        "interventions": [
+                            {
+                                "intervention_id": "pace-1",
+                                "kind": "pacing",
+                                "target": "surface vertex 2",
+                                "parameters": {"root_node": 2},
+                                "model_service": "CardiEP",
+                                "model_capability": "ep.simulate",
+                            }
+                        ],
+                    },
+                ],
+                "endpoints": ["activation_span_ms"],
+            },
+            "settings": {
+                "ep_backend": "surface-eikonal-v1",
+                "ep_parameters": {"isotropic_speed_cm_per_ms": 0.1},
+                "ep_settings": {
+                    "root_node": 0,
+                    "output_dir": str(tmp_path / "therapy-ep"),
+                },
+            },
+        },
+    )
+    assert therapy_result["validation_status"] == "software_checked"
+    assert therapy_result["backend"] == "cardiep-pacing-v1"
+    assert {item["arm_id"] for item in therapy_result["outcomes"]} == {
+        "control",
+        "paced",
+    }
+    assert all(item["unit"] == "ms" for item in therapy_result["outcomes"])
 
     with pytest.raises(Exception, match="backend unavailable"):
         registry.capability("therapy.run").invoke(
@@ -292,11 +377,16 @@ def test_cardiflow_reference_backend_and_carditherapy_fail_closed() -> None:
                     "uri": "file:///state.json",
                 },
                 "plan": {
-                    "plan_id": "P1",
+                    "plan_id": "P2",
                     "arms": [
-                        {"arm_id": "control", "label": "Control", "is_comparator": True}
+                        {
+                            "arm_id": "control",
+                            "label": "Control",
+                            "is_comparator": True,
+                        }
                     ],
-                    "endpoints": ["ejection_fraction"],
+                    "endpoints": ["activation_span_ms"],
                 },
             },
         )
+
