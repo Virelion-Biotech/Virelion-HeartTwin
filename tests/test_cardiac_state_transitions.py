@@ -1,6 +1,6 @@
 import pytest
 
-from hearttwin.contracts import Observation, Provenance
+from hearttwin.contracts import Observation, Provenance, ServiceResult
 from hearttwin.orchestrator import HeartTwin
 from hearttwin.service_registry import ServiceRegistry, ServiceSpec
 from hearttwin.state import CardiacStateStore, CardiacStateValidationError
@@ -15,13 +15,13 @@ def test_phase_history_is_explicit_and_ordered():
     )
     store = CardiacStateStore.new("entity-1", [observation])
     store.transition("simulated", trigger="simulation.run", provenance=Provenance(source_service="CardiSim", run_id="sim-1"))
-    store.transition("validated", trigger="evaluation.run", provenance=Provenance(source_service="CardiEval", run_id="eval-1"))
+    store.transition("evaluated", trigger="evaluation.run", provenance=Provenance(source_service="CardiEval", run_id="eval-1"))
     snapshot = store.snapshot()
     assert [(t.from_phase, t.to_phase) for t in snapshot.transitions] == [
         ("baseline", "simulated"),
-        ("simulated", "validated"),
+        ("simulated", "evaluated"),
     ]
-    assert snapshot.state_phase == "validated"
+    assert snapshot.state_phase == "evaluated"
 
 
 def test_noop_transition_is_rejected():
@@ -48,3 +48,45 @@ def test_typed_reduction_error_is_reported_by_legacy_runner():
     run = HeartTwin(Registry()).run("entity-1", capabilities=["atlas.context"])
     assert run.results[0].status == "error"
     assert "atlas.context" in (run.results[0].message or "")
+
+
+def test_inference_result_becomes_first_class_posterior_artifact():
+    store = CardiacStateStore.new("entity-1")
+    result = ServiceResult(
+        service="CardiInfer",
+        capability="infer.run",
+        status="ok",
+        data={
+            "contract_version": "1.1",
+            "subject_id": "entity-1",
+            "backend": "native-abc-smc-v1",
+            "model_service": "CardiEP",
+            "model_capability": "ep.simulate",
+            "posterior": [
+                {
+                    "parameter": "fibre_speed",
+                    "mean": 0.1,
+                    "median": 0.1,
+                    "sd": 0.01,
+                    "q025": 0.08,
+                    "q975": 0.12,
+                    "unit": "cm/ms",
+                }
+            ],
+            "posterior_samples": None,
+            "convergence": {"converged": True},
+            "identifiability": {"status": "acceptable", "weak_parameters": [], "diagnostics": {}},
+            "sensitivity": None,
+            "diagnostics": {},
+            "validation_status": "synthetic_recovery_checked",
+            "provenance": {},
+        },
+        provenance=Provenance(source_service="CardiInfer", run_id="infer-1"),
+    )
+    store.reduce_service_result(result)
+    snapshot = store.snapshot()
+    assert len(snapshot.posterior_artifacts) == 1
+    artifact = snapshot.posterior_artifacts[0]
+    assert artifact.subject_id == "entity-1"
+    assert artifact.model_service == "CardiEP"
+    assert artifact.validation_status == "synthetic_recovery_checked"

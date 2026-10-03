@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-CONTRACT_VERSION = "1.1.0"
+CONTRACT_VERSION = "1.2.0"
 
 
 class Provenance(BaseModel):
@@ -94,6 +94,30 @@ class PredictionArtifact(BaseModel):
     provenance_ids: list[str] = Field(default_factory=list)
 
 
+class PosteriorArtifact(BaseModel):
+    """Canonical HeartTwin representation of one CardiInfer posterior result."""
+
+    model_config = ConfigDict(extra="forbid")
+    posterior_id: str
+    subject_id: str
+    backend: str
+    model_service: str
+    model_capability: str
+    posterior: list[dict[str, Any]] = Field(default_factory=list)
+    posterior_samples: dict[str, Any] | None = None
+    convergence: dict[str, Any] = Field(default_factory=dict)
+    identifiability: dict[str, Any] = Field(default_factory=dict)
+    sensitivity: dict[str, Any] | None = None
+    diagnostics: dict[str, Any] = Field(default_factory=dict)
+    validation_status: Literal[
+        "unvalidated",
+        "software_checked",
+        "synthetic_recovery_checked",
+        "empirically_checked",
+    ] = "unvalidated"
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
 class ValidationArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid")
     validation_id: str
@@ -112,7 +136,7 @@ class ValidationArtifact(BaseModel):
 
 StatePhase = Literal[
     "unknown", "baseline", "injury", "acute", "remodeling", "recovery",
-    "intervention", "post_intervention", "simulated", "validated"
+    "intervention", "post_intervention", "simulated", "evaluated", "validated"
 ]
 
 
@@ -193,6 +217,30 @@ class SimulationResultPayload(BaseModel):
     summary: dict[str, Any]
     events: list[str] = Field(default_factory=list)
     population_size: int
+
+
+class InferenceResultPayload(BaseModel):
+    """Transport view of CardiInfer's InferenceResult contract."""
+
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "1.1"
+    subject_id: str
+    backend: str
+    model_service: str
+    model_capability: str
+    posterior: list[dict[str, Any]] = Field(default_factory=list)
+    posterior_samples: dict[str, Any] | None = None
+    convergence: dict[str, Any] = Field(default_factory=dict)
+    identifiability: dict[str, Any] = Field(default_factory=dict)
+    sensitivity: dict[str, Any] | None = None
+    diagnostics: dict[str, Any] = Field(default_factory=dict)
+    validation_status: Literal[
+        "unvalidated",
+        "software_checked",
+        "synthetic_recovery_checked",
+        "empirically_checked",
+    ] = "unvalidated"
+    provenance: dict[str, Any] = Field(default_factory=dict)
 
 
 class EvaluationResultPayload(BaseModel):
@@ -289,6 +337,7 @@ class CardiacState(BaseModel):
     derived_values: list[StateValue] = Field(default_factory=list)
     simulation_artifacts: list[SimulationArtifact] = Field(default_factory=list)
     prediction_artifacts: list[PredictionArtifact] = Field(default_factory=list)
+    posterior_artifacts: list[PosteriorArtifact] = Field(default_factory=list)
     evaluation_artifacts: list[ValidationArtifact] = Field(default_factory=list)
     challenges: list[AgentChallengePayload] = Field(default_factory=list)
     vex_observations: list[VexObservationPayload] = Field(default_factory=list)
@@ -327,6 +376,7 @@ class WorkflowState(BaseModel):
     anatomy: AnatomyBundlePayload | None = None
     benchmark: BenchmarkResolutionPayload | None = None
     learning: LearningResultPayload | None = None
+    inference: InferenceResultPayload | None = None
     simulation: SimulationResultPayload | None = None
     agent: AgentChallengePayload | None = None
     vex: VexObservationPayload | None = None

@@ -72,7 +72,7 @@ CardiAnatomy CardiAtlas / CardiLearn   modality adapters
 
 ## Canonical CardiacState
 
-The current state contract is version `1.1.0`. It provides typed collections for observations, Atlas context, benchmark resolutions, modality analyses, derived state variables, simulations, predictions, evaluations, challenges, CardiVex observations, bridge publications, phase transitions, trace records, and HeartTwin provenance.
+The current state contract is version `1.2.0`. It provides typed collections for observations, Atlas context, benchmark resolutions, modality analyses, derived state variables, simulations, predictions, inference posteriors, evaluations, challenges, CardiVex observations, bridge publications, phase transitions, trace records, and HeartTwin provenance.
 
 Each `StateValue` can carry a domain, variable, value, unit, anatomical region, temporal information, observed/inferred/simulated status, confidence, structured uncertainty, method, and provenance links. Simulation, prediction, and evaluation results have dedicated artifact models rather than requiring arbitrary dictionaries.
 
@@ -80,7 +80,7 @@ The old `inferred_state`, `simulations`, `predictions`, and `validation` diction
 
 `CardiacStateStore` is the reducer/validator for the canonical state. It enforces unique IDs, prevents dangling HeartTwin provenance links, validates phase history, creates stable artifact IDs, and emits a SHA-256 `state_fingerprint` from the canonical snapshot.
 
-See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.1.0.schema.json` for the contract and migration details.
+See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.2.0.schema.json` for the current contract. The 1.0.0 and 1.1.0 schemas remain for compatibility.
 
 ## Current implementation
 

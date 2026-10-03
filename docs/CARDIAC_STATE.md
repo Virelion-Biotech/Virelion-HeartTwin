@@ -22,6 +22,7 @@ CardiacState
 │   └── typed variable + unit + region + uncertainty + evidence status
 ├── simulation_artifacts
 ├── prediction_artifacts
+├── posterior_artifacts
 ├── evaluation_artifacts
 ├── challenges / vex_observations
 ├── bridge_publications
@@ -44,7 +45,7 @@ Every HeartTwin-produced typed artifact can link to one or more HeartTwin `Prove
 
 The state supports explicit phases such as `baseline`, `injury`, `acute`, `remodeling`, `recovery`, `intervention`, `post_intervention`, `simulated`, and `validated`. `StateTransition` records the trigger, sequence, timestamp, provenance links, and optional details.
 
-Current integration workflows use `baseline -> simulated -> validated` for synthetic infrastructure tests. This is a software execution state, not a clinical inference about a real patient.
+Software evaluation now transitions to `evaluated`, not `validated`. The `validated` phase is reserved for an explicit validation gate whose scope and evidence are recorded separately. Synthetic integration workflows therefore use `baseline -> simulated -> evaluated`.
 
 ## Validation boundary
 
@@ -52,4 +53,4 @@ The state layer validates structural invariants: IDs, typed artifacts, provenanc
 
 ## Schema
 
-The versioned JSON schema is `schemas/cardiac-state-1.1.0.schema.json`. The previous 1.0.0 schema is retained for compatibility. New producers should emit `contract_version = 1.1.0`.
+The versioned JSON schema is `schemas/cardiac-state-1.2.0.schema.json`. The previous 1.0.0 schema is retained for compatibility. New producers should emit `contract_version = 1.2.0`.

@@ -13,9 +13,11 @@ from .contracts import (
     CardiacState,
     EvaluationResultPayload,
     LearningResultPayload,
+    InferenceResultPayload,
     ModalityAnalysisPayload,
     Observation,
     PredictionArtifact,
+    PosteriorArtifact,
     Provenance,
     ServiceResult,
     SimulationArtifact,
@@ -177,6 +179,30 @@ class CardiacStateStore:
         ]
         return artifact
 
+    def record_inference(
+        self, payload: InferenceResultPayload, provenance: Provenance | None = None
+    ) -> PosteriorArtifact:
+        artifact_id = f"posterior-{sha256(payload.model_dump(mode='json'))[:16]}"
+        artifact = PosteriorArtifact(
+            posterior_id=artifact_id,
+            subject_id=payload.subject_id,
+            backend=payload.backend,
+            model_service=payload.model_service,
+            model_capability=payload.model_capability,
+            posterior=payload.posterior,
+            posterior_samples=payload.posterior_samples,
+            convergence=payload.convergence,
+            identifiability=payload.identifiability,
+            sensitivity=payload.sensitivity,
+            diagnostics=payload.diagnostics,
+            validation_status=payload.validation_status,
+            provenance_ids=self._add_provenance(provenance),
+        )
+        self._append_unique(
+            self.state.posterior_artifacts, artifact, "posterior_id", artifact_id
+        )
+        return artifact
+
     def record_simulation(
         self, payload: SimulationResultPayload, provenance: Provenance | None = None
     ) -> SimulationArtifact:
@@ -322,6 +348,10 @@ class CardiacStateStore:
                     result.provenance,
                     capability=result.capability,
                 )
+            elif result.capability == "infer.run":
+                self.record_inference(
+                    InferenceResultPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "simulation.run":
                 self.record_simulation(SimulationResultPayload.model_validate(data), result.provenance)
                 if self.state.state_phase != "simulated":
@@ -332,8 +362,8 @@ class CardiacStateStore:
                 self.record_vex(VexObservationPayload.model_validate(data), result.provenance)
             elif result.capability == "evaluation.run":
                 self.record_evaluation(EvaluationResultPayload.model_validate(data), result.provenance)
-                if self.state.state_phase != "validated":
-                    self.transition("validated", trigger=result.capability, provenance=result.provenance)
+                if self.state.state_phase != "evaluated":
+                    self.transition("evaluated", trigger=result.capability, provenance=result.provenance)
             elif result.capability == "bridge.publish":
                 self.record_bridge(BridgePublicationPayload.model_validate(data), result.provenance)
             elif result.capability == "trace.record":
@@ -381,6 +411,7 @@ class CardiacStateStore:
         self._assert_unique([item.value_id for item in state.derived_values], "value_id")
         self._assert_unique([item.simulation_id for item in state.simulation_artifacts], "simulation_id")
         self._assert_unique([item.prediction_id for item in state.prediction_artifacts], "prediction_id")
+        self._assert_unique([item.posterior_id for item in state.posterior_artifacts], "posterior_id")
         self._assert_unique([item.validation_id for item in state.evaluation_artifacts], "validation_id")
         self._assert_unique([item.message_id for item in state.bridge_publications], "message_id")
         self._assert_unique([item.transition_id for item in state.transitions], "transition_id")
@@ -392,6 +423,7 @@ class CardiacStateStore:
         for collection in (
             state.simulation_artifacts,
             state.prediction_artifacts,
+            state.posterior_artifacts,
             state.evaluation_artifacts,
             state.transitions,
         ):
@@ -415,7 +447,7 @@ class CardiacStateStore:
             raise CardiacStateValidationError(
                 f"state_phase={state.state_phase} does not match final transition phase={expected_phase}"
             )
-        if not state.transitions and state.state_phase not in {expected_phase, "simulated", "validated"}:
+        if not state.transitions and state.state_phase not in {expected_phase, "simulated", "evaluated", "validated"}:
             raise CardiacStateValidationError(
                 f"state_phase={state.state_phase} is inconsistent with current observations"
             )
