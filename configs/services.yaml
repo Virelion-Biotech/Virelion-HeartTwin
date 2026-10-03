@@ -11,7 +11,7 @@ services:
     endpoint: ${CARDIATLAS_URL}
   - name: CardiBench
     repository: Virelion-Biotech/Virelion-CardiBench
-    capabilities: [benchmark.health, benchmark.resolve, benchmark.search, benchmark.catalog, benchmark.discover, benchmark.result.record, benchmark.results]
+    capabilities: [benchmark.health, benchmark.resolve, benchmark.search, benchmark.catalog, benchmark.discover, benchmark.admission.assess, benchmark.result.record, benchmark.results]
     builtin: cardibench
     endpoint: ${CARDIBENCH_URL}
   - name: CardiEval
