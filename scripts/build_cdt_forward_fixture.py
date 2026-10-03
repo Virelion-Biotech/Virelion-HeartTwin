@@ -45,11 +45,13 @@ def main() -> None:
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--subject", default="DTI004")
-    parser.add_argument("--purkinje-max-path", type=float, default=200.0)
+    parser.add_argument("--purkinje-max-path", type=int, default=200)
     parser.add_argument("--lv-root-distance", type=float, default=1.5)
     parser.add_argument("--rv-root-distance", type=float, default=1.5)
     args = parser.parse_args()
 
+    if args.purkinje_max_path < 1:
+        raise ValueError("--purkinje-max-path must be a positive integer")
     if not args.upstream.exists():
         raise RuntimeError(f"Upstream checkout does not exist: {args.upstream}")
     geometry_root = _find_geometry_root(args.data_root)
@@ -145,6 +147,7 @@ def main() -> None:
         "geometry_root": str(geometry_root.resolve()),
         "parameter_names": names,
         "parameter_values": values.tolist(),
+        "approx_djikstra_purkinje_max_path_len": int(args.purkinje_max_path),
         "root_count": int(root_count),
         "node_count": int(len(geometry.get_node_xyz())),
         "edge_count": int(len(edges)),
