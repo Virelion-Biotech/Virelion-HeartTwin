@@ -2,7 +2,7 @@
 # Transitive Python dependencies remain governed by component package constraints.
 git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@749b2069cca06970e48d795c67a8459fb302e2a2
 git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@b7e1425aaa0a73434c097403b47e2d5a613c13c7
-git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@19701b5a700d7306a4b8d9195f354b0478d6c915
+git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@02b915889fb8b5935a260da6f450ed153150375e
 git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@a697906c4ff68bacfaf764eda566a92a67cb64f3
 git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@a62914807f31c97a77259fbb96c62dd18a1ae041
 git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@5c6d44807611e79c5161a305b1feebb0b9819d92
