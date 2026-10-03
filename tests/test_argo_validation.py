@@ -1,3 +1,4 @@
+import hashlib
 import json
 import shutil
 from pathlib import Path
@@ -13,6 +14,7 @@ from hearttwin.argo_validation import (
     prepare_argo_cohort,
     prepare_argo_empirical_study,
     read_argo_record,
+    run_argo_surface_baseline,
     score_argo_cohort,
     score_argo_holdout,
 )
@@ -361,3 +363,93 @@ def test_argo_cohort_fails_closed_on_missing_patient_predictions(tmp_path: Path)
     )
     with pytest.raises(FileNotFoundError, match="Missing ARGO predictions"):
         score_argo_cohort(prepared["manifest_path"], tmp_path / "empty-predictions")
+
+
+def test_argo_surface_baseline_preserves_blinding(tmp_path: Path) -> None:
+    root = _synthetic_patient(tmp_path)
+    prepared = prepare_argo_empirical_study(
+        root,
+        tmp_path / "study",
+        holdout_fraction=0.5,
+        seed=9,
+        strict_official_counts=False,
+    )
+
+    class _Adapter:
+        def invoke(self, capability, payload):
+            assert capability == "ep.calibrate"
+            assert payload["backend"] == "surface-eikonal-v1"
+            split = prepared["split"]
+            assert set(payload["settings"]["root_candidates"]) <= {0, 1, 2, 3}
+            out = tmp_path / "fake-cardiep"
+            out.mkdir(exist_ok=True)
+            activation = out / "activation.json"
+            activation.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cardiep-surface-activation-v1",
+                        "activation_ms": [-30.0, -10.0, 20.0, 40.0],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            return {
+                "contract_version": "1.0",
+                "subject_id": split["patient_id"],
+                "backend": "surface-eikonal-v1",
+                "parameters": {
+                    "values": {"isotropic_speed_cm_per_ms": 0.1},
+                    "units": {"isotropic_speed_cm_per_ms": "cm/ms"},
+                    "source": "calibrated",
+                },
+                "objective": 0.0,
+                "converged": True,
+                "posterior_ref": None,
+                "simulated": {
+                    "contract_version": "1.0",
+                    "subject_id": split["patient_id"],
+                    "backend": "surface-eikonal-v1",
+                    "parameters": {
+                        "values": {"isotropic_speed_cm_per_ms": 0.1},
+                        "units": {},
+                        "source": "calibrated",
+                    },
+                    "outputs": [
+                        {
+                            "artifact_id": "activation",
+                            "kind": "activation_map",
+                            "uri": activation.resolve().as_uri(),
+                            "sha256": hashlib.sha256(activation.read_bytes()).hexdigest(),
+                            "coordinate_frame": "ARGO_CARTO",
+                            "metadata": {},
+                        }
+                    ],
+                    "validation_status": "software_checked",
+                    "warnings": [],
+                    "provenance": {},
+                },
+                "diagnostics": {},
+                "provenance": {},
+            }
+
+    class _Registry:
+        def capability(self, name):
+            assert name == "ep.calibrate"
+            return _Adapter()
+
+    result = run_argo_surface_baseline(
+        _Registry(),
+        prepared["split_path"],
+        tmp_path / "baseline",
+        coordinate_unit="mm",
+        speed_min_cm_per_ms=0.05,
+        speed_max_cm_per_ms=0.2,
+        gates={"lat_rmse_ms_max": 1e-12, "lat_abs_bias_ms_max": 1e-12},
+    )
+    assert result["holdout_report"]["status"] == "pass"
+    predictions = json.loads(
+        Path(result["predictions_path"]).read_text(encoding="utf-8")
+    )
+    assert set(predictions["records"]) == set(prepared["split"]["holdout_ids"])
+    assert not set(predictions["records"]) & set(prepared["split"]["calibration_ids"])

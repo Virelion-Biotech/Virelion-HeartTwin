@@ -26,6 +26,12 @@ def test_cardiep_niederer_contract_is_available_through_stack_pin() -> None:
     assert report["status"] == "pass"
     assert report["metrics"]["rmse_ms"] == pytest.approx(0.0)
 
+    backends = cardiep.EPAPI().backends()["backends"]
+    assert any(
+        item["name"] == "surface-eikonal-v1" and item["available"]
+        for item in backends
+    )
+
     refinement = cardiep.run_eikonal_refinement_validation()
     assert refinement["passed"] is True
     assert refinement["validation_status"] == "numerical_refinement_check"

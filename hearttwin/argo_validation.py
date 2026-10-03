@@ -4,6 +4,7 @@ import argparse
 import csv
 import hashlib
 import json
+from urllib.parse import unquote, urlparse
 import math
 import re
 from dataclasses import dataclass
@@ -748,6 +749,209 @@ def score_argo_holdout(
         ),
     }
 
+
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _local_artifact_path(uri: str) -> Path:
+    parsed = urlparse(uri)
+    if parsed.scheme not in {"", "file"}:
+        raise ValueError(f"Expected a local CardiEP artifact URI, got {uri!r}")
+    raw = parsed.path if parsed.scheme == "file" else uri
+    return Path(unquote(raw)).expanduser().resolve()
+
+
+def run_argo_surface_baseline(
+    registry: Any,
+    split_path: str | Path,
+    output_dir: str | Path,
+    *,
+    coordinate_unit: str,
+    speed_min_cm_per_ms: float,
+    speed_max_cm_per_ms: float,
+    gates: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Fit CardiEP's surface baseline on calibration LATs and score held-out LATs."""
+    if coordinate_unit not in {"mm", "cm", "m"}:
+        raise ValueError("coordinate_unit must be one of mm, cm, or m")
+    low = float(speed_min_cm_per_ms)
+    high = float(speed_max_cm_per_ms)
+    if not (math.isfinite(low) and math.isfinite(high) and 0 < low < high):
+        raise ValueError("Surface speed bounds must satisfy 0 < minimum < maximum")
+
+    split_file = Path(split_path).expanduser().resolve()
+    split = json.loads(split_file.read_text(encoding="utf-8"))
+    if split.get("schema_version") != "hearttwin-argo-split-v1":
+        raise ValueError("Unsupported ARGO split schema")
+    patient = load_argo_patient(split["patient_dir"], strict_official_counts=False)
+    if patient["patient_id"] != split["patient_id"]:
+        raise ValueError("ARGO patient directory does not match split identity")
+    points = {item.point_id: item for item in patient["points"]}
+
+    output = Path(output_dir).expanduser().resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    surface_path = output / "surface.json"
+    surface_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "cardiep-surface-v1",
+                "coordinate_unit": coordinate_unit,
+                "vertices": patient["vertices"].tolist(),
+                "triangles": patient["connectivity"].tolist(),
+            },
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    calibration_vertices = []
+    calibration_lat = []
+    for point_id in split["calibration_ids"]:
+        point = points[point_id]
+        measurement = extract_argo_measurement(read_argo_record(point.record_base))
+        calibration_vertices.append(int(point.nearest_mesh_index))
+        calibration_lat.append(float(measurement["local_activation_ms"]))
+    eam_path = output / "calibration-eam.json"
+    eam_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "cardiep-eam-activation-v1",
+                "patient_id": patient["patient_id"],
+                "split_sha256": split["split_sha256"],
+                "vertex_indices": calibration_vertices,
+                "activation_ms": calibration_lat,
+            },
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    adapter = registry.capability("ep.calibrate")
+    if adapter is None:
+        raise RuntimeError("HeartTwin registry has no ep.calibrate capability")
+    calibration = adapter.invoke(
+        "ep.calibrate",
+        {
+            "subject_id": patient["patient_id"],
+            "anatomy_ref": {
+                "artifact_id": f"{patient['patient_id']}-argo-surface",
+                "kind": "surface_mesh",
+                "uri": surface_path.as_uri(),
+                "sha256": _file_sha256(surface_path),
+                "coordinate_frame": "ARGO_CARTO",
+                "metadata": {
+                    "dataset": "ARGO",
+                    "dataset_version": ARGO_VERSION,
+                    "coordinate_unit": coordinate_unit,
+                },
+            },
+            "observations": [
+                {
+                    "observation_id": f"{patient['patient_id']}-argo-calibration-lat",
+                    "kind": "eam_activation",
+                    "artifact": {
+                        "artifact_id": f"{patient['patient_id']}-argo-calibration-lat",
+                        "kind": "eam_activation",
+                        "uri": eam_path.as_uri(),
+                        "sha256": _file_sha256(eam_path),
+                        "coordinate_frame": "ARGO_CARTO",
+                    },
+                    "coordinate_frame": "ARGO_CARTO",
+                    "units": "ms",
+                }
+            ],
+            "backend": "surface-eikonal-v1",
+            "parameter_bounds": {
+                "isotropic_speed_cm_per_ms": [low, high],
+            },
+            "settings": {
+                "root_candidates": sorted(set(calibration_vertices)),
+                "output_dir": str(output / "cardiep"),
+            },
+        },
+    )
+    simulated = calibration.get("simulated")
+    if not isinstance(simulated, dict):
+        raise RuntimeError("CardiEP surface calibration did not return a simulation")
+    outputs = simulated.get("outputs")
+    if not isinstance(outputs, list):
+        raise RuntimeError("CardiEP surface simulation outputs are missing")
+    activation_ref = next(
+        (item for item in outputs if isinstance(item, dict) and item.get("kind") == "activation_map"),
+        None,
+    )
+    if activation_ref is None:
+        raise RuntimeError("CardiEP surface simulation did not emit an activation map")
+    activation_path = _local_artifact_path(str(activation_ref["uri"]))
+    if activation_ref.get("sha256") and _file_sha256(activation_path) != activation_ref["sha256"]:
+        raise RuntimeError("CardiEP surface activation artifact failed SHA-256 verification")
+    activation_payload = json.loads(activation_path.read_text(encoding="utf-8"))
+    activation = np.asarray(activation_payload.get("activation_ms"), dtype=float)
+    if activation.shape != (patient["n_vertices"],) or not np.isfinite(activation).all():
+        raise RuntimeError("CardiEP surface activation artifact has an invalid shape/value")
+
+    records = {
+        point_id: {
+            "lat_ms": float(activation[points[point_id].nearest_mesh_index]),
+            "surface_vertex_index": int(points[point_id].nearest_mesh_index),
+        }
+        for point_id in split["holdout_ids"]
+    }
+    predictions = {
+        "schema_version": "hearttwin-argo-predictions-v1",
+        "patient_id": patient["patient_id"],
+        "split_sha256": split["split_sha256"],
+        "records": records,
+        "model": {
+            "service": "CardiEP",
+            "backend": "surface-eikonal-v1",
+            "scope": "isotropic surface-Eikonal LAT baseline",
+        },
+    }
+    predictions_path = output / "predictions.json"
+    predictions_path.write_text(
+        json.dumps(predictions, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    report = score_argo_holdout(
+        split_file,
+        predictions_path,
+        gates=dict(gates or {}),
+    )
+    result = {
+        "schema_version": "hearttwin-argo-surface-baseline-v1",
+        "patient_id": patient["patient_id"],
+        "split_sha256": split["split_sha256"],
+        "coordinate_unit": coordinate_unit,
+        "speed_bounds_cm_per_ms": [low, high],
+        "calibration": calibration,
+        "predictions_path": str(predictions_path),
+        "holdout_report": report,
+        "scientific_boundary": (
+            "This is an isotropic LV-surface activation baseline fitted only to "
+            "calibration EAM points. It is not fibre-resolved volumetric EP, does "
+            "not predict ECG, and is not clinical validation. The coordinate unit "
+            "is an explicit study input and is not inferred by HeartTwin."
+        ),
+    }
+    (output / "surface-baseline-report.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return result
 
 
 def prepare_argo_cohort(

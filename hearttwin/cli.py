@@ -82,6 +82,21 @@ def main() -> None:
         action="store_true",
         help="Skip the published ARGO v1 patient/count checks (fixtures only)",
     )
+    argo_surface = sub.add_parser(
+        "argo-surface-baseline",
+        help="Fit CardiEP surface-Eikonal on blinded ARGO calibration LATs",
+    )
+    argo_surface.add_argument("split")
+    argo_surface.add_argument("output_dir")
+    argo_surface.add_argument(
+        "--coordinate-unit",
+        required=True,
+        choices=("mm", "cm", "m"),
+        help="Explicit unit of the ARGO/CARTO mesh coordinates; never inferred",
+    )
+    argo_surface.add_argument("--speed-min-cm-per-ms", required=True, type=float)
+    argo_surface.add_argument("--speed-max-cm-per-ms", required=True, type=float)
+    argo_surface.add_argument("--gates")
     argo_cohort_prepare = sub.add_parser(
         "argo-cohort-prepare",
         help="Prepare deterministic blinded splits for the full ARGO cohort",
@@ -143,6 +158,28 @@ def main() -> None:
             strict_official_counts=not args.allow_nonofficial_count,
         )
         print(json.dumps(result["split"], indent=2, sort_keys=True))
+        return
+    if args.cmd == "argo-surface-baseline":
+        from .argo_validation import run_argo_surface_baseline
+
+        gates = {}
+        if args.gates:
+            gates_raw = json.loads(Path(args.gates).read_text(encoding="utf-8"))
+            if not isinstance(gates_raw, dict):
+                raise TypeError("ARGO gates JSON must contain an object")
+            gates = gates_raw
+        report = run_argo_surface_baseline(
+            registry,
+            args.split,
+            args.output_dir,
+            coordinate_unit=args.coordinate_unit,
+            speed_min_cm_per_ms=args.speed_min_cm_per_ms,
+            speed_max_cm_per_ms=args.speed_max_cm_per_ms,
+            gates=gates,
+        )
+        print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
+        if report["holdout_report"]["status"] == "fail":
+            raise SystemExit(2)
         return
     if args.cmd == "argo-cohort-prepare":
         from .argo_validation import prepare_argo_cohort

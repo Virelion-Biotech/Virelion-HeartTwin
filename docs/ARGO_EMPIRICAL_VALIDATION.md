@@ -262,3 +262,36 @@ The cohort report is **equal-patient weighted**. It records every patient report
 and the IDs of any patients that fail prespecified gates. HeartTwin deliberately
 does not use a mapping-point-weighted aggregate as the primary cohort result,
 because the ARGO patient point counts are highly imbalanced.
+
+
+## Surface-Eikonal baseline
+
+When only the ARGO CARTO surface is available, HeartTwin can now use CardiEP's
+separate `surface-eikonal-v1` backend as an **observable-level baseline**. It
+fits only the calibration mapping points, predicts activation time over the LV
+surface, writes predictions for the held-out point IDs, and immediately invokes
+the existing blind scorer.
+
+Because the ARGO public documentation describes the 3-D coordinates but does
+not state their physical unit on the dataset page, HeartTwin does **not** guess
+the unit. The study operator must verify it from the source/export metadata and
+pass it explicitly:
+
+```bash
+hearttwin argo-surface-baseline \
+  outputs/argo/Pt1/split.json \
+  outputs/argo/Pt1/surface-baseline \
+  --coordinate-unit mm \
+  --speed-min-cm-per-ms <prespecified-lower-bound> \
+  --speed-max-cm-per-ms <prespecified-upper-bound> \
+  --gates argo-lat-gates.json
+```
+
+The speed bounds are also explicit study inputs and should be frozen before
+looking at held-out results.
+
+This model is deliberately limited: isotropic surface conduction, a fitted
+root, one global speed, and one timing offset. It does not model transmural
+propagation, myocardial fibres, scar depth, Purkinje anatomy, or ECG forward
+physics. It therefore provides a leakage-resistant ARGO LAT baseline, not a
+replacement for volumetric patient-specific CardiEP.
