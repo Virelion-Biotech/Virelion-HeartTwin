@@ -15,6 +15,13 @@ on:
       - "hearttwin/operations.py"
       - "hearttwin/service_registry.py"
       - "hearttwin/workflow.py"
+      - "hearttwin/state.py"
+      - "hearttwin/state_crosswalk.py"
+      - "hearttwin/validation_gate.py"
+      - "hearttwin/services.yaml"
+      - "configs/compatibility-lock.json"
+      - "tests/test_native_service_connections.py"
+      - "tests/test_compatibility_lock.py"
       - "requirements-services.txt"
   pull_request:
     branches: [main]
@@ -27,6 +34,13 @@ on:
       - "hearttwin/operations.py"
       - "hearttwin/service_registry.py"
       - "hearttwin/workflow.py"
+      - "hearttwin/state.py"
+      - "hearttwin/state_crosswalk.py"
+      - "hearttwin/validation_gate.py"
+      - "hearttwin/services.yaml"
+      - "configs/compatibility-lock.json"
+      - "tests/test_native_service_connections.py"
+      - "tests/test_compatibility_lock.py"
       - "requirements-services.txt"
 
 permissions:
