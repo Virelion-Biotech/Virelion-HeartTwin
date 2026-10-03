@@ -497,7 +497,6 @@ def prepare_argo_empirical_study(
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
-        "license": ARGO_LICENSE,
         "patient_id": patient["patient_id"],
         "seed": int(seed),
         "holdout_fraction": float(holdout_fraction),
@@ -508,6 +507,7 @@ def prepare_argo_empirical_study(
     split_payload = {
         **split_identity,
         "schema_version": "hearttwin-argo-split-v1",
+        "license": ARGO_LICENSE,
         "patient_dir": str(Path(patient_dir).expanduser().resolve()),
         "scientific_boundary": (
             "ARGO provides surface ECG, intracardiac EGMs and reconstructed CARTO EA maps, "
@@ -1005,7 +1005,6 @@ def prepare_argo_cohort(
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
-        "license": ARGO_LICENSE,
         "holdout_fraction": float(holdout_fraction),
         "seed": int(seed),
         "patients": [
@@ -1019,6 +1018,7 @@ def prepare_argo_cohort(
     manifest = {
         **identity,
         "schema_version": "hearttwin-argo-cohort-v1",
+        "license": ARGO_LICENSE,
         "dataset_root": str(root),
         "output_root": str(output),
         "patient_count": len(patients),
@@ -1147,7 +1147,6 @@ def score_argo_cohort(
         "dataset": manifest.get("dataset"),
         "dataset_version": manifest.get("dataset_version"),
         "doi": manifest.get("doi"),
-        "license": manifest.get("license"),
         "holdout_fraction": manifest.get("holdout_fraction"),
         "seed": manifest.get("seed"),
         "patients": [
