@@ -15,6 +15,7 @@ from hearttwin.argo_validation import (
     prepare_argo_empirical_study,
     read_argo_record,
     run_argo_surface_baseline,
+    run_argo_surface_cohort_baseline,
     score_argo_cohort,
     score_argo_holdout,
 )
@@ -453,3 +454,114 @@ def test_argo_surface_baseline_preserves_blinding(tmp_path: Path) -> None:
     )
     assert set(predictions["records"]) == set(prepared["split"]["holdout_ids"])
     assert not set(predictions["records"]) & set(prepared["split"]["calibration_ids"])
+
+
+def test_argo_surface_cohort_runs_each_patient_independently(tmp_path: Path) -> None:
+    source = _synthetic_patient(tmp_path)
+    dataset = tmp_path / "surface-cohort-data"
+    dataset.mkdir()
+    patient_ids = ["PtA", "PtB"]
+    for patient_id in patient_ids:
+        shutil.copytree(source, dataset / patient_id)
+
+    prepared = prepare_argo_cohort(
+        dataset,
+        tmp_path / "surface-cohort-study",
+        holdout_fraction=0.5,
+        seed=13,
+        patient_ids=patient_ids,
+        strict_official_counts=False,
+    )
+
+    class _Adapter:
+        def invoke(self, capability, payload):
+            assert capability == "ep.calibrate"
+            patient_id = payload["subject_id"]
+            out = tmp_path / "fake-surface-cardiep" / patient_id
+            out.mkdir(parents=True, exist_ok=True)
+            activation = out / "activation.json"
+            activation.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cardiep-surface-activation-v1",
+                        "activation_ms": [-30.0, -10.0, 20.0, 40.0],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            return {
+                "contract_version": "1.0",
+                "subject_id": patient_id,
+                "backend": "surface-eikonal-v1",
+                "parameters": {
+                    "values": {
+                        "isotropic_speed_cm_per_ms": 0.1,
+                        "activation_offset_ms": 0.0,
+                    },
+                    "units": {
+                        "isotropic_speed_cm_per_ms": "cm/ms",
+                        "activation_offset_ms": "ms",
+                    },
+                    "source": "calibrated",
+                },
+                "objective": 0.0,
+                "converged": True,
+                "posterior_ref": None,
+                "simulated": {
+                    "contract_version": "1.0",
+                    "subject_id": patient_id,
+                    "backend": "surface-eikonal-v1",
+                    "parameters": {
+                        "values": {"isotropic_speed_cm_per_ms": 0.1},
+                        "units": {},
+                        "source": "calibrated",
+                    },
+                    "outputs": [
+                        {
+                            "artifact_id": f"{patient_id}-activation",
+                            "kind": "activation_map",
+                            "uri": activation.resolve().as_uri(),
+                            "sha256": hashlib.sha256(
+                                activation.read_bytes()
+                            ).hexdigest(),
+                            "coordinate_frame": "ARGO_CARTO",
+                            "metadata": {},
+                        }
+                    ],
+                    "validation_status": "software_checked",
+                    "warnings": [],
+                    "provenance": {},
+                },
+                "diagnostics": {"root_node": 0},
+                "provenance": {},
+            }
+
+    class _Registry:
+        def capability(self, name):
+            assert name == "ep.calibrate"
+            return _Adapter()
+
+    result = run_argo_surface_cohort_baseline(
+        _Registry(),
+        prepared["manifest_path"],
+        tmp_path / "surface-cohort-output",
+        coordinate_unit="mm",
+        speed_min_cm_per_ms=0.05,
+        speed_max_cm_per_ms=0.2,
+        gates={
+            "lat_rmse_ms_max": 1e-12,
+            "lat_abs_bias_ms_max": 1e-12,
+        },
+    )
+    assert result["cohort_report"]["status"] == "pass"
+    assert result["cohort_report"]["patient_count"] == 2
+    assert result["cohort_report"]["failed_patients"] == []
+    assert {item["patient_id"] for item in result["patients"]} == set(patient_ids)
+    for patient_id in patient_ids:
+        assert (
+            tmp_path
+            / "surface-cohort-output"
+            / patient_id
+            / "predictions.json"
+        ).is_file()
