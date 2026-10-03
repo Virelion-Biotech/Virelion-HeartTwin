@@ -216,3 +216,8 @@ hearttwin operational-rehearsal \
 
 See `docs/OPERATIONAL_REHEARSAL.md` for the topology, fault model, persistence
 semantics, and CI acceptance gates.
+
+
+## CardiBench intelligence loop
+
+HeartTwin treats CardiBench discovery/search/catalog operations as control-plane research intelligence. They are routed through the service registry but are not reduced into subject-level `CardiacState`. The run path is `benchmark.resolve → CardiLearn → CardiEval → benchmark.result.record → CardiTrace`.

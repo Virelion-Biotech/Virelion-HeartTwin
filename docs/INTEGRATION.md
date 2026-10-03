@@ -113,3 +113,10 @@ revision used for these contracts.
 ## Flow and therapy readiness boundary
 
 CardiFlow and CardiTherapy are registered as native/HTTP-capable services. CardiFlow ships the deterministic `windkessel-3element-v1` reduced-order afterload backend; its outputs are software-checked reference hemodynamics, not CFD or patient validation. CardiTherapy has zero default intervention backends and `therapy.run` fails closed. Unsupported Flow backends also fail closed.
+
+
+## CardiBench intelligence boundary
+
+HeartTwin routes `benchmark.health`, `benchmark.search`, `benchmark.catalog`, `benchmark.discover`, `benchmark.result.record`, and `benchmark.results` in addition to `benchmark.resolve`. Discovery/search/catalog are control-plane capabilities and never become biological observations. Only a resolved benchmark used by the current workflow enters `CardiacState`.
+
+The multimodal workflow closes the loop as `CardiBench → CardiLearn → CardiEval → CardiBench result history → CardiTrace`. CardiBench owns benchmark/result identity; CardiEval scoring; CardiBridge transport; CardiTrace lineage; HeartTwin orchestration.

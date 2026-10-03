@@ -448,6 +448,29 @@ def run_multimodal_workflow(
         raise WorkflowError(f"Evaluation failed: {state.evaluation.errors}")
     steps.append(evaluation_result)
 
+    # Close the benchmark lifecycle before CardiTrace seals the run. Discovery,
+    # catalog, and search remain control-plane operations and never become
+    # biological CardiacState observations.
+    if registry.capability("benchmark.result.record") is not None:
+        benchmark_history_result = _call(
+            registry,
+            "benchmark.result.record",
+            entity_id,
+            {
+                "benchmark_id": state.evaluation.benchmark_id,
+                "benchmark_version": state.evaluation.benchmark_version,
+                "benchmark_provenance_sha256": state.benchmark.metadata_sha256,
+                "model_id": state.evaluation.model_id,
+                "model_version": "unknown",
+                "split": "test",
+                "metrics": state.evaluation.metrics,
+                "sample_count": sum(1 for partition in assignments.values() if partition == "test"),
+                "protocol_id": state.evaluation.task_id or "hearttwin-evaluation",
+                "source": "CardiEval",
+            },
+        )
+        steps.append(benchmark_history_result)
+
     pre_trace_state = store.snapshot()
     pre_trace_fingerprint = pre_trace_state.state_fingerprint or ""
     state.cardiac_state = pre_trace_state
