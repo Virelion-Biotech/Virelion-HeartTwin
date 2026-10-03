@@ -112,8 +112,4 @@ revision used for these contracts.
 
 ## Flow and therapy readiness boundary
 
-CardiFlow and CardiTherapy are registered as native/HTTP-capable services so their
-contracts are part of the stack before numerical backends are available. Their
-health capabilities are valid with zero registered backends. Execution capabilities
-(`flow.simulate` and `therapy.run`) fail closed until an explicit backend is
-registered; HeartTwin must not fabricate hemodynamic or intervention outcomes.
+CardiFlow and CardiTherapy are registered as native/HTTP-capable services. CardiFlow ships the deterministic `windkessel-3element-v1` reduced-order afterload backend; its outputs are software-checked reference hemodynamics, not CFD or patient validation. CardiTherapy has zero default intervention backends and `therapy.run` fails closed. Unsupported Flow backends also fail closed.
