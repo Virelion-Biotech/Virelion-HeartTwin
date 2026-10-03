@@ -520,6 +520,7 @@ def prepare_argo_empirical_study(
 
     calibration_payload = {
         "schema_version": "hearttwin-argo-calibration-targets-v1",
+        "license": ARGO_LICENSE,
         "patient_id": patient["patient_id"],
         "split_sha256": split_payload["split_sha256"],
         "targets": calibration_targets,
@@ -915,6 +916,7 @@ def run_argo_surface_baseline(
     }
     predictions = {
         "schema_version": "hearttwin-argo-predictions-v1",
+        "license": ARGO_LICENSE,
         "patient_id": patient["patient_id"],
         "split_sha256": split["split_sha256"],
         "records": records,
@@ -936,6 +938,7 @@ def run_argo_surface_baseline(
     )
     result = {
         "schema_version": "hearttwin-argo-surface-baseline-v1",
+        "license": ARGO_LICENSE,
         "patient_id": patient["patient_id"],
         "split_sha256": split["split_sha256"],
         "coordinate_unit": coordinate_unit,
@@ -1089,6 +1092,7 @@ def run_argo_surface_cohort_baseline(
     )
     result = {
         "schema_version": "hearttwin-argo-surface-cohort-v1",
+        "license": ARGO_LICENSE,
         "cohort_sha256": manifest["cohort_sha256"],
         "coordinate_unit": coordinate_unit,
         "speed_bounds_cm_per_ms": [
