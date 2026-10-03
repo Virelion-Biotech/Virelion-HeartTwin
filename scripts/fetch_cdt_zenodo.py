@@ -21,6 +21,17 @@ REQUIRED_DIRS = ("clinical_data", "cellular_data")
 GEOMETRY_DIRS = ("geometric_data", "geometric_data_ruben")
 
 
+def _download_priority(item: dict) -> tuple[int, str]:
+    """Prefer the published metadata/input archive before large result bundles."""
+    key = str(item.get("key") or item.get("filename") or "")
+    lowered = key.lower()
+    if "meta_data" in lowered or "metadata" in lowered:
+        return (0, lowered)
+    if any(token in lowered for token in ("clinical", "geometric", "cellular")):
+        return (1, lowered)
+    return (2, lowered)
+
+
 def file_digest(path: Path, algorithm: str = "sha256") -> str:
     h = hashlib.new(algorithm)
     with path.open("rb") as fh:
@@ -102,12 +113,14 @@ def main() -> None:
     files = record.get("files", [])
     if not files:
         raise RuntimeError(f"Zenodo record {args.record} contains no downloadable files")
+    files = sorted(files, key=_download_priority)
 
     downloads = args.output / "downloads"
     extracts = args.output / "extracted"
     downloads.mkdir(exist_ok=True)
     extracts.mkdir(exist_ok=True)
     manifest = []
+    reference_root: Path | None = None
 
     for item in files:
         key = item.get("key") or item.get("filename")
@@ -124,11 +137,35 @@ def main() -> None:
             md5 = file_digest(destination, "md5")  # nosec B303: checksum interoperability, not security
             if md5 != expected.removeprefix("md5:"):
                 raise RuntimeError(f"Checksum mismatch for {key}")
-        manifest.append({"key": key, "size": destination.stat().st_size, "sha256": actual, "zenodo_checksum": expected, "url": url})
+        manifest.append(
+            {
+                "key": key,
+                "size": destination.stat().st_size,
+                "sha256": actual,
+                "zenodo_checksum": expected,
+                "url": url,
+            }
+        )
         maybe_extract(destination, extracts)
 
-    (args.output / "download_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    reference_root = find_required_root(extracts if any(extracts.iterdir()) else downloads)
+        # This workflow needs the published input layout, not every result bundle
+        # attached to the Zenodo record. Stop once all required input directories
+        # coexist under one extracted root.
+        try:
+            reference_root = find_required_root(extracts)
+        except RuntimeError:
+            reference_root = None
+        if reference_root is not None:
+            break
+
+    (args.output / "download_manifest.json").write_text(
+        json.dumps(manifest, indent=2),
+        encoding="utf-8",
+    )
+    if reference_root is None:
+        reference_root = find_required_root(
+            extracts if any(extracts.iterdir()) else downloads
+        )
     (args.output / "reference_root.txt").write_text(str(reference_root.resolve()), encoding="utf-8")
     print(reference_root.resolve())
 
