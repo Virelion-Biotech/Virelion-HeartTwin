@@ -166,6 +166,12 @@ class ValidationArtifact(BaseModel):
     benchmark_version: str
     task_id: str
     model_id: str
+    evaluator_version: str | None = None
+    benchmark_sha256: str | None = None
+    split: str | None = None
+    sample_count: int | None = Field(default=None, ge=0)
+    ground_truth_source: str | None = None
+    primary_direction: str | None = None
     primary_metric: str | None = None
     primary_value: float | None = None
     metrics: list[dict[str, Any]] = Field(default_factory=list)
@@ -317,6 +323,12 @@ class EvaluationResultPayload(BaseModel):
     benchmark_version: str
     task_id: str
     model_id: str
+    evaluator_version: str | None = None
+    benchmark_sha256: str | None = None
+    split: str | None = None
+    sample_count: int | None = Field(default=None, ge=0)
+    ground_truth_source: str | None = None
+    primary_direction: str | None = None
     primary_metric: str | None = None
     primary_value: float | None = None
     metrics: list[dict[str, Any]]

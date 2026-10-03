@@ -105,6 +105,14 @@ def test_native_multimodal_workflow_is_end_to_end() -> None:
     assert all(step.status == "ok" for step in run.steps)
     assert run.state.evaluation.primary_metric == "macro_f1"
     assert run.state.evaluation.evaluation_fingerprint
+    assert run.state.evaluation.evaluator_version
+    assert run.state.evaluation.benchmark_sha256 == run.state.benchmark.metadata_sha256
+    assert run.state.evaluation.split == "test"
+    assert run.state.evaluation.sample_count == 2
+    canonical_eval = run.state.cardiac_state.evaluation_artifacts[-1]
+    assert canonical_eval.evaluator_version == run.state.evaluation.evaluator_version
+    history_step = next(step for step in run.steps if step.capability == "benchmark.result.record")
+    assert history_step.data["result"]["source"] == f"CardiEval/{run.state.evaluation.evaluator_version}"
     assert run.state.bridge.transport == "in-process"
     assert run.state.bridge.status in {"processed", "duplicate"}
     assert run.state.bridge.consumer_result is not None

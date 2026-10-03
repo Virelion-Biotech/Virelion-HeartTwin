@@ -471,14 +471,14 @@ def run_multimodal_workflow(
             {
                 "benchmark_id": state.evaluation.benchmark_id,
                 "benchmark_version": state.evaluation.benchmark_version,
-                "benchmark_provenance_sha256": state.benchmark.metadata_sha256,
+                "benchmark_provenance_sha256": state.evaluation.benchmark_sha256 or state.benchmark.metadata_sha256,
                 "model_id": state.evaluation.model_id,
                 "model_version": "unknown",
-                "split": "test",
+                "split": state.evaluation.split or "test",
                 "metrics": state.evaluation.metrics,
-                "sample_count": sum(1 for partition in assignments.values() if partition == "test"),
+                "sample_count": state.evaluation.sample_count or sum(1 for partition in assignments.values() if partition == "test"),
                 "protocol_id": state.evaluation.task_id or "hearttwin-evaluation",
-                "source": "CardiEval",
+                "evaluator_version": state.evaluation.evaluator_version,
             },
         )
         steps.append(benchmark_history_result)

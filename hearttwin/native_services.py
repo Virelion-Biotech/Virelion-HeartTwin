@@ -540,6 +540,10 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     return {
         "contract_version": "1.0", "benchmark_id": benchmark_id, "benchmark_version": version,
         "task_id": task.task_id, "model_id": str(payload.get("model_id", "unknown")),
+        "evaluator_version": report.evaluator_version, "benchmark_sha256": report.benchmark_sha256,
+        "split": report.split, "sample_count": len(test_ids),
+        "ground_truth_source": report.ground_truth_source,
+        "primary_direction": report.primary_direction,
         "primary_metric": report.primary_metric, "primary_value": report.primary_value,
         "metrics": [metric.model_dump(mode="json") for metric in report.metrics],
         "warnings": list(report.warnings), "errors": list(report.errors),

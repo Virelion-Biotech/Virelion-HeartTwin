@@ -879,6 +879,43 @@
           "items": {
             "type": "string"
           }
+        },
+        "evaluator_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "benchmark_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "split": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sample_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "ground_truth_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "primary_direction": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
