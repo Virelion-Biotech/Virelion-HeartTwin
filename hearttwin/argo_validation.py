@@ -18,6 +18,7 @@ from .provenance import sha256
 
 ARGO_VERSION = "1.0.0"
 ARGO_DOI = "10.13026/8gh2-e660"
+ARGO_LICENSE = "CC-BY-NC-SA-4.0"
 _STANDARD_ECG_LEADS = (
     "I",
     "II",
@@ -342,6 +343,7 @@ def load_argo_patient(
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
+        "license": ARGO_LICENSE,
         "patient_id": patient_id,
         "coordinate_unit": "CARTO_native",
         "n_vertices": int(len(vertices)),
@@ -495,6 +497,7 @@ def prepare_argo_empirical_study(
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
+        "license": ARGO_LICENSE,
         "patient_id": patient["patient_id"],
         "seed": int(seed),
         "holdout_fraction": float(holdout_fraction),
@@ -999,6 +1002,7 @@ def prepare_argo_cohort(
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
+        "license": ARGO_LICENSE,
         "holdout_fraction": float(holdout_fraction),
         "seed": int(seed),
         "patients": [
@@ -1139,6 +1143,7 @@ def score_argo_cohort(
         "dataset": manifest.get("dataset"),
         "dataset_version": manifest.get("dataset_version"),
         "doi": manifest.get("doi"),
+        "license": manifest.get("license"),
         "holdout_fraction": manifest.get("holdout_fraction"),
         "seed": manifest.get("seed"),
         "patients": [
@@ -1205,6 +1210,7 @@ def score_argo_cohort(
         "dataset": "ARGO",
         "dataset_version": ARGO_VERSION,
         "doi": ARGO_DOI,
+        "license": ARGO_LICENSE,
         "cohort_sha256": manifest["cohort_sha256"],
         "patient_count": len(reports),
         "primary_weighting": "equal_patient",

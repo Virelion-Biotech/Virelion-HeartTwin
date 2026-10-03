@@ -315,3 +315,13 @@ hearttwin argo-surface-cohort \
 This command does not pool calibration data between patients. It writes one
 prediction manifest and holdout report per patient, then produces the same
 equal-patient cohort aggregate used by `argo-cohort-score`.
+
+
+## Dataset license boundary
+
+ARGO v1.0.0 is distributed under **CC BY-NC-SA 4.0**. HeartTwin records
+`CC-BY-NC-SA-4.0` in generated ARGO patient, split, holdout, and cohort
+provenance. The repository intentionally does not bundle or automatically
+download ARGO and does not decide whether a specific institutional or commercial
+use satisfies the license. The operator is responsible for obtaining the data
+under appropriate terms and documenting the permitted use for the study.
