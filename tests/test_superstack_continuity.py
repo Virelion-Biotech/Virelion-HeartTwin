@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import pytest
 
 from hearttwin import Observation, Provenance, load_registry, run_superstack_workflow
@@ -60,6 +59,8 @@ def _require_full_stack(registry) -> None:
 def test_one_subject_crosses_every_repo_and_is_sealed_once(tmp_path: Path) -> None:
     registry = load_registry()
     _require_full_stack(registry)
+
+    import pandas as pd
 
     geometry = tmp_path / "geometry.json"
     geometry.write_text(
