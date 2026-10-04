@@ -522,18 +522,61 @@ def _cardieval(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
     records = [PredictionRecord.model_validate(pred_by_id[sample_id]) for sample_id in test_ids]
     benchmark_id = str(benchmark["benchmark_id"])
     version = str(benchmark["version"])
+    task_type = str(payload.get("task_type", "binary_classification"))
+    if task_type not in {"binary_classification", "regression"}:
+        raise ValueError(
+            "HeartTwin CardiEval adapter currently supports binary_classification "
+            "and regression tasks"
+        )
+
+    if task_type == "regression":
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in labels.values()):
+            raise ValueError("Regression reference_labels must be numeric")
+        allowed_metrics = ["mae", "rmse"]
+        primary_metric = str(payload.get("primary_metric", "rmse"))
+        if primary_metric not in allowed_metrics:
+            raise ValueError("Regression primary_metric must be 'mae' or 'rmse'")
+        primary_direction = "lower_is_better"
+        default_task_id = "mechanistic-regression"
+        label_schema = {"value": "independent reference"}
+        description = "HeartTwin mechanistic outcome evaluation task"
+    else:
+        allowed_metrics = [
+            "accuracy", "balanced_accuracy", "macro_f1",
+            "auroc", "auprc", "brier", "ece",
+        ]
+        primary_metric = str(payload.get("primary_metric", "macro_f1"))
+        if primary_metric not in allowed_metrics:
+            raise ValueError(
+                "Binary classification primary_metric is not enabled by HeartTwin"
+            )
+        primary_direction = "higher_is_better"
+        default_task_id = "binary-cardiac-state-detection"
+        label_schema = {"0": "reference", "1": "target"}
+        description = "HeartTwin multimodal integration evaluation task"
+
     manifest = BenchmarkManifest(
-        benchmark_id=benchmark_id, version=version, task="binary_classification", split="test",
-        sample_ids=test_ids, dataset_sha256=str(benchmark["metadata_sha256"]),
-        label_schema={"0": "reference", "1": "target"}, metadata={"source": "HeartTwin/CardiBench"},
+        benchmark_id=benchmark_id,
+        version=version,
+        task=task_type,
+        split="test",
+        sample_ids=test_ids,
+        dataset_sha256=str(benchmark["metadata_sha256"]),
+        label_schema=label_schema,
+        metadata={"source": "HeartTwin/CardiBench"},
         authoritative_labels=labels,
     )
     task = BenchmarkTask(
-        benchmark_id=benchmark_id, version=version, task_id=str(payload.get("task_id", "binary-cardiac-state-detection")),
-        task_type="binary_classification", allowed_metrics=["accuracy", "balanced_accuracy", "macro_f1", "auroc", "auprc", "brier", "ece"],
-        primary_metric="macro_f1", primary_direction="higher_is_better", splits=["test"],
+        benchmark_id=benchmark_id,
+        version=version,
+        task_id=str(payload.get("task_id", default_task_id)),
+        task_type=task_type,
+        allowed_metrics=allowed_metrics,
+        primary_metric=primary_metric,
+        primary_direction=primary_direction,
+        splits=["test"],
         requires_authoritative_labels=True,
-        description="HeartTwin multimodal integration evaluation task",
+        description=description,
     )
     report = evaluate_submission(manifest, records, model_id=str(payload.get("model_id", "unknown")), task_contract=task)
     report_json = report.model_dump(mode="json")
