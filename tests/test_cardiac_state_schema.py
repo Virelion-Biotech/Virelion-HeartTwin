@@ -21,10 +21,13 @@ def test_published_cardiac_state_schema_is_valid_and_accepts_runtime_snapshot():
         provenance=Provenance(source_service="fixture", run_id="fixture-1"),
     )
     snapshot = CardiacStateStore.new("entity-1", [observation]).snapshot()
-    errors = sorted(Draft202012Validator(schema).iter_errors(snapshot.model_dump(mode="json")), key=str)
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(snapshot.model_dump(mode="json")),
+        key=str,
+    )
     assert not errors, [error.message for error in errors]
     assert snapshot.contract_version == "1.3.0"
-    assert schema["$id"].endswith("cardiac-state-1.2.0.json")
+    assert schema["$id"].endswith("cardiac-state-1.3.0.json")
 
 
 def test_card_state_default_is_backward_compatible():
