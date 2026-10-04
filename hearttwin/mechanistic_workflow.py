@@ -426,6 +426,7 @@ def run_mechanistic_twin_workflow(
     mech_cfg = dict(mechanics_settings or {})
     mech_cfg.setdefault("output_dir", str(root / "mechanics"))
     mech_cfg["inline_series"] = False
+    mech_cfg["posterior_replay_selection"] = replay_selection
     mechanics_request = {
         "subject_id": entity_id,
         "anatomy_ref": mechanics_anatomy,
@@ -445,10 +446,6 @@ def run_mechanistic_twin_workflow(
         parent_run_ids=[inference_result.provenance.run_id, ep_result.provenance.run_id],
     )
     mechanics_payload = MechanicsResultPayload.model_validate(mechanics_result.data)
-    mechanics_payload.provenance.setdefault(
-        "posterior_replay_selection", replay_selection
-    )
-    mechanics_result.data["provenance"] = mechanics_payload.provenance
     if mechanics_payload.provenance.get("anatomy_bundle_fingerprint") != bundle_fingerprint:
         raise MechanisticWorkflowError("Mechanics anatomy bundle fingerprint was not preserved")
     if mechanics_payload.provenance.get("activation_artifact_id") != activation_ref["artifact_id"]:
