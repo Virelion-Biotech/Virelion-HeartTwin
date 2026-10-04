@@ -15,3 +15,6 @@ matplotlib>=3.8,<4
 plotly>=5,<7
 seaborn>=0.13,<1
 vtk>=9.3,<10
+
+# Required by HeartTwin's native reconstruction path used in the equivalence job.
+pydantic>=2.6,<3
