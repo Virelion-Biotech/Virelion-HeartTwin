@@ -12,6 +12,7 @@ import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlparse
 
 from .contracts import (
     AnatomyBundlePayload,
@@ -127,22 +128,103 @@ def _one_anatomy_artifact(
     )
 
 
+def _apply_flat_parameters(
+    parameters: dict[str, Any],
+    values: dict[str, Any],
+) -> dict[str, Any]:
+    calibrated = deepcopy(parameters)
+    for name, raw_value in values.items():
+        parts = str(name).split(".")
+        if len(parts) != 2 or parts[0] not in {"passive", "active"}:
+            continue
+        calibrated.setdefault(parts[0], {})[parts[1]] = float(raw_value)
+    calibrated["source"] = "calibrated"
+    return calibrated
+
+
 def _apply_posterior_means(
     parameters: dict[str, Any],
     posterior: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    calibrated = deepcopy(parameters)
-    for item in posterior:
-        name = str(item.get("parameter", ""))
-        mean = item.get("mean")
-        if not name or mean is None:
-            continue
-        parts = name.split(".")
-        if len(parts) != 2 or parts[0] not in {"passive", "active"}:
-            continue
-        calibrated.setdefault(parts[0], {})[parts[1]] = float(mean)
-    calibrated["source"] = "calibrated"
-    return calibrated
+    values = {
+        str(item.get("parameter", "")): item["mean"]
+        for item in posterior
+        if item.get("parameter") and item.get("mean") is not None
+    }
+    return _apply_flat_parameters(parameters, values)
+
+
+def _posterior_sample_path(artifact: dict[str, Any]) -> Path:
+    parsed = urlparse(str(artifact["uri"]))
+    if parsed.scheme not in {"", "file"}:
+        raise MechanisticWorkflowError(
+            "Mechanistic replay requires a local/file posterior-samples artifact"
+        )
+    raw = unquote(parsed.path) if parsed.scheme == "file" else str(artifact["uri"])
+    path = Path(raw).expanduser().resolve()
+    if not path.is_file():
+        raise MechanisticWorkflowError(f"Posterior-samples artifact is missing: {path}")
+    expected = artifact.get("sha256")
+    if expected is not None:
+        observed = hashlib.sha256(path.read_bytes()).hexdigest()
+        if observed.lower() != str(expected).lower():
+            raise MechanisticWorkflowError(
+                "Posterior-samples artifact failed SHA-256 verification"
+            )
+    return path
+
+
+def _replay_parameters(
+    parameters: dict[str, Any],
+    inference: InferenceResultPayload,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Choose an actually evaluated posterior point for forward replay.
+
+    Marginal posterior means are not guaranteed to form a jointly supported
+    parameter vector. When weighted posterior samples are available, replay the
+    accepted sample with the lowest recorded objective. MAP-only backends fall
+    back to their point summaries.
+    """
+    artifact = inference.posterior_samples
+    if artifact is None:
+        return (
+            _apply_posterior_means(parameters, inference.posterior),
+            {"selection": "posterior_summary_fallback"},
+        )
+
+    path = _posterior_sample_path(artifact)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    samples = payload.get("samples")
+    if not isinstance(samples, list) or not samples:
+        raise MechanisticWorkflowError(
+            "Posterior-samples artifact does not contain accepted samples"
+        )
+    valid = [
+        item
+        for item in samples
+        if isinstance(item, dict)
+        and isinstance(item.get("parameters"), dict)
+        and item.get("objective") is not None
+    ]
+    if not valid:
+        raise MechanisticWorkflowError(
+            "Posterior-samples artifact has no replayable parameter vectors"
+        )
+    selected = min(valid, key=lambda item: float(item["objective"]))
+    return (
+        _apply_flat_parameters(parameters, selected["parameters"]),
+        {
+            "selection": "accepted_posterior_sample",
+            "objective": float(selected["objective"]),
+            "weight": (
+                None
+                if selected.get("weight") is None
+                else float(selected["weight"])
+            ),
+            "posterior_artifact_id": artifact.get("artifact_id"),
+            "posterior_sha256": artifact.get("sha256"),
+        },
+    )
 
 
 def _write_state_artifact(
@@ -337,9 +419,9 @@ def run_mechanistic_twin_workflow(
     store.reduce_service_result(inference_result)
     steps.append(inference_result)
 
-    calibrated_parameters = _apply_posterior_means(
+    calibrated_parameters, replay_selection = _replay_parameters(
         mechanics_parameters,
-        inference_payload.posterior,
+        inference_payload,
     )
     mech_cfg = dict(mechanics_settings or {})
     mech_cfg.setdefault("output_dir", str(root / "mechanics"))
@@ -363,6 +445,10 @@ def run_mechanistic_twin_workflow(
         parent_run_ids=[inference_result.provenance.run_id, ep_result.provenance.run_id],
     )
     mechanics_payload = MechanicsResultPayload.model_validate(mechanics_result.data)
+    mechanics_payload.provenance.setdefault(
+        "posterior_replay_selection", replay_selection
+    )
+    mechanics_result.data["provenance"] = mechanics_payload.provenance
     if mechanics_payload.provenance.get("anatomy_bundle_fingerprint") != bundle_fingerprint:
         raise MechanisticWorkflowError("Mechanics anatomy bundle fingerprint was not preserved")
     if mechanics_payload.provenance.get("activation_artifact_id") != activation_ref["artifact_id"]:
