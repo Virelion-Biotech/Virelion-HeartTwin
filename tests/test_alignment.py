@@ -99,7 +99,7 @@ def test_observation_alignment_fields_roundtrip_through_canonical_schema() -> No
     snapshot = CardiacStateStore.new("S1", [observation]).snapshot()
     payload = snapshot.model_dump(mode="json")
     schema = json.loads(
-        (Path(__file__).parents[1] / "schemas" / "cardiac-state-1.2.0.schema.json")
+        (Path(__file__).parents[1] / "schemas" / "cardiac-state-1.3.0.schema.json")
         .read_text(encoding="utf-8")
     )
     jsonschema.validate(payload, schema)
