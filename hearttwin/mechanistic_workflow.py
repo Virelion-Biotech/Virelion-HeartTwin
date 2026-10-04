@@ -273,8 +273,8 @@ def run_mechanistic_twin_workflow(
     flow_settings: dict[str, Any] | None = None,
     therapy_backend: str,
     therapy_plan: dict[str, Any],
-    therapy_settings: dict[str, Any] | None = None,
     evaluation_reference_outcomes: dict[str, float],
+    therapy_settings: dict[str, Any] | None = None,
     evaluation_primary_metric: str = "rmse",
     workdir: str | Path = "hearttwin-mechanistic-run",
 ) -> WorkflowRun:
