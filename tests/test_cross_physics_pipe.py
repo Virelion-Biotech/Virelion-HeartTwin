@@ -167,7 +167,7 @@ def test_native_flow_and_pacing_results_survive_canonical_state_pipe(
     payload = snapshot.model_dump(mode="json")
     json.dumps(payload, allow_nan=False)
     schema = json.loads(
-        (Path(__file__).parents[1] / "schemas" / "cardiac-state-1.2.0.schema.json")
+        (Path(__file__).parents[1] / "schemas" / "cardiac-state-1.3.0.schema.json")
         .read_text(encoding="utf-8")
     )
     jsonschema.validate(payload, schema)
