@@ -23,6 +23,7 @@ from .provenance import sha256
 from .service_registry import ServiceRegistry, ServiceSpec
 from .workflow import run_multimodal_workflow
 from .mechanistic_workflow import run_mechanistic_twin_workflow
+from .superstack import run_superstack_workflow
 
 
 CANARY = "HEARTTWIN-OPERATIONAL-REHEARSAL"
@@ -284,6 +285,59 @@ def _write_mechanistic_fixture(root: Path, entity_id: str) -> dict[str, Any]:
         json.dumps({"values": [125.0]}) + "\n",
         encoding="utf-8",
     )
+
+    ep_geometry = root / "ep_geometry.json"
+    ep_geometry.write_text(
+        json.dumps(
+            {
+                "units": "cm",
+                "node_xyz": [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                ],
+                "tetrahedra": [[0, 1, 2, 3]],
+                "fibre": [[1.0, 0.0, 0.0]] * 4,
+                "sheet": [[0.0, 1.0, 0.0]] * 4,
+                "normal": [[0.0, 0.0, 1.0]] * 4,
+                "root_nodes": [0],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    ep_geometry_sha = _file_sha256(ep_geometry)
+    activation = root / "activation.json"
+    activation.write_text(
+        json.dumps({"values_ms": [0.0, 10.0, 20.0, 40.0]}) + "\n",
+        encoding="utf-8",
+    )
+
+    super_common = {
+        "uri": ep_geometry.resolve().as_uri(),
+        "sha256": ep_geometry_sha,
+        "subject_id": entity_id,
+        "study_id": f"{entity_id}-SUPER-STUDY",
+        "acquisition_id": f"{entity_id}-SUPER-ACQ",
+        "producer": "hearttwin.operational_rehearsal.superstack",
+        "metadata": {"synthetic_integration_fixture": True},
+    }
+    super_bundle = AnatomyBundle(
+        subject_id=entity_id,
+        study_id=f"{entity_id}-SUPER-STUDY",
+        acquisition_id=f"{entity_id}-SUPER-ACQ",
+        artifacts=[
+            {"artifact_id": "super-surface", "kind": "surface_mesh", **super_common},
+            {"artifact_id": "super-volume", "kind": "volume_mesh", **super_common},
+            {"artifact_id": "super-coordinates", "kind": "coordinate_field", **super_common},
+            {"artifact_id": "super-fibres", "kind": "fiber_field", **super_common},
+        ],
+        qc={"passed": True, "checks": {"superstack_fixture": True}},
+        provenance={"scope": "distributed superstack rehearsal"},
+    )
+    super_bundle.bundle_fingerprint = bundle_fingerprint(super_bundle)
+
     return {
         "surface": surface,
         "surface_sha256": source_sha,
@@ -291,6 +345,12 @@ def _write_mechanistic_fixture(root: Path, entity_id: str) -> dict[str, Any]:
         "edv_sha256": _file_sha256(observation),
         "bundle": bundle.model_dump(mode="json"),
         "bundle_fingerprint": bundle.bundle_fingerprint,
+        "ep_geometry": ep_geometry,
+        "ep_geometry_sha256": ep_geometry_sha,
+        "activation": activation,
+        "activation_sha256": _file_sha256(activation),
+        "superstack_bundle": super_bundle.model_dump(mode="json"),
+        "superstack_bundle_fingerprint": super_bundle.bundle_fingerprint,
     }
 
 
@@ -1444,6 +1504,304 @@ def run_operational_rehearsal(
                 f"Distributed specialist modalities were incomplete: {modalities}"
             )
 
+        calibration_observation = Observation(
+            observation_id=f"obs-{case_id}-ep-calibration",
+            modality="electrical",
+            values={
+                "input_path": str(mechanistic_fixture["activation"]),
+                "observation_kind": "activation_map",
+                "coordinate_frame": "ep_geometry",
+                "units": "ms",
+                "discrepancy": "rmse",
+                "specialist_analysis": False,
+            },
+            provenance=Provenance(
+                source_service="hearttwin-operational-rehearsal",
+                source_repository="Virelion-Biotech/Virelion-HeartTwin",
+                run_id=f"rehearsal-{case_id}-ep-calibration",
+            ),
+        )
+        superstack_observations = [*observations, calibration_observation]
+
+        def execute_superstack_workflow() -> dict[str, Any]:
+            run = run_superstack_workflow(
+                distributed,
+                entity_id=case_id,
+                observations=superstack_observations,
+                multimodal={
+                    "benchmark_samples": [
+                        {
+                            "sample_id": row["sample_id"],
+                            "group_id": row["group_id"],
+                            "study_id": row["study_id"],
+                            "label": row["label"],
+                            "region": "IZ" if row["target"] else "remote",
+                        }
+                        for row in rows
+                    ],
+                    "learning_data": rows,
+                    "feature_columns": ["gene_a", "gene_b"],
+                    "reference_labels": {
+                        row["sample_id"]: row["target"]
+                        for row in rows
+                    },
+                    "benchmark_validation_values": [
+                        rows[-4]["group_id"],
+                        rows[-3]["group_id"],
+                    ],
+                    "benchmark_test_values": [
+                        rows[-2]["group_id"],
+                        rows[-1]["group_id"],
+                    ],
+                    "simulation": dict(simulation_config),
+                    "seed": workflow_seed,
+                },
+                cardistudio={
+                    "factors": {"condition": ["sham", "MI"]},
+                    "replicates": 1,
+                    "seed": workflow_seed,
+                    "benchmark_factor": "condition",
+                },
+                dccp={
+                    "module_scores": {"structural_injury": 0.35},
+                    "challenge_axis": "structural_injury",
+                },
+                ep_calibration={
+                    "observation_id": calibration_observation.observation_id,
+                    "anatomy_ref": {
+                        "artifact_id": "super-ep-geometry",
+                        "kind": "ep_geometry",
+                        "uri": mechanistic_fixture["ep_geometry"].resolve().as_uri(),
+                        "sha256": mechanistic_fixture["ep_geometry_sha256"],
+                    },
+                    "priors": [
+                        {
+                            "name": "fibre_speed",
+                            "distribution": "uniform",
+                            "bounds": [0.05, 0.15],
+                            "unit": "cm/ms",
+                        }
+                    ],
+                    "inference_backend": "native-abc-smc-v1",
+                    "ep_backend": "numpy-eikonal-v1",
+                    "ep_settings": {"root_nodes": [0]},
+                    "fixed_parameters": {
+                        "sheet_speed": 0.05,
+                        "normal_speed": 0.025,
+                        "apd_ms": 280.0,
+                    },
+                    "sampler_settings": {
+                        "n_particles": 8,
+                        "n_generations": 1,
+                        "initial_oversample": 2,
+                        "output_dir": str(root / "superstack-ep-inference"),
+                    },
+                    "seed": 19,
+                    "parameter_map": {"fibre_speed": "fibre_speed"},
+                },
+                mechanistic={
+                    "anatomy_bundle": mechanistic_fixture["superstack_bundle"],
+                    "ep_backend": "numpy-eikonal-v1",
+                    "ep_parameters": {
+                        "fibre_speed": 0.1,
+                        "sheet_speed": 0.05,
+                        "normal_speed": 0.025,
+                        "apd_ms": 280.0,
+                    },
+                    "ep_parameter_units": {
+                        "fibre_speed": "cm/ms",
+                        "sheet_speed": "cm/ms",
+                        "normal_speed": "cm/ms",
+                        "apd_ms": "ms",
+                    },
+                    "ep_settings": {"root_nodes": [0]},
+                    "mechanics_backend": "numpy-lumped-v1",
+                    "mechanics_parameters": {
+                        "passive": {
+                            "v0_ml": 10.0,
+                            "a_mmHg": 0.08,
+                            "b": 0.055,
+                        },
+                        "active": {"emax_mmHg_per_ml": 2.1},
+                        "units": {
+                            "passive.a_mmHg": "mmHg",
+                            "active.emax_mmHg_per_ml": "mmHg/mL",
+                        },
+                        "source": "prior",
+                    },
+                    "mechanics_calibration": {
+                        "observations": [
+                            {
+                                "observation_id": "edv-superstack",
+                                "kind": "end_diastolic_volume",
+                                "artifact": {
+                                    "artifact_id": "edv-superstack-observation",
+                                    "kind": "scalar",
+                                    "uri": mechanistic_fixture["edv"].resolve().as_uri(),
+                                    "sha256": mechanistic_fixture["edv_sha256"],
+                                },
+                                "unit": "mL",
+                            }
+                        ],
+                        "parameter_bounds": {
+                            "passive.a_mmHg": [0.06, 0.10],
+                            "active.emax_mmHg_per_ml": [1.8, 2.4],
+                        },
+                        "circulation": {
+                            "enabled": True,
+                            "model": "windkessel_3e",
+                            "parameters": {},
+                        },
+                        "settings": {
+                            "discrepancy": "rmse",
+                            "inference_backend": "native-abc-smc-v1",
+                            "sampler_settings": {
+                                "n_particles": 8,
+                                "n_generations": 1,
+                                "initial_oversample": 2,
+                            },
+                            "seed": 20261004,
+                        },
+                    },
+                    "mechanics_settings": {"cycles": 4, "dt_s": 0.001},
+                    "flow_backend": "windkessel-3element-v1",
+                    "flow_fluid": {
+                        "density": 1060.0,
+                        "dynamic_viscosity": 0.0035,
+                    },
+                    "flow_boundary_conditions": [
+                        {
+                            "boundary_id": "afterload",
+                            "kind": "windkessel",
+                            "region": "aorta",
+                            "parameters": {
+                                "proximal_resistance": 1.0,
+                                "distal_resistance": 4.0,
+                                "compliance": 0.5,
+                            },
+                        }
+                    ],
+                    "therapy_backend": "cardiep-pacing-v1",
+                    "therapy_plan": {
+                        "plan_id": "superstack-pace",
+                        "arms": [
+                            {
+                                "arm_id": "control",
+                                "label": "Baseline",
+                                "is_comparator": True,
+                            },
+                            {
+                                "arm_id": "paced",
+                                "label": "Alternative root",
+                                "interventions": [
+                                    {
+                                        "intervention_id": "superstack-pace-1",
+                                        "kind": "pacing",
+                                        "target": "root node 1",
+                                        "parameters": {"root_nodes": [1]},
+                                        "model_service": "CardiEP",
+                                        "model_capability": "ep.simulate",
+                                    }
+                                ],
+                            },
+                        ],
+                        "endpoints": ["activation_span_ms"],
+                    },
+                    "evaluation_reference_outcomes": {
+                        "control:activation_span_ms": 15.0,
+                        "paced:activation_span_ms": 15.0,
+                    },
+                    "workdir": root / "distributed-superstack-mechanistic",
+                },
+            )
+            return run.model_dump(mode="json")
+
+        superstack_payload = {
+            "entity_id": case_id,
+            "rows_sha256": sha256(rows),
+            "superstack_bundle_fingerprint": mechanistic_fixture[
+                "superstack_bundle_fingerprint"
+            ],
+            "ep_geometry_sha256": mechanistic_fixture["ep_geometry_sha256"],
+            "activation_sha256": mechanistic_fixture["activation_sha256"],
+            "workflow_seed": workflow_seed,
+        }
+        distributed_superstack, superstack_reused = journal.run_stage(
+            case_id,
+            "distributed-superstack",
+            superstack_payload,
+            execute_superstack_workflow,
+            max_attempts=2,
+        )
+        if superstack_reused:
+            raise RuntimeError(
+                "First distributed superstack execution was unexpectedly cached"
+            )
+        super_state = distributed_superstack["state"]["cardiac_state"]
+        expected_services = {
+            "CardiAnatomy",
+            "CardiAtlas",
+            "CardiBench",
+            "CardiEval",
+            "CardiFlow",
+            "CardiLearn",
+            "CardiEP",
+            "CardiMech",
+            "CardiInfer",
+            "CardiSim",
+            "CardiTherapy",
+            "CardiTrace",
+            "CardiBridge",
+            "CardiAgent",
+            "CardiVex",
+            "CardiStudio",
+            "DCCP",
+            "ElectroTrace",
+            "MyoTrace",
+            "OptiCell",
+            "CardioScore",
+        }
+        observed_services = set(
+            super_state.get("biological_context", {})
+            .get("superstack", {})
+            .get("service_contributions", [])
+        )
+        if observed_services != expected_services:
+            raise RuntimeError(
+                "Distributed superstack service continuity mismatch: "
+                f"missing={sorted(expected_services - observed_services)}, "
+                f"extra={sorted(observed_services - expected_services)}"
+            )
+        if not super_state.get("state_fingerprint"):
+            raise RuntimeError("Distributed superstack has no canonical fingerprint")
+        if not super_state.get("anatomy_bundles"):
+            raise RuntimeError("Distributed superstack lost anatomy")
+        for collection in (
+            "modality_analyses",
+            "benchmarks",
+            "prediction_artifacts",
+            "simulation_artifacts",
+            "ep_artifacts",
+            "posterior_artifacts",
+            "mechanics_artifacts",
+            "flow_artifacts",
+            "therapy_artifacts",
+            "challenges",
+            "vex_observations",
+            "bridge_publications",
+            "evaluation_artifacts",
+            "trace_records",
+        ):
+            if not super_state.get(collection):
+                raise RuntimeError(
+                    f"Distributed superstack lost canonical collection {collection}"
+                )
+        super_trace = distributed_superstack["state"].get("trace") or {}
+        if super_trace.get("canonical_state_verified") is not True:
+            raise RuntimeError(
+                "Distributed superstack trace did not verify the canonical state"
+            )
+
         replay_result, replay_reused = journal.run_stage(
             case_id,
             "distributed-workflow",
@@ -1492,6 +1850,12 @@ def run_operational_rehearsal(
             "mechanistic_trace_verified": (
                 mech_trace.get("canonical_state_verified") is True
             ),
+            "distributed_superstack": True,
+            "superstack_state_fingerprint": super_state["state_fingerprint"],
+            "superstack_trace_verified": (
+                super_trace.get("canonical_state_verified") is True
+            ),
+            "superstack_service_count": len(observed_services),
             "output_artifact": repaired.model_dump(),
             "timeout_observed": timeout_observed,
             "worker_restart_recovered": True,
