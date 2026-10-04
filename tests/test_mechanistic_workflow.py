@@ -284,8 +284,10 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
 
     assert ep_artifact.anatomy_bundle_fingerprint
     assert (
-        mechanics_artifact.anatomy_bundle_fingerprint
+        state.anatomy_bundles[0].bundle_fingerprint
         == ep_artifact.anatomy_bundle_fingerprint
+        == mechanics_artifact.anatomy_bundle_fingerprint
+        == flow_artifact.anatomy_bundle_fingerprint
     )
     assert mechanics_artifact.activation_artifact_id == activation["artifact_id"]
     assert mechanics_artifact.activation_sha256 == activation["sha256"]
@@ -298,6 +300,7 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
     )
     assert run.state.flow is not None
     assert run.state.flow.provenance["coupling_mode"] == "mechanics_aortic_flow"
+    assert flow_artifact.coupling_mode == "mechanics_aortic_flow"
     assert flow_artifact.mechanics_artifact_id == mechanics_timeseries["artifact_id"]
     assert flow_artifact.mechanics_sha256 == mechanics_timeseries["sha256"]
     assert (
@@ -308,6 +311,7 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
     assert run.state.inference is not None
     assert therapy_artifact.twin_state_artifact_id == f"{subject}-cardiac-state"
     assert therapy_artifact.twin_state_sha256
+    assert therapy_artifact.twin_state_fingerprint
     assert therapy_artifact.posterior_artifact_id is not None
     assert (
         therapy_artifact.posterior_sha256
