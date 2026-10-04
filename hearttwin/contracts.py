@@ -167,6 +167,10 @@ class FlowArtifact(BaseModel):
     series_outputs: dict[str, list[float]] = Field(default_factory=dict)
     qc: dict[str, Any] | None = None
     validation_status: str = "unvalidated"
+    anatomy_artifact_id: str | None = None
+    anatomy_bundle_fingerprint: str | None = None
+    mechanics_artifact_id: str | None = None
+    mechanics_sha256: str | None = None
     provenance_ids: list[str] = Field(default_factory=list)
 
 
@@ -180,6 +184,10 @@ class TherapyArtifact(BaseModel):
     artifacts: list[dict[str, Any]] = Field(default_factory=list)
     validation_status: str = "unvalidated"
     warnings: list[str] = Field(default_factory=list)
+    twin_state_artifact_id: str | None = None
+    twin_state_sha256: str | None = None
+    posterior_artifact_id: str | None = None
+    posterior_sha256: str | None = None
     provenance_ids: list[str] = Field(default_factory=list)
 
 
