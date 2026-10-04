@@ -18,6 +18,8 @@ from .contracts import (
     FlowResultPayload,
     LearningResultPayload,
     InferenceResultPayload,
+    MechanicsArtifact,
+    MechanicsResultPayload,
     ModalityAnalysisPayload,
     Observation,
     PredictionArtifact,
