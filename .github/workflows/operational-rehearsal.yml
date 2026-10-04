@@ -27,6 +27,7 @@ on:
       - "configs/services.yaml"
       - "tests/test_native_service_connections.py"
       - "tests/test_mechanistic_pipe.py"
+      - "tests/test_mechanistic_workflow.py"
       - "tests/test_cross_physics_pipe.py"
       - "tests/test_cardiac_state.py"
       - "tests/test_cardiac_state_schema.py"
