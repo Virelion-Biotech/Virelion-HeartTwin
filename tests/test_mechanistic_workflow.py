@@ -218,7 +218,7 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
         mechanics_calibration=mechanics_calibration,
         mechanics_settings={
             "cycles": 4,
-            "dt_s": 0.002,
+            "dt_s": 0.001,
             "cycle_length_s": 0.8,
         },
         flow_backend="windkessel-3element-v1",
@@ -330,10 +330,10 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
     )
     prepared_settings = prepared_step.data["model_context"]["cardimech_request"]["settings"]
     assert prepared_settings["cycles"] == 4
-    assert prepared_settings["dt_s"] == pytest.approx(0.002)
+    assert prepared_settings["dt_s"] == pytest.approx(0.001)
     assert prepared_settings["cycle_length_s"] == pytest.approx(0.8)
     assert run.state.mechanics.provenance["settings"]["cycles"] == 4
-    assert run.state.mechanics.provenance["settings"]["dt_s"] == pytest.approx(0.002)
+    assert run.state.mechanics.provenance["settings"]["dt_s"] == pytest.approx(0.001)
     assert run.state.mechanics.provenance["settings"]["cycle_length_s"] == pytest.approx(0.8)
 
     payload = state.model_dump(mode="json")
