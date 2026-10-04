@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ from urllib.parse import unquote, urlparse
 from .contracts import (
     AnatomyBundlePayload,
     EPResultPayload,
+    EvaluationResultPayload,
     FlowResultPayload,
     InferenceResultPayload,
     MechanicsResultPayload,
@@ -272,6 +274,8 @@ def run_mechanistic_twin_workflow(
     therapy_backend: str,
     therapy_plan: dict[str, Any],
     therapy_settings: dict[str, Any] | None = None,
+    evaluation_reference_outcomes: dict[str, float],
+    evaluation_primary_metric: str = "rmse",
     workdir: str | Path = "hearttwin-mechanistic-run",
 ) -> WorkflowRun:
     if (anatomy_bundle is None) == (anatomy_request is None):
@@ -511,6 +515,12 @@ def run_mechanistic_twin_workflow(
         provenance=flow_result.provenance,
     )
 
+    store.transition(
+        "intervention",
+        trigger="CardiTherapy:therapy.run",
+        provenance=flow_result.provenance,
+        details={"plan_id": str(therapy_plan.get("plan_id", ""))},
+    )
     pretherapy_state = store.snapshot()
     state_ref = _write_state_artifact(
         root / "state",
@@ -558,6 +568,108 @@ def run_mechanistic_twin_workflow(
         raise MechanisticWorkflowError("Therapy did not preserve the posterior hash")
     store.reduce_service_result(therapy_result)
     steps.append(therapy_result)
+    store.transition(
+        "post_intervention",
+        trigger="CardiTherapy:therapy.run",
+        provenance=therapy_result.provenance,
+        details={"plan_id": therapy_payload.plan_id},
+    )
+
+    predictions: list[dict[str, Any]] = []
+    for outcome in therapy_payload.outcomes:
+        value = outcome.get("value")
+        if value is None:
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise MechanisticWorkflowError(
+                "Mechanistic evaluation supports scalar numeric therapy outcomes only"
+            )
+        numeric = float(value)
+        if not math.isfinite(numeric):
+            raise MechanisticWorkflowError(
+                "Mechanistic therapy outcome contains a non-finite value"
+            )
+        sample_id = f"{outcome['arm_id']}:{outcome['endpoint']}"
+        predictions.append({"sample_id": sample_id, "y_pred": numeric})
+
+    prediction_ids = [item["sample_id"] for item in predictions]
+    if not prediction_ids or len(prediction_ids) != len(set(prediction_ids)):
+        raise MechanisticWorkflowError(
+            "Therapy outcomes must provide unique scalar arm:endpoint values for evaluation"
+        )
+    reference = {
+        str(key): float(value)
+        for key, value in evaluation_reference_outcomes.items()
+    }
+    if any(not math.isfinite(value) for value in reference.values()):
+        raise MechanisticWorkflowError(
+            "Mechanistic evaluation reference outcomes must be finite"
+        )
+    if set(reference) != set(prediction_ids):
+        missing = sorted(set(prediction_ids) - set(reference))
+        extra = sorted(set(reference) - set(prediction_ids))
+        raise MechanisticWorkflowError(
+            "Mechanistic evaluation references must exactly match therapy outcomes; "
+            f"missing={missing}, extra={extra}"
+        )
+
+    evaluation_benchmark = {
+        "benchmark_id": "hearttwin-mechanistic-therapy",
+        "version": "1.0",
+        "assignments": {sample_id: "test" for sample_id in prediction_ids},
+        "metadata_sha256": sha256(
+            {
+                "reference_outcomes": reference,
+                "therapy_plan_id": therapy_payload.plan_id,
+            }
+        ),
+    }
+    evaluation_result = _call(
+        registry,
+        "evaluation.run",
+        entity_id,
+        {
+            "benchmark": evaluation_benchmark,
+            "predictions": predictions,
+            "reference_labels": reference,
+            "model_id": f"{therapy_payload.backend}:{therapy_payload.plan_id}",
+            "task_id": "mechanistic-therapy-outcomes",
+            "task_type": "regression",
+            "primary_metric": evaluation_primary_metric,
+        },
+        parent_run_ids=[evaluation_result.provenance.run_id],
+    )
+    evaluation_payload = EvaluationResultPayload.model_validate(
+        evaluation_result.data
+    )
+    if evaluation_payload.ground_truth_source != "benchmark_manifest":
+        raise MechanisticWorkflowError(
+            "Mechanistic evaluation did not use evaluator-controlled reference outcomes"
+        )
+    store.reduce_service_result(evaluation_result)
+    steps.append(evaluation_result)
+    store.record_validation_gate(
+        ValidationGateArtifact(
+            gate_id=f"mechanistic-e2e-{run_id[:16]}",
+            policy_id="hearttwin.mechanistic-e2e.v1",
+            evidence_level="numerical_verification",
+            passed=True,
+            criteria=[
+                {"name": "therapy_state_hash", "passed": True},
+                {
+                    "name": "independent_regression_evaluation",
+                    "passed": True,
+                    "primary_metric": evaluation_payload.primary_metric,
+                    "primary_value": evaluation_payload.primary_value,
+                },
+            ],
+            evidence_ids=[
+                state_ref["artifact_id"],
+                evaluation_payload.evaluation_fingerprint or "",
+            ],
+        ),
+        provenance=evaluation_result.provenance,
+    )
 
     traced_state = store.snapshot()
     trace_result = _call(
@@ -603,6 +715,7 @@ def run_mechanistic_twin_workflow(
             mechanics=mechanics_payload,
             flow=flow_payload,
             therapy=therapy_payload,
+            evaluation=evaluation_payload,
             trace=trace_result.data,
         ),
         steps=steps,
