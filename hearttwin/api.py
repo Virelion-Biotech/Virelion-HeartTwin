@@ -6,6 +6,7 @@ from .contracts import Observation
 from .orchestrator import HeartTwin
 from .service_registry import ServiceRegistry
 from .workflow import run_multimodal_workflow
+from .mechanistic_workflow import run_mechanistic_twin_workflow
 
 
 class VirelionServices:
@@ -46,6 +47,14 @@ class VirelionServices:
             self.registry,
             entity_id=entity_id,
             observations=observations,
+            **kwargs,
+        )
+
+    def run_mechanistic(self, entity_id: str, **kwargs: Any):
+        """Run the explicit Anatomy→EP→Infer→Mech→Flow→Therapy→Eval→Trace pipe."""
+        return run_mechanistic_twin_workflow(
+            self.registry,
+            entity_id=entity_id,
             **kwargs,
         )
 
