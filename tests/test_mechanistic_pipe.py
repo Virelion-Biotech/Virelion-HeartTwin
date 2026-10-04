@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 
@@ -155,10 +156,10 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
                     "label": "Alternative root",
                     "interventions": [
                         {
-                            "intervention_id": "pace-2",
+                            "intervention_id": "pace-1",
                             "kind": "pacing",
-                            "target": "surface vertex 2",
-                            "parameters": {"root_node": 2},
+                            "target": "surface vertex 1",
+                            "parameters": {"root_node": 1},
                             "model_service": "CardiEP",
                             "model_capability": "ep.simulate",
                         }
@@ -166,6 +167,10 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
                 },
             ],
             "endpoints": ["activation_span_ms"],
+        },
+        evaluation_reference_outcomes={
+            "control:activation_span_ms": math.sqrt(2.0) / 0.1,
+            "paced:activation_span_ms": 2.0 / 0.1,
         },
         workdir=tmp_path / "run",
     )
@@ -178,6 +183,8 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
     assert len(state.mechanics_artifacts) == 1
     assert len(state.flow_artifacts) == 1
     assert len(state.therapy_artifacts) == 1
+    assert len(state.evaluation_artifacts) == 1
+    assert state.state_phase == "evaluated"
     assert state.validation_gates[-1].passed is True
     assert state.trace_records
     assert (
@@ -199,4 +206,8 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
     assert run.state.therapy.provenance["posterior_sha256"] == (
         state.posterior_artifacts[0].posterior_samples["sha256"]
     )
+    assert run.state.evaluation is not None
+    assert run.state.evaluation.ground_truth_source == "benchmark_manifest"
+    assert run.state.evaluation.primary_metric == "rmse"
+    assert run.state.evaluation.primary_value == pytest.approx(0.0, abs=1e-10)
     json.dumps(state.model_dump(mode="json"), allow_nan=False)
