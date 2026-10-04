@@ -1281,6 +1281,12 @@
             "null"
           ],
           "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "coupling_mode": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
@@ -1359,6 +1365,12 @@
             "null"
           ],
           "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "twin_state_fingerprint": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

@@ -95,12 +95,15 @@ def _service_ref(artifact: dict[str, Any], bundle_fingerprint: str) -> dict[str,
 
 
 def _therapy_ref(artifact: dict[str, Any]) -> dict[str, Any]:
+    metadata = dict(artifact.get("metadata") or {})
+    if artifact.get("coordinate_frame") is not None:
+        metadata.setdefault("coordinate_frame", str(artifact["coordinate_frame"]))
     return {
         "artifact_id": str(artifact["artifact_id"]),
         "kind": str(artifact["kind"]),
         "uri": str(artifact["uri"]),
         "sha256": artifact.get("sha256"),
-        "metadata": dict(artifact.get("metadata") or {}),
+        "metadata": metadata,
     }
 
 
@@ -324,12 +327,24 @@ def run_mechanistic_twin_workflow(
             parent_run_ids=[run_id],
             content_sha256=sha256(bundle.model_dump(mode="json")),
         )
+        if bundle.bundle_fingerprint is None:
+            bundle = bundle.model_copy(
+                update={
+                    "bundle_fingerprint": sha256(
+                        bundle.model_dump(
+                            mode="json",
+                            exclude={"bundle_fingerprint"},
+                        )
+                    )
+                }
+            )
         store.record_anatomy(bundle, input_prov)
 
-    bundle_fingerprint = (
-        bundle.bundle_fingerprint
-        or sha256(bundle.model_dump(mode="json", exclude={"bundle_fingerprint"}))
-    )
+    bundle_fingerprint = bundle.bundle_fingerprint
+    if bundle_fingerprint is None:
+        raise MechanisticWorkflowError(
+            "Anatomy bundle reached the mechanistic pipe without a fingerprint"
+        )
 
     for target in ("ep", "mechanics", "flow"):
         readiness = _call(

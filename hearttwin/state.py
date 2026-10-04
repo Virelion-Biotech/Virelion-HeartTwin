@@ -259,6 +259,7 @@ class CardiacStateStore:
             ),
             mechanics_artifact_id=payload.provenance.get("mechanics_artifact_id"),
             mechanics_sha256=payload.provenance.get("mechanics_sha256"),
+            coupling_mode=payload.provenance.get("coupling_mode"),
             provenance_ids=self._add_provenance(provenance),
         )
         self._append_unique(self.state.flow_artifacts, artifact, "flow_id", artifact_id)
@@ -279,6 +280,7 @@ class CardiacStateStore:
             warnings=payload.warnings,
             twin_state_artifact_id=payload.provenance.get("twin_state_artifact_id"),
             twin_state_sha256=payload.provenance.get("twin_state_sha256"),
+            twin_state_fingerprint=payload.provenance.get("twin_state_fingerprint"),
             posterior_artifact_id=payload.provenance.get("posterior_artifact_id"),
             posterior_sha256=payload.provenance.get("posterior_sha256"),
             provenance_ids=self._add_provenance(provenance),

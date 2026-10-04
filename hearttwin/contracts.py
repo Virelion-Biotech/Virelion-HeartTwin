@@ -171,6 +171,7 @@ class FlowArtifact(BaseModel):
     anatomy_bundle_fingerprint: str | None = None
     mechanics_artifact_id: str | None = None
     mechanics_sha256: str | None = None
+    coupling_mode: str | None = None
     provenance_ids: list[str] = Field(default_factory=list)
 
 
@@ -186,6 +187,7 @@ class TherapyArtifact(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     twin_state_artifact_id: str | None = None
     twin_state_sha256: str | None = None
+    twin_state_fingerprint: str | None = None
     posterior_artifact_id: str | None = None
     posterior_sha256: str | None = None
     provenance_ids: list[str] = Field(default_factory=list)
