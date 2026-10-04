@@ -2,8 +2,10 @@ import pytest
 
 from hearttwin.contracts import (
     AtlasContextPayload,
+    EPResultPayload,
     EvaluationResultPayload,
     LearningPredictionPayload,
+    MechanicsResultPayload,
     LearningResultPayload,
     Observation,
     Provenance,
@@ -77,7 +79,7 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
     )
 
     snapshot = store.snapshot()
-    assert snapshot.contract_version == "1.2.0"
+    assert snapshot.contract_version == "1.3.0"
     assert snapshot.state_phase == "baseline"  # Recording metrics is not a validation gate.
     assert len(snapshot.prediction_artifacts) == 1
     assert snapshot.predictions[0]["capability"] == "learn.predict"
@@ -145,3 +147,60 @@ def test_from_snapshot_rejects_invalid_embedded_fingerprint():
     snapshot.state_fingerprint = "0" * 64
     with pytest.raises(CardiacStateValidationError, match="fingerprint mismatch"):
         CardiacStateStore.from_snapshot(snapshot)
+
+
+def test_ep_and_mechanics_results_are_first_class_canonical_artifacts():
+    store = CardiacStateStore.new("subject-1")
+    ep_prov = provenance("CardiEP", "ep-1")
+    ep = EPResultPayload(
+        subject_id="subject-1",
+        backend="surface-eikonal-v1",
+        parameters={"values": {"speed": 0.1}},
+        outputs=[{"artifact_id": "activation", "kind": "activation_map", "uri": "file:///activation.json"}],
+        validation_status="software_checked",
+        provenance={
+            "anatomy_artifact_id": "surface",
+            "anatomy_bundle_fingerprint": "b" * 64,
+        },
+    )
+    store.reduce_service_result(
+        ServiceResult(
+            service="CardiEP",
+            capability="ep.simulate",
+            status="ok",
+            data=ep.model_dump(mode="json"),
+            provenance=ep_prov,
+        )
+    )
+
+    mech_prov = provenance("CardiMech", "mech-1")
+    mechanics = MechanicsResultPayload(
+        subject_id="subject-1",
+        backend="numpy-lumped-v1",
+        parameters={"passive": {}, "active": {}},
+        outputs=[{"artifact_id": "timeseries", "kind": "mechanics_timeseries", "uri": "file:///mechanics.json"}],
+        scalar_outputs={"edv_ml": 120.0},
+        validation_status="software_checked",
+        provenance={
+            "anatomy_artifact_id": "volume",
+            "anatomy_bundle_fingerprint": "b" * 64,
+            "activation_artifact_id": "activation",
+            "activation_sha256": "c" * 64,
+        },
+    )
+    store.reduce_service_result(
+        ServiceResult(
+            service="CardiMech",
+            capability="mechanics.simulate",
+            status="ok",
+            data=mechanics.model_dump(mode="json"),
+            provenance=mech_prov,
+        )
+    )
+
+    snapshot = store.snapshot()
+    assert len(snapshot.ep_artifacts) == 1
+    assert snapshot.ep_artifacts[0].anatomy_bundle_fingerprint == "b" * 64
+    assert len(snapshot.mechanics_artifacts) == 1
+    assert snapshot.mechanics_artifacts[0].activation_artifact_id == "activation"
+    assert snapshot.mechanics_artifacts[0].activation_sha256 == "c" * 64

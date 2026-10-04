@@ -11,6 +11,8 @@ from .contracts import (
     BenchmarkResolutionPayload,
     BridgePublicationPayload,
     CardiacState,
+    EPArtifact,
+    EPResultPayload,
     EvaluationResultPayload,
     FlowArtifact,
     FlowResultPayload,
@@ -182,6 +184,59 @@ class CardiacStateStore:
         self.state.predictions = [
             {"capability": capability, "data": payload.model_dump(mode="json"), "status": "inferred"}
         ]
+        return artifact
+
+    def record_ep(
+        self, payload: EPResultPayload, provenance: Provenance | None = None
+    ) -> EPArtifact:
+        artifact_id = f"ep-{sha256(payload.model_dump(mode='json'))[:16]}"
+        artifact = EPArtifact(
+            ep_id=artifact_id,
+            subject_id=payload.subject_id,
+            backend=payload.backend,
+            parameters=payload.parameters,
+            outputs=payload.outputs,
+            validation_status=payload.validation_status,
+            warnings=payload.warnings,
+            anatomy_artifact_id=payload.provenance.get("anatomy_artifact_id"),
+            anatomy_bundle_fingerprint=payload.provenance.get(
+                "anatomy_bundle_fingerprint"
+            ),
+            provenance_ids=self._add_provenance(provenance),
+        )
+        self._append_unique(self.state.ep_artifacts, artifact, "ep_id", artifact_id)
+        return artifact
+
+    def record_mechanics(
+        self, payload: MechanicsResultPayload, provenance: Provenance | None = None
+    ) -> MechanicsArtifact:
+        artifact_id = f"mech-{sha256(payload.model_dump(mode='json'))[:16]}"
+        artifact = MechanicsArtifact(
+            mechanics_id=artifact_id,
+            subject_id=payload.subject_id,
+            backend=payload.backend,
+            parameters=payload.parameters,
+            outputs=payload.outputs,
+            scalar_outputs=payload.scalar_outputs,
+            qc=payload.qc,
+            validation_status=payload.validation_status,
+            warnings=payload.warnings,
+            anatomy_artifact_id=payload.provenance.get("anatomy_artifact_id"),
+            anatomy_bundle_fingerprint=payload.provenance.get(
+                "anatomy_bundle_fingerprint"
+            ),
+            activation_artifact_id=payload.provenance.get(
+                "activation_artifact_id"
+            ),
+            activation_sha256=payload.provenance.get("activation_sha256"),
+            provenance_ids=self._add_provenance(provenance),
+        )
+        self._append_unique(
+            self.state.mechanics_artifacts,
+            artifact,
+            "mechanics_id",
+            artifact_id,
+        )
         return artifact
 
     def record_flow(
@@ -407,6 +462,12 @@ class CardiacStateStore:
                     result.provenance,
                     capability=result.capability,
                 )
+            elif result.capability == "ep.simulate":
+                self.record_ep(EPResultPayload.model_validate(data), result.provenance)
+            elif result.capability == "mechanics.simulate":
+                self.record_mechanics(
+                    MechanicsResultPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "flow.simulate":
                 self.record_flow(FlowResultPayload.model_validate(data), result.provenance)
             elif result.capability == "therapy.run":
@@ -476,6 +537,8 @@ class CardiacStateStore:
         self._assert_unique([item.value_id for item in state.derived_values], "value_id")
         self._assert_unique([item.simulation_id for item in state.simulation_artifacts], "simulation_id")
         self._assert_unique([item.prediction_id for item in state.prediction_artifacts], "prediction_id")
+        self._assert_unique([item.ep_id for item in state.ep_artifacts], "ep_id")
+        self._assert_unique([item.mechanics_id for item in state.mechanics_artifacts], "mechanics_id")
         self._assert_unique([item.flow_id for item in state.flow_artifacts], "flow_id")
         self._assert_unique([item.therapy_id for item in state.therapy_artifacts], "therapy_id")
         self._assert_unique([item.posterior_id for item in state.posterior_artifacts], "posterior_id")
@@ -491,6 +554,8 @@ class CardiacStateStore:
         for collection in (
             state.simulation_artifacts,
             state.prediction_artifacts,
+            state.ep_artifacts,
+            state.mechanics_artifacts,
             state.flow_artifacts,
             state.therapy_artifacts,
             state.posterior_artifacts,

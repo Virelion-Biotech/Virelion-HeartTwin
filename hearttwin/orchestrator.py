@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from .contracts import Observation, Provenance, ServiceResult, TwinRun
@@ -18,9 +19,57 @@ DEFAULT_CAPABILITIES = [
 
 TYPED_STATE_CAPABILITIES = {
     "anatomy.build", "atlas.context", "benchmark.resolve", "learn.infer", "learn.predict",
-    "simulation.run", "evaluation.run", "agent.challenge", "vex.observe",
+    "ep.simulate", "infer.run", "mechanics.simulate", "flow.simulate", "therapy.run",
+    "simulation.run", "evaluation.run", "agent.challenge", "bridge.publish", "vex.observe",
     "trace.record",
 }
+
+_EXPLICIT_CONTEXT_REQUESTS = {
+    "anatomy.build": "cardianatomy_request",
+    "ep.simulate": "cardiep_request",
+    "infer.run": "cardiinfer_request",
+    "mechanics.simulate": "cardimech_request",
+    "mechanics.prepare_calibration": "cardimech_calibration_request",
+    "flow.simulate": "cardiflow_request",
+    "therapy.run": "carditherapy_request",
+}
+
+
+def _capability_payload(
+    capability: str,
+    *,
+    entity_id: str,
+    generic_payload: dict[str, Any],
+) -> dict[str, Any]:
+    context_key = _EXPLICIT_CONTEXT_REQUESTS.get(capability)
+    if context_key is None:
+        return generic_payload
+    context = generic_payload.get("context") or {}
+    template = context.get(context_key)
+    if not isinstance(template, dict):
+        raise ValueError(
+            f"{capability} requires context.{context_key}; "
+            "HeartTwin will not broadcast a generic observation envelope into a specialist schema"
+        )
+    request = deepcopy(template)
+    declared = request.get("subject_id")
+    if declared is not None and str(declared) != entity_id:
+        raise ValueError(
+            f"{capability} request subject_id {declared!r} does not match entity_id {entity_id!r}"
+        )
+    request["subject_id"] = entity_id
+    if capability == "anatomy.build":
+        acquisition = request.get("acquisition")
+        if isinstance(acquisition, dict):
+            acquired_subject = acquisition.get("subject_id")
+            if acquired_subject is not None and str(acquired_subject) != entity_id:
+                raise ValueError(
+                    "anatomy.build acquisition subject_id does not match HeartTwin entity_id"
+                )
+            acquisition = deepcopy(acquisition)
+            acquisition["subject_id"] = entity_id
+            request["acquisition"] = acquisition
+    return request
 
 
 class HeartTwin:
@@ -61,7 +110,11 @@ class HeartTwin:
                 )
                 continue
             try:
-                invocation_payload = payload
+                invocation_payload = _capability_payload(
+                    capability,
+                    entity_id=entity_id,
+                    generic_payload=payload,
+                )
                 if capability == "trace.record":
                     invocation_payload = {
                         **payload,

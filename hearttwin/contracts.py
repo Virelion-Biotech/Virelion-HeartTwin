@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-CONTRACT_VERSION = "1.2.0"
+CONTRACT_VERSION = "1.3.0"
 
 
 class Provenance(BaseModel):
@@ -119,6 +119,42 @@ class PredictionArtifact(BaseModel):
     predictions: list["LearningPredictionPayload"] = Field(default_factory=list)
     metrics: dict[str, dict[str, float]] = Field(default_factory=dict)
     dataset_fingerprint: str | None = None
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
+class EPArtifact(BaseModel):
+    """Canonical HeartTwin representation of one CardiEP forward result."""
+
+    model_config = ConfigDict(extra="forbid")
+    ep_id: str
+    subject_id: str
+    backend: str
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    outputs: list[dict[str, Any]] = Field(default_factory=list)
+    validation_status: str = "unvalidated"
+    warnings: list[str] = Field(default_factory=list)
+    anatomy_artifact_id: str | None = None
+    anatomy_bundle_fingerprint: str | None = None
+    provenance_ids: list[str] = Field(default_factory=list)
+
+
+class MechanicsArtifact(BaseModel):
+    """Canonical HeartTwin representation of one CardiMech forward result."""
+
+    model_config = ConfigDict(extra="forbid")
+    mechanics_id: str
+    subject_id: str
+    backend: str
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    outputs: list[dict[str, Any]] = Field(default_factory=list)
+    scalar_outputs: dict[str, float] = Field(default_factory=dict)
+    qc: dict[str, Any] | None = None
+    validation_status: str = "unvalidated"
+    warnings: list[str] = Field(default_factory=list)
+    anatomy_artifact_id: str | None = None
+    anatomy_bundle_fingerprint: str | None = None
+    activation_artifact_id: str | None = None
+    activation_sha256: str | None = None
     provenance_ids: list[str] = Field(default_factory=list)
 
 
@@ -294,6 +330,33 @@ class SimulationResultPayload(BaseModel):
     population_size: int
 
 
+class EPResultPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "1.0"
+    subject_id: str
+    backend: str
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    outputs: list[dict[str, Any]] = Field(default_factory=list)
+    validation_status: str = "unvalidated"
+    warnings: list[str] = Field(default_factory=list)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+
+class MechanicsResultPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_version: str = "2.0"
+    subject_id: str
+    backend: str
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    outputs: list[dict[str, Any]] = Field(default_factory=list)
+    scalar_outputs: dict[str, float] = Field(default_factory=dict)
+    series: dict[str, list[float]] = Field(default_factory=dict)
+    qc: dict[str, Any] | None = None
+    validation_status: str = "unvalidated"
+    warnings: list[str] = Field(default_factory=list)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+
 class FlowResultPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
     contract_version: str = "1.0"
@@ -444,6 +507,8 @@ class CardiacState(BaseModel):
     derived_values: list[StateValue] = Field(default_factory=list)
     simulation_artifacts: list[SimulationArtifact] = Field(default_factory=list)
     prediction_artifacts: list[PredictionArtifact] = Field(default_factory=list)
+    ep_artifacts: list[EPArtifact] = Field(default_factory=list)
+    mechanics_artifacts: list[MechanicsArtifact] = Field(default_factory=list)
     flow_artifacts: list[FlowArtifact] = Field(default_factory=list)
     therapy_artifacts: list[TherapyArtifact] = Field(default_factory=list)
     posterior_artifacts: list[PosteriorArtifact] = Field(default_factory=list)
@@ -487,7 +552,11 @@ class WorkflowState(BaseModel):
     anatomy: AnatomyBundlePayload | None = None
     benchmark: BenchmarkResolutionPayload | None = None
     learning: LearningResultPayload | None = None
+    ep: EPResultPayload | None = None
     inference: InferenceResultPayload | None = None
+    mechanics: MechanicsResultPayload | None = None
+    flow: FlowResultPayload | None = None
+    therapy: TherapyResultPayload | None = None
     simulation: SimulationResultPayload | None = None
     agent: AgentChallengePayload | None = None
     vex: VexObservationPayload | None = None

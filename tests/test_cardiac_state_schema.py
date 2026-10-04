@@ -7,7 +7,7 @@ from hearttwin.contracts import CardiacState, Observation, Provenance
 from hearttwin.state import CardiacStateStore
 
 
-SCHEMA_PATH = Path(__file__).parents[1] / "schemas" / "cardiac-state-1.2.0.schema.json"
+SCHEMA_PATH = Path(__file__).parents[1] / "schemas" / "cardiac-state-1.3.0.schema.json"
 
 
 def test_published_cardiac_state_schema_is_valid_and_accepts_runtime_snapshot():
@@ -23,7 +23,7 @@ def test_published_cardiac_state_schema_is_valid_and_accepts_runtime_snapshot():
     snapshot = CardiacStateStore.new("entity-1", [observation]).snapshot()
     errors = sorted(Draft202012Validator(schema).iter_errors(snapshot.model_dump(mode="json")), key=str)
     assert not errors, [error.message for error in errors]
-    assert snapshot.contract_version == "1.2.0"
+    assert snapshot.contract_version == "1.3.0"
     assert schema["$id"].endswith("cardiac-state-1.2.0.json")
 
 
