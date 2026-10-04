@@ -22,6 +22,8 @@ CardiacState
 │   └── typed variable + unit + region + uncertainty + evidence status
 ├── simulation_artifacts
 ├── prediction_artifacts
+├── ep_artifacts
+├── mechanics_artifacts
 ├── flow_artifacts
 ├── therapy_artifacts
 ├── posterior_artifacts
@@ -56,7 +58,7 @@ The state layer validates structural invariants: IDs, typed artifacts, provenanc
 
 ## Schema
 
-The versioned JSON schema is `schemas/cardiac-state-1.2.0.schema.json`. The previous 1.0.0 schema is retained for compatibility. New producers should emit `contract_version = 1.2.0`.
+The current versioned JSON schema is `schemas/cardiac-state-1.3.0.schema.json`. Earlier schemas remain retained for compatibility. New producers should emit `contract_version = 1.3.0`. EP and mechanics forward results are first-class canonical artifacts rather than opaque service-result dictionaries.
 
 
 ## Scientific evidence gates
@@ -77,3 +79,17 @@ modalities. The resulting `AlignmentReport` is stored in the workflow view and
 inside the canonical state's `biological_context.observation_alignment`.
 Missing declarations remain visible as `incomplete`; they are not converted
 into an assumption that the data are aligned.
+
+
+## Mechanistic artifact lineage
+
+The mechanistic workflow treats cross-physics handoffs as artifact dependencies rather than
+narrative provenance. CardiEP records the exact anatomy artifact and anatomy-bundle
+fingerprint it consumed. CardiMech records that anatomy lineage plus the EP activation
+artifact ID and SHA-256. CardiFlow consumes the emitted CardiMech mechanics-timeseries
+artifact and records its ID/SHA-256. CardiTherapy receives a serialized canonical
+CardiacState artifact and, when available, the CardiInfer posterior-samples artifact.
+
+HeartTwin rejects a mechanistic run when these identities or hashes do not match. The
+built-in Windkessel reference path is therefore mechanics-coupled through the actual
+`aortic_flow_ml_s` series; it is still a reduced-order 0D reference model, not CFD.

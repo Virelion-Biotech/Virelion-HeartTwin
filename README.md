@@ -17,6 +17,8 @@ HeartTwin does not duplicate specialist-service algorithms blindly. It can use i
 | OptiCell | microscopy QC and cell analysis | HeartTwin command adapter |
 | CardioScore | MEA-based cardiac safety scoring | HeartTwin command adapter |
 | CardiLearn | molecular-state learning | Native + HTTP fallback |
+| CardiEP | cardiac electrophysiology forward simulation and calibration target | Native + HTTP fallback |
+| CardiInfer | shared inverse-problem, posterior, identifiability, and uncertainty layer | Native + HTTP fallback |
 | CardiMech | cardiac mechanics, EP-to-mechanics handoff, circulation coupling, and mechanics calibration forward model | HeartTwin command adapter |
 | CardiFlow | hemodynamics/flow contracts plus deterministic 0D Windkessel reference backend | Native + HTTP fallback; software-checked reduced-order backend, not CFD/clinical validation |
 | CardiSim | synthetic trajectories | Native + HTTP fallback |
@@ -68,11 +70,11 @@ CardiAnatomy CardiAtlas / CardiLearn   modality adapters
         CardiTrace
 ```
 
-`CardiacState` is the canonical biological/computational state object. `WorkflowState` is the execution view and carries stage-specific typed payloads alongside a `cardiac_state` reference. The low-level `HeartTwin.run()` API remains backward compatible and reduces any recognized typed service results into the canonical state.
+`CardiacState` is the canonical biological/computational state object. `WorkflowState` is the execution view and carries stage-specific typed payloads alongside a `cardiac_state` reference. The low-level `HeartTwin.run()` API reduces recognized typed service results into the canonical state; specialist schemas such as anatomy, EP, inference, mechanics, flow, and therapy require explicit per-capability request templates rather than receiving a broadcast generic payload.
 
 ## Canonical CardiacState
 
-The current state contract is version `1.2.0`. It provides typed collections for observations, Atlas context, benchmark resolutions, modality analyses, derived state variables, simulations, predictions, inference posteriors, evaluations, challenges, CardiVex observations, bridge publications, phase transitions, trace records, and HeartTwin provenance.
+The current state contract is version `1.3.0`. It provides typed collections for observations, Atlas context, benchmark resolutions, modality analyses, EP simulations, mechanics simulations, flow simulations, therapy experiments, derived state variables, simulations, predictions, inference posteriors, evaluations, challenges, CardiVex observations, bridge publications, phase transitions, trace records, and HeartTwin provenance.
 
 Each `StateValue` can carry a domain, variable, value, unit, anatomical region, temporal information, observed/inferred/simulated status, confidence, structured uncertainty, method, and provenance links. Simulation, prediction, and evaluation results have dedicated artifact models rather than requiring arbitrary dictionaries.
 
@@ -80,7 +82,7 @@ The old `inferred_state`, `simulations`, `predictions`, and `validation` diction
 
 `CardiacStateStore` is the reducer/validator for the canonical state. It enforces unique IDs, prevents dangling HeartTwin provenance links, validates phase history, creates stable artifact IDs, and emits a SHA-256 `state_fingerprint` from the canonical snapshot.
 
-See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.2.0.schema.json` for the current contract. The 1.0.0 and 1.1.0 schemas remain for compatibility.
+See `docs/CARDIAC_STATE.md` and `schemas/cardiac-state-1.3.0.schema.json` for the current contract. Older versioned schemas remain for compatibility.
 
 ## Current implementation
 
@@ -95,7 +97,8 @@ The repository includes:
 - explicit benchmark/test-group binding between CardiLearn and CardiBench;
 - reproducible workflow run IDs and per-step SHA-256 provenance;
 - a full multimodal workflow ending in CardiEval and CardiTrace;
-- cross-repository GitHub Actions integration testing on Python 3.10–3.12.
+- an explicit mechanistic workflow that chains anatomy readiness → CardiEP → CardiInfer → CardiMech → CardiFlow → CardiTherapy → CardiTrace while verifying artifact hashes and anatomy identity at each boundary;
+- frozen cross-repository integration testing on Python 3.10–3.12 plus a separate current-`main` compatibility workflow that detects ecosystem drift.
 
 ## Quick start
 
@@ -113,7 +116,8 @@ Install the component repositories for the complete native stack:
 ```bash
 for repo in \
   Virelion-CardiAnatomy Virelion-CardiAtlas Virelion-CardiBench Virelion-CardiEval Virelion-CardiLearn \
-  Virelion-CardiSim Virelion-CardiMech Virelion-CardiVex Virelion-CardiStudio Virelion-DCCP \
+  Virelion-CardiEP Virelion-CardiInfer Virelion-CardiMech Virelion-CardiFlow Virelion-CardiTherapy \
+  Virelion-CardiSim Virelion-CardiVex Virelion-CardiStudio Virelion-DCCP \
   Virelion-ElectroTrace Virelion-MyoTrace Virelion-OptiCell Virelion-CardioScore \
   Virelion-CardiTrace Virelion-CardiBridge Virelion-CardiAgent; do
   python -m pip install "git+https://github.com/Virelion-Biotech/${repo}.git@main"
@@ -126,7 +130,7 @@ Run the synthetic end-to-end workflow:
 hearttwin workflow-demo --output outputs/workflow-demo.json
 ```
 
-The integration matrix installs the actual repositories from clean environments and fails hard if a required native service cannot be imported. Component compatibility fixes are kept in the component repositories rather than hidden by HeartTwin fallbacks.
+The frozen integration matrix installs exact tested repository revisions from clean environments and fails hard if a required service cannot be imported. `requirements-services-main.txt` and the `HeartTwin current-main integration` workflow separately install the live component branches so history rewrites or sibling dependency drift cannot be hidden by the reproducibility lock. Component compatibility fixes are kept in the component repositories rather than hidden by HeartTwin fallbacks.
 
 The workflow is computational test infrastructure. Its generated states are not patient measurements, and passing software integration tests does not establish clinical or biological validity. Scientific validation gates are recorded separately with prespecified criteria, evidence IDs, and provenance; a successful evaluation does not silently promote a state to biological or clinical validity.
 
@@ -167,7 +171,8 @@ See `docs/ARGO_EMPIRICAL_VALIDATION.md` for the raw-data contract, extraction ru
 There are two CI layers:
 
 1. `CI` runs the HeartTwin package tests without optional component installations.
-2. `HeartTwin integration` installs the actual component repositories into a clean environment, runs native connection smoke tests, runs the multimodal workflow, then runs the complete HeartTwin test suite across Python 3.10, 3.11, and 3.12.
+2. `HeartTwin integration` installs the frozen, exact component revisions into a clean environment, runs native connection smoke tests, runs the multimodal workflow, then runs the complete HeartTwin test suite across Python 3.10, 3.11, and 3.12.
+3. `HeartTwin current-main integration` installs every live component `main` branch, runs the complete suite, and executes the mechanistic continuity canary that requires the actual EP activation artifact, mechanics timeseries, posterior, canonical state hash, and trace record to survive the entire chain.
 
 The CardiacState tests additionally validate the published Draft 2020-12 JSON schema against runtime snapshots.
 
@@ -196,7 +201,7 @@ GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later).
 Install the component revisions tested together with `python -m pip install -r requirements-services.txt`. `configs/compatibility-lock.json` mirrors those exact repository SHAs and is regression-tested against the install matrix so component-contract upgrades cannot silently drift.
 The workflow now requires explicit `feature_columns`, a `reference_labels` mapping for every benchmark sample, and a simulation `preset`. Benchmark assignments are fixed before training; identifiers and outcome metadata are excluded from features. These checks do not establish that user-supplied labels are scientifically valid or that selected features are free of all confounding.
 
-The current workflow is a research integration pipeline. Specialist analyses are recorded in the shared state, but do not yet calibrate a patient-specific model. Classification evaluation does not change a simulated state into a biologically validated state. CardiSim-to-CardiVex domain mappings are explicitly extrapolated and have no calibrated uncertainty estimate.
+The multimodal classification workflow remains a research integration pipeline and does not create biological validation. The separate mechanistic workflow now performs software-level EP/mechanics/inference/flow/therapy handoffs with explicit artifact lineage and posterior transport, but this is still not empirical patient-specific validation. Classification evaluation does not change a simulated state into a biologically validated state. CardiSim-to-CardiVex domain mappings are explicitly extrapolated and have no calibrated uncertainty estimate.
 
 See [the repair audit](docs/REPAIR_AUDIT_2026-09-28.md) for verified defects, test coverage and unresolved product/scientific gaps. Command adapters accept large JSON payloads through stdin when `HEARTTWIN_PAYLOAD_STDIN=1`; small payloads retain the existing environment-variable protocol.
 
