@@ -1,0 +1,23 @@
+# Moving-main component matrix for ecosystem drift detection.
+# This file is intentionally non-reproducible: the frozen release matrix remains requirements-services.txt.
+git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiFlow.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiInfer.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiSim.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiVex.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiStudio.git@main
+git+https://github.com/Virelion-Biotech/Virelion-DCCP.git@main
+git+https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git@main
+git+https://github.com/Virelion-Biotech/Virelion-MyoTrace.git@main
+git+https://github.com/Virelion-Biotech/Virelion-OptiCell.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardioScore.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@main
+git+https://github.com/Virelion-Biotech/Virelion-CardiAgent.git@main
