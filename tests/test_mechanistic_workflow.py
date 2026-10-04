@@ -171,7 +171,7 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
             "discrepancy": "rmse",
             "inference_backend": "native-abc-smc-v1",
             "sampler_settings": {
-                "n_particles": 4,
+                "n_particles": 8,
                 "n_generations": 1,
                 "initial_oversample": 1,
             },
