@@ -323,6 +323,19 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
     assert run.state.evaluation.primary_metric == "rmse"
     assert run.state.evaluation.primary_value == pytest.approx(0.0, abs=1e-10)
 
+    prepared_step = next(
+        step
+        for step in run.steps
+        if step.capability == "mechanics.prepare_calibration"
+    )
+    prepared_settings = prepared_step.data["model_context"]["cardimech_request"]["settings"]
+    assert prepared_settings["cycles"] == 3
+    assert prepared_settings["dt_s"] == pytest.approx(0.005)
+    assert prepared_settings["cycle_length_s"] == pytest.approx(0.8)
+    assert run.state.mechanics.provenance["settings"]["cycles"] == 3
+    assert run.state.mechanics.provenance["settings"]["dt_s"] == pytest.approx(0.005)
+    assert run.state.mechanics.provenance["settings"]["cycle_length_s"] == pytest.approx(0.8)
+
     payload = state.model_dump(mode="json")
     json.dumps(payload, allow_nan=False)
     schema = json.loads(
