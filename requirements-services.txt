@@ -19,6 +19,6 @@ git+https://github.com/Virelion-Biotech/Virelion-MyoTrace.git@857130b6254e6dc8b2
 git+https://github.com/Virelion-Biotech/Virelion-OptiCell.git@d0361912f56796a933aecb7fcf2df0cb07dfe1df
 git+https://github.com/Virelion-Biotech/Virelion-CardioScore.git@e275801a0945293f895f4788ac1886bd10064f47
 git+https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git@5f359d9cf6d7befe4c1323b7e927ff8240044603
-git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@f8dbd170a2097876b97ac75126208bb6a54d793e
+git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@f09f5872a4f99fe8819f03f299194c508d4b6bef
 git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@d17d30b057e7744cbd6fe23afb805db081e66f40
 git+https://github.com/Virelion-Biotech/Virelion-CardiAgent.git@3761bff478e13607f4ec5c3dde50587724d2b6ec

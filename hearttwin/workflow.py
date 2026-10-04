@@ -151,6 +151,8 @@ def _run_specialist_modalities(
     for observation in observations:
         capability = capability_by_modality.get(observation.modality)
         input_path = observation.values.get("input_path")
+        if observation.values.get("specialist_analysis") is False:
+            continue
         if capability is None or not input_path:
             continue
         adapter = registry.capability(capability)
@@ -257,6 +259,7 @@ def run_multimodal_workflow(
     atlas_records: list[dict[str, Any]] | None = None,
     simulation: dict[str, Any] | None = None,
     alignment_policy: AlignmentPolicy | dict[str, Any] | None = None,
+    challenge_severity: float | None = None,
     seed: int = 42,
 ) -> WorkflowRun:
     """Run a complete local multimodal HeartTwin workflow."""
@@ -286,6 +289,7 @@ def run_multimodal_workflow(
             "atlas_record_ids": atlas_record_ids,
             "atlas_records": atlas_records,
             "alignment": alignment.model_dump(mode="json"),
+            "challenge_severity": challenge_severity,
             "seed": seed,
         },
     )
@@ -393,6 +397,13 @@ def run_multimodal_workflow(
     )
     steps.append(simulation_result)
 
+    if challenge_severity is None:
+        selected_challenge_severity = max(0.1, min(0.9, 1.0 - health))
+    else:
+        selected_challenge_severity = float(challenge_severity)
+        if not isfinite(selected_challenge_severity) or not 0.0 <= selected_challenge_severity <= 1.0:
+            raise WorkflowError("challenge_severity must be finite and within [0, 1]")
+
     agent_result = _call(
         registry,
         "agent.challenge",
@@ -402,7 +413,7 @@ def run_multimodal_workflow(
                 "modality": "structural",
                 "values": {
                     "domain": "ischemic",
-                    "severity": max(0.1, min(0.9, 1.0 - health)),
+                    "severity": selected_challenge_severity,
                     "count": 1,
                     "seed": seed,
                 },

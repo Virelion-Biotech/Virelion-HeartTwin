@@ -44,6 +44,7 @@ from .api import VirelionServices
 from .workflow import WorkflowError, run_multimodal_workflow
 from .ep_calibration import EPCalibrationWorkflowError, prepare_ep_inference_problem, run_ep_calibration
 from .mechanistic_workflow import MechanisticWorkflowError, run_mechanistic_twin_workflow
+from .superstack import SuperstackWorkflowError, run_superstack_workflow
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -64,6 +65,7 @@ __all__ = [
     "WorkflowState", "WorkflowRun", "WorkflowError", "run_multimodal_workflow",
     "EPCalibrationWorkflowError", "prepare_ep_inference_problem", "run_ep_calibration",
     "MechanisticWorkflowError", "run_mechanistic_twin_workflow",
+    "SuperstackWorkflowError", "run_superstack_workflow",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
