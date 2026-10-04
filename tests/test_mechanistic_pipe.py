@@ -188,9 +188,11 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
     assert state.validation_gates[-1].passed is True
     assert state.trace_records
     assert (
-        state.ep_artifacts[0].anatomy_bundle_fingerprint
+        state.anatomy_bundles[0].bundle_fingerprint
+        == state.ep_artifacts[0].anatomy_bundle_fingerprint
         == bundle.bundle_fingerprint
         == state.mechanics_artifacts[0].anatomy_bundle_fingerprint
+        == state.flow_artifacts[0].anatomy_bundle_fingerprint
     )
     activation = next(
         item for item in run.state.ep.outputs if item["kind"] == "activation_map"
@@ -203,6 +205,8 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
     assert run.state.flow.provenance["mechanics_artifact_id"] == mechanics["artifact_id"]
     assert run.state.flow.provenance["mechanics_sha256"] == mechanics["sha256"]
     assert run.state.flow.provenance["coupling_mode"] == "mechanics_aortic_flow"
+    assert state.flow_artifacts[0].coupling_mode == "mechanics_aortic_flow"
+    assert state.therapy_artifacts[0].twin_state_fingerprint
     assert run.state.therapy.provenance["posterior_sha256"] == (
         state.posterior_artifacts[0].posterior_samples["sha256"]
     )
