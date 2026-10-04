@@ -637,7 +637,7 @@ def run_mechanistic_twin_workflow(
             "task_type": "regression",
             "primary_metric": evaluation_primary_metric,
         },
-        parent_run_ids=[evaluation_result.provenance.run_id],
+        parent_run_ids=[therapy_result.provenance.run_id],
     )
     evaluation_payload = EvaluationResultPayload.model_validate(
         evaluation_result.data
@@ -696,7 +696,7 @@ def run_mechanistic_twin_workflow(
                 for item in steps
             ],
         },
-        parent_run_ids=[therapy_result.provenance.run_id],
+        parent_run_ids=[evaluation_result.provenance.run_id],
     )
     store.reduce_service_result(trace_result)
     steps.append(trace_result)
