@@ -123,7 +123,7 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
                 "discrepancy": "rmse",
                 "inference_backend": "native-abc-smc-v1",
                 "sampler_settings": {
-                    "n_particles": 4,
+                    "n_particles": 8,
                     "n_generations": 1,
                     "initial_oversample": 2,
                 },
