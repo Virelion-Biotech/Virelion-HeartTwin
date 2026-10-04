@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -21,6 +22,7 @@ from .operations import ArtifactStore, CaseJournal, IdempotencyStore, JobQueue
 from .provenance import sha256
 from .service_registry import ServiceRegistry, ServiceSpec
 from .workflow import run_multimodal_workflow
+from .mechanistic_workflow import run_mechanistic_twin_workflow
 
 
 CANARY = "HEARTTWIN-OPERATIONAL-REHEARSAL"
@@ -224,6 +226,74 @@ def _write_inputs(root: Path) -> dict[str, Path]:
     }
 
 
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_mechanistic_fixture(root: Path, entity_id: str) -> dict[str, Any]:
+    """Create the same small, deterministic artifact chain used by the native canary."""
+    from cardianatomy.models import AnatomyBundle
+    from cardianatomy.pipeline import bundle_fingerprint
+
+    root.mkdir(parents=True, exist_ok=True)
+    surface = root / "surface.json"
+    surface.write_text(
+        json.dumps(
+            {
+                "schema_version": "cardiep-surface-v1",
+                "coordinate_unit": "cm",
+                "vertices": [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [1.0, 1.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                ],
+                "triangles": [[0, 1, 2], [0, 2, 3]],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    source_sha = _file_sha256(surface)
+    common = {
+        "uri": surface.resolve().as_uri(),
+        "sha256": source_sha,
+        "subject_id": entity_id,
+        "study_id": f"{entity_id}-MECH-STUDY",
+        "acquisition_id": f"{entity_id}-MECH-ACQ",
+        "producer": "hearttwin.operational_rehearsal",
+        "metadata": {"synthetic_integration_fixture": True},
+    }
+    bundle = AnatomyBundle(
+        subject_id=entity_id,
+        study_id=f"{entity_id}-MECH-STUDY",
+        acquisition_id=f"{entity_id}-MECH-ACQ",
+        artifacts=[
+            {"artifact_id": "surface", "kind": "surface_mesh", **common},
+            {"artifact_id": "volume", "kind": "volume_mesh", **common},
+            {"artifact_id": "coordinates", "kind": "coordinate_field", **common},
+            {"artifact_id": "fibres", "kind": "fiber_field", **common},
+        ],
+        qc={"passed": True, "checks": {"integration_fixture": True}},
+        provenance={"scope": "distributed operational rehearsal"},
+    )
+    bundle.bundle_fingerprint = bundle_fingerprint(bundle)
+
+    observation = root / "edv.json"
+    observation.write_text(
+        json.dumps({"values": [125.0]}) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "surface": surface,
+        "surface_sha256": source_sha,
+        "edv": observation,
+        "edv_sha256": _file_sha256(observation),
+        "bundle": bundle.model_dump(mode="json"),
+        "bundle_fingerprint": bundle.bundle_fingerprint,
+    }
+
+
 def _run_concurrent_case_probe(
     distributed: ServiceRegistry,
     *,
@@ -327,6 +397,181 @@ def _run_concurrent_case_probe(
             )
 
         time.sleep(float(payload.get("delay_seconds", 0.0)))
+        def execute_mechanistic_workflow() -> dict[str, Any]:
+            run = run_mechanistic_twin_workflow(
+                distributed,
+                entity_id=case_id,
+                anatomy_bundle=mechanistic_fixture["bundle"],
+                ep_backend="surface-eikonal-v1",
+                ep_parameters={"isotropic_speed_cm_per_ms": 0.1},
+                ep_parameter_units={
+                    "isotropic_speed_cm_per_ms": "cm/ms",
+                },
+                ep_settings={"root_node": 0},
+                mechanics_backend="numpy-lumped-v1",
+                mechanics_parameters={
+                    "passive": {
+                        "v0_ml": 10.0,
+                        "a_mmHg": 0.08,
+                        "b": 0.055,
+                    },
+                    "active": {"emax_mmHg_per_ml": 2.1},
+                    "units": {
+                        "passive.a_mmHg": "mmHg",
+                        "active.emax_mmHg_per_ml": "mmHg/mL",
+                    },
+                    "source": "prior",
+                },
+                mechanics_calibration={
+                    "observations": [
+                        {
+                            "observation_id": "edv",
+                            "kind": "end_diastolic_volume",
+                            "artifact": {
+                                "artifact_id": "edv-observation",
+                                "kind": "scalar",
+                                "uri": mechanistic_fixture["edv"].resolve().as_uri(),
+                                "sha256": mechanistic_fixture["edv_sha256"],
+                            },
+                            "unit": "mL",
+                        }
+                    ],
+                    "parameter_bounds": {
+                        "passive.a_mmHg": [0.06, 0.10],
+                        "active.emax_mmHg_per_ml": [1.8, 2.4],
+                    },
+                    "circulation": {
+                        "enabled": True,
+                        "model": "windkessel_3e",
+                        "parameters": {},
+                    },
+                    "settings": {
+                        "discrepancy": "rmse",
+                        "inference_backend": "native-abc-smc-v1",
+                        "sampler_settings": {
+                            "n_particles": 8,
+                            "n_generations": 1,
+                            "initial_oversample": 2,
+                            "output_dir": str(root / "mechanistic-inference"),
+                        },
+                        "seed": 20261004,
+                    },
+                },
+                mechanics_settings={"cycles": 4, "dt_s": 0.001},
+                flow_backend="windkessel-3element-v1",
+                flow_fluid={
+                    "density": 1060.0,
+                    "dynamic_viscosity": 0.0035,
+                },
+                flow_boundary_conditions=[
+                    {
+                        "boundary_id": "afterload",
+                        "kind": "windkessel",
+                        "region": "aorta",
+                        "parameters": {
+                            "proximal_resistance": 1.0,
+                            "distal_resistance": 4.0,
+                            "compliance": 0.5,
+                        },
+                    }
+                ],
+                therapy_backend="cardiep-pacing-v1",
+                therapy_plan={
+                    "plan_id": "pace",
+                    "arms": [
+                        {
+                            "arm_id": "control",
+                            "label": "Baseline",
+                            "is_comparator": True,
+                        },
+                        {
+                            "arm_id": "paced",
+                            "label": "Alternative root",
+                            "interventions": [
+                                {
+                                    "intervention_id": "pace-1",
+                                    "kind": "pacing",
+                                    "target": "surface vertex 1",
+                                    "parameters": {"root_node": 1},
+                                    "model_service": "CardiEP",
+                                    "model_capability": "ep.simulate",
+                                }
+                            ],
+                        },
+                    ],
+                    "endpoints": ["activation_span_ms"],
+                },
+                evaluation_reference_outcomes={
+                    "control:activation_span_ms": (2.0 ** 0.5) / 0.1,
+                    "paced:activation_span_ms": 2.0 / 0.1,
+                },
+                workdir=root / "distributed-mechanistic",
+            )
+            return run.model_dump(mode="json")
+
+        mechanistic_payload = {
+            "entity_id": case_id,
+            "bundle_fingerprint": mechanistic_fixture["bundle_fingerprint"],
+            "surface_sha256": mechanistic_fixture["surface_sha256"],
+            "edv_sha256": mechanistic_fixture["edv_sha256"],
+            "ep_backend": "surface-eikonal-v1",
+            "mechanics_backend": "numpy-lumped-v1",
+            "flow_backend": "windkessel-3element-v1",
+            "therapy_backend": "cardiep-pacing-v1",
+        }
+        distributed_mechanistic, mechanistic_reused = journal.run_stage(
+            case_id,
+            "distributed-mechanistic-pipe",
+            mechanistic_payload,
+            execute_mechanistic_workflow,
+            max_attempts=2,
+        )
+        if mechanistic_reused:
+            raise RuntimeError(
+                "First distributed mechanistic execution was unexpectedly cached"
+            )
+        mech_state = distributed_mechanistic["state"]["cardiac_state"]
+        if distributed_mechanistic.get("entity_id") != case_id:
+            raise RuntimeError("Distributed mechanistic workflow changed case identity")
+        required_mechanistic_collections = (
+            "ep_artifacts",
+            "posterior_artifacts",
+            "mechanics_artifacts",
+            "flow_artifacts",
+            "therapy_artifacts",
+            "evaluation_artifacts",
+            "trace_records",
+        )
+        missing_mechanistic = [
+            name
+            for name in required_mechanistic_collections
+            if not mech_state.get(name)
+        ]
+        if missing_mechanistic:
+            raise RuntimeError(
+                "Distributed mechanistic pipe is incomplete: "
+                + ", ".join(missing_mechanistic)
+            )
+        fingerprint = mechanistic_fixture["bundle_fingerprint"]
+        if not (
+            mech_state["ep_artifacts"][-1].get("anatomy_bundle_fingerprint")
+            == fingerprint
+            == mech_state["mechanics_artifacts"][-1].get(
+                "anatomy_bundle_fingerprint"
+            )
+            == mech_state["flow_artifacts"][-1].get(
+                "anatomy_bundle_fingerprint"
+            )
+        ):
+            raise RuntimeError(
+                "Distributed mechanistic pipe broke anatomy fingerprint continuity"
+            )
+        mech_trace = distributed_mechanistic["state"].get("trace") or {}
+        if mech_trace.get("canonical_state_verified") is not True:
+            raise RuntimeError(
+                "Distributed mechanistic trace did not independently verify canonical state"
+            )
+
         observations = [
             _observation(
                 concurrent_case_id,
@@ -643,6 +888,10 @@ def run_operational_rehearsal(
     queue = JobQueue(journal_path)
     artifacts = ArtifactStore(root / "artifacts")
     inputs = _write_inputs(root / "inputs")
+    mechanistic_fixture = _write_mechanistic_fixture(
+        root / "mechanistic-inputs",
+        case_id,
+    )
     rows = _rows()
 
     input_manifest = {
@@ -1238,6 +1487,11 @@ def run_operational_rehearsal(
             "workflow_state_fingerprint": workflow_result["state"]["cardiac_state"][
                 "state_fingerprint"
             ],
+            "distributed_mechanistic_pipe": True,
+            "mechanistic_state_fingerprint": mech_state["state_fingerprint"],
+            "mechanistic_trace_verified": (
+                mech_trace.get("canonical_state_verified") is True
+            ),
             "output_artifact": repaired.model_dump(),
             "timeout_observed": timeout_observed,
             "worker_restart_recovered": True,
