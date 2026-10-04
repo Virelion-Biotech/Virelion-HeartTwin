@@ -295,6 +295,7 @@ def run_mechanistic_twin_workflow(
     )
     steps: list[ServiceResult] = []
 
+    input_prov: Provenance | None = None
     if anatomy_request is not None:
         request = deepcopy(anatomy_request)
         declared = request.get("subject_id")
@@ -327,17 +328,31 @@ def run_mechanistic_twin_workflow(
             parent_run_ids=[run_id],
             content_sha256=sha256(bundle.model_dump(mode="json")),
         )
-        if bundle.bundle_fingerprint is None:
-            bundle = bundle.model_copy(
-                update={
-                    "bundle_fingerprint": sha256(
-                        bundle.model_dump(
-                            mode="json",
-                            exclude={"bundle_fingerprint"},
-                        )
-                    )
-                }
+
+    validated_targets: set[str] = set()
+    if bundle.bundle_fingerprint is None:
+        canonical = _call(
+            registry,
+            "anatomy.validate",
+            entity_id,
+            {"target": "ep", "bundle": bundle.model_dump(mode="json")},
+            parent_run_ids=[run_id],
+        )
+        canonical_fingerprint = canonical.data.get("bundle_fingerprint")
+        if (
+            not isinstance(canonical_fingerprint, str)
+            or len(canonical_fingerprint) != 64
+        ):
+            raise MechanisticWorkflowError(
+                "CardiAnatomy did not return a canonical bundle fingerprint"
             )
+        bundle = bundle.model_copy(
+            update={"bundle_fingerprint": canonical_fingerprint}
+        )
+        steps.append(canonical)
+        validated_targets.add("ep")
+
+    if input_prov is not None:
         store.record_anatomy(bundle, input_prov)
 
     bundle_fingerprint = bundle.bundle_fingerprint
@@ -347,6 +362,8 @@ def run_mechanistic_twin_workflow(
         )
 
     for target in ("ep", "mechanics", "flow"):
+        if target in validated_targets:
+            continue
         readiness = _call(
             registry,
             "anatomy.validate",
@@ -354,6 +371,10 @@ def run_mechanistic_twin_workflow(
             {"target": target, "bundle": bundle.model_dump(mode="json")},
             parent_run_ids=[run_id],
         )
+        if readiness.data.get("bundle_fingerprint") != bundle_fingerprint:
+            raise MechanisticWorkflowError(
+                f"CardiAnatomy changed the bundle fingerprint during {target} readiness"
+            )
         steps.append(readiness)
 
     ep_anatomy = _service_ref(
@@ -407,6 +428,15 @@ def run_mechanistic_twin_workflow(
         }
     )
     calibration_settings = dict(calibration_request.get("settings") or {})
+    forward_settings = dict(mechanics_settings or {})
+    for execution_only in ("output_dir", "inline_series", "posterior_replay_selection"):
+        forward_settings.pop(execution_only, None)
+    for key, value in forward_settings.items():
+        if key in calibration_settings and calibration_settings[key] != value:
+            raise MechanisticWorkflowError(
+                f"Mechanics setting {key!r} differs between calibration and replay"
+            )
+        calibration_settings[key] = deepcopy(value)
     sampler = dict(calibration_settings.get("sampler_settings") or {})
     sampler.setdefault("output_dir", str(root / "inference"))
     calibration_settings["sampler_settings"] = sampler
@@ -438,25 +468,41 @@ def run_mechanistic_twin_workflow(
     store.reduce_service_result(inference_result)
     steps.append(inference_result)
 
+    model_context = prepared.data.get("model_context")
+    if not isinstance(model_context, dict):
+        raise MechanisticWorkflowError(
+            "CardiMech calibration did not provide model_context"
+        )
+    replay_template = model_context.get("cardimech_request")
+    if not isinstance(replay_template, dict):
+        raise MechanisticWorkflowError(
+            "CardiMech calibration did not provide the authoritative replay template"
+        )
+    mechanics_request = deepcopy(replay_template)
+    template_parameters = mechanics_request.get("parameters")
+    if not isinstance(template_parameters, dict):
+        raise MechanisticWorkflowError(
+            "CardiMech replay template is missing parameters"
+        )
     calibrated_parameters, replay_selection = _replay_parameters(
-        mechanics_parameters,
+        template_parameters,
         inference_payload,
     )
-    mech_cfg = dict(mechanics_settings or {})
-    mech_cfg.setdefault("output_dir", str(root / "mechanics"))
+    mechanics_request["subject_id"] = entity_id
+    mechanics_request["anatomy_ref"] = mechanics_anatomy
+    mechanics_request["activation_ref"] = activation_ref
+    mechanics_request["backend"] = mechanics_backend
+    mechanics_request["parameters"] = calibrated_parameters
+
+    mech_cfg = dict(mechanics_request.get("settings") or {})
+    requested_mech_cfg = dict(mechanics_settings or {})
+    mech_cfg["output_dir"] = str(
+        requested_mech_cfg.get("output_dir") or (root / "mechanics")
+    )
     mech_cfg["inline_series"] = False
     mech_cfg["posterior_replay_selection"] = replay_selection
-    mechanics_request = {
-        "subject_id": entity_id,
-        "anatomy_ref": mechanics_anatomy,
-        "backend": mechanics_backend,
-        "parameters": calibrated_parameters,
-        "boundary_conditions": list(calibration_request.get("boundary_conditions") or []),
-        "activation_ref": activation_ref,
-        "observations": [],
-        "circulation": dict(calibration_request.get("circulation") or {}),
-        "settings": mech_cfg,
-    }
+    mechanics_request["settings"] = mech_cfg
+
     mechanics_result = _call(
         registry,
         "mechanics.simulate",
