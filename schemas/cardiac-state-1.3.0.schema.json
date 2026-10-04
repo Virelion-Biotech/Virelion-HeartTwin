@@ -1256,6 +1256,31 @@
           "items": {
             "type": "string"
           }
+        },
+        "anatomy_artifact_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "anatomy_bundle_fingerprint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mechanics_artifact_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mechanics_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-fA-F]{64}$"
         }
       }
     },
@@ -1308,6 +1333,32 @@
           "items": {
             "type": "string"
           }
+        },
+        "twin_state_artifact_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "twin_state_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "posterior_artifact_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "posterior_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-fA-F]{64}$"
         }
       }
     },
