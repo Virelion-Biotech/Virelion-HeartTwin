@@ -18,3 +18,4 @@ vtk>=9.3,<10
 
 # Required by HeartTwin's native reconstruction path used in the equivalence job.
 pydantic>=2.6,<3
+PyYAML>=6.0,<7
