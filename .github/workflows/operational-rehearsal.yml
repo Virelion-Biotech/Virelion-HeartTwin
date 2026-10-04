@@ -10,6 +10,8 @@ on:
       - ".github/workflows/operational-rehearsal.yml"
       - "hearttwin/rehearsal.py"
       - "hearttwin/rehearsal_worker.py"
+      - "hearttwin/superstack.py"
+      - "tests/test_superstack_continuity.py"
       - "hearttwin/contracts.py"
       - "hearttwin/alignment.py"
       - "schemas/cardiac-state-1.3.0.schema.json"
@@ -39,6 +41,8 @@ on:
       - ".github/workflows/operational-rehearsal.yml"
       - "hearttwin/rehearsal.py"
       - "hearttwin/rehearsal_worker.py"
+      - "hearttwin/superstack.py"
+      - "tests/test_superstack_continuity.py"
       - "hearttwin/contracts.py"
       - "hearttwin/alignment.py"
       - "schemas/cardiac-state-1.3.0.schema.json"
@@ -131,6 +135,8 @@ jobs:
               "multi_case_isolation_verified": True,
               "duplicate_case_submission_collapsed": True,
               "coordinator_restart_recovered": True,
+              "distributed_mechanistic_pipe": True,
+              "mechanistic_trace_verified": True,
           }
           for key, expected in required.items():
               if data.get(key) != expected:
