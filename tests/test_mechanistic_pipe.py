@@ -131,7 +131,7 @@ def test_one_artifact_chain_crosses_ep_infer_mechanics_flow_therapy_trace(tmp_pa
                 "seed": 20261004,
             },
         },
-        mechanics_settings={"cycles": 4, "dt_s": 0.002},
+        mechanics_settings={"cycles": 4, "dt_s": 0.001},
         flow_backend="windkessel-3element-v1",
         flow_fluid={"density": 1060.0, "dynamic_viscosity": 0.0035},
         flow_boundary_conditions=[
