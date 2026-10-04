@@ -5,6 +5,7 @@ versioned contracts and simultaneously reduced into one canonical CardiacState.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from math import isfinite
 from typing import Any
 
@@ -415,6 +416,7 @@ def run_multimodal_workflow(
 
     scenario = _scenario_from_workflow(entity_id, state.simulation)
     _register_local_vex_handler(registry, entity_id, scenario)
+    bridge_timestamp = datetime.now(timezone.utc).isoformat()
     bridge_result = _call(
         registry,
         "bridge.publish",
@@ -429,6 +431,8 @@ def run_multimodal_workflow(
                 for challenge in state.agent.challenges
             ],
             "intended_task": "defensive-phenotype-evaluation",
+            "created_at": bridge_timestamp,
+            "timestamp": bridge_timestamp,
         },
     )
     consumer = bridge_result.data.get("result")
