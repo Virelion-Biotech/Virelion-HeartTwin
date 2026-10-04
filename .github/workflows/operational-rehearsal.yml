@@ -137,6 +137,8 @@ jobs:
               "coordinator_restart_recovered": True,
               "distributed_mechanistic_pipe": True,
               "mechanistic_trace_verified": True,
+              "distributed_superstack": True,
+              "superstack_trace_verified": True,
           }
           for key, expected in required.items():
               if data.get(key) != expected:
@@ -146,6 +148,11 @@ jobs:
                   )
           if data.get("distributed_service_count", 0) < 15:
               raise SystemExit("Too few services crossed real HTTP worker boundaries")
+          if data.get("superstack_service_count") != 21:
+              raise SystemExit(
+                  "Superstack did not record all 21 component services: "
+                  f"{data.get('superstack_service_count')!r}"
+              )
           expected_branches = {
               "CardiAnatomy",
               "CardiEP",
