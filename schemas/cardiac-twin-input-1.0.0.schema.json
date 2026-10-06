@@ -30,6 +30,9 @@
         "apd_max":{"type":"number","exclusiveMinimum":0}
       }
     },
+    "optogenetic_stimulation": {
+      "$ref": "optical-stimulation-1.0.0.schema.json"
+    },
     "with_ecg":{"type":"boolean"}
   }
 }
