@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://virelion.ai/schemas/optical-stimulation-1.0.0.json",
+  "title": "Virelion Optical Stimulation Protocol",
+  "description": "Minimal cross-stack metadata contract for cardiac optogenetic or optoelectronic stimulation. This contract describes stimulation and provenance only; it does not imply a validated opsin kinetic model or therapeutic use.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "protocol_id", "modality", "light", "timing", "control"],
+  "properties": {
+    "schema_version": {"const": "virelion.optical-stimulation/1.0.0"},
+    "protocol_id": {"type": "string", "minLength": 1},
+    "modality": {"type": "string", "enum": ["optogenetic", "optoelectronic"]},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cell_type": {"type": ["string", "null"]},
+        "anatomical_region": {"type": ["string", "null"]},
+        "spatial_pattern": {"type": "string", "enum": ["global", "focal", "linear", "patterned", "custom"]},
+        "geometry_ref": {"type": ["string", "null"]}
+      }
+    },
+    "actuator": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": ["string", "null"]},
+        "class": {"type": "string", "enum": ["opsin", "optoelectronic_interface", "unknown"]},
+        "expression_method": {"type": ["string", "null"], "enum": ["transgenic", "viral", "other", null]}
+      }
+    },
+    "light": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wavelength_nm", "irradiance_mw_mm2", "pulse_width_ms", "frequency_hz"],
+      "properties": {
+        "wavelength_nm": {"type": "number", "exclusiveMinimum": 0},
+        "irradiance_mw_mm2": {"type": "number", "minimum": 0},
+        "pulse_width_ms": {"type": "number", "exclusiveMinimum": 0},
+        "frequency_hz": {"type": "number", "minimum": 0}
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_ms", "duration_ms"],
+      "properties": {
+        "start_ms": {"type": "number", "minimum": 0},
+        "duration_ms": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {"type": "string", "enum": ["open_loop", "closed_loop"]},
+        "feedback_signal": {"type": ["string", "null"]},
+        "controller_ref": {"type": ["string", "null"]}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "enum": ["experimental", "simulation", "literature"]},
+        "source_id": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
