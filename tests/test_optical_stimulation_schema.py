@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator, RefResolver
+from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 
 SCHEMA_DIR = Path(__file__).parents[1] / "schemas"
 OPTICAL_SCHEMA = SCHEMA_DIR / "optical-stimulation-1.0.0.schema.json"
 TWIN_INPUT_SCHEMA = SCHEMA_DIR / "cardiac-twin-input-1.0.0.schema.json"
+TWIN_OPTICAL_REF = "https://virelionbiotech.github.io/HeartTwin/schemas/optical-stimulation-1.0.0.schema.json"
 
 
 def _example_protocol():
@@ -50,8 +52,9 @@ def test_optical_stimulation_schema_is_valid_and_accepts_protocol():
 
 def test_cardiac_twin_input_accepts_optional_optogenetic_stimulation():
     schema = json.loads(TWIN_INPUT_SCHEMA.read_text(encoding="utf-8"))
-    resolver = RefResolver(base_uri=SCHEMA_DIR.as_uri() + "/", referrer=schema)
-    validator = Draft202012Validator(schema, resolver=resolver)
+    optical_schema = json.loads(OPTICAL_SCHEMA.read_text(encoding="utf-8"))
+    registry = Registry().with_resource(TWIN_OPTICAL_REF, Resource.from_contents(optical_schema))
+    validator = Draft202012Validator(schema, registry=registry)
     payload = {
         "entity_id": "fixture",
         "geometry": {
