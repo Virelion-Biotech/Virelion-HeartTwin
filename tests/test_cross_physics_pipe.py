@@ -154,7 +154,7 @@ def test_native_flow_and_pacing_results_survive_canonical_state_pipe(
     )
 
     snapshot = store.snapshot()
-    assert snapshot.flow_artifacts[0].units == flow["units"]
+    assert snapshot.flow_artifacts[0].units == flow.get("units", {})
     assert len(snapshot.flow_artifacts) == 1
     assert snapshot.flow_artifacts[0].backend == "windkessel-3element-v1"
     assert snapshot.flow_artifacts[0].validation_status == "software_checked"

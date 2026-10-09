@@ -158,3 +158,86 @@ def test_empirical_claim_requires_all_declared_uncertainty_sources():
             endpoint="LAT",
             claim="empirical",
         )
+
+
+def test_direct_service_result_cannot_bypass_claim_admission():
+    from hearttwin.contracts import ServiceResult
+
+    with pytest.raises(ValueError):
+        ServiceResult(
+            service="custom",
+            capability="custom",
+            status="ok",
+            data={
+                "scientific_claims": [
+                    {"artifact_id": "p", "endpoint": "survival", "claim": "predictive"}
+                ]
+            },
+        )
+    with pytest.raises(ValueError, match="Patient outcomes"):
+        ServiceResult(
+            service="CardiTherapy",
+            capability="therapy.run",
+            status="ok",
+            data={
+                "validation_status": "empirically_checked",
+                "outcomes": [
+                    {
+                        "endpoint": "survival",
+                        "endpoint_scope": "patient_outcome",
+                        "value": 1,
+                    }
+                ],
+            },
+        )
+
+
+def test_mutated_claims_fail_before_state_mutation():
+    from hearttwin.contracts import ServiceResult
+
+    result = ServiceResult(service="custom", capability="custom", status="ok")
+    result.data["scientific_claims"] = [
+        {"artifact_id": "p", "endpoint": "survival", "claim": "predictive"}
+    ]
+    store = CardiacStateStore.new("s")
+    before = store.fingerprint()
+    with pytest.raises(ValueError):
+        store.reduce_service_result(result)
+    assert store.fingerprint() == before
+
+
+def test_admitted_claim_is_retained_and_rechecked_on_snapshot():
+    from hearttwin.contracts import ServiceResult
+
+    evidence = CredibilityEvidence(
+        evidence_id="software-1",
+        artifact_id="ep-1",
+        context_id="activation-v1",
+        endpoint="LAT",
+        level=0,
+        comparator="fixture",
+        dataset_id="fixture",
+        dataset_version="1",
+        population="declared cohort",
+        metric="error",
+        value=0,
+        acceptance_maximum=1,
+        protocol_sha256="a" * 64,
+        report_sha256="b" * 64,
+        data_role="challenge",
+    )
+    result = ServiceResult(
+        service="custom",
+        capability="custom",
+        status="ok",
+        credibility=CredibilityEnvelope(context=context(), evidence=(evidence,)),
+        scientific_claims=[
+            {"artifact_id": "ep-1", "endpoint": "LAT", "claim": "software"}
+        ],
+    )
+    store = CardiacStateStore.new("s")
+    store.reduce_service_result(result)
+    assert store.snapshot().scientific_claims[0].artifact_id == "ep-1"
+    store.state.credibility = CredibilityEnvelope(context=context())
+    with pytest.raises(ValueError):
+        store.snapshot()

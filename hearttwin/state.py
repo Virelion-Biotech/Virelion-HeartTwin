@@ -492,6 +492,8 @@ class CardiacStateStore:
         Unknown or legacy service outputs remain in ``ServiceResult.data`` rather
         than being guessed into a cardiac-state field.
         """
+        # Revalidate mutable results before any canonical-state mutation.
+        result = ServiceResult.model_validate(result.model_dump(mode="python"))
         if result.provenance is not None:
             self._add_provenance(result.provenance)
         if result.status != "ok":
@@ -501,6 +503,9 @@ class CardiacStateStore:
 
         merged = merge_credibility(self.state.credibility, result.credibility)
         self.state.credibility = merged
+        self.state.scientific_claims = tuple(dict.fromkeys(
+            (*self.state.scientific_claims, *result.scientific_claims)
+        ))
         data = result.data
         try:
             if result.capability == "anatomy.build":
@@ -612,6 +617,9 @@ class CardiacStateStore:
         from .credibility import CredibilityEnvelope
 
         CredibilityEnvelope.model_validate(state.credibility.model_dump(mode="python"))
+        from .credibility import validate_result_claims
+
+        validate_result_claims(state.credibility, state.scientific_claims, {})
         if not state.entity_id:
             raise CardiacStateValidationError("entity_id must not be empty")
 

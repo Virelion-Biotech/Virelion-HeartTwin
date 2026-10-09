@@ -171,25 +171,16 @@ class HeartTwin:
                     parent_run_ids=[run_id],
                     content_sha256=sha256(out),
                 )
-                from .credibility import CredibilityEnvelope, require_scientific_claim
+                from .credibility import CredibilityEnvelope
 
                 out = dict(out)
                 credibility = CredibilityEnvelope.model_validate(
                     out.pop("credibility", {})
                 )
                 claims = out.pop("scientific_claims", [])
-                if not isinstance(claims, list):
-                    raise ValueError("scientific_claims must be a list")
-                for claim in claims:
-                    if not isinstance(claim, dict) or set(claim) != {
-                        "artifact_id",
-                        "endpoint",
-                        "claim",
-                    }:
-                        raise ValueError("Invalid scientific claim declaration")
-                    require_scientific_claim(credibility, **claim)
                 result = ServiceResult(
                     credibility=credibility,
+                    scientific_claims=claims,
                     service=adapter.spec.name,
                     capability=capability,
                     status="ok",

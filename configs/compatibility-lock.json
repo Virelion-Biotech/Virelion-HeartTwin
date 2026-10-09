@@ -4,7 +4,7 @@
   "repositories": [
     {
       "name": "Virelion-CardiAnatomy",
-      "sha": "70d9e44e3fcc984996cb3c0f3de96ecda3a20282",
+      "sha": "956a799d0696b074608cc8b524e1b25319393cec",
       "role": "native"
     },
     {
@@ -14,12 +14,12 @@
     },
     {
       "name": "Virelion-CardiBench",
-      "sha": "120c9bb2cf95fb2bf180cd7f6a0bfbd6514053d6",
+      "sha": "4dda685aa62a6c239caaa496d095a2737cd3e8c8",
       "role": "native"
     },
     {
       "name": "Virelion-CardiEval",
-      "sha": "cb3974697623cb67cd3209dfae673a3830ccec7a",
+      "sha": "b49865d3406ac56221f6446fa320b5b3e3e62965",
       "role": "native"
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "name": "Virelion-CardiFlow",
-      "sha": "f1965c895bc4167590f25095102b94419c5a953c",
+      "sha": "e218a83196ca67fa885f5a8e77564118d75cdb05",
       "role": "native"
     },
     {
@@ -44,7 +44,7 @@
     },
     {
       "name": "Virelion-CardiInfer",
-      "sha": "a5d5c5d596bb08c50158f64bbb88bcfac0bf5e7b",
+      "sha": "868dc68e28e1785d5fcfa157502e7b7c228bc0f5",
       "role": "native"
     },
     {
@@ -54,12 +54,12 @@
     },
     {
       "name": "Virelion-CardiVex",
-      "sha": "0b3dfa358443dfff8f25dbf9594f8d461eddd17f",
+      "sha": "dccfdb4b3f34223d59f5ccd822e4f975c3dc2cd5",
       "role": "native"
     },
     {
       "name": "Virelion-CardiStudio",
-      "sha": "881db23332da3f9a3ae08c3f9bdc80a3e031e6ac",
+      "sha": "d02739291d5e0a9d85999d0bd7fec52e93d3bf79",
       "role": "native"
     },
     {
@@ -69,32 +69,32 @@
     },
     {
       "name": "Virelion-ElectroTrace",
-      "sha": "bccf75672c2abf1a61576bcd3e7e5d37bbf24f90",
+      "sha": "bd3d3da98a12c6caf39c46a7203cabf22560bf5a",
       "role": "command"
     },
     {
       "name": "Virelion-MyoTrace",
-      "sha": "857130b6254e6dc8b2e4f245a6d7eee3c57dd853",
+      "sha": "6772d2e6db11a2ef46f2bef16a91e5c5e3d3d7a4",
       "role": "command"
     },
     {
       "name": "Virelion-OptiCell",
-      "sha": "d0361912f56796a933aecb7fcf2df0cb07dfe1df",
+      "sha": "0713a3e714dfe18ebb28623a8a87f89126f2b094",
       "role": "command"
     },
     {
       "name": "Virelion-CardioScore",
-      "sha": "e275801a0945293f895f4788ac1886bd10064f47",
+      "sha": "40b1ef02cf4cd38b652d0448dce8c2290361aabc",
       "role": "command"
     },
     {
       "name": "Virelion-CardiTherapy",
-      "sha": "5f359d9cf6d7befe4c1323b7e927ff8240044603",
+      "sha": "1907943a04f11c658ce69e95d264ff69875f7177",
       "role": "native"
     },
     {
       "name": "Virelion-CardiTrace",
-      "sha": "f09f5872a4f99fe8819f03f299194c508d4b6bef",
+      "sha": "e80739c1c3db6951dcff9c3f78743b6f397847e6",
       "role": "command"
     },
     {
@@ -104,7 +104,7 @@
     },
     {
       "name": "Virelion-CardiAgent",
-      "sha": "3761bff478e13607f4ec5c3dde50587724d2b6ec",
+      "sha": "02e76bdb56aaa44397f1a6ea4caf98738f48fa03",
       "role": "command"
     }
   ]

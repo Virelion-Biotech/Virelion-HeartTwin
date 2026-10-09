@@ -6,7 +6,9 @@ Reject nonfinite validation metrics and empty empirical gate criteria. Add versi
 
 ## Scope and remaining evidence
 
-The envelope is backward-compatible and defaults to unknown; producers must adopt it. Explicit scientific_claims in orchestrator results are checked. Arbitrary legacy text/statuses and downstream tools are not automatically policed. Declared hashes do not authenticate reports. No scientific evidence is created by these contracts. Empirical claims require listed uncertainty sources; list all material upstream sources in the context.
+The envelope is backward-compatible and defaults to unknown; producers must adopt it. Explicit scientific_claims are checked when ServiceResult is constructed and rechecked before canonical state mutation, including direct callers. Admitted claims are retained and rechecked in state snapshots. Structured patient outcomes require an artifact-bound clinical_decision claim. Arbitrary legacy text/statuses and downstream tools are not automatically policed. Declared hashes do not authenticate reports. No scientific evidence is created by these contracts. Empirical claims require listed uncertainty sources; list all material upstream sources in the context.
+
+Integration CI pins the changed components to the audit revisions merged into main. Unchanged component pins are retained. Legacy flow adapters without unit metadata remain unknown rather than receiving inferred units.
 
 ## Implementation
 
@@ -25,4 +27,4 @@ The envelope is backward-compatible and defaults to unknown; producers must adop
 
 ## Verification
 
-Regression tests accompany the changes. Repository test results are recorded in the audit completion report and draft pull request. Software regression checks do not establish numerical, biological, transport or clinical validity.
+Regression tests accompany the changes. Repository test results are recorded in the audit completion report and pull request. Software regression checks do not establish numerical, biological, transport or clinical validity.

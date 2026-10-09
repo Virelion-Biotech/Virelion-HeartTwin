@@ -1508,6 +1508,40 @@
       "title": "Provenance",
       "type": "object"
     },
+    "ScientificClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "endpoint": {
+          "minLength": 1,
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "claim": {
+          "enum": [
+            "software",
+            "numerical",
+            "empirical",
+            "transport",
+            "predictive",
+            "clinical_decision"
+          ],
+          "title": "Claim",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "endpoint",
+        "claim"
+      ],
+      "title": "ScientificClaim",
+      "type": "object"
+    },
     "SimulationArtifact": {
       "additionalProperties": false,
       "properties": {
@@ -2412,6 +2446,14 @@
     },
     "credibility": {
       "$ref": "#/$defs/CredibilityEnvelope"
+    },
+    "scientific_claims": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ScientificClaim"
+      },
+      "title": "Scientific Claims",
+      "type": "array"
     },
     "biological_context": {
       "additionalProperties": true,

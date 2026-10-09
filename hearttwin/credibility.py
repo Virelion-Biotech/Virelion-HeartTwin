@@ -234,6 +234,54 @@ def require_scientific_claim(envelope, *, artifact_id, endpoint, claim):
     return True
 
 
+class ScientificClaim(ScientificModel):
+    artifact_id: str = Field(min_length=1)
+    endpoint: str = Field(min_length=1)
+    claim: Literal[
+        "software",
+        "numerical",
+        "empirical",
+        "transport",
+        "predictive",
+        "clinical_decision",
+    ]
+
+
+def validate_result_claims(envelope, claims, data):
+    """Check every declared claim and prohibit patient-outcome tier jumps.
+
+    This is contract admission, not scientific authentication of the supplied evidence.
+    """
+    declared = data.get("scientific_claims", [])
+    if not isinstance(declared, (list, tuple)):
+        raise ValueError("scientific_claims must be an array")
+    parsed = tuple(ScientificClaim.model_validate(x) for x in (*claims, *declared))
+    for claim in parsed:
+        require_scientific_claim(envelope, **claim.model_dump())
+    outcomes = data.get("outcomes", [])
+    if isinstance(outcomes, list):
+        for outcome in outcomes:
+            if (
+                not isinstance(outcome, dict)
+                or outcome.get("endpoint_scope") != "patient_outcome"
+            ):
+                continue
+            artifact = outcome.get("artifact_ref")
+            artifact_id = (
+                artifact.get("artifact_id") if isinstance(artifact, dict) else None
+            )
+            if not artifact_id or not any(
+                claim.artifact_id == artifact_id
+                and claim.endpoint == outcome.get("endpoint")
+                and claim.claim == "clinical_decision"
+                for claim in parsed
+            ):
+                raise ValueError(
+                    "Patient outcomes require an artifact-bound clinical_decision evidence claim"
+                )
+    return tuple(dict.fromkeys(parsed))
+
+
 def merge_credibility(first, second):
     if (
         first.context is not None

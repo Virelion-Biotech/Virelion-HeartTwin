@@ -5,9 +5,9 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .credibility import CredibilityEnvelope
+from .credibility import CredibilityEnvelope, ScientificClaim, validate_result_claims
 
 CONTRACT_VERSION = "1.4.0"
 
@@ -539,6 +539,7 @@ class CardiacState(BaseModel):
     entity_id: str
     state_fingerprint: str | None = None
     credibility: CredibilityEnvelope = Field(default_factory=CredibilityEnvelope)
+    scientific_claims: tuple[ScientificClaim, ...] = ()
     biological_context: dict[str, Any] = Field(default_factory=dict)
     state_phase: StatePhase = "unknown"
     observations: list[Observation] = Field(default_factory=list)
@@ -573,12 +574,21 @@ class CardiacState(BaseModel):
 class ServiceResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     credibility: CredibilityEnvelope = Field(default_factory=CredibilityEnvelope)
+    scientific_claims: tuple[ScientificClaim, ...] = ()
     service: str
     capability: str
     status: Literal["ok", "unavailable", "error", "skipped"]
     data: dict[str, Any] = Field(default_factory=dict)
     message: str | None = None
     provenance: Provenance | None = None
+
+    @model_validator(mode="after")
+    def scientific_admission(self):
+        if self.status == "ok":
+            self.scientific_claims = validate_result_claims(
+                self.credibility, self.scientific_claims, self.data
+            )
+        return self
 
 
 class WorkflowState(BaseModel):
