@@ -1,12 +1,15 @@
 """Versioned contracts shared by the HeartTwin orchestrator and state layer."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-CONTRACT_VERSION = "1.3.0"
+from .credibility import CredibilityEnvelope, ScientificClaim, validate_result_claims
+
+CONTRACT_VERSION = "1.4.0"
 
 
 class Provenance(BaseModel):
@@ -24,8 +27,14 @@ class Observation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     observation_id: str
     modality: Literal[
-        "molecular", "electrical", "mechanical", "imaging", "safety", "structural",
-        "clinical", "other"
+        "molecular",
+        "electrical",
+        "mechanical",
+        "imaging",
+        "safety",
+        "structural",
+        "clinical",
+        "other",
     ]
     values: dict[str, Any] = Field(default_factory=dict)
     provenance: Provenance
@@ -83,8 +92,17 @@ class StateValue(BaseModel):
     model_config = ConfigDict(extra="forbid")
     value_id: str
     domain: Literal[
-        "electrical", "mechanical", "structural", "molecular", "metabolic",
-        "imaging", "clinical", "safety", "simulation", "inference", "other"
+        "electrical",
+        "mechanical",
+        "structural",
+        "molecular",
+        "metabolic",
+        "imaging",
+        "clinical",
+        "safety",
+        "simulation",
+        "inference",
+        "other",
     ]
     variable: str
     value: Any
@@ -165,6 +183,7 @@ class FlowArtifact(BaseModel):
     backend: str
     scalar_outputs: dict[str, float] = Field(default_factory=dict)
     series_outputs: dict[str, list[float]] = Field(default_factory=dict)
+    units: dict[str, str] = Field(default_factory=dict)
     qc: dict[str, Any] | None = None
     validation_status: str = "unvalidated"
     anatomy_artifact_id: str | None = None
@@ -222,8 +241,10 @@ class ValidationGateArtifact(BaseModel):
     gate_id: str
     policy_id: str
     evidence_level: Literal[
-        "numerical_verification", "synthetic_recovery",
-        "empirical_validation", "clinical_validation",
+        "numerical_verification",
+        "synthetic_recovery",
+        "empirical_validation",
+        "clinical_validation",
     ]
     passed: bool
     criteria: list[dict[str, Any]] = Field(default_factory=list)
@@ -256,8 +277,17 @@ class ValidationArtifact(BaseModel):
 
 
 StatePhase = Literal[
-    "unknown", "baseline", "injury", "acute", "remodeling", "recovery",
-    "intervention", "post_intervention", "simulated", "evaluated", "validated"
+    "unknown",
+    "baseline",
+    "injury",
+    "acute",
+    "remodeling",
+    "recovery",
+    "intervention",
+    "post_intervention",
+    "simulated",
+    "evaluated",
+    "validated",
 ]
 
 
@@ -375,6 +405,7 @@ class FlowResultPayload(BaseModel):
     outputs: list[dict[str, Any]] = Field(default_factory=list)
     scalar_outputs: dict[str, float] = Field(default_factory=dict)
     series_outputs: dict[str, list[float]] = Field(default_factory=dict)
+    units: dict[str, str] = Field(default_factory=dict)
     qc: dict[str, Any] | None = None
     validation_status: str = "unvalidated"
     provenance: dict[str, Any] = Field(default_factory=dict)
@@ -507,6 +538,8 @@ class CardiacState(BaseModel):
     contract_version: str = CONTRACT_VERSION
     entity_id: str
     state_fingerprint: str | None = None
+    credibility: CredibilityEnvelope = Field(default_factory=CredibilityEnvelope)
+    scientific_claims: tuple[ScientificClaim, ...] = ()
     biological_context: dict[str, Any] = Field(default_factory=dict)
     state_phase: StatePhase = "unknown"
     observations: list[Observation] = Field(default_factory=list)
@@ -540,12 +573,22 @@ class CardiacState(BaseModel):
 
 class ServiceResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    credibility: CredibilityEnvelope = Field(default_factory=CredibilityEnvelope)
+    scientific_claims: tuple[ScientificClaim, ...] = ()
     service: str
     capability: str
     status: Literal["ok", "unavailable", "error", "skipped"]
     data: dict[str, Any] = Field(default_factory=dict)
     message: str | None = None
     provenance: Provenance | None = None
+
+    @model_validator(mode="after")
+    def scientific_admission(self):
+        if self.status == "ok":
+            self.scientific_claims = validate_result_claims(
+                self.credibility, self.scientific_claims, self.data
+            )
+        return self
 
 
 class WorkflowState(BaseModel):

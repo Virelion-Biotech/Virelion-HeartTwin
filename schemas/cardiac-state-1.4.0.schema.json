@@ -1,0 +1,2667 @@
+{
+  "$defs": {
+    "AgentChallengePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Id"
+        },
+        "challenges": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Challenges",
+          "type": "array"
+        }
+      },
+      "required": [
+        "challenges"
+      ],
+      "title": "AgentChallengePayload",
+      "type": "object"
+    },
+    "AnatomyBundlePayload": {
+      "additionalProperties": false,
+      "description": "Compact HeartTwin view of a CardiAnatomy AnatomyBundle.",
+      "properties": {
+        "contract_version": {
+          "default": "2.0.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "study_id": {
+          "title": "Study Id",
+          "type": "string"
+        },
+        "acquisition_id": {
+          "title": "Acquisition Id",
+          "type": "string"
+        },
+        "artifacts": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "frames": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Frames",
+          "type": "array"
+        },
+        "registrations": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Registrations",
+          "type": "array"
+        },
+        "labels": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "stages": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Stages",
+          "type": "array"
+        },
+        "qc": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qc"
+        },
+        "provenance": {
+          "additionalProperties": true,
+          "title": "Provenance",
+          "type": "object"
+        },
+        "bundle_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bundle Fingerprint"
+        }
+      },
+      "required": [
+        "subject_id",
+        "study_id",
+        "acquisition_id"
+      ],
+      "title": "AnatomyBundlePayload",
+      "type": "object"
+    },
+    "AtlasContextPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "context_id": {
+          "title": "Context Id",
+          "type": "string"
+        },
+        "record_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Record Ids",
+          "type": "array"
+        },
+        "context": {
+          "additionalProperties": true,
+          "title": "Context",
+          "type": "object"
+        },
+        "provenance": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "context_id"
+      ],
+      "title": "AtlasContextPayload",
+      "type": "object"
+    },
+    "BenchmarkResolutionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "benchmark_id": {
+          "title": "Benchmark Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "policy": {
+          "title": "Policy",
+          "type": "string"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "assignments": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Assignments",
+          "type": "object"
+        },
+        "sample_count": {
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "group_count": {
+          "title": "Group Count",
+          "type": "integer"
+        },
+        "metadata_sha256": {
+          "title": "Metadata Sha256",
+          "type": "string"
+        },
+        "samples": {
+          "items": {
+            "$ref": "#/$defs/BenchmarkSamplePayload"
+          },
+          "title": "Samples",
+          "type": "array"
+        }
+      },
+      "required": [
+        "benchmark_id",
+        "version",
+        "policy",
+        "seed",
+        "assignments",
+        "sample_count",
+        "group_count",
+        "metadata_sha256",
+        "samples"
+      ],
+      "title": "BenchmarkResolutionPayload",
+      "type": "object"
+    },
+    "BenchmarkSamplePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "sample_id": {
+          "title": "Sample Id",
+          "type": "string"
+        },
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "study_id": {
+          "title": "Study Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "technical_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Technical Group"
+        },
+        "organism": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organism"
+        },
+        "timepoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timepoint"
+        },
+        "cell_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cell Context"
+        },
+        "region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region"
+        }
+      },
+      "required": [
+        "sample_id",
+        "group_id",
+        "study_id",
+        "label"
+      ],
+      "title": "BenchmarkSamplePayload",
+      "type": "object"
+    },
+    "BridgePublicationPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "message_type": {
+          "title": "Message Type",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "transport": {
+          "title": "Transport",
+          "type": "string"
+        },
+        "content_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Sha256"
+        },
+        "consumer_result": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Consumer Result"
+        }
+      },
+      "required": [
+        "message_type",
+        "message_id",
+        "status",
+        "transport"
+      ],
+      "title": "BridgePublicationPayload",
+      "type": "object"
+    },
+    "ContextOfUse": {
+      "additionalProperties": false,
+      "properties": {
+        "context_id": {
+          "minLength": 1,
+          "title": "Context Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "population": {
+          "minLength": 1,
+          "title": "Population",
+          "type": "string"
+        },
+        "endpoints": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Endpoints",
+          "type": "array"
+        },
+        "applicability_domain": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Applicability Domain",
+          "type": "array"
+        },
+        "model_risk": {
+          "default": "unknown",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "unknown"
+          ],
+          "title": "Model Risk",
+          "type": "string"
+        },
+        "required_uncertainty_kinds": {
+          "default": [
+            "measurement",
+            "parameter",
+            "numerical",
+            "model_discrepancy"
+          ],
+          "items": {
+            "enum": [
+              "measurement",
+              "segmentation",
+              "registration",
+              "scar",
+              "fiber",
+              "parameter",
+              "numerical",
+              "model_discrepancy"
+            ],
+            "type": "string"
+          },
+          "title": "Required Uncertainty Kinds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "context_id",
+        "purpose",
+        "population",
+        "endpoints",
+        "applicability_domain"
+      ],
+      "title": "ContextOfUse",
+      "type": "object"
+    },
+    "CredibilityEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContextOfUse"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CredibilityEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "data_roles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DataRoleRecord"
+          },
+          "title": "Data Roles",
+          "type": "array"
+        },
+        "uncertainties": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UncertaintyRecord"
+          },
+          "title": "Uncertainties",
+          "type": "array"
+        }
+      },
+      "title": "CredibilityEnvelope",
+      "type": "object"
+    },
+    "CredibilityEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "context_id": {
+          "minLength": 1,
+          "title": "Context Id",
+          "type": "string"
+        },
+        "endpoint": {
+          "minLength": 1,
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "level": {
+          "maximum": 6,
+          "minimum": 0,
+          "title": "Level",
+          "type": "integer"
+        },
+        "comparator": {
+          "minLength": 1,
+          "title": "Comparator",
+          "type": "string"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "dataset_version": {
+          "minLength": 1,
+          "title": "Dataset Version",
+          "type": "string"
+        },
+        "population": {
+          "minLength": 1,
+          "title": "Population",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "acceptance_minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Acceptance Minimum"
+        },
+        "acceptance_maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Acceptance Maximum"
+        },
+        "protocol_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Protocol Sha256",
+          "type": "string"
+        },
+        "report_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Report Sha256",
+          "type": "string"
+        },
+        "data_role": {
+          "enum": [
+            "training",
+            "calibration",
+            "tuning",
+            "internal_validation",
+            "external_validation",
+            "challenge",
+            "prospective"
+          ],
+          "title": "Data Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "artifact_id",
+        "context_id",
+        "endpoint",
+        "level",
+        "comparator",
+        "dataset_id",
+        "dataset_version",
+        "population",
+        "metric",
+        "value",
+        "protocol_sha256",
+        "report_sha256",
+        "data_role"
+      ],
+      "title": "CredibilityEvidence",
+      "type": "object"
+    },
+    "DataRoleRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "dataset_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Sha256",
+          "type": "string"
+        },
+        "subject_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Subject Ids",
+          "type": "array"
+        },
+        "role": {
+          "enum": [
+            "training",
+            "calibration",
+            "tuning",
+            "internal_validation",
+            "external_validation",
+            "challenge",
+            "prospective"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "context_id": {
+          "minLength": 1,
+          "title": "Context Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "dataset_sha256",
+        "subject_ids",
+        "role",
+        "context_id"
+      ],
+      "title": "DataRoleRecord",
+      "type": "object"
+    },
+    "EPArtifact": {
+      "additionalProperties": false,
+      "description": "Canonical HeartTwin representation of one CardiEP forward result.",
+      "properties": {
+        "ep_id": {
+          "title": "Ep Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "outputs": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "validation_status": {
+          "default": "unvalidated",
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "anatomy_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy Artifact Id"
+        },
+        "anatomy_bundle_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy Bundle Fingerprint"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ep_id",
+        "subject_id",
+        "backend"
+      ],
+      "title": "EPArtifact",
+      "type": "object"
+    },
+    "FlowArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "flow_id": {
+          "title": "Flow Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "scalar_outputs": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Scalar Outputs",
+          "type": "object"
+        },
+        "series_outputs": {
+          "additionalProperties": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Series Outputs",
+          "type": "object"
+        },
+        "units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "qc": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qc"
+        },
+        "validation_status": {
+          "default": "unvalidated",
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "anatomy_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy Artifact Id"
+        },
+        "anatomy_bundle_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy Bundle Fingerprint"
+        },
+        "mechanics_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mechanics Artifact Id"
+        },
+        "mechanics_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mechanics Sha256"
+        },
+        "coupling_mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coupling Mode"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "flow_id",
+        "subject_id",
+        "backend"
+      ],
+      "title": "FlowArtifact",
+      "type": "object"
+    },
+    "LearningPredictionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "sample_id": {
+          "title": "Sample Id",
+          "type": "string"
+        },
+        "y_true": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y True"
+        },
+        "y_pred": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Y Pred"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "subgroup": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subgroup"
+        }
+      },
+      "required": [
+        "sample_id",
+        "y_pred"
+      ],
+      "title": "LearningPredictionPayload",
+      "type": "object"
+    },
+    "MechanicsArtifact": {
+      "additionalProperties": false,
+      "description": "Canonical HeartTwin representation of one CardiMech forward result.",
+      "properties": {
+        "mechanics_id": {
+          "title": "Mechanics Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "outputs": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "scalar_outputs": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Scalar Outputs",
+          "type": "object"
+        },
+        "qc": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qc"
+        },
+        "validation_status": {
+          "default": "unvalidated",
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "anatomy_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy Artifact Id"
+        },
+        "anatomy_bundle_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy Bundle Fingerprint"
+        },
+        "activation_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Activation Artifact Id"
+        },
+        "activation_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Activation Sha256"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mechanics_id",
+        "subject_id",
+        "backend"
+      ],
+      "title": "MechanicsArtifact",
+      "type": "object"
+    },
+    "ModalityAnalysisPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "observation_id": {
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "modality": {
+          "enum": [
+            "electrical",
+            "mechanical",
+            "imaging",
+            "safety"
+          ],
+          "title": "Modality",
+          "type": "string"
+        },
+        "capability": {
+          "title": "Capability",
+          "type": "string"
+        },
+        "service": {
+          "title": "Service",
+          "type": "string"
+        },
+        "input_path": {
+          "title": "Input Path",
+          "type": "string"
+        },
+        "output": {
+          "additionalProperties": true,
+          "title": "Output",
+          "type": "object"
+        },
+        "content_sha256": {
+          "title": "Content Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observation_id",
+        "modality",
+        "capability",
+        "service",
+        "input_path",
+        "output",
+        "content_sha256"
+      ],
+      "title": "ModalityAnalysisPayload",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "modality": {
+          "enum": [
+            "molecular",
+            "electrical",
+            "mechanical",
+            "imaging",
+            "safety",
+            "structural",
+            "clinical",
+            "other"
+          ],
+          "title": "Modality",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": true,
+          "title": "Values",
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "status": {
+          "default": "observed",
+          "enum": [
+            "observed",
+            "inferred",
+            "simulated"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "uncertainty": {
+          "additionalProperties": true,
+          "title": "Uncertainty",
+          "type": "object"
+        },
+        "recorded_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recorded At"
+        },
+        "anatomical_region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomical Region"
+        },
+        "measurement_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measurement Method"
+        },
+        "quality": {
+          "additionalProperties": true,
+          "title": "Quality",
+          "type": "object"
+        },
+        "subject_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subject Id"
+        },
+        "timepoint_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timepoint Id"
+        }
+      },
+      "required": [
+        "observation_id",
+        "modality",
+        "provenance"
+      ],
+      "title": "Observation",
+      "type": "object"
+    },
+    "PosteriorArtifact": {
+      "additionalProperties": false,
+      "description": "Canonical HeartTwin representation of one CardiInfer posterior result.",
+      "properties": {
+        "posterior_id": {
+          "title": "Posterior Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "model_service": {
+          "title": "Model Service",
+          "type": "string"
+        },
+        "model_capability": {
+          "title": "Model Capability",
+          "type": "string"
+        },
+        "posterior": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Posterior",
+          "type": "array"
+        },
+        "posterior_samples": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Posterior Samples"
+        },
+        "convergence": {
+          "additionalProperties": true,
+          "title": "Convergence",
+          "type": "object"
+        },
+        "identifiability": {
+          "additionalProperties": true,
+          "title": "Identifiability",
+          "type": "object"
+        },
+        "sensitivity": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sensitivity"
+        },
+        "diagnostics": {
+          "additionalProperties": true,
+          "title": "Diagnostics",
+          "type": "object"
+        },
+        "validation_status": {
+          "default": "unvalidated",
+          "enum": [
+            "unvalidated",
+            "software_checked",
+            "synthetic_recovery_checked",
+            "empirically_checked"
+          ],
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "posterior_id",
+        "subject_id",
+        "backend",
+        "model_service",
+        "model_capability"
+      ],
+      "title": "PosteriorArtifact",
+      "type": "object"
+    },
+    "PredictionArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "prediction_id": {
+          "title": "Prediction Id",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "task": {
+          "title": "Task",
+          "type": "string"
+        },
+        "target_column": {
+          "title": "Target Column",
+          "type": "string"
+        },
+        "feature_columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Feature Columns",
+          "type": "array"
+        },
+        "predictions": {
+          "items": {
+            "$ref": "#/$defs/LearningPredictionPayload"
+          },
+          "title": "Predictions",
+          "type": "array"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "dataset_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Fingerprint"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "prediction_id",
+        "model_id",
+        "task",
+        "target_column"
+      ],
+      "title": "PredictionArtifact",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "source_service": {
+          "title": "Source Service",
+          "type": "string"
+        },
+        "source_repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Repository"
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Version"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "parent_run_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Parent Run Ids",
+          "type": "array"
+        },
+        "content_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Sha256"
+        }
+      },
+      "required": [
+        "source_service",
+        "run_id"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScientificClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "endpoint": {
+          "minLength": 1,
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "claim": {
+          "enum": [
+            "software",
+            "numerical",
+            "empirical",
+            "transport",
+            "predictive",
+            "clinical_decision"
+          ],
+          "title": "Claim",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "endpoint",
+        "claim"
+      ],
+      "title": "ScientificClaim",
+      "type": "object"
+    },
+    "SimulationArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "simulation_id": {
+          "title": "Simulation Id",
+          "type": "string"
+        },
+        "service": {
+          "title": "Service",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "summary": {
+          "additionalProperties": true,
+          "title": "Summary",
+          "type": "object"
+        },
+        "events": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "population_size": {
+          "minimum": 0,
+          "title": "Population Size",
+          "type": "integer"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "simulation_id",
+        "service",
+        "backend",
+        "population_size"
+      ],
+      "title": "SimulationArtifact",
+      "type": "object"
+    },
+    "StateTransition": {
+      "additionalProperties": false,
+      "properties": {
+        "transition_id": {
+          "title": "Transition Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "from_phase": {
+          "enum": [
+            "unknown",
+            "baseline",
+            "injury",
+            "acute",
+            "remodeling",
+            "recovery",
+            "intervention",
+            "post_intervention",
+            "simulated",
+            "evaluated",
+            "validated"
+          ],
+          "title": "From Phase",
+          "type": "string"
+        },
+        "to_phase": {
+          "enum": [
+            "unknown",
+            "baseline",
+            "injury",
+            "acute",
+            "remodeling",
+            "recovery",
+            "intervention",
+            "post_intervention",
+            "simulated",
+            "evaluated",
+            "validated"
+          ],
+          "title": "To Phase",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "transition_id",
+        "sequence",
+        "from_phase",
+        "to_phase",
+        "trigger"
+      ],
+      "title": "StateTransition",
+      "type": "object"
+    },
+    "StateValue": {
+      "additionalProperties": false,
+      "description": "A typed, provenance-linked variable contributing to canonical cardiac state.",
+      "properties": {
+        "value_id": {
+          "title": "Value Id",
+          "type": "string"
+        },
+        "domain": {
+          "enum": [
+            "electrical",
+            "mechanical",
+            "structural",
+            "molecular",
+            "metabolic",
+            "imaging",
+            "clinical",
+            "safety",
+            "simulation",
+            "inference",
+            "other"
+          ],
+          "title": "Domain",
+          "type": "string"
+        },
+        "variable": {
+          "title": "Variable",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "anatomical_region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomical Region"
+        },
+        "time": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time"
+        },
+        "status": {
+          "enum": [
+            "observed",
+            "inferred",
+            "simulated"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UncertaintySpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "value_id",
+        "domain",
+        "variable",
+        "value",
+        "status"
+      ],
+      "title": "StateValue",
+      "type": "object"
+    },
+    "TherapyArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "therapy_id": {
+          "title": "Therapy Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "plan_id": {
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "outcomes": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "artifacts": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "validation_status": {
+          "default": "unvalidated",
+          "title": "Validation Status",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "twin_state_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Twin State Artifact Id"
+        },
+        "twin_state_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Twin State Sha256"
+        },
+        "twin_state_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Twin State Fingerprint"
+        },
+        "posterior_artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Posterior Artifact Id"
+        },
+        "posterior_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Posterior Sha256"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "therapy_id",
+        "subject_id",
+        "backend",
+        "plan_id"
+      ],
+      "title": "TherapyArtifact",
+      "type": "object"
+    },
+    "UncertaintyRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "uncertainty_id": {
+          "minLength": 1,
+          "title": "Uncertainty Id",
+          "type": "string"
+        },
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "measurement",
+            "segmentation",
+            "registration",
+            "scar",
+            "fiber",
+            "parameter",
+            "numerical",
+            "model_discrepancy"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "quantified",
+            "sensitivity_only"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "evidence_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "ensemble_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ensemble Sha256"
+        },
+        "lower": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lower"
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "uncertainty_id",
+        "artifact_id",
+        "kind"
+      ],
+      "title": "UncertaintyRecord",
+      "type": "object"
+    },
+    "UncertaintySpec": {
+      "additionalProperties": false,
+      "description": "Structured uncertainty metadata for canonical derived state values.",
+      "properties": {
+        "distribution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Distribution"
+        },
+        "lower": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lower"
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper"
+        },
+        "std": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Std"
+        },
+        "confidence_level": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Level"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        }
+      },
+      "title": "UncertaintySpec",
+      "type": "object"
+    },
+    "ValidationArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "validation_id": {
+          "title": "Validation Id",
+          "type": "string"
+        },
+        "benchmark_id": {
+          "title": "Benchmark Id",
+          "type": "string"
+        },
+        "benchmark_version": {
+          "title": "Benchmark Version",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "evaluator_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evaluator Version"
+        },
+        "benchmark_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Sha256"
+        },
+        "split": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Split"
+        },
+        "sample_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sample Count"
+        },
+        "ground_truth_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ground Truth Source"
+        },
+        "primary_direction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Direction"
+        },
+        "primary_metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Metric"
+        },
+        "primary_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Value"
+        },
+        "metrics": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Metrics",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "errors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "evaluation_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evaluation Fingerprint"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "validation_id",
+        "benchmark_id",
+        "benchmark_version",
+        "task_id",
+        "model_id"
+      ],
+      "title": "ValidationArtifact",
+      "type": "object"
+    },
+    "ValidationGateArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "gate_id": {
+          "title": "Gate Id",
+          "type": "string"
+        },
+        "policy_id": {
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "evidence_level": {
+          "enum": [
+            "numerical_verification",
+            "synthetic_recovery",
+            "empirical_validation",
+            "clinical_validation"
+          ],
+          "title": "Evidence Level",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "criteria": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "observed_metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Observed Metrics",
+          "type": "object"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "provenance_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provenance Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "gate_id",
+        "policy_id",
+        "evidence_level",
+        "passed"
+      ],
+      "title": "ValidationGateArtifact",
+      "type": "object"
+    },
+    "VexObservationPayload": {
+      "additionalProperties": true,
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "scenario_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scenario Id"
+        },
+        "evidence_tier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Tier"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "primary": {
+          "additionalProperties": true,
+          "title": "Primary",
+          "type": "object"
+        }
+      },
+      "title": "VexObservationPayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Canonical typed state shared by all HeartTwin workflow stages.\n\nThe older ``inferred_state``, ``simulations``, ``predictions`` and ``validation``\ndictionaries remain as compatibility mirrors. New code should use the typed\nartifact collections below them.",
+  "properties": {
+    "contract_version": {
+      "default": "1.4.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "entity_id": {
+      "title": "Entity Id",
+      "type": "string"
+    },
+    "state_fingerprint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "State Fingerprint"
+    },
+    "credibility": {
+      "$ref": "#/$defs/CredibilityEnvelope"
+    },
+    "scientific_claims": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ScientificClaim"
+      },
+      "title": "Scientific Claims",
+      "type": "array"
+    },
+    "biological_context": {
+      "additionalProperties": true,
+      "title": "Biological Context",
+      "type": "object"
+    },
+    "state_phase": {
+      "default": "unknown",
+      "enum": [
+        "unknown",
+        "baseline",
+        "injury",
+        "acute",
+        "remodeling",
+        "recovery",
+        "intervention",
+        "post_intervention",
+        "simulated",
+        "evaluated",
+        "validated"
+      ],
+      "title": "State Phase",
+      "type": "string"
+    },
+    "observations": {
+      "items": {
+        "$ref": "#/$defs/Observation"
+      },
+      "title": "Observations",
+      "type": "array"
+    },
+    "atlas_context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AtlasContextPayload"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "anatomy_bundles": {
+      "items": {
+        "$ref": "#/$defs/AnatomyBundlePayload"
+      },
+      "title": "Anatomy Bundles",
+      "type": "array"
+    },
+    "benchmarks": {
+      "items": {
+        "$ref": "#/$defs/BenchmarkResolutionPayload"
+      },
+      "title": "Benchmarks",
+      "type": "array"
+    },
+    "modality_analyses": {
+      "items": {
+        "$ref": "#/$defs/ModalityAnalysisPayload"
+      },
+      "title": "Modality Analyses",
+      "type": "array"
+    },
+    "derived_values": {
+      "items": {
+        "$ref": "#/$defs/StateValue"
+      },
+      "title": "Derived Values",
+      "type": "array"
+    },
+    "simulation_artifacts": {
+      "items": {
+        "$ref": "#/$defs/SimulationArtifact"
+      },
+      "title": "Simulation Artifacts",
+      "type": "array"
+    },
+    "prediction_artifacts": {
+      "items": {
+        "$ref": "#/$defs/PredictionArtifact"
+      },
+      "title": "Prediction Artifacts",
+      "type": "array"
+    },
+    "ep_artifacts": {
+      "items": {
+        "$ref": "#/$defs/EPArtifact"
+      },
+      "title": "Ep Artifacts",
+      "type": "array"
+    },
+    "mechanics_artifacts": {
+      "items": {
+        "$ref": "#/$defs/MechanicsArtifact"
+      },
+      "title": "Mechanics Artifacts",
+      "type": "array"
+    },
+    "flow_artifacts": {
+      "items": {
+        "$ref": "#/$defs/FlowArtifact"
+      },
+      "title": "Flow Artifacts",
+      "type": "array"
+    },
+    "therapy_artifacts": {
+      "items": {
+        "$ref": "#/$defs/TherapyArtifact"
+      },
+      "title": "Therapy Artifacts",
+      "type": "array"
+    },
+    "posterior_artifacts": {
+      "items": {
+        "$ref": "#/$defs/PosteriorArtifact"
+      },
+      "title": "Posterior Artifacts",
+      "type": "array"
+    },
+    "evaluation_artifacts": {
+      "items": {
+        "$ref": "#/$defs/ValidationArtifact"
+      },
+      "title": "Evaluation Artifacts",
+      "type": "array"
+    },
+    "validation_gates": {
+      "items": {
+        "$ref": "#/$defs/ValidationGateArtifact"
+      },
+      "title": "Validation Gates",
+      "type": "array"
+    },
+    "challenges": {
+      "items": {
+        "$ref": "#/$defs/AgentChallengePayload"
+      },
+      "title": "Challenges",
+      "type": "array"
+    },
+    "vex_observations": {
+      "items": {
+        "$ref": "#/$defs/VexObservationPayload"
+      },
+      "title": "Vex Observations",
+      "type": "array"
+    },
+    "bridge_publications": {
+      "items": {
+        "$ref": "#/$defs/BridgePublicationPayload"
+      },
+      "title": "Bridge Publications",
+      "type": "array"
+    },
+    "transitions": {
+      "items": {
+        "$ref": "#/$defs/StateTransition"
+      },
+      "title": "Transitions",
+      "type": "array"
+    },
+    "trace_records": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Trace Records",
+      "type": "array"
+    },
+    "provenance": {
+      "items": {
+        "$ref": "#/$defs/Provenance"
+      },
+      "title": "Provenance",
+      "type": "array"
+    },
+    "inferred_state": {
+      "additionalProperties": true,
+      "title": "Inferred State",
+      "type": "object"
+    },
+    "simulations": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Simulations",
+      "type": "array"
+    },
+    "predictions": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Predictions",
+      "type": "array"
+    },
+    "validation": {
+      "additionalProperties": true,
+      "title": "Validation",
+      "type": "object"
+    }
+  },
+  "required": [
+    "entity_id"
+  ],
+  "title": "CardiacState",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://virelion.org/schemas/cardiac-state-1.4.0.json"
+}

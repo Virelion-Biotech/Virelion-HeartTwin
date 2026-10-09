@@ -13,7 +13,11 @@ from hearttwin.contracts import (
     SimulationResultPayload,
     StateValue,
 )
-from hearttwin.state import CardiacStateStore, CardiacStateValidationError, state_from_service_results
+from hearttwin.state import (
+    CardiacStateStore,
+    CardiacStateValidationError,
+    state_from_service_results,
+)
 
 
 def provenance(service: str, run_id: str) -> Provenance:
@@ -43,7 +47,9 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
         target_column="target",
         feature_columns=["x1"],
         metrics={"test": {"accuracy": 1.0}},
-        predictions=[LearningPredictionPayload(sample_id="s1", y_true=1, y_pred=1, score=0.9)],
+        predictions=[
+            LearningPredictionPayload(sample_id="s1", y_true=1, y_pred=1, score=0.9)
+        ],
         dataset_fingerprint="b" * 64,
     )
     store.record_learning(learning, learning_prov, capability="learn.predict")
@@ -79,8 +85,10 @@ def test_canonical_store_reduces_typed_artifacts_and_fingerprints():
     )
 
     snapshot = store.snapshot()
-    assert snapshot.contract_version == "1.3.0"
-    assert snapshot.state_phase == "baseline"  # Recording metrics is not a validation gate.
+    assert snapshot.contract_version == "1.4.0"
+    assert (
+        snapshot.state_phase == "baseline"
+    )  # Recording metrics is not a validation gate.
     assert len(snapshot.prediction_artifacts) == 1
     assert snapshot.predictions[0]["capability"] == "learn.predict"
     assert len(snapshot.simulation_artifacts) == 1
@@ -128,7 +136,9 @@ def test_dangling_provenance_is_rejected():
             provenance_ids=["missing-run"],
         )
     )
-    with pytest.raises(CardiacStateValidationError, match="Dangling HeartTwin provenance"):
+    with pytest.raises(
+        CardiacStateValidationError, match="Dangling HeartTwin provenance"
+    ):
         store.validate()
 
 
@@ -156,7 +166,13 @@ def test_ep_and_mechanics_results_are_first_class_canonical_artifacts():
         subject_id="subject-1",
         backend="surface-eikonal-v1",
         parameters={"values": {"speed": 0.1}},
-        outputs=[{"artifact_id": "activation", "kind": "activation_map", "uri": "file:///activation.json"}],
+        outputs=[
+            {
+                "artifact_id": "activation",
+                "kind": "activation_map",
+                "uri": "file:///activation.json",
+            }
+        ],
         validation_status="software_checked",
         provenance={
             "anatomy_artifact_id": "surface",
@@ -178,7 +194,13 @@ def test_ep_and_mechanics_results_are_first_class_canonical_artifacts():
         subject_id="subject-1",
         backend="numpy-lumped-v1",
         parameters={"passive": {}, "active": {}},
-        outputs=[{"artifact_id": "timeseries", "kind": "mechanics_timeseries", "uri": "file:///mechanics.json"}],
+        outputs=[
+            {
+                "artifact_id": "timeseries",
+                "kind": "mechanics_timeseries",
+                "uri": "file:///mechanics.json",
+            }
+        ],
         scalar_outputs={"edv_ml": 120.0},
         validation_status="software_checked",
         provenance={

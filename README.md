@@ -148,7 +148,7 @@ No automatic transformation is made between unlike biological quantities. Cross-
 
 ## Canonical `CardiacState`
 
-The current contract is **version `1.3.0`**.
+The current contract is **version `1.4.0`**.
 
 `CardiacState` carries typed collections for:
 
@@ -175,7 +175,7 @@ The current contract is **version `1.3.0`**.
 
 The legacy `inferred_state`, `simulations`, `predictions`, and `validation` dictionary fields remain as compatibility mirrors. New code should use the typed collections.
 
-See [`docs/CARDIAC_STATE.md`](docs/CARDIAC_STATE.md) and [`schemas/cardiac-state-1.3.0.schema.json`](schemas/cardiac-state-1.3.0.schema.json).
+See [`docs/CARDIAC_STATE.md`](docs/CARDIAC_STATE.md) and [`schemas/cardiac-state-1.4.0.schema.json`](schemas/cardiac-state-1.4.0.schema.json).
 
 ## Current implementation
 

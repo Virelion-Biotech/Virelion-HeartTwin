@@ -58,12 +58,19 @@ The state layer validates structural invariants: IDs, typed artifacts, provenanc
 
 ## Schema
 
-The current versioned JSON schema is `schemas/cardiac-state-1.3.0.schema.json`. Earlier schemas remain retained for compatibility. New producers should emit `contract_version = 1.3.0`. EP and mechanics forward results are first-class canonical artifacts rather than opaque service-result dictionaries.
+The current versioned JSON schema is `schemas/cardiac-state-1.4.0.schema.json`. Earlier schemas remain retained for compatibility. New producers should emit `contract_version = 1.4.0`. EP and mechanics forward results are first-class canonical artifacts rather than opaque service-result dictionaries.
 
 
 ## Scientific evidence gates
 
 Evaluation artifacts and scientific validation are separate. `validation_gates` record prespecified criteria, evidence identifiers, observed metrics, pass/fail state, and provenance without changing the biological/execution phase. Numerical, synthetic-recovery, empirical, and clinical evidence therefore remain explicit rather than being inferred from successful workflow execution.
+
+Typed `scientific_claims` bind a claim tier to an artifact and endpoint. The same
+evidence gate applies to orchestrated and direct `ServiceResult` callers, and
+the reducer rechecks mutable results before admitting them to canonical state.
+Admitted claims remain in snapshots and are rechecked against their evidence.
+Structured patient outcomes require an artifact-bound `clinical_decision` claim.
+These checks validate submitted contracts; they do not authenticate the evidence.
 
 
 ## Observation alignment

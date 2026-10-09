@@ -9,18 +9,47 @@ from .service_registry import ServiceRegistry
 from .state import CardiacStateStore, CardiacStateValidationError
 
 DEFAULT_CAPABILITIES = [
-    "atlas.context", "atlas.search", "design.generate", "population.generate",
-    "design.validate", "power.plan", "challenge.validate", "challenge.assess",
-    "challenge.materialize", "recovery.score", "host.map", "electrical.analyze",
-    "mechanical.analyze", "imaging.qc", "safety.score", "learn.infer", "learn.predict",
-    "simulation.run", "benchmark.resolve", "evaluation.run", "trace.record",
-    "agent.challenge", "vex.observe"
+    "atlas.context",
+    "atlas.search",
+    "design.generate",
+    "population.generate",
+    "design.validate",
+    "power.plan",
+    "challenge.validate",
+    "challenge.assess",
+    "challenge.materialize",
+    "recovery.score",
+    "host.map",
+    "electrical.analyze",
+    "mechanical.analyze",
+    "imaging.qc",
+    "safety.score",
+    "learn.infer",
+    "learn.predict",
+    "simulation.run",
+    "benchmark.resolve",
+    "evaluation.run",
+    "trace.record",
+    "agent.challenge",
+    "vex.observe",
 ]
 
 TYPED_STATE_CAPABILITIES = {
-    "anatomy.build", "atlas.context", "benchmark.resolve", "learn.infer", "learn.predict",
-    "ep.simulate", "infer.run", "mechanics.simulate", "flow.simulate", "therapy.run",
-    "simulation.run", "evaluation.run", "agent.challenge", "bridge.publish", "vex.observe",
+    "anatomy.build",
+    "atlas.context",
+    "benchmark.resolve",
+    "learn.infer",
+    "learn.predict",
+    "ep.simulate",
+    "infer.run",
+    "mechanics.simulate",
+    "flow.simulate",
+    "therapy.run",
+    "simulation.run",
+    "evaluation.run",
+    "agent.challenge",
+    "bridge.publish",
+    "vex.observe",
     "trace.record",
 }
 
@@ -142,7 +171,16 @@ class HeartTwin:
                     parent_run_ids=[run_id],
                     content_sha256=sha256(out),
                 )
+                from .credibility import CredibilityEnvelope
+
+                out = dict(out)
+                credibility = CredibilityEnvelope.model_validate(
+                    out.pop("credibility", {})
+                )
+                claims = out.pop("scientific_claims", [])
                 result = ServiceResult(
+                    credibility=credibility,
+                    scientific_claims=claims,
                     service=adapter.spec.name,
                     capability=capability,
                     status="ok",
