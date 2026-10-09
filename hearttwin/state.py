@@ -1,4 +1,5 @@
 """Canonical CardiacState reducer, validation, and fingerprinting utilities."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -82,7 +83,9 @@ class CardiacStateStore:
         return cls(state)
 
     @classmethod
-    def from_snapshot(cls, state: CardiacState, *, verify: bool = True) -> "CardiacStateStore":
+    def from_snapshot(
+        cls, state: CardiacState, *, verify: bool = True
+    ) -> "CardiacStateStore":
         """Create a store from an existing snapshot, optionally verifying its fingerprint."""
         store = cls(state.model_copy(deep=True))
         if verify:
@@ -98,7 +101,9 @@ class CardiacStateStore:
         return [provenance.run_id]
 
     def add_observation(self, observation: Observation) -> None:
-        if observation.observation_id in {item.observation_id for item in self.state.observations}:
+        if observation.observation_id in {
+            item.observation_id for item in self.state.observations
+        }:
             raise CardiacStateValidationError(
                 f"Duplicate observation_id: {observation.observation_id}"
             )
@@ -107,14 +112,18 @@ class CardiacStateStore:
         if self.state.state_phase == "unknown":
             self.state.state_phase = "baseline"
 
-    def record_atlas(self, payload: AtlasContextPayload, provenance: Provenance | None = None) -> None:
+    def record_atlas(
+        self, payload: AtlasContextPayload, provenance: Provenance | None = None
+    ) -> None:
         self.state.atlas_context = payload
         self._add_provenance(provenance)
 
     def record_anatomy(
         self, payload: AnatomyBundlePayload, provenance: Provenance | None = None
     ) -> None:
-        fingerprint = payload.bundle_fingerprint or sha256(payload.model_dump(mode="json"))
+        fingerprint = payload.bundle_fingerprint or sha256(
+            payload.model_dump(mode="json")
+        )
         existing = {
             item.bundle_fingerprint or sha256(item.model_dump(mode="json"))
             for item in self.state.anatomy_bundles
@@ -148,10 +157,15 @@ class CardiacStateStore:
         self, payload: ModalityAnalysisPayload, provenance: Provenance | None = None
     ) -> None:
         self._append_unique(
-            self.state.modality_analyses, payload, "observation_id", payload.observation_id
+            self.state.modality_analyses,
+            payload,
+            "observation_id",
+            payload.observation_id,
         )
         self._add_provenance(provenance)
-        domain = _CAPABILITY_PREFIX_TO_DOMAIN.get(payload.capability.split(".", 1)[0] + ".")
+        domain = _CAPABILITY_PREFIX_TO_DOMAIN.get(
+            payload.capability.split(".", 1)[0] + "."
+        )
         if domain:
             self._record_derived(
                 domain=domain,
@@ -184,7 +198,11 @@ class CardiacStateStore:
             self.state.prediction_artifacts, artifact, "prediction_id", artifact_id
         )
         self.state.predictions = [
-            {"capability": capability, "data": payload.model_dump(mode="json"), "status": "inferred"}
+            {
+                "capability": capability,
+                "data": payload.model_dump(mode="json"),
+                "status": "inferred",
+            }
         ]
         return artifact
 
@@ -227,9 +245,7 @@ class CardiacStateStore:
             anatomy_bundle_fingerprint=payload.provenance.get(
                 "anatomy_bundle_fingerprint"
             ),
-            activation_artifact_id=payload.provenance.get(
-                "activation_artifact_id"
-            ),
+            activation_artifact_id=payload.provenance.get("activation_artifact_id"),
             activation_sha256=payload.provenance.get("activation_sha256"),
             provenance_ids=self._add_provenance(provenance),
         )
@@ -251,6 +267,7 @@ class CardiacStateStore:
             backend=payload.backend,
             scalar_outputs=payload.scalar_outputs,
             series_outputs=payload.series_outputs,
+            units=payload.units,
             qc=payload.qc,
             validation_status=payload.validation_status,
             anatomy_artifact_id=payload.provenance.get("anatomy_artifact_id"),
@@ -331,7 +348,11 @@ class CardiacStateStore:
             self.state.simulation_artifacts, artifact, "simulation_id", artifact_id
         )
         self.state.simulations = [
-            {"capability": "simulation.run", "data": payload.model_dump(mode="json"), "status": "simulated"}
+            {
+                "capability": "simulation.run",
+                "data": payload.model_dump(mode="json"),
+                "status": "simulated",
+            }
         ]
         return artifact
 
@@ -339,7 +360,9 @@ class CardiacStateStore:
         self, payload: AgentChallengePayload, provenance: Provenance | None = None
     ) -> None:
         fingerprint = sha256(payload.model_dump(mode="json"))
-        existing_ids = {sha256(item.model_dump(mode="json")) for item in self.state.challenges}
+        existing_ids = {
+            sha256(item.model_dump(mode="json")) for item in self.state.challenges
+        }
         if fingerprint not in existing_ids:
             self.state.challenges.append(payload)
         self._add_provenance(provenance)
@@ -357,7 +380,9 @@ class CardiacStateStore:
         self, payload: VexObservationPayload, provenance: Provenance | None = None
     ) -> None:
         fingerprint = sha256(payload.model_dump(mode="json"))
-        existing_ids = {sha256(item.model_dump(mode="json")) for item in self.state.vex_observations}
+        existing_ids = {
+            sha256(item.model_dump(mode="json")) for item in self.state.vex_observations
+        }
         if fingerprint not in existing_ids:
             self.state.vex_observations.append(payload)
         self._add_provenance(provenance)
@@ -416,11 +441,19 @@ class CardiacStateStore:
     ) -> None:
         provenance_ids = self._add_provenance(provenance)
         artifact = artifact.model_copy(
-            update={"provenance_ids": sorted(set(artifact.provenance_ids) | set(provenance_ids))}
+            update={
+                "provenance_ids": sorted(
+                    set(artifact.provenance_ids) | set(provenance_ids)
+                )
+            }
         )
-        self._append_unique(self.state.validation_gates, artifact, "gate_id", artifact.gate_id)
+        self._append_unique(
+            self.state.validation_gates, artifact, "gate_id", artifact.gate_id
+        )
 
-    def record_trace(self, data: Mapping[str, Any], provenance: Provenance | None = None) -> None:
+    def record_trace(
+        self, data: Mapping[str, Any], provenance: Provenance | None = None
+    ) -> None:
         self.state.trace_records.append(dict(data))
         self.state.validation["trace"] = dict(data)
         self._add_provenance(provenance)
@@ -435,7 +468,9 @@ class CardiacStateStore:
     ) -> StateTransition:
         from_phase = self.state.state_phase
         if to_phase == from_phase:
-            raise CardiacStateValidationError(f"No-op state transition is not allowed: {to_phase}")
+            raise CardiacStateValidationError(
+                f"No-op state transition is not allowed: {to_phase}"
+            )
         transition_id = f"transition-{sha256({'entity_id': self.state.entity_id, 'from': from_phase, 'to': to_phase, 'trigger': trigger, 'n': len(self.state.transitions)})[:16]}"
         transition = StateTransition(
             transition_id=transition_id,
@@ -462,14 +497,24 @@ class CardiacStateStore:
         if result.status != "ok":
             return
 
+        from .credibility import merge_credibility
+
+        merged = merge_credibility(self.state.credibility, result.credibility)
+        self.state.credibility = merged
         data = result.data
         try:
             if result.capability == "anatomy.build":
-                self.record_anatomy(AnatomyBundlePayload.model_validate(data), result.provenance)
+                self.record_anatomy(
+                    AnatomyBundlePayload.model_validate(data), result.provenance
+                )
             elif result.capability == "atlas.context":
-                self.record_atlas(AtlasContextPayload.model_validate(data), result.provenance)
+                self.record_atlas(
+                    AtlasContextPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "benchmark.resolve":
-                self.record_benchmark(BenchmarkResolutionPayload.model_validate(data), result.provenance)
+                self.record_benchmark(
+                    BenchmarkResolutionPayload.model_validate(data), result.provenance
+                )
             elif result.capability in {"learn.infer", "learn.predict"}:
                 self.record_learning(
                     LearningResultPayload.model_validate(data),
@@ -483,7 +528,9 @@ class CardiacStateStore:
                     MechanicsResultPayload.model_validate(data), result.provenance
                 )
             elif result.capability == "flow.simulate":
-                self.record_flow(FlowResultPayload.model_validate(data), result.provenance)
+                self.record_flow(
+                    FlowResultPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "therapy.run":
                 self.record_therapy(
                     TherapyResultPayload.model_validate(data), result.provenance
@@ -493,19 +540,37 @@ class CardiacStateStore:
                     InferenceResultPayload.model_validate(data), result.provenance
                 )
             elif result.capability == "simulation.run":
-                self.record_simulation(SimulationResultPayload.model_validate(data), result.provenance)
+                self.record_simulation(
+                    SimulationResultPayload.model_validate(data), result.provenance
+                )
                 if self.state.state_phase != "simulated":
-                    self.transition("simulated", trigger=result.capability, provenance=result.provenance)
+                    self.transition(
+                        "simulated",
+                        trigger=result.capability,
+                        provenance=result.provenance,
+                    )
             elif result.capability == "agent.challenge":
-                self.record_agent(AgentChallengePayload.model_validate(data), result.provenance)
+                self.record_agent(
+                    AgentChallengePayload.model_validate(data), result.provenance
+                )
             elif result.capability == "vex.observe":
-                self.record_vex(VexObservationPayload.model_validate(data), result.provenance)
+                self.record_vex(
+                    VexObservationPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "evaluation.run":
-                self.record_evaluation(EvaluationResultPayload.model_validate(data), result.provenance)
+                self.record_evaluation(
+                    EvaluationResultPayload.model_validate(data), result.provenance
+                )
                 if self.state.state_phase != "evaluated":
-                    self.transition("evaluated", trigger=result.capability, provenance=result.provenance)
+                    self.transition(
+                        "evaluated",
+                        trigger=result.capability,
+                        provenance=result.provenance,
+                    )
             elif result.capability == "bridge.publish":
-                self.record_bridge(BridgePublicationPayload.model_validate(data), result.provenance)
+                self.record_bridge(
+                    BridgePublicationPayload.model_validate(data), result.provenance
+                )
             elif result.capability == "trace.record":
                 self.record_trace(data, result.provenance)
         except Exception as exc:
@@ -544,22 +609,47 @@ class CardiacStateStore:
 
     def validate(self) -> None:
         state = self.state
+        from .credibility import CredibilityEnvelope
+
+        CredibilityEnvelope.model_validate(state.credibility.model_dump(mode="python"))
         if not state.entity_id:
             raise CardiacStateValidationError("entity_id must not be empty")
 
-        self._assert_unique([item.observation_id for item in state.observations], "observation_id")
-        self._assert_unique([item.value_id for item in state.derived_values], "value_id")
-        self._assert_unique([item.simulation_id for item in state.simulation_artifacts], "simulation_id")
-        self._assert_unique([item.prediction_id for item in state.prediction_artifacts], "prediction_id")
+        self._assert_unique(
+            [item.observation_id for item in state.observations], "observation_id"
+        )
+        self._assert_unique(
+            [item.value_id for item in state.derived_values], "value_id"
+        )
+        self._assert_unique(
+            [item.simulation_id for item in state.simulation_artifacts], "simulation_id"
+        )
+        self._assert_unique(
+            [item.prediction_id for item in state.prediction_artifacts], "prediction_id"
+        )
         self._assert_unique([item.ep_id for item in state.ep_artifacts], "ep_id")
-        self._assert_unique([item.mechanics_id for item in state.mechanics_artifacts], "mechanics_id")
+        self._assert_unique(
+            [item.mechanics_id for item in state.mechanics_artifacts], "mechanics_id"
+        )
         self._assert_unique([item.flow_id for item in state.flow_artifacts], "flow_id")
-        self._assert_unique([item.therapy_id for item in state.therapy_artifacts], "therapy_id")
-        self._assert_unique([item.posterior_id for item in state.posterior_artifacts], "posterior_id")
-        self._assert_unique([item.validation_id for item in state.evaluation_artifacts], "validation_id")
-        self._assert_unique([item.gate_id for item in state.validation_gates], "gate_id")
-        self._assert_unique([item.message_id for item in state.bridge_publications], "message_id")
-        self._assert_unique([item.transition_id for item in state.transitions], "transition_id")
+        self._assert_unique(
+            [item.therapy_id for item in state.therapy_artifacts], "therapy_id"
+        )
+        self._assert_unique(
+            [item.posterior_id for item in state.posterior_artifacts], "posterior_id"
+        )
+        self._assert_unique(
+            [item.validation_id for item in state.evaluation_artifacts], "validation_id"
+        )
+        self._assert_unique(
+            [item.gate_id for item in state.validation_gates], "gate_id"
+        )
+        self._assert_unique(
+            [item.message_id for item in state.bridge_publications], "message_id"
+        )
+        self._assert_unique(
+            [item.transition_id for item in state.transitions], "transition_id"
+        )
 
         provenance_ids = {item.run_id for item in state.provenance}
         all_links: list[str] = []
@@ -581,7 +671,9 @@ class CardiacStateStore:
                 all_links.extend(item.provenance_ids)
         for item in all_links:
             if item not in provenance_ids:
-                raise CardiacStateValidationError(f"Dangling HeartTwin provenance link: {item}")
+                raise CardiacStateValidationError(
+                    f"Dangling HeartTwin provenance link: {item}"
+                )
 
         expected_phase: StatePhase = "unknown"
         if state.observations:
@@ -597,7 +689,12 @@ class CardiacStateStore:
             raise CardiacStateValidationError(
                 f"state_phase={state.state_phase} does not match final transition phase={expected_phase}"
             )
-        if not state.transitions and state.state_phase not in {expected_phase, "simulated", "evaluated", "validated"}:
+        if not state.transitions and state.state_phase not in {
+            expected_phase,
+            "simulated",
+            "evaluated",
+            "validated",
+        }:
             raise CardiacStateValidationError(
                 f"state_phase={state.state_phase} is inconsistent with current observations"
             )
@@ -608,7 +705,9 @@ class CardiacStateStore:
     def snapshot(self) -> CardiacState:
         self.validate()
         snapshot = self.state.model_copy(deep=True)
-        snapshot.state_fingerprint = sha256(snapshot.model_dump(mode="json", exclude={"state_fingerprint"}))
+        snapshot.state_fingerprint = sha256(
+            snapshot.model_dump(mode="json", exclude={"state_fingerprint"})
+        )
         return snapshot
 
     def verify_fingerprint(self) -> str:
@@ -654,7 +753,9 @@ class CardiacStateStore:
         }
         value_id = value_id or f"value-{sha256(payload)[:16]}"
         if value_id in {item.value_id for item in self.state.derived_values}:
-            return next(item for item in self.state.derived_values if item.value_id == value_id)
+            return next(
+                item for item in self.state.derived_values if item.value_id == value_id
+            )
         item = StateValue(
             value_id=value_id,
             domain=domain,
@@ -680,10 +781,14 @@ class CardiacStateStore:
                 duplicates.add(value)
             seen.add(value)
         if duplicates:
-            raise CardiacStateValidationError(f"Duplicate {label}: {sorted(duplicates)}")
+            raise CardiacStateValidationError(
+                f"Duplicate {label}: {sorted(duplicates)}"
+            )
 
     @staticmethod
-    def _append_unique(collection: list[Any], item: Any, field: str, value: str) -> None:
+    def _append_unique(
+        collection: list[Any], item: Any, field: str, value: str
+    ) -> None:
         if any(getattr(existing, field) == value for existing in collection):
             return
         collection.append(item)

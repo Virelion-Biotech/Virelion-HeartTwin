@@ -7,7 +7,7 @@ from hearttwin.contracts import CardiacState, Observation, Provenance
 from hearttwin.state import CardiacStateStore
 
 
-SCHEMA_PATH = Path(__file__).parents[1] / "schemas" / "cardiac-state-1.3.0.schema.json"
+SCHEMA_PATH = Path(__file__).parents[1] / "schemas" / "cardiac-state-1.4.0.schema.json"
 
 
 def test_published_cardiac_state_schema_is_valid_and_accepts_runtime_snapshot():
@@ -26,8 +26,8 @@ def test_published_cardiac_state_schema_is_valid_and_accepts_runtime_snapshot():
         key=str,
     )
     assert not errors, [error.message for error in errors]
-    assert snapshot.contract_version == "1.3.0"
-    assert schema["$id"].endswith("cardiac-state-1.3.0.json")
+    assert snapshot.contract_version == "1.4.0"
+    assert schema["$id"].endswith("cardiac-state-1.4.0.json")
 
 
 def test_card_state_default_is_backward_compatible():

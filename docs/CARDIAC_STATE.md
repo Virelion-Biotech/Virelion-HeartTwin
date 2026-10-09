@@ -58,7 +58,7 @@ The state layer validates structural invariants: IDs, typed artifacts, provenanc
 
 ## Schema
 
-The current versioned JSON schema is `schemas/cardiac-state-1.3.0.schema.json`. Earlier schemas remain retained for compatibility. New producers should emit `contract_version = 1.3.0`. EP and mechanics forward results are first-class canonical artifacts rather than opaque service-result dictionaries.
+The current versioned JSON schema is `schemas/cardiac-state-1.4.0.schema.json`. Earlier schemas remain retained for compatibility. New producers should emit `contract_version = 1.4.0`. EP and mechanics forward results are first-class canonical artifacts rather than opaque service-result dictionaries.
 
 
 ## Scientific evidence gates

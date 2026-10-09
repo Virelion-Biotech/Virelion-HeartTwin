@@ -11,9 +11,7 @@ from hearttwin import CardiacStateStore, Provenance, ServiceResult, load_registr
 
 
 def _require_native(registry, names: set[str]) -> None:
-    missing = sorted(
-        name for name in names if not registry.adapters[name].available()
-    )
+    missing = sorted(name for name in names if not registry.adapters[name].available())
     if missing and os.getenv("HEARTTWIN_REQUIRE_NATIVE") != "1":
         pytest.skip("native component packages not installed: " + ", ".join(missing))
     assert not missing
@@ -156,6 +154,7 @@ def test_native_flow_and_pacing_results_survive_canonical_state_pipe(
     )
 
     snapshot = store.snapshot()
+    assert snapshot.flow_artifacts[0].units == flow["units"]
     assert len(snapshot.flow_artifacts) == 1
     assert snapshot.flow_artifacts[0].backend == "windkessel-3element-v1"
     assert snapshot.flow_artifacts[0].validation_status == "software_checked"
@@ -167,7 +166,8 @@ def test_native_flow_and_pacing_results_survive_canonical_state_pipe(
     payload = snapshot.model_dump(mode="json")
     json.dumps(payload, allow_nan=False)
     schema = json.loads(
-        (Path(__file__).parents[1] / "schemas" / "cardiac-state-1.3.0.schema.json")
-        .read_text(encoding="utf-8")
+        (
+            Path(__file__).parents[1] / "schemas" / "cardiac-state-1.4.0.schema.json"
+        ).read_text(encoding="utf-8")
     )
     jsonschema.validate(payload, schema)
