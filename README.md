@@ -6,6 +6,21 @@ HeartTwin does **not** replace specialist algorithms with one monolith. It conne
 
 > **Status note — 2026-10-08:** the stack has expanded substantially beyond the original multimodal workflow. The repository now includes a complete mechanistic path, a single-subject superstack continuity workflow, distributed operational rehearsal, cross-physics lineage in `CardiacState`, and a shared optical-stimulation compatibility contract. Several component repositories also received new CPU-verified releases on 2026-10-07/08. Those latest component heads are described below, but they are **not automatically equivalent to the frozen HeartTwin compatibility matrix** until that matrix is deliberately refreshed and requalified.
 
+
+<!-- VALIDATION_PRODUCT_STATUS:BEGIN -->
+## Validation and product completion status
+
+**Reviewed 2026-10-14; implementation base `e8b43c09118f`.** **Status: Integration/operational rehearsal; end-to-end twin qualification incomplete.** This is an evidence-backed scope assessment, not a percentage-complete estimate or a declaration that the product is finished.
+
+| Area | Current evidence / remaining gate |
+|---|---|
+| Software / operational checks | Automated test sources and CI definitions are present; this documentation audit does not report a new algorithm/data-validation run. |
+| Scientific or domain evidence | Typed multimodal/mechanistic workflows, frozen compatibility tests and operational rehearsal exist. Component-level evidence and new main heads are not automatically qualification of the frozen compatibility matrix or a patient twin. |
+| Remaining for the declared product scope | Refresh/requalify the intended dependency matrix after component changes; execute measured single-subject workflows with explicit calibrated cross-domain mappings; establish independent end-to-end uncertainty/outcome evidence; qualify distributed recovery, artifact retention and deployment security for intended operation. |
+
+Evidence and limits: [repository report](docs/SUPERSTACK_CONTINUITY.md). The [organization status index](https://github.com/Virelion-Biotech/Virelion-HeartTwin/blob/main/docs/STACK_VALIDATION_STATUS.md) separates software, numerical, data-readiness and empirical qualification. Code/schema execution or a completed download is not a substitute for endpoint-specific validation.
+<!-- VALIDATION_PRODUCT_STATUS:END -->
+
 ## What HeartTwin now orchestrates
 
 HeartTwin exposes several complementary execution paths:

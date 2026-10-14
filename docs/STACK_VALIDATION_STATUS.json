@@ -1,0 +1,296 @@
+{
+  "review_date": "2026-10-14",
+  "scope": "All 29 accessible Virelion-Biotech repositories; source/report audit plus returned DCCP integrity artifact, no new scientific runs",
+  "repositories": [
+    {
+      "repository": "Virelion-DCCP",
+      "readme": "README.md",
+      "base_commit": "1b10db187acdfc150b06c7ec2ac0db3be141a50c",
+      "validation_status": "Data integrity/readiness only; empirical severity qualification blocked",
+      "evidence_path": "validation/colab_gse240848_2026_10_14/REVIEW.json",
+      "remaining_product_work": "Resolve animal/sample/condition mapping and independent severity labels; lock host-axis calibration and a subject-disjoint empirical benchmark; qualify OOD and recovery endpoints on independent host evidence.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-OptiCell",
+      "readme": "README.md",
+      "base_commit": "053d9a669d9820e2c6208b474b381c99ec909c4b",
+      "validation_status": "Research workbench; domain-specific accuracy remains incomplete",
+      "evidence_path": "docs/CTC_DIAGNOSIS_2026-10-10.md",
+      "remaining_product_work": "Complete learned-backend and real-GPU matrices; qualify independent-lab/domain segmentation and counting; repair/qualify dim-object detection and division lineage; calibrate QC/confidence against labels. Existing batch UI, projects, brush correction, provenance and deployment features are implemented; larger deployment and reader coverage still require intended-scale checks.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-ElectroTrace",
+      "readme": "README.md",
+      "base_commit": "bd3d3da98a12c6caf39c46a7203cabf22560bf5a",
+      "validation_status": "External algorithmic characterization exists; clinical/streaming claims unestablished",
+      "evidence_path": "validation_reports/VALIDATION_STATUS.md",
+      "remaining_product_work": "Predeclare and evaluate a genuinely unused cohort with subject-level uncertainty and failure accounting; qualify lead-selection benefit prospectively; validate streaming latency/robustness if shipping a streaming product; freeze intended-use/device boundaries and operational acceptance criteria.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-MyoTrace",
+      "readme": "README.md",
+      "base_commit": "6772d2e6db11a2ef46f2bef16a91e5c5e3d3d7a4",
+      "validation_status": "Analytical accuracy recovery; public recordings lack independent beat/force truth",
+      "evidence_path": "docs/ACCURACY_RECOVERY.md",
+      "remaining_product_work": "Acquire independent beat/timing and instrument-calibrated mechanical references with ROI/acquisition metadata; resolve multimode/drift/unsigned double-event failures; validate across batches/labs and test-retest; add bounded-memory streaming for large acquisitions.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardioScore",
+      "readme": "README.md",
+      "base_commit": "40b1ef02cf4cd38b652d0448dce8c2290361aabc",
+      "validation_status": "Workbook ingestion/audit evidence; external score qualification incomplete",
+      "evidence_path": "docs/cipa_blinova_workbook_audit.md",
+      "remaining_product_work": "Finish provenance/field-semantic reconciliation and complete endpoint mapping; independently qualify raw-waveform extraction; freeze score weights/probability calibration and independent-unit splits; evaluate held-out compounds/sites with uncertainty and clinical-utility boundaries.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiSim",
+      "readme": "README.md",
+      "base_commit": "462413ec8fb34968f2269eb535151f53cb5f4940",
+      "validation_status": "Bounded numerical surrogate benchmark; biological/clinical validation incomplete",
+      "evidence_path": "docs/DEEPCARDIOSIM_COLAB_2026-10-12.md",
+      "remaining_product_work": "Run controlled full-4,804-node and validation-stopped training ablations with stronger baselines; audit physical scale and independent anatomical identity; qualify on a new holdout. Separately calibrate/validate phenotype trajectories and phenotype-to-CDT mappings with empirical longitudinal/perturbation data.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiAgent",
+      "readme": "README.md",
+      "base_commit": "984347b63a84201aa5d9a4489412d5fb4cbaace6",
+      "validation_status": "Synthetic generator verification; patient realism unqualified",
+      "evidence_path": "docs/JOINT_GENERATOR.md",
+      "remaining_product_work": "Qualify joint dependence and interpolation across independent empirical domains; retain extrapolation guards and explicit quality status; implement/qualify temporal and partial-observation behavior where required; run live producer/consumer integrations and independent blinded challenge evaluation.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiVex",
+      "readme": "README.md",
+      "base_commit": "dccfdb4b3f34223d59f5ccd822e4f975c3dc2cd5",
+      "validation_status": "Limited empirical/numerical characterization; broader qualification incomplete",
+      "evidence_path": "validation/real_data/summary.json",
+      "remaining_product_work": "Lock a larger independent subject-level external benchmark; establish novelty/OOD labels and threshold calibration; qualify longitudinal recovery endpoints and model-conditional uncertainty; strengthen independently blinded cross-service challenge evaluation.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiAnatomy",
+      "readme": "README.md",
+      "base_commit": "0bd310ac9408ba208d5248804ba07a053c988e21",
+      "validation_status": "Geometry/contract and numerical checks; anatomical reconstruction qualification incomplete",
+      "evidence_path": "validation/cpu/AUDIT.md",
+      "remaining_product_work": "Integrate and qualify explicit imaging/segmentation/reconstruction backends with independent labeled images; validate registration, motion, scar and fibers against appropriate truth; resolve required mesh/element/reader coverage; demonstrate intended-scale simulation-ready exports with provenance.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiEP",
+      "readme": "README.md",
+      "base_commit": "2bcdd1ec2e282c1986d91459a0c39cea5b3ade15",
+      "validation_status": "Analytical/numerical reference evidence; empirical EP qualification incomplete",
+      "evidence_path": "docs/CPU_AUDIT.md",
+      "remaining_product_work": "Complete intended-backend cross-solver/mesh/time convergence and ionic/PDE qualification; calibrate against registered measured activation/repolarization/ECG data; validate held-out observables/subjects and noise/discrepancy models; qualify performance and durable backend execution for the declared scope.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiInfer",
+      "readme": "README.md",
+      "base_commit": "e8eac832f053244d4e0abe374ff4912327457d50",
+      "validation_status": "Synthetic inference verification; empirical uncertainty calibration incomplete",
+      "evidence_path": "docs/NOISE_AWARE_CARDIEP.md",
+      "remaining_product_work": "Establish repeated-inference coverage/SBC for supported models and observation noise; handle correlated errors and ECG registration where needed; validate held-out observables on empirical cohorts; qualify plugin adapters, convergence diagnostics and uncertainty propagation without treating distance objectives as likelihoods.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiMech",
+      "readme": "README.md",
+      "base_commit": "69c02886a24f9faa989b4c3c56c0ea26eea05d69",
+      "validation_status": "Lumped and restricted spatial numerical verification; myocardial validation incomplete",
+      "evidence_path": "docs/SPATIAL_MECHANICS.md",
+      "remaining_product_work": "Address near-incompressible locking/mixed formulation and broader benchmark convergence; implement intended dynamic EP/spatial circulation coupling and inverse-field calibration; validate registered myocardial displacement/strain/pressure on held-out measured data; qualify scar/contact only if those capabilities enter scope.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiFlow",
+      "readme": "README.md",
+      "base_commit": "75c22fad2059293557bd6eb73c3c45bb16bfa6f8",
+      "validation_status": "0D and restricted spatial numerical evidence; patient-flow qualification incomplete",
+      "evidence_path": "docs/SPATIAL_REFERENCE.md",
+      "remaining_product_work": "For the broader flow product, implement/qualify anatomical boundary labeling, 3D/branched flow, moving-wall and 0D\u2013spatial coupling with mesh-field artifacts; demonstrate convergence and measured-flow agreement; propagate uncertainty and qualify intended-scale execution.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiTherapy",
+      "readme": "README.md",
+      "base_commit": "1907943a04f11c658ce69e95d264ff69875f7177",
+      "validation_status": "Restricted model-proxy interventions numerically checked; measured benefit unqualified",
+      "evidence_path": "docs/INTERVENTION_MODELS.md",
+      "remaining_product_work": "Validate supported endpoints against independent measured treatment responses and explicit baseline calibration; implement posterior propagation; add scientifically specified backends before exposing unsupported therapy types; qualify comparators, uncertainty and intended-use boundaries.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiAtlas",
+      "readme": "README.md",
+      "base_commit": "37f452b92c5089c5d03efb09475379e998a73c0a",
+      "validation_status": "Metadata/schema/source checks; biomedical-claim curation incomplete",
+      "evidence_path": "validation/README.md",
+      "remaining_product_work": "Resolve required biological IDs and metadata ambiguities; curate graph relationships/claims with source-location evidence and contradiction review; benchmark retrieval/normalization accuracy against a reviewed corpus; qualify source refresh, persistence and consumer handoffs at intended scale.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiBench",
+      "readme": "README.md",
+      "base_commit": "b5a1983145bcd412bb4d946feb50d08bc719568b",
+      "validation_status": "Manifest/leakage/admission infrastructure; dataset fitness remains cohort-specific",
+      "evidence_path": "SCIENTIFIC_AUDIT_2026-10-09.md",
+      "remaining_product_work": "Complete cohort-specific subject/sample/condition/time/region reconciliation and raw-source hashes; freeze independent splits and metric policies; audit deduplication/study-family leakage and evidence fitness; qualify source refresh and result-history operations without bypassing manual admission.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiEval",
+      "readme": "README.md",
+      "base_commit": "294628f87044b78b434a722ec2b49cd7eb0be019",
+      "validation_status": "Synthetic/contract/statistical verification; real benchmark adoption incomplete",
+      "evidence_path": "validation/README.md",
+      "remaining_product_work": "Adopt frozen real benchmark packages and independently produced submissions; enforce appropriate subject/cluster units and subgroup coverage; qualify calibration/clinical-utility reporting and interval behavior for intended tasks; complete deployment signing/key/access-control requirements where needed.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiLearn",
+      "readme": "README.md",
+      "base_commit": "1b8ad6e5ca9fc9a22a0bef6faea32486df9d88a3",
+      "validation_status": "Research architectures and locked metadata infrastructure; empirical staged gates incomplete",
+      "evidence_path": "docs/VALIDATION_READINESS.md",
+      "remaining_product_work": "Materialize/hash strict count sources and finish raw-read rescue for eligible cohorts; execute locked simple baselines before staged encoder evaluation; establish subject/study-family-safe independent results and real paired modalities before fusion; obtain independently labeled task/calibration evidence. Follow the existing AGENTS.md stage gates; this status update does not advance a scientific stage.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiStudio",
+      "readme": "README.md",
+      "base_commit": "d02739291d5e0a9d85999d0bd7fec52e93d3bf79",
+      "validation_status": "Synthetic/statistical design checks; empirical planning calibration incomplete",
+      "evidence_path": "validation/README.md",
+      "remaining_product_work": "Calibrate marginal/dependence/hierarchy parameters on independent measured cohorts; compare power/coverage with appropriate clustered and longitudinal reference designs; qualify constraint feasibility and study templates with domain review; test intended-size design/HeartTwin workflows.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiTrace",
+      "readme": "README.md",
+      "base_commit": "1f378436833adec2030dfdea66248134033195ed",
+      "validation_status": "Integrity/recovery/runtime-observation checks; execution attestation incomplete",
+      "evidence_path": "docs/RUNTIME_CAPTURE_2026-10-10.md",
+      "remaining_product_work": "Verify container/lockfile/seed/device/backend declarations against observed execution where supported; complete signing/key and artifact-retention policies for deployment; test cross-process/federated recovery and replay at intended scale; keep integrity separate from scientific truth.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-CardiBridge",
+      "readme": "README.md",
+      "base_commit": "fc990ace415c97fb301b2386066862b3dfe8ae98",
+      "validation_status": "Contract/durable-local transport checks; broker deployment qualification incomplete",
+      "evidence_path": "docs/VALIDATION_AUDIT_2026-10-07.md",
+      "remaining_product_work": "Run real NATS/Kafka broker failure/replay/conformance tests; qualify authentication/authorization, key rotation and delivery observability; test clock/lease and crash-idempotency behavior at deployment scale; preserve explicit consumer scientific validation responsibilities.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-HeartTwin",
+      "readme": "README.md",
+      "base_commit": "e8b43c09118f7a0179136b2e8602508b2d70b5ee",
+      "validation_status": "Integration/operational rehearsal; end-to-end twin qualification incomplete",
+      "evidence_path": "docs/SUPERSTACK_CONTINUITY.md",
+      "remaining_product_work": "Refresh/requalify the intended dependency matrix after component changes; execute measured single-subject workflows with explicit calibrated cross-domain mappings; establish independent end-to-end uncertainty/outcome evidence; qualify distributed recovery, artifact retention and deployment security for intended operation.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-Intelligence",
+      "readme": "README.md",
+      "base_commit": "9148341d94c6093e9b006d3bf10d49cd7bcaea47",
+      "validation_status": "Discovery/extraction research pipeline; curated accuracy/coverage qualification incomplete",
+      "evidence_path": "README.md",
+      "remaining_product_work": "Benchmark entity resolution, source recall, extraction accuracy and ranking against reviewed examples; qualify live API pagination/retry/window coverage and outage handling; audit source/licensing/provenance refresh and Atlas admission; calibrate opportunity scoring with explicit human-review criteria.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Cardiac-Regenerative-Lab-Autocrawler",
+      "readme": "README.md",
+      "base_commit": "152845594950412d62c03f24d64ccec1622ca6e2",
+      "validation_status": "Discovery pipeline; exhaustive lab coverage unestablished",
+      "evidence_path": "README.md",
+      "remaining_product_work": "Build a reviewed lab/PI gold set and measure precision/recall, identity merges and activity classification; qualify source access/pagination and failed-extraction review; verify affiliations/funding/trials from dated primary evidence; complete reproducible annual change review and export QA.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-Biosafety-Assessment",
+      "readme": "README.md",
+      "base_commit": "ec4a51805b479366cfb904cc0ed22515dab4d985",
+      "validation_status": "Rule-based planning aid; institutional decision validation required",
+      "evidence_path": "README.md",
+      "remaining_product_work": "Obtain qualified expert review of rule coverage/conflicts and representative test cases; maintain versioned primary guidance and assumptions; qualify input/UI/accessibility/audit behavior and explicit escalation; retain institution-owned final decision and sign-off.",
+      "test_sources_present": true,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": "Virelion-VB-101",
+      "readme": "README.md",
+      "base_commit": "678fb3251d3b8ad3a185a4733004f8fddb01cafd",
+      "validation_status": "Discovery-stage therapeutic program; target efficacy/safety unestablished",
+      "evidence_path": "README.md",
+      "remaining_product_work": "Lock datasets/biological units and reproducible candidate-ranking evidence; independently replicate prioritized associations and assess causal plausibility; complete appropriately reviewed experimental efficacy/safety and translational milestones before therapeutic claims.",
+      "test_sources_present": false,
+      "ci_definitions_present": false
+    },
+    {
+      "repository": "Virelion-VB-204",
+      "readme": "README.md",
+      "base_commit": "634233d549abd42ae693674beacaf894c8dbc799",
+      "validation_status": "Research scaffold; executable graft-ranking engine absent",
+      "evidence_path": "README.md",
+      "remaining_product_work": "Implement each declared layer with reproducible inputs and contracts; reproduce independent numerical and published-outcome benchmarks before design ranking; quantify uncertainty/domain transfer; establish independent empirical integration/risk evidence and program-appropriate experimental milestones.",
+      "test_sources_present": false,
+      "ci_definitions_present": false
+    },
+    {
+      "repository": "CARDIAC-BREACH",
+      "readme": "README.md",
+      "base_commit": "5db01e65851a9668a2d0352552e4b19ffa721b41",
+      "validation_status": "Fictional game/software QA; biomedical validation not a product claim",
+      "evidence_path": "README.md",
+      "remaining_product_work": "Complete representative browser/device/accessibility and player-usability QA; verify save/recovery, balance and performance over long sessions; review medical wording for educational accuracy while keeping fictional boundaries; qualify deployment/update behavior.",
+      "test_sources_present": false,
+      "ci_definitions_present": true
+    },
+    {
+      "repository": ".github",
+      "readme": "profile/README.md",
+      "base_commit": "84b86e899fbe9b03e3de5c0e66be7bdef4bb2a05",
+      "validation_status": "Organization documentation; no scientific runtime to qualify",
+      "evidence_path": "profile/README.md",
+      "remaining_product_work": "Keep component links, roles, evidence levels and implementation dates synchronized; remove unsupported organization-wide clinical/completeness claims; maintain the centralized status index and link each claimed capability to its repository evidence.",
+      "test_sources_present": false,
+      "ci_definitions_present": false
+    }
+  ]
+}
