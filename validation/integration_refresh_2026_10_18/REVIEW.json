@@ -1,0 +1,20 @@
+{
+  "all_registered_services_available": true,
+  "base_hearttwin_commit": "377211d4e5e8e3fab85fb58a7a3ce1e50dc9ff23",
+  "compatibility_lock_version": 4,
+  "empirical_twin_qualified": false,
+  "hosted_matrix_acceptance": "See PR/workflow checks for Python 3.10, 3.11 and 3.12",
+  "pinned_component_count": 21,
+  "python": "3.12.14",
+  "registered_services_available": 22,
+  "remaining_gates": [
+    "Full ARGO ingestion and coordinate-unit reconciliation",
+    "Independent measured endpoint and cross-domain calibration",
+    "CardiLearn raw count rescue exceeds current resource budget",
+    "Upstream CDT generated fixture equivalence remains unexecuted in this local suite"
+  ],
+  "skip_reason": "Generated upstream CDT fixture not present",
+  "status": "LOCAL_SOFTWARE_INTEGRATION_PASS",
+  "tests_passed": 190,
+  "tests_skipped": 1
+}

@@ -1,0 +1,20 @@
+........................................................................ [ 37%]
+...........s............................................................ [ 75%]
+...............................................                          [100%]
+=============================== warnings summary ===============================
+tests/test_integrity_regressions.py::test_pinned_cardilearn_uses_json_null_for_undefined_metrics
+  /workspace/scratch/863026fcd50f/.venv-stack/lib/python3.12/site-packages/sklearn/metrics/_classification.py:614: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
+    warnings.warn(
+
+tests/test_integrity_regressions.py::test_pinned_cardilearn_uses_json_null_for_undefined_metrics
+  /workspace/scratch/863026fcd50f/.venv-stack/lib/python3.12/site-packages/sklearn/metrics/_ranking.py:469: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+    warnings.warn(
+
+tests/test_integrity_regressions.py::test_pinned_cardilearn_uses_json_null_for_undefined_metrics
+  /workspace/scratch/863026fcd50f/.venv-stack/lib/python3.12/site-packages/sklearn/metrics/_regression.py:1295: UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+    warnings.warn(msg, UndefinedMetricWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_cdt_equivalence.py:56: Generated CDT fixture not present
+190 passed, 1 skipped, 3 warnings in 82.02s (0:01:22)

@@ -2,9 +2,25 @@
 set -euo pipefail
 ROOT="${1:-.virelion/services}"
 mkdir -p "$ROOT"
-repos=(
-  CardiAtlas CardiBench CardiEval ElectroTrace MyoTrace OptiCell CardioScore CardiLearn CardiSim CardiTrace CardiBridge CardiAgent CardiVex CardiStudio DCCP
-)
+SCRIPT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+# Use the same service inventory as the compatibility matrix. A second list
+# previously omitted anatomy and five mechanistic services.
+repo_names="$(python3 - "$SCRIPT_ROOT/configs/compatibility-lock.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    repositories = json.load(handle)["repositories"]
+if not repositories:
+    raise ValueError("Compatibility matrix has no service repositories")
+for repository in repositories:
+    name = repository["name"]
+    if not name.startswith("Virelion-") or not name.removeprefix("Virelion-").isalnum():
+        raise ValueError(f"Unexpected service repository: {name!r}")
+    print(name.removeprefix("Virelion-"))
+PY
+)"
+mapfile -t repos <<< "$repo_names"
 for name in "${repos[@]}"; do
   dir="$ROOT/$name"
   url="https://github.com/Virelion-Biotech/Virelion-$name.git"

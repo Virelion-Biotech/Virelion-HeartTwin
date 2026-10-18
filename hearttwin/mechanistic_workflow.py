@@ -45,6 +45,7 @@ def _call(
     payload: dict[str, Any],
     *,
     parent_run_ids: list[str],
+    orchestration_context: dict[str, Any] | None = None,
 ) -> ServiceResult:
     adapter = registry.capability(capability)
     if adapter is None:
@@ -61,6 +62,15 @@ def _call(
         raise MechanisticWorkflowError(
             f"{capability} returned subject {returned_subject!r}, expected {entity_id!r}"
         )
+    if orchestration_context is not None:
+        # Workflow decisions are not numerical solver settings. Keep their
+        # origin explicit and include them before computing the result hash.
+        output = deepcopy(output)
+        output_provenance = dict(output.get("provenance") or {})
+        if "hearttwin_orchestration" in output_provenance:
+            raise MechanisticWorkflowError("Service supplied reserved HeartTwin provenance")
+        output_provenance["hearttwin_orchestration"] = deepcopy(orchestration_context)
+        output["provenance"] = output_provenance
     step_run_id = new_run_id(
         entity_id,
         {"capability": capability, "payload": payload, "output": output},
@@ -500,7 +510,7 @@ def run_mechanistic_twin_workflow(
         requested_mech_cfg.get("output_dir") or (root / "mechanics")
     )
     mech_cfg["inline_series"] = False
-    mech_cfg["posterior_replay_selection"] = replay_selection
+    mech_cfg.pop("posterior_replay_selection", None)
     mechanics_request["settings"] = mech_cfg
 
     mechanics_result = _call(
@@ -509,6 +519,7 @@ def run_mechanistic_twin_workflow(
         entity_id,
         mechanics_request,
         parent_run_ids=[inference_result.provenance.run_id, ep_result.provenance.run_id],
+        orchestration_context={"posterior_replay_selection": replay_selection},
     )
     mechanics_payload = MechanicsResultPayload.model_validate(mechanics_result.data)
     if mechanics_payload.provenance.get("anatomy_bundle_fingerprint") != bundle_fingerprint:
