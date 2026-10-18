@@ -1,0 +1,17 @@
+{
+  "receipts": 9313,
+  "selected_files_downloaded": 9312,
+  "selected_files_total": 11821,
+  "per_patient_downloaded_files": {
+    "global": 2,
+    "Pt1": 947,
+    "Pt2": 629,
+    "Pt3": 545,
+    "Pt4": 2831,
+    "Pt5": 281,
+    "Pt6": 4078
+  },
+  "full_raw_bytes_present_in_uploaded_zip": false,
+  "manifest_and_launcher_identities_verified": true,
+  "independent_raw_cache_reverification_required": true
+}

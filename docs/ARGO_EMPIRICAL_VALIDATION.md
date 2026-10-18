@@ -321,7 +321,19 @@ equal-patient cohort aggregate used by `argo-cohort-score`.
 
 ARGO v1.0.0 is distributed under **CC BY-NC-SA 4.0**. HeartTwin records
 `CC-BY-NC-SA-4.0` in generated ARGO patient, split, holdout, and cohort
-provenance. The repository intentionally does not bundle or automatically
-download ARGO and does not decide whether a specific institutional or commercial
-use satisfies the license. The operator is responsible for obtaining the data
+provenance. The empirical fitting/scoring adapters do not bundle or fetch ARGO. The optional
+readiness audit can download the explicitly requested files. HeartTwin does not
+decide whether a specific institutional or commercial use satisfies the license. The operator is responsible for obtaining the data
 under appropriate terms and documenting the permitted use for the study.
+
+## Resumable ingestion audit (2026-10-18)
+
+The v1 Colab run paused during downloading and did not complete record validation. The [review](COLAB_ARGO_REVIEW_2026-10-18.md) preserves its evidence and documents a latent annotation-parser bug. Use the repaired standalone Colab notebook, or run the new audit against a persistent data cache:
+
+```bash
+python -m hearttwin.argo_readiness --data /persistent/argo/data --output /persistent/argo/audit --budget-seconds 6600
+```
+
+This command downloads public files as explicitly requested for the audit, verifies pinned publisher hashes, validates records immediately and saves per-record progress in small hash-checked pages. It does not run a holdout prediction study or qualify a twin. Install WFDB 4.2.0 for this audit; the recovery notebook supplies an isolated pinned environment. Keep the same data/output folder to continue across runtimes. The new audit downloads data; the older empirical fitting commands still require operator-provided data.
+
+Non-AVP P/U annotations use a single WFDB NOTE with an out-of-range sentinel. Python WFDB reads the checked examples at 9998, while the publisher page documents 9999. The audit preserves the raw sentinel and null bounds, without turning it into an activation time or changing a U label. Only class A has two valid in-signal AVP bounds. Neither encoding supplies independent LAT truth.

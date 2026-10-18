@@ -1,0 +1,12 @@
+{
+  "error": null,
+  "protocol_sha256": "150256adef59e3e2b0e79987f679cf85bbc9f7531a3c153c7318c9b786b2f7d8",
+  "scientific_validation": "NOT_ESTABLISHED_BY_EXECUTION",
+  "scope": "Download and verify all primary WFDB files, expert/consensus annotations and meshes for nine patients / 1,962 records; check dimensions, signal finiteness and annotation parse.",
+  "seconds_this_session": 8162.288207538001,
+  "source_pins": {
+    "Virelion-HeartTwin": "e8b43c09118f7a0179136b2e8602508b2d70b5ee"
+  },
+  "status": "PAUSED",
+  "n_input_receipts": 9313
+}

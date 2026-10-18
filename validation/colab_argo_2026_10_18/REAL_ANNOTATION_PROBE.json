@@ -1,0 +1,49 @@
+[
+  {
+    "record": "P71",
+    "annotation": "annotation_consensus",
+    "class": "P",
+    "raw_samples": [
+      9998
+    ],
+    "symbols": [
+      "\""
+    ],
+    "avp_bounds_samples": null,
+    "bounds_applicable": false,
+    "independent_LAT_truth": false
+  },
+  {
+    "record": "P1000",
+    "annotation": "annotation_consensus",
+    "class": "A",
+    "raw_samples": [
+      2022,
+      2107
+    ],
+    "symbols": [
+      "(",
+      ")"
+    ],
+    "avp_bounds_samples": [
+      2022,
+      2107
+    ],
+    "bounds_applicable": true,
+    "independent_LAT_truth": false
+  },
+  {
+    "record": "P1003",
+    "annotation": "annotation_ann1",
+    "class": "U",
+    "raw_samples": [
+      9998
+    ],
+    "symbols": [
+      "\""
+    ],
+    "avp_bounds_samples": null,
+    "bounds_applicable": false,
+    "independent_LAT_truth": false
+  }
+]

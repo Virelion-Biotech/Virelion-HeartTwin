@@ -1,0 +1,6 @@
+Data cache: /workspace/scratch/16c6ed495deb/argo_notebook_e2e/content/drive/MyDrive/HeartTwinValidation/09_HeartTwin_ARGO_v1/data
+Each required cached file is rehashed; old receipts alone are never trusted.
+Status: PAUSED Records verified: 2 /1962
+Progress saved. Run this same notebook again on a new CPU runtime to continue.
+Results ZIP: /workspace/scratch/16c6ed495deb/argo_notebook_e2e/content/09_HeartTwin_ARGO_v2_recovery_results.zip
+NOTEBOOK E2E SMOKE PASSED: actual two records, old Drive-cache reuse, isolated pins, source/data hashes and ZIP export

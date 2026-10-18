@@ -1,0 +1,11 @@
+{
+  "test_scope": "Delivered notebook code with only Colab UI/filesystem substitutions and explicit two-record smoke cap; real immutable source, pinned isolated environment, verified official data, native/WFDB parsers and ZIP export. No full-cohort/hosted Colab claim.",
+  "source_commit": "1634ef7eb7f4e632cc11dbcd4066df23bfe8066e",
+  "source_zip_sha256": "d7354308f45b097f393ab48a1cfb361f9609a39da608046d9c073d28f529e637",
+  "status": "PAUSED",
+  "records_verified": 2,
+  "v1_drive_cache_reused": true,
+  "second_notebook_run_reused_page_without_rewrite": true,
+  "zip_artifact_hashes_verified": 14,
+  "full_cohort_verified": false
+}

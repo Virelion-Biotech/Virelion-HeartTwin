@@ -1,0 +1,14 @@
+{
+  "ATTEMPT_STATUS.json": "5ad267f33631bfd34c488ecd6acbfa9553183cfa0a3fa365caa851f69547f986",
+  "LAST_SESSION.json": "d190361d4fcaf8dfa39b6099e9012822e5a0e1cb7dead1b380a65f3b4e87b5cb",
+  "RETAINED_ON_DRIVE.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "RUN_STATUS.json": "9e680b60f23e91a9dac86add489e91ea7edc6e96fdea2edfc853685e2cc6c94e",
+  "environment-setup.log": "3579161d4bf59771723b9e3bf8d00a7e0a5e2032afd296cee5d305c5f177bfd8",
+  "environment.txt": "4f3af8d7c5a5db97bbf4953985f543a2d1e1469c9d21df778298c800c3356c20",
+  "launcher/runtime.py": "42099bbb908333a480c11eca9f0586759d57162a1c11b977067a9696c45d0985",
+  "launcher/training.py": "c63aee5893f194932f786c5054bd5ff5938bde40a69328d43fd39fb8b0faf112",
+  "launcher/worker.py": "76a8b3ddbe6411bea07d353948f7bed3a708ddd3dd46624e6569c377b3eb88b3",
+  "protocol.json": "f50bdc7d6919d7b32326cbb8b0ec1f64ae4b2896c55bc4cdfed9abace03cfb55",
+  "source_snapshots.json": "b1d979b89b91a6a9182c0f5de0157cf6c121d9c21f663583027e896ab4d1cfc7",
+  "worker-session.log": "8f49ae60d21e7497d6bef78252158c0b8e2e920695a9cb4ef8d824f75246bad1"
+}

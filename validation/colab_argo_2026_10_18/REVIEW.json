@@ -1,0 +1,32 @@
+{
+  "uploaded_status": "PAUSED",
+  "elapsed_seconds": 8162.288207538001,
+  "completed_records": 0,
+  "selected_files_downloaded": 9312,
+  "selected_files_total": 11821,
+  "input_receipts": 9313,
+  "zip_artifact_hashes_verified": 12,
+  "pinned_source_files_verified": 108,
+  "source_pin": "e8b43c09118f7a0179136b2e8602508b2d70b5ee",
+  "primary_failure": "All-downloads-before-validation reaches budget with no record-level outputs.",
+  "latent_parser_failure": "Non-AVP uses one WFDB NOTE at a sentinel, not two boundary symbols. Hash-verified P71/P1003 decode sample 9998 with Python WFDB 4.2.0. The original two-marker assertion rejects these records.",
+  "safe_corrections": [
+    "Validate immediately after each record downloads; persist bounded-size hash-checked pages per record, avoiding repeated global artifact rescans.",
+    "Rehash and reuse v1 Drive data; source, protocol, environment and input hashes bind resumed results.",
+    "Accept class-dependent annotation encoding; preserve P/U note sentinel, leave bounds null, never reinterpret U as physiological or AVP bounds as LAT truth.",
+    "Compare native physical signal scaling against WFDB; check inventory/meshes without guessing physical coordinate units."
+  ],
+  "tests": {
+    "local_passed": 130,
+    "optional_skipped": 44,
+    "targeted_readiness_passed": 14
+  },
+  "complete_cohort_verified": false,
+  "empirical_LAT_accuracy_evaluated": false,
+  "paired_twin_qualified": false,
+  "remaining": [
+    "Complete all 1,962 record audits using repaired notebook; paused original does not establish this.",
+    "Confirm coordinate units from authoritative export metadata before conduction-speed fitting.",
+    "Independent LAT reference and paired volumetric scar/fibers, mechanics/hemodynamics and clinical/outcome qualification remain unavailable in this run."
+  ]
+}
