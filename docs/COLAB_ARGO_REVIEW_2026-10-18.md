@@ -21,3 +21,16 @@ Local tests: **130 passed, 44 optional integration skips**, including **14 readi
 ## Delivered notebook smoke check
 
 The standalone recovery notebook executed locally in its actual isolated pinned environment, with only Colab UI/path substitutions and an explicit two-record smoke cap. It reused a simulated v1 Drive data cache, verified immutable source and publisher hashes, checked two real records and Pt1 geometry, then exported a correctly labeled PAUSED ZIP. All 14 exported artifact hashes verify. A second notebook run reused the saved record page without rewriting it. This is a smoke/resumption check, not a full 1,962-record result or an observed hosted Colab execution. The delivered notebook defaults to the full audit with no smoke cap.
+
+
+## Uploaded v2 recovery: environment failure
+
+The uploaded `09_HeartTwin_ARGO_v2_recovery_results.zip` contains six safe, unique entries. All five artifact checksums verify. Its status is FAILED: `/usr/bin/python3 -m venv` failed when the new environment invoked `ensurepip --upgrade --default-pip`. The outer log does not expose the inner ensurepip error, so its exact system-package cause is unknown. No install or validation outputs were produced, and this run supplies no new scientific results. The cache-location record confirms the v1 Drive data directory was selected; it does not prove raw files are intact.
+
+The [v3 notebook](../notebooks/09_HeartTwin_ARGO_Recovery_v3.ipynb) creates its isolated environment with `venv --without-pip`, then uses existing host pip's documented `--python` option (pip >=22.3) to install pinned pip and numerical dependencies into that environment. It runs `pip check` and actual dependency imports before invoking the unchanged source-pinned readiness worker. No global package installation or root package-manager operation is required. See the [pip interpreter documentation](https://pip.pypa.io/en/stable/topics/python-option/).
+
+A fresh v3 report folder prevents mixing setup protocols. The v1 raw-data directory is reused and extended if present; otherwise inputs are downloaded from scratch. The default remains all 1,962 records, with 110-minute sessions and Drive checkpoint resumption. The existing readiness source, annotation interpretation and scientific gates are unchanged. Full-cohort ingestion and all model/clinical accuracy claims remain unestablished.
+
+Reproduce the local regression with `python scripts/check_argo_colab_recovery.py --data /path/to/argo-cache --source /path/to/pinned-source.zip --work-dir /fresh/scratch/path`. It forces the standard ensurepip path to fail, then executes the repaired notebook with Colab UI/path substitutions and an explicit two-record smoke cap, and checks resumption. Hosted Colab execution remains to be observed.
+
+The recorded regression passed: the default environment creation failed under injected ensurepip unavailability; v3 installed actual isolated dependencies, passed pip check/import checks, validated two real records, exported verified ZIPs and reused the record page without rewriting it. Evidence is in `validation/colab_argo_v2_2026_10_18/local_v3_smoke/`. This remains a local smoke test rather than hosted Colab or full-cohort validation.

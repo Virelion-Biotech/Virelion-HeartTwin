@@ -1,0 +1,2 @@
+COMMAND ["/usr/bin/python3", "-m", "venv", "/content/09_HeartTwin_ARGO_v2_recovery_runtime/venv"]
+Error: Command '['/content/09_HeartTwin_ARGO_v2_recovery_runtime/venv/bin/python3', '-m', 'ensurepip', '--upgrade', '--default-pip']' returned non-zero exit status 1.

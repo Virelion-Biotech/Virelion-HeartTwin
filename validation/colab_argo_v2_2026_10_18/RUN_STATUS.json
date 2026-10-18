@@ -1,0 +1,5 @@
+{
+  "error": "Traceback (most recent call last):\n  File \"/tmp/ipykernel_2315/3697511453.py\", line 107, in <cell line: 0>\n    command([sys.executable,\"-m\",\"venv\",venv], ROOT / \"logs/venv.log\")\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/ipykernel_2315/3697511453.py\", line 43, in command\n    raise RuntimeError(\"Command failed; see \" + log.name + \" in the exported ZIP\")\nRuntimeError: Command failed; see venv.log in the exported ZIP\n",
+  "source_commit": "1634ef7eb7f4e632cc11dbcd4066df23bfe8066e",
+  "status": "FAILED"
+}
