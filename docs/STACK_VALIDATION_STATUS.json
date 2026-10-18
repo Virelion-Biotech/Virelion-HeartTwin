@@ -216,9 +216,9 @@
       "repository": "Virelion-HeartTwin",
       "readme": "README.md",
       "base_commit": "e8b43c09118f7a0179136b2e8602508b2d70b5ee",
-      "validation_status": "Integration/operational rehearsal; end-to-end twin qualification incomplete",
-      "evidence_path": "docs/SUPERSTACK_CONTINUITY.md",
-      "remaining_product_work": "Refresh/requalify the intended dependency matrix after component changes; execute measured single-subject workflows with explicit calibrated cross-domain mappings; establish independent end-to-end uncertainty/outcome evidence; qualify distributed recovery, artifact retention and deployment security for intended operation.",
+      "validation_status": "Refreshed software integration matrix; empirical end-to-end twin qualification incomplete",
+      "evidence_path": "docs/INTEGRATION_REFRESH_2026-10-18.md",
+      "remaining_product_work": "Maintain/requalify the dependency matrix after future component changes; execute measured single-subject workflows with explicit calibrated cross-domain mappings; establish independent end-to-end uncertainty/outcome evidence; qualify distributed recovery, artifact retention and deployment security for intended operation.",
       "test_sources_present": true,
       "ci_definitions_present": true
     },
@@ -292,5 +292,7 @@
       "test_sources_present": false,
       "ci_definitions_present": false
     }
-  ]
+  ],
+  "targeted_update_date": "2026-10-18",
+  "targeted_update_report": "docs/INTEGRATION_REFRESH_2026-10-18.md"
 }

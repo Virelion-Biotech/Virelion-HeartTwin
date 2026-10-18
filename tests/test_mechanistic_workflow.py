@@ -337,6 +337,16 @@ def test_one_canary_crosses_the_complete_mechanistic_pipe(tmp_path: Path) -> Non
     assert run.state.mechanics.provenance["settings"][
         "cycle_length_s"
     ] == pytest.approx(0.8)
+    # Replay selection must survive without leaking into strict solver options.
+    from hearttwin.provenance import sha256
+
+    mechanics_step = next(step for step in run.steps if step.capability == "mechanics.simulate")
+    assert "posterior_replay_selection" not in mechanics_step.data["provenance"]["settings"]
+    selection = mechanics_step.data["provenance"]["hearttwin_orchestration"]["posterior_replay_selection"]
+    assert selection["selection"] == "accepted_posterior_sample"
+    assert selection["posterior_sha256"] == run.state.inference.posterior_samples["sha256"]
+    assert mechanics_step.provenance.content_sha256 == sha256(mechanics_step.data)
+    assert run.state.mechanics.provenance["hearttwin_orchestration"]["posterior_replay_selection"] == selection
 
     payload = state.model_dump(mode="json")
     json.dumps(payload, allow_nan=False)

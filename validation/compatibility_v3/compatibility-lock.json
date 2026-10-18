@@ -1,0 +1,111 @@
+{
+  "lock_version": 3,
+  "generated_from": "requirements-services.txt",
+  "repositories": [
+    {
+      "name": "Virelion-CardiAnatomy",
+      "sha": "956a799d0696b074608cc8b524e1b25319393cec",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiAtlas",
+      "sha": "c7050222f08686132d04f53296f08a934e6f109a",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiBench",
+      "sha": "4dda685aa62a6c239caaa496d095a2737cd3e8c8",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiEval",
+      "sha": "b49865d3406ac56221f6446fa320b5b3e3e62965",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiLearn",
+      "sha": "1b8ad6e5ca9fc9a22a0bef6faea32486df9d88a3",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiEP",
+      "sha": "889f8ce942a6062b5a023a20daa2c4cc671ddede",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiFlow",
+      "sha": "e218a83196ca67fa885f5a8e77564118d75cdb05",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiMech",
+      "sha": "048216c65a8d141136b554958023e0839152b919",
+      "role": "command"
+    },
+    {
+      "name": "Virelion-CardiInfer",
+      "sha": "868dc68e28e1785d5fcfa157502e7b7c228bc0f5",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiSim",
+      "sha": "4802ffeb24085e76eb87172d9ecf324778260db6",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiVex",
+      "sha": "dccfdb4b3f34223d59f5ccd822e4f975c3dc2cd5",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiStudio",
+      "sha": "d02739291d5e0a9d85999d0bd7fec52e93d3bf79",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-DCCP",
+      "sha": "95f732e7f9c728cae681fe47dc550c62e2630bbe",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-ElectroTrace",
+      "sha": "bd3d3da98a12c6caf39c46a7203cabf22560bf5a",
+      "role": "command"
+    },
+    {
+      "name": "Virelion-MyoTrace",
+      "sha": "6772d2e6db11a2ef46f2bef16a91e5c5e3d3d7a4",
+      "role": "command"
+    },
+    {
+      "name": "Virelion-OptiCell",
+      "sha": "0713a3e714dfe18ebb28623a8a87f89126f2b094",
+      "role": "command"
+    },
+    {
+      "name": "Virelion-CardioScore",
+      "sha": "40b1ef02cf4cd38b652d0448dce8c2290361aabc",
+      "role": "command"
+    },
+    {
+      "name": "Virelion-CardiTherapy",
+      "sha": "1907943a04f11c658ce69e95d264ff69875f7177",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiTrace",
+      "sha": "e80739c1c3db6951dcff9c3f78743b6f397847e6",
+      "role": "command"
+    },
+    {
+      "name": "Virelion-CardiBridge",
+      "sha": "d17d30b057e7744cbd6fe23afb805db081e66f40",
+      "role": "native"
+    },
+    {
+      "name": "Virelion-CardiAgent",
+      "sha": "02e76bdb56aaa44397f1a6ea4caf98738f48fa03",
+      "role": "command"
+    }
+  ]
+}

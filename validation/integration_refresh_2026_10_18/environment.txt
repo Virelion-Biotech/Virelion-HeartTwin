@@ -1,0 +1,67 @@
+annotated-types==0.8.0
+attrs==26.1.0
+cardieval @ git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@831156fd1605d70b7ff5ec25deaa3e784ca38a72
+click==8.5.0
+cloudpickle==3.1.2
+contourpy==1.4.0
+cycler==0.12.1
+defusedxml==0.7.1
+electrotrace @ git+https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git@51adddec49efa182f9707524cb59a16b4be554d7
+fonttools==4.67.0
+iniconfig==2.3.1
+Jinja2==3.1.6
+joblib==1.6.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+kiwisolver==1.5.1
+MarkupSafe==3.0.4
+matplotlib==3.11.2
+narwhals==2.27.1
+numpy==2.2.6
+opencv-python-headless==4.14.0.94
+opticell @ git+https://github.com/Virelion-Biotech/Virelion-OptiCell.git@2b1a3337d7d13a8e6f67669b86fb3e9e63c430f6
+packaging==26.3
+pandas==2.3.3
+pillow==13.0.0
+pluggy==1.7.0
+pydantic==2.14.1
+pydantic_core==2.50.1
+Pygments==2.21.0
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+PyYAML==6.0.3
+referencing==0.37.0
+rpds-py==2026.9.1
+ruff==0.17.1
+scikit-learn==1.9.1
+scipy==1.14.1
+seaborn==0.13.2
+setuptools==84.0.0
+six==1.17.0
+threadpoolctl==3.7.0
+tifffile==2026.10.15
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+tzdata==2026.5
+virelion-cardi-atlas @ git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@7eb4d418e907080f75a18972957683a9f6a97115
+virelion-cardi-bench @ git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@b521ad859969d6562aec9363b0b937bd01c73404
+virelion-cardi-trace @ git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@1564073b09c8497d976053a3afd7c7a9bd1dc584
+virelion-cardiagent @ git+https://github.com/Virelion-Biotech/Virelion-CardiAgent.git@7ff1e8d2df1e4a3988c4000ae48694fdffdbba29
+virelion-cardianatomy @ git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7
+virelion-cardibridge @ git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@777ba1f0767e960070df0ceff0b2a2b55a0c4aff
+virelion-cardiep @ git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@dec17a9cad70709dff641ae29d96f3a37eb4a15e
+virelion-cardiflow @ git+https://github.com/Virelion-Biotech/Virelion-CardiFlow.git@670d370635ba09b2908f7e6736299719e86fc36b
+virelion-cardiinfer @ git+https://github.com/Virelion-Biotech/Virelion-CardiInfer.git@9aabf87bdbee4c70b98229baa3bbea3fb896b490
+virelion-cardilearn @ git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@0f3b15a5ad53b4edc5d44cb5c38f06149bac4401
+virelion-cardimech @ git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+virelion-cardioscore @ git+https://github.com/Virelion-Biotech/Virelion-CardioScore.git@b1430cce48098e868a20b37326e258eff726a100
+virelion-cardisim @ git+https://github.com/Virelion-Biotech/Virelion-CardiSim.git@2cfe5c2261014ea4a95f2613ec9f3387b950c8fa
+virelion-cardistudio @ git+https://github.com/Virelion-Biotech/Virelion-CardiStudio.git@8a65e9927888734e91c6fe219645cd28fbe95334
+virelion-carditherapy @ git+https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git@0a3186a7f16e3178a36ab2239322b300d9f9958a
+virelion-cardivex @ git+https://github.com/Virelion-Biotech/Virelion-CardiVex.git@56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7
+virelion-dccp @ git+https://github.com/Virelion-Biotech/Virelion-DCCP.git@6b05a9aab27809a7f3ec4cc9a9adb809c150a1f5
+-e git+https://github.com/Virelion-Biotech/Virelion-HeartTwin.git@377211d4e5e8e3fab85fb58a7a3ce1e50dc9ff23#egg=virelion_hearttwin
+virelion-myotrace @ git+https://github.com/Virelion-Biotech/Virelion-MyoTrace.git@66a512d8ef7fc0c981d3d5bb804ff99528797ed3
+wheel==0.48.0

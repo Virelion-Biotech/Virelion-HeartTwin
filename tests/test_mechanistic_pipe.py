@@ -3,18 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
 
 import pytest
 
 from hearttwin import load_registry, run_mechanistic_twin_workflow
-
-
-pytestmark = pytest.mark.skipif(
-    os.getenv("HEARTTWIN_CURRENT_MAIN") != "1",
-    reason="mechanistic pipe requires current component main branches",
-)
 
 
 def _sha(path: Path) -> str:

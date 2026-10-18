@@ -73,6 +73,7 @@ jobs:
           tests/test_cardiep_native_engine.py
           tests/test_ep_calibration_workflow.py
           tests/test_mechanistic_workflow.py
+          tests/test_mechanistic_pipe.py
 
       - name: Run full HeartTwin test suite
         env:
