@@ -1,0 +1,17 @@
+{
+  "09_HeartTwin_ARGO_v1_results.zip": "56c2145b500c8c209d0042197c5e80300f2cfc5a2bd898429c444d6901061ef1",
+  "ARTIFACT_HASHES.json": "c8cbebf3c1406a025ae82038d0405232dc673b19ca8b55562aa364348b4d0ebc",
+  "ATTEMPT_STATUS.json": "5ad267f33631bfd34c488ecd6acbfa9553183cfa0a3fa365caa851f69547f986",
+  "REAL_ANNOTATION_PROBE.json": "a07c55bbf1387bb81efcbcd10fc020c0d470303d109a3c22fef66a62a3f05ac4",
+  "REAL_PT1_GEOMETRY.json": "63010b93767de9b0c9b8a98ac735d8af6c533e0a2f2d43e6c9dc503dcf4466fb",
+  "REAL_SAMPLE_PAGE.json": "fe651fd175d9b89b31faadad20d8acca1a06db80ae0871bbcc671463a1dfabca",
+  "REAL_SMOKE_STATUS.json": "2debede220b34c63f9bd03308195ce258aa8c39229ec9986d662e47000c4ab8a",
+  "REVIEW.json": "215f3b3c183e31bd21ccfff8c7cbdc24028f0ab112c01e07af17ea49ef5d7313",
+  "UPLOADED_RECEIPT_REVIEW.json": "712d7d72d4ade732f5af87b5939a9589a28cd2a29c92eb7e57df2eece8a4e29a",
+  "UPLOADED_STATUS_SUMMARY.json": "91a86a4870d32d01a4fc12f1e05e58575c39604a9544e406af2fcd55d264a7e4",
+  "full_tests.log": "e6f822adf1fff470d96d2babdc2dd4dc0c8bc9800930eddf1693e132670cac23",
+  "protocol.json": "f50bdc7d6919d7b32326cbb8b0ec1f64ae4b2896c55bc4cdfed9abace03cfb55",
+  "real_resume.log": "8eeda25dbb48e67a360ec34a72f2daafaae92ae7fc8cbb47fa4581b3c3717311",
+  "regression.log": "1ca077c2ebd8061ff04005144e98195bd3ff2353f24dd7be97d759b04622df3f",
+  "source_snapshots.json": "b1d979b89b91a6a9182c0f5de0157cf6c121d9c21f663583027e896ab4d1cfc7"
+}
