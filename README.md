@@ -414,6 +414,14 @@ The native pseudo-ECG, Eikonal, lumped-mechanics and 0D-flow backends are integr
 8. Validate CardiAgent/DCCP challenge distributions on independent empirical cohorts and keep failed generator evidence visible.
 9. Expand persistent jobs, distributed artifact stores, deployment observability and research-facing UI without weakening scientific gates.
 
+## Unified website
+
+Run `hearttwin-web` after installing HeartTwin and its component stack to open one
+interface for module launchers, file uploads, explicit workflows, queued execution,
+logs and results. The same interface can be hosted privately and connected to your
+own HTTPS compute worker. CardiLearn remains gated; advanced capabilities use their
+native JSON contracts. See [the workbench setup guide](docs/WEB_WORKBENCH.md).
+
 ## Further documentation
 
 - [`docs/INTEGRATION.md`](docs/INTEGRATION.md) — integration architecture and contracts.
