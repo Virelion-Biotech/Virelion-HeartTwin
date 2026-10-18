@@ -1,0 +1,348 @@
+{
+  "schema_version": "hearttwin-workbench/1",
+  "services": [
+    {
+      "name": "CardiAnatomy",
+      "repository": "Virelion-Biotech/Virelion-CardiAnatomy",
+      "capabilities": [
+        "anatomy.health",
+        "anatomy.build",
+        "anatomy.validate",
+        "anatomy.tools",
+        "anatomy.microstructure.reference",
+        "anatomy.scar.classify",
+        "anatomy.presets",
+        "anatomy.registration.rigid",
+        "anatomy.geometry.measure",
+        "anatomy.manifest.audit",
+        "anatomy.series.rank",
+        "anatomy.segmentation.qc",
+        "anatomy.cine.phases",
+        "anatomy.transforms.compose",
+        "anatomy.transforms.invert",
+        "anatomy.correspondence.compare",
+        "anatomy.motion.summarize",
+        "anatomy.validation.segmentation",
+        "anatomy.validation.points"
+      ],
+      "group": "Models",
+      "description": "Prepare geometry and assess simulation readiness.",
+      "scope": "Native geometry and QC checks do not establish patient-image reconstruction accuracy.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiAtlas",
+      "repository": "Virelion-Biotech/Virelion-CardiAtlas",
+      "capabilities": [
+        "atlas.context",
+        "atlas.search"
+      ],
+      "group": "Infrastructure",
+      "description": "Retrieve metadata and evidence context.",
+      "scope": "Retrieved citations and records require claim-level review and biological-identity reconciliation.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiBench",
+      "repository": "Virelion-Biotech/Virelion-CardiBench",
+      "capabilities": [
+        "benchmark.health",
+        "benchmark.resolve",
+        "benchmark.search",
+        "benchmark.catalog",
+        "benchmark.discover",
+        "benchmark.admission.assess",
+        "benchmark.result.record",
+        "benchmark.results"
+      ],
+      "group": "Infrastructure",
+      "description": "Define and inspect benchmark data contracts.",
+      "scope": "Schema-valid datasets still need reconciled biological units, splits and appropriate endpoint labels.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiEval",
+      "repository": "Virelion-Biotech/Virelion-CardiEval",
+      "capabilities": [
+        "evaluation.run"
+      ],
+      "group": "Infrastructure",
+      "description": "Evaluate independently defined endpoints.",
+      "scope": "A working evaluator does not grant scientific validity to its submitted model or reference data.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "ElectroTrace",
+      "repository": "Virelion-Biotech/Virelion-ElectroTrace",
+      "capabilities": [
+        "electrical.analyze",
+        "electrical.prepare_calibration"
+      ],
+      "group": "Analysis",
+      "description": "Inspect ECG and electrophysiology recordings.",
+      "scope": "External algorithm characterization exists. Lead selection and new recording domains require task-specific evaluation.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "MyoTrace",
+      "repository": "Virelion-Biotech/Virelion-MyoTrace",
+      "capabilities": [
+        "mechanical.analyze"
+      ],
+      "group": "Analysis",
+      "description": "Extract mechanical motion from video and TIFF.",
+      "scope": "Motion events are not independently verified cardiac beats; motion magnitude is not force without calibration.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "OptiCell",
+      "repository": "Virelion-Biotech/Virelion-OptiCell",
+      "capabilities": [
+        "imaging.qc"
+      ],
+      "group": "Analysis",
+      "description": "Assess microscopy inputs and image quality.",
+      "scope": "Segmentation and QC accuracy depend on imaging domain and selected backend.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardioScore",
+      "repository": "Virelion-Biotech/Virelion-CardioScore",
+      "capabilities": [
+        "safety.score"
+      ],
+      "group": "Analysis",
+      "description": "Run supported MEA-based safety analyses.",
+      "scope": "Complete endpoint inputs are required; the CiPA workbook audit does not qualify predictive score cutoffs.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiLearn",
+      "repository": "Virelion-Biotech/Virelion-CardiLearn",
+      "capabilities": [
+        "learn.infer",
+        "learn.predict"
+      ],
+      "group": "Models",
+      "description": "Molecular-state learning and prediction.",
+      "scope": "Blocked: raw-count acquisition, baseline and model gates remain incomplete. No trained cross-study model is assumed.",
+      "runnable": false,
+      "installed": null,
+      "gate": "Raw-count benchmark/training gates incomplete"
+    },
+    {
+      "name": "CardiEP",
+      "repository": "Virelion-Biotech/Virelion-CardiEP",
+      "capabilities": [
+        "ep.health",
+        "ep.backends",
+        "ep.simulate",
+        "ep.calibrate",
+        "ep.validate.reference",
+        "ep.ecosystem"
+      ],
+      "group": "Models",
+      "description": "Run supported electrophysiology forward models.",
+      "scope": "Numerical reference evidence exists; patient electrical predictions require registered measured validation.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiFlow",
+      "repository": "Virelion-Biotech/Virelion-CardiFlow",
+      "capabilities": [
+        "flow.health",
+        "flow.simulate"
+      ],
+      "group": "Models",
+      "description": "Run supported hemodynamic reference models.",
+      "scope": "0D and rigid-pipe checks do not qualify arbitrary patient-anatomy CFD or moving-wall models.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiMech",
+      "repository": "Virelion-Biotech/Virelion-CardiMech",
+      "capabilities": [
+        "mechanics.health",
+        "mechanics.backends",
+        "mechanics.materials",
+        "mechanics.simulate",
+        "mechanics.prepare_calibration",
+        "mechanics.validate.reference",
+        "mechanics.ecosystem"
+      ],
+      "group": "Models",
+      "description": "Simulate lumped or restricted spatial mechanics.",
+      "scope": "Spatial and lumped backends have different supported boundaries; patient myocardial validation remains open.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiInfer",
+      "repository": "Virelion-Biotech/Virelion-CardiInfer",
+      "capabilities": [
+        "infer.health",
+        "infer.backends",
+        "infer.ecosystem",
+        "infer.run",
+        "infer.propagate"
+      ],
+      "group": "Models",
+      "description": "Calibrate models and inspect parameter uncertainty.",
+      "scope": "Intervals are model-conditional. Synthetic recovery does not establish calibrated patient uncertainty.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiSim",
+      "repository": "Virelion-Biotech/Virelion-CardiSim",
+      "capabilities": [
+        "simulation.run"
+      ],
+      "group": "Models",
+      "description": "Generate model-based cardiac trajectories.",
+      "scope": "Simulation output and surrogate benchmarks are not empirical patient-response evidence.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiSimNative",
+      "repository": "Virelion-Biotech/Virelion-HeartTwin",
+      "capabilities": [
+        "simulation.cardiac_twin"
+      ],
+      "group": "Models",
+      "description": "Use the built-in reference digital twin.",
+      "scope": "A reference integration model; independent patient accuracy and full upstream equivalence remain open.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiTherapy",
+      "repository": "Virelion-Biotech/Virelion-CardiTherapy",
+      "capabilities": [
+        "therapy.health",
+        "therapy.run"
+      ],
+      "group": "Models",
+      "description": "Configure supported virtual interventions.",
+      "scope": "Executable intervention scope is narrow; contract availability does not establish treatment efficacy.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiTrace",
+      "repository": "Virelion-Biotech/Virelion-CardiTrace",
+      "capabilities": [
+        "trace.record"
+      ],
+      "group": "Infrastructure",
+      "description": "Seal provenance and reproducibility records.",
+      "scope": "Hash and journal integrity support reproducibility, not the scientific truth of a result.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiBridge",
+      "repository": "Virelion-Biotech/Virelion-CardiBridge",
+      "capabilities": [
+        "bridge.validate",
+        "bridge.publish",
+        "bridge.contracts",
+        "bridge.asyncapi",
+        "bridge.replay",
+        "bridge.health"
+      ],
+      "group": "Infrastructure",
+      "description": "Route typed artifacts between services.",
+      "scope": "Transport integrity does not establish payload science. Broker deployment qualification is separate.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiAgent",
+      "repository": "Virelion-Biotech/Virelion-CardiAgent",
+      "capabilities": [
+        "agent.challenge"
+      ],
+      "group": "Models",
+      "description": "Generate configured phenotype challenges.",
+      "scope": "Synthetic fidelity controls do not qualify patient realism, biological causality, or longitudinal behavior.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiVex",
+      "repository": "Virelion-Biotech/Virelion-CardiVex",
+      "capabilities": [
+        "vex.observe"
+      ],
+      "group": "Analysis",
+      "description": "Evaluate challenge and out-of-domain behavior.",
+      "scope": "Limited empirical characterization; external independent subject-level qualification remains incomplete.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "CardiStudio",
+      "repository": "Virelion-Biotech/Virelion-CardiStudio",
+      "capabilities": [
+        "design.generate",
+        "population.generate",
+        "design.validate",
+        "power.plan"
+      ],
+      "group": "Infrastructure",
+      "description": "Configure populations and study designs.",
+      "scope": "Synthetic/statistical checks require empirical calibration for the intended experimental design.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
+      "name": "DCCP",
+      "repository": "Virelion-Biotech/Virelion-DCCP",
+      "capabilities": [
+        "challenge.validate",
+        "challenge.assess",
+        "challenge.materialize",
+        "recovery.score",
+        "host.map"
+      ],
+      "group": "Models",
+      "description": "Inspect defensive phenotype challenges.",
+      "scope": "Data readiness is distinct from empirical severity and recovery qualification.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    }
+  ]
+}

@@ -27,6 +27,6 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
       - run: python -m compileall -q hearttwin tests
-      - run: ruff check hearttwin/argo_readiness.py tests/test_argo_readiness.py
+      - run: ruff check hearttwin/argo_readiness.py tests/test_argo_readiness.py hearttwin/web.py hearttwin/web_job.py tests/test_web_workbench.py
       - run: pytest -q
       - run: hearttwin doctor

@@ -10,6 +10,7 @@ dev = ["pytest>=8", "ruff>=0.6", "jsonschema>=4.23"]
 
 [project.scripts]
 hearttwin = "hearttwin.cli:main"
+hearttwin-web = "hearttwin.web:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -19,4 +20,4 @@ build-backend = "setuptools.build_meta"
 include = ["hearttwin*"]
 
 [tool.setuptools.package-data]
-hearttwin = ["services.yaml"]
+hearttwin = ["services.yaml", "webui/*.html", "webui/*.css", "webui/*.js", "webui/*.json"]
