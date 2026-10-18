@@ -14,7 +14,7 @@ HeartTwin does **not** replace specialist algorithms with one monolith. It conne
 
 | Area | Current evidence / remaining gate |
 |---|---|
-| Software / operational checks | ARGO Colab v1 paused at 9,312/11,821 selected files, before record validation. All 12 artifact hashes and 108 pinned source files verified. Recovery adds correct non-AVP annotation handling, immediate record checkpoints and verified Drive-cache reuse; 130 local tests passed, 44 optional integration skips. |
+| Software / operational checks | ARGO Colab v1 paused at 9,312/11,821 selected files, before record validation. All 12 artifact hashes and 108 pinned source files verified. Recovery v2 failed at environment `ensurepip`, before any validation. The v3 notebook bypasses that bootstrap and retains verified Drive-cache reuse and immediate record checkpoints; 130 local tests passed, 44 optional integration skips. |
 | Scientific or domain evidence | Typed multimodal/mechanistic workflows, frozen compatibility tests and operational rehearsal exist. Component-level evidence and new main heads are not automatically qualification of the frozen compatibility matrix or a patient twin. |
 | Remaining for the declared product scope | Refresh/requalify the intended dependency matrix after component changes; execute measured single-subject workflows with explicit calibrated cross-domain mappings; establish independent end-to-end uncertainty/outcome evidence; qualify distributed recovery, artifact retention and deployment security for intended operation. |
 

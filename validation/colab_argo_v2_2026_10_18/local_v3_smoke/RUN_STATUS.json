@@ -1,0 +1,24 @@
+{
+  "clinical_validation": false,
+  "consensus_class_counts": {
+    "P": 1,
+    "U": 1
+  },
+  "coordinate_unit_confirmed": false,
+  "data_directory": "/workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/drive/MyDrive/HeartTwinValidation/09_HeartTwin_ARGO_v1/data",
+  "empirical_LAT_accuracy_evaluated": false,
+  "error": "Requested smoke-test record limit reached; full audit incomplete",
+  "limits": [
+    "AVP onset/end are not LAT ground truth; U is not physiological.",
+    "Only the final beat is documented reliable; coordinate units remain unconfirmed.",
+    "Missing paired volumetric scar/fibers, mechanics/hemodynamics and outcome qualification."
+  ],
+  "paired_twin_qualified": false,
+  "patients": {
+    "Pt1": 2
+  },
+  "records_verified": 2,
+  "seconds_this_session": 2.0913767840000332,
+  "source_commit": "1634ef7eb7f4e632cc11dbcd4066df23bfe8066e",
+  "status": "PAUSED"
+}

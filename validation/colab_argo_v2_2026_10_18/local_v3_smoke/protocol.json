@@ -1,0 +1,18 @@
+{
+  "bootstrap": "host-pip-target-venv-v1",
+  "requirements": [
+    "numpy==2.2.6",
+    "scipy==1.15.3",
+    "pandas==2.2.3",
+    "wfdb==4.2.0",
+    "matplotlib==3.10.1",
+    "pydantic==2.11.7",
+    "PyYAML==6.0.2",
+    "requests==2.32.4"
+  ],
+  "run_label": "09_HeartTwin_ARGO_v3_recovery",
+  "scope": "Resumable ARGO ingestion readiness only",
+  "smoke_record_limit": 2,
+  "source_commit": "1634ef7eb7f4e632cc11dbcd4066df23bfe8066e",
+  "source_sha256": "d7354308f45b097f393ab48a1cfb361f9609a39da608046d9c073d28f529e637"
+}

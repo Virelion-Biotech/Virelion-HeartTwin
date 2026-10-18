@@ -1,0 +1,1 @@
+COMMAND ["/workspace/scratch/16c6ed495deb/argo_notebook_v3_test/python-no-ensurepip", "-m", "venv", "--without-pip", "/workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/09_HeartTwin_ARGO_v3_recovery_runtime/venv"]

@@ -1,0 +1,21 @@
+{
+  "ARTIFACT_HASHES.json": "0d612de201ee552d2959768d224ae0e33669ea33dc2cd57b94dda28398ed14ab",
+  "SOURCE_SNAPSHOT.json": "c9c6cfa1611eb570f2c3ed702ed1cd958f87a63433cbb5d5b56c60abfaf28701",
+  "CACHE_LOCATION.json": "03787eef93b4a0dc49274fbc939cb9530577d8b3ff26203de1700fdcd31106d7",
+  "09_HeartTwin_ARGO_v2_recovery_results.zip": "739388653d509e96910574d605bc28eba9bdf53e1e938d6e0723044313db49fa",
+  "protocol.json": "b8ef15e3b03fe4511acade88c5587e84bdd489714599029cf1bda59a23f15d82",
+  "RUN_STATUS.json": "a25b28d71fd9bb4680ac2e89d71138310ffe9caf395e600e486c22048d8823be",
+  "logs/venv.log": "755836626863d2ffa9c6d5b6e58cd0bf4ea12b11bdea451ee97e3b95f17fefae",
+  "local_v3_smoke/SOURCE_SNAPSHOT.json": "c9c6cfa1611eb570f2c3ed702ed1cd958f87a63433cbb5d5b56c60abfaf28701",
+  "local_v3_smoke/regression.log": "8afd2087a6ccd48509ed2de214b79c357a079fcad426f5b287793119bd586443",
+  "local_v3_smoke/protocol.json": "ac53c526fc175852dd6f06b52ba7576b37bca62a8d6adf32d51ecaa587f2e9cc",
+  "local_v3_smoke/RUN_STATUS.json": "1d8f1c3bacfc0e243a9d0cdc3bc2c490c139396dd5e96eb78305b70248335176",
+  "local_v3_smoke/environment.txt": "430802237bfb15280ae44015f4b9332dd28d7aa425790ef39c213f5304e9b47b",
+  "local_v3_smoke/logs/pip-check.log": "256c0d58cca5af69df637ab1e95f8e74157b6aa65838180109eb97a278fd119c",
+  "local_v3_smoke/logs/venv.log": "f331dddb60f3369610aa35cecf809082f1bb54678254afe89442a69e896aa00e",
+  "local_v3_smoke/logs/imports.log": "244e9ff14e6d1b36b91e77f87000e505dc55276ab0e72414292ccc2c13afe153",
+  "local_v3_smoke/logs/validation.log": "adcaeea4e32e615e0d4a24aeebd0094d4217344ef149f63170b074993084feba",
+  "local_v3_smoke/logs/install.log": "09f34a0234256eaef9852311f9133ddb24fc0d74dc788b86bc2c81ce82825d81",
+  "local_v3_smoke/validation/RUN_STATUS.json": "2debede220b34c63f9bd03308195ce258aa8c39229ec9986d662e47000c4ab8a",
+  "local_v3_smoke/validation/patients/Pt1/page-000.json": "7db6a653b52c29b6d8dfe9d5f1539ef88533075b175278741cd5de12284641a4"
+}

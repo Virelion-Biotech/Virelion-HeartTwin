@@ -1,0 +1,12 @@
+REGRESSION REPRODUCED: default venv fails when ensurepip unavailable
+Data cache: /workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/drive/MyDrive/HeartTwinValidation/09_HeartTwin_ARGO_v1/data
+Each required cached file is rehashed; old receipts alone are never trusted.
+Status: PAUSED Records verified: 2 /1962
+Progress saved. Run this same notebook again on a new CPU runtime to continue.
+Results ZIP: /workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/09_HeartTwin_ARGO_v3_recovery_results.zip
+Data cache: /workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/drive/MyDrive/HeartTwinValidation/09_HeartTwin_ARGO_v1/data
+Each required cached file is rehashed; old receipts alone are never trusted.
+Status: PAUSED Records verified: 2 /1962
+Progress saved. Run this same notebook again on a new CPU runtime to continue.
+Results ZIP: /workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/09_HeartTwin_ARGO_v3_recovery_results.zip
+PASS: real isolated install, pip check, imports, two real records, ZIP hashes, Drive reuse and unchanged-page resume, with ensurepip forced unavailable

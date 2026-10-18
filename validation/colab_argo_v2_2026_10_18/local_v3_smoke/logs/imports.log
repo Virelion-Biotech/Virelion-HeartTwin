@@ -1,0 +1,3 @@
+COMMAND ["/workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/09_HeartTwin_ARGO_v3_recovery_runtime/venv/bin/python", "-c", "import sys; assert sys.prefix != sys.base_prefix; import numpy, scipy, pandas, wfdb, matplotlib, pydantic, yaml, requests; print(sys.version); print(sys.executable)"]
+3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]
+/workspace/scratch/16c6ed495deb/argo_notebook_v3_test/content/09_HeartTwin_ARGO_v3_recovery_runtime/venv/bin/python
