@@ -7,6 +7,11 @@ from .orchestrator import HeartTwin
 from .service_registry import ServiceRegistry
 from .workflow import run_multimodal_workflow
 from .mechanistic_workflow import run_mechanistic_twin_workflow
+from .patient_ep import prepare_patient_ep_requests
+from .patient_ep_strict import run_strict_patient_ep_workflow
+from .patient_model import PatientCase, PatientEPWorkflowSpec
+from .patient_report import build_patient_model_report
+from .patient_trace import record_patient_trace
 
 
 class VirelionServices:
@@ -55,6 +60,52 @@ class VirelionServices:
         return run_mechanistic_twin_workflow(
             self.registry,
             entity_id=entity_id,
+            **kwargs,
+        )
+
+    def prepare_patient_ep(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Prepare patient EP solver requests without executing a solver."""
+        return prepare_patient_ep_requests(case=case, spec=spec, **kwargs)
+
+    def run_patient_ep(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Run patient EP only after strict patient-specific anatomy readiness checks."""
+        return run_strict_patient_ep_workflow(
+            self.registry,
+            case=case,
+            spec=spec,
+            **kwargs,
+        )
+
+    def patient_model_report(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Build the auditable patient-personalization and claim-ceiling report."""
+        return build_patient_model_report(case=case, spec=spec, **kwargs)
+
+    def trace_patient_ep(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Persist the patient workflow envelope through the CardiTrace boundary."""
+        return record_patient_trace(
+            self.registry,
+            case=case,
+            spec=spec,
             **kwargs,
         )
 

@@ -45,6 +45,55 @@ from .workflow import WorkflowError, run_multimodal_workflow
 from .ep_calibration import EPCalibrationWorkflowError, prepare_ep_inference_problem, run_ep_calibration
 from .mechanistic_workflow import MechanisticWorkflowError, run_mechanistic_twin_workflow
 from .superstack import SuperstackWorkflowError, run_superstack_workflow
+from .patient_model import (
+    CoordinateFrame,
+    CoordinateTransform,
+    EvidenceSplitReport,
+    PatientAcquisition,
+    PatientCase,
+    PatientCaseQC,
+    PatientEncounter,
+    PatientEvidenceItem,
+    PatientEPWorkflowSpec,
+    PatientModelInput,
+    SourceFileRef,
+    assess_evidence_split,
+    assess_patient_case_for_ep,
+    validate_patient_ep_workflow,
+)
+from .patient_ep import (
+    PatientEPPreparedRequests,
+    PatientEPWorkflowError,
+    PatientEPWorkflowResult,
+    prepare_patient_ep_requests,
+    run_patient_ep_workflow,
+)
+from .patient_ep_strict import run_strict_patient_ep_workflow
+from .ep_parameter_mapping import (
+    EPParameterMappingResult,
+    EPParameterMappingSpec,
+    EPParameterMapRule,
+    IgnoredEPParameter,
+    apply_ep_parameter_mapping,
+)
+from .patient_ecg_eval import (
+    ECGAcceptanceCriteria,
+    ECGEvaluationSpec,
+    ECGLeadMetric,
+    ECGValidationReport,
+    ECGWaveform,
+    evaluate_heldout_ecg,
+)
+from .patient_report import (
+    PatientModelReport,
+    PersonalizationDomainReport,
+    build_patient_model_report,
+)
+from .patient_trace import (
+    PatientTraceEnvelope,
+    build_patient_trace_payload,
+    record_patient_trace,
+)
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -66,6 +115,18 @@ __all__ = [
     "EPCalibrationWorkflowError", "prepare_ep_inference_problem", "run_ep_calibration",
     "MechanisticWorkflowError", "run_mechanistic_twin_workflow",
     "SuperstackWorkflowError", "run_superstack_workflow",
+    "SourceFileRef", "CoordinateFrame", "CoordinateTransform", "PatientEncounter",
+    "PatientAcquisition", "PatientModelInput", "PatientEvidenceItem", "EvidenceSplitReport",
+    "PatientCase", "PatientCaseQC", "PatientEPWorkflowSpec", "assess_evidence_split",
+    "assess_patient_case_for_ep", "validate_patient_ep_workflow",
+    "PatientEPPreparedRequests", "PatientEPWorkflowError", "PatientEPWorkflowResult",
+    "prepare_patient_ep_requests", "run_patient_ep_workflow", "run_strict_patient_ep_workflow",
+    "EPParameterMapRule", "IgnoredEPParameter", "EPParameterMappingSpec",
+    "EPParameterMappingResult", "apply_ep_parameter_mapping",
+    "ECGWaveform", "ECGAcceptanceCriteria", "ECGEvaluationSpec", "ECGLeadMetric",
+    "ECGValidationReport", "evaluate_heldout_ecg",
+    "PersonalizationDomainReport", "PatientModelReport", "build_patient_model_report",
+    "PatientTraceEnvelope", "build_patient_trace_payload", "record_patient_trace",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
