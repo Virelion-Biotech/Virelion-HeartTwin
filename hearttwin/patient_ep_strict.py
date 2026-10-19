@@ -202,6 +202,18 @@ def _electrotrace_patient_observations(
     return fit_observations, holdout_observations, provenance
 
 
+def _calibration_only_measurement_provenance(
+    provenance: dict[str, Any],
+) -> dict[str, Any]:
+    """Return only information already admissible to the calibration solver."""
+    return {
+        "service": provenance["service"],
+        "capability": provenance["capability"],
+        "schema_version": provenance["schema_version"],
+        "calibration": deepcopy(provenance["calibration"]),
+    }
+
+
 def run_strict_patient_ep_workflow(
     registry: ServiceRegistry,
     *,
@@ -223,8 +235,8 @@ def run_strict_patient_ep_workflow(
     For the scientific Camps calibration backend, raw ECG acquisitions are first
     transformed into immutable ElectroTrace calibration artifacts. Fit and
     holdout acquisitions use the same fixed measurement-preparation settings,
-    but validation observations remain outside both calibration and confirmation
-    solver requests.
+    but validation observations and their artifact identities remain outside
+    both calibration and confirmation solver requests.
     """
     if (anatomy_bundle is None) == (anatomy_request is None):
         raise PatientEPWorkflowError(
@@ -292,7 +304,9 @@ def run_strict_patient_ep_workflow(
             raise PatientEPWorkflowError(
                 "calibration settings use reserved hearttwin_measurement_preparation key"
             )
-        settings["hearttwin_measurement_preparation"] = measurement_provenance
+        settings["hearttwin_measurement_preparation"] = (
+            _calibration_only_measurement_provenance(measurement_provenance)
+        )
         calibration_request["settings"] = settings
 
     calibration = _invoke(registry, "ep.calibrate", calibration_request)
@@ -363,6 +377,7 @@ def run_strict_patient_ep_workflow(
             raise PatientEPWorkflowError(
                 "EP backend supplied reserved hearttwin_measurement_preparation provenance"
             )
+        # Full fit+holdout lineage is added only after calibration has returned.
         provenance["hearttwin_measurement_preparation"] = measurement_provenance
         calibration["provenance"] = provenance
 
