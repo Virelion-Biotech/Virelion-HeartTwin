@@ -169,3 +169,21 @@ for delivery and verified before decoding; it works without a compute connection
 
 See [UI design references](UI_DESIGN_REFERENCES.md) for the public commercial materials
 used to inform the workstation layout.
+
+## Task-oriented analyses
+
+The hosted workbench starts with recording and image tasks, rather than package names.
+`hearttwin/webui/tasks.js` maps every registered service to a descriptive task, required
+input, expected output and an explicit default operation. Analysis search includes data
+types and research questions; less common evidence and data tools are expandable.
+Package names and operation selectors remain available in Technical settings.
+
+ECG, video/TIFF motion, microscopy QC and MEA scoring retain their real command-adapter
+file handoff. A selected upload is required before submission. Non-file model operations
+start with an empty configuration and cannot be submitted until inputs are supplied.
+The displayed atlas is never silently used as a simulation mesh. No measurements or
+clinical conclusions are fabricated by the UI. Scientific validity still depends on the
+selected model, input quality, and independent evaluation.
+
+Validation: `node --test tests/webui_tasks.test.cjs tests/webui_geometry.test.cjs` checks
+registered operation routing, search, task availability and geometry contracts.
