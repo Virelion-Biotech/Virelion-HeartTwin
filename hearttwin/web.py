@@ -531,6 +531,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         "/viewer.js": "viewer.js",
                         "/heart-reference.json": "heart-reference.json",
                         "/styles.css": "styles.css",
+                        "/virelion-logo.png": "virelion-logo.png",
                         "/catalog.json": "catalog.json",
                     }
                     if path not in names:
@@ -539,6 +540,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         "html": "text/html; charset=utf-8",
                         "js": "text/javascript",
                         "css": "text/css",
+                        "png": "image/png",
                         "json": "application/json",
                     }[names[path].rsplit(".", 1)[-1]]
                     return self.send_bytes(
