@@ -26,38 +26,52 @@ def _case(*, anatomy_modality: str = "ct", fit_role: str = "calibration") -> Pat
         "I", "II", "III", "aVR", "aVL", "aVF",
         "V1", "V2", "V3", "V4", "V5", "V6",
     ]
+    acquisitions = [
+        PatientAcquisition(
+            acquisition_id="anatomy",
+            subject_id="P1",
+            modality=anatomy_modality,
+            source_files=[_source("anatomy")],
+            coordinate_frame_id="image" if anatomy_modality in {"ct", "mri"} else None,
+            sampling_rate_hz=500 if anatomy_modality == "ecg" else None,
+            lead_definitions=leads if anatomy_modality == "ecg" else [],
+        ),
+        PatientAcquisition(
+            acquisition_id="fit",
+            subject_id="P1",
+            modality="ecg",
+            source_files=[_source("fit")],
+            sampling_rate_hz=500,
+            lead_definitions=leads,
+        ),
+        PatientAcquisition(
+            acquisition_id="holdout",
+            subject_id="P1",
+            modality="ecg",
+            source_files=[_source("holdout")],
+            sampling_rate_hz=500,
+            lead_definitions=leads,
+        ),
+    ]
+    # Keep the patient globally EP-ready even when the deliberately selected
+    # anatomy acquisition has the wrong modality. This isolates selection logic.
+    if anatomy_modality not in {"ct", "mri"}:
+        acquisitions.append(
+            PatientAcquisition(
+                acquisition_id="valid-ct-not-selected",
+                subject_id="P1",
+                modality="ct",
+                source_files=[_source("valid-ct")],
+                coordinate_frame_id="image",
+            )
+        )
+
     return PatientCase(
         patient_id="P1",
         coordinate_frames=[
             CoordinateFrame(frame_id="image", convention="DICOM_LPS", length_unit="mm")
         ],
-        acquisitions=[
-            PatientAcquisition(
-                acquisition_id="anatomy",
-                subject_id="P1",
-                modality=anatomy_modality,
-                source_files=[_source("anatomy")],
-                coordinate_frame_id="image" if anatomy_modality in {"ct", "mri"} else None,
-                sampling_rate_hz=500 if anatomy_modality == "ecg" else None,
-                lead_definitions=leads if anatomy_modality == "ecg" else [],
-            ),
-            PatientAcquisition(
-                acquisition_id="fit",
-                subject_id="P1",
-                modality="ecg",
-                source_files=[_source("fit")],
-                sampling_rate_hz=500,
-                lead_definitions=leads,
-            ),
-            PatientAcquisition(
-                acquisition_id="holdout",
-                subject_id="P1",
-                modality="ecg",
-                source_files=[_source("holdout")],
-                sampling_rate_hz=500,
-                lead_definitions=leads,
-            ),
-        ],
+        acquisitions=acquisitions,
         evidence=[
             PatientEvidenceItem(
                 evidence_id="fit-evidence",
@@ -120,7 +134,6 @@ def _prepare(case: PatientCase, bundle: AnatomyBundlePayload):
 
 
 def test_selected_anatomy_must_be_ct_or_mri() -> None:
-    # The case still contains ECG data, but the explicitly selected anatomy ID is wrong.
     case = _case(anatomy_modality="ecg")
     with pytest.raises(PatientEPWorkflowError, match="CT or MRI"):
         _prepare(case, _bundle())
