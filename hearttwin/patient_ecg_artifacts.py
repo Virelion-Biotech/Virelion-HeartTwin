@@ -66,9 +66,7 @@ def _verified_json(artifact: dict[str, Any], *, role: str) -> dict[str, Any]:
         raise PatientECGArtifactError(f"{role} artifact is missing: {path}")
     observed = hashlib.sha256(path.read_bytes()).hexdigest()
     if observed != digest:
-        raise PatientECGArtifactError(
-            f"{role} artifact failed SHA-256 verification"
-        )
+        raise PatientECGArtifactError(f"{role} artifact failed SHA-256 verification")
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
@@ -258,7 +256,7 @@ def evaluate_patient_ep_holdouts(
     *,
     spec: ECGEvaluationSpec,
 ) -> list[ECGValidationReport]:
-    """Evaluate a completed patient EP prediction against all held-out ECG artifacts."""
+    """Evaluate one confirmation prediction against its one explicit held-out ECG."""
     payload = (
         result.model_dump(mode="json")
         if isinstance(result, PatientEPWorkflowResult)
@@ -272,30 +270,29 @@ def evaluate_patient_ep_holdouts(
     holdouts = payload.get("holdout_observations")
     if not isinstance(holdouts, list) or not holdouts:
         raise PatientECGArtifactError("patient EP result has no held-out ECG observations")
-
-    reports: list[ECGValidationReport] = []
-    for observation in holdouts:
-        if not isinstance(observation, dict):
-            raise PatientECGArtifactError("held-out observation must be an object")
-        measured, measured_time_ms, evidence_id = waveform_from_electrotrace_holdout(
-            observation
+    if len(holdouts) != 1:
+        raise PatientECGArtifactError(
+            "automatic patient EP validation currently requires exactly one held-out ECG per "
+            "confirmation prediction; multiple holdouts require explicit prediction-to-acquisition mapping"
         )
-        if abs(measured.sample_rate_hz - predicted.sample_rate_hz) > 1e-9:
-            raise PatientECGArtifactError(
-                "measured and predicted ECG sample rates differ; implicit resampling is not allowed"
-            )
-        _require_compatible_time_axes(
-            measured_time_ms,
-            predicted_time_ms,
-            sample_rate_hz=measured.sample_rate_hz,
+    observation = holdouts[0]
+    if not isinstance(observation, dict):
+        raise PatientECGArtifactError("held-out observation must be an object")
+    measured, measured_time_ms, evidence_id = waveform_from_electrotrace_holdout(observation)
+    if abs(measured.sample_rate_hz - predicted.sample_rate_hz) > 1e-9:
+        raise PatientECGArtifactError(
+            "measured and predicted ECG sample rates differ; implicit resampling is not allowed"
         )
-        reports.append(
-            evaluate_heldout_ecg(
-                measured=measured,
-                predicted=predicted,
-                evidence_id=evidence_id,
-                withheld_from_fit=True,
-                spec=spec,
-            )
-        )
-    return reports
+    _require_compatible_time_axes(
+        measured_time_ms,
+        predicted_time_ms,
+        sample_rate_hz=measured.sample_rate_hz,
+    )
+    report = evaluate_heldout_ecg(
+        measured=measured,
+        predicted=predicted,
+        evidence_id=evidence_id,
+        withheld_from_fit=True,
+        spec=spec,
+    )
+    return [report]
