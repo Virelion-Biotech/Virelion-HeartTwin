@@ -28,7 +28,7 @@ HeartTwin rejects cross-patient acquisitions or evidence records and unresolved 
 
 ## Evidence separation
 
-Two validation modes are distinct:
+Two validation modes are distinct.
 
 ### Within-patient holdout
 
@@ -43,35 +43,44 @@ Example:
 
 Calibration and validation patients must be disjoint. Subject overlap is treated as leakage.
 
-This distinction prevents the previous failure mode in which any appearance of one subject in both roles was rejected, while preserving patient-disjoint testing for cohort-level claims.
+This distinction permits legitimate within-patient prediction while preserving patient-disjoint testing for cohort-level claims.
 
-## EP readiness gates
+## Patient anatomy readiness
 
-The initial pathway fails closed when it lacks:
+The strict patient pathway calls CardiAnatomy with:
+
+```text
+anatomy.validate -- target patient_ep
+```
+
+The `patient_ep` gate is intentionally stronger than generic solver-level `ep` readiness. In addition to the artifacts required by the EP solver, it requires an unambiguous selected segmentation, volume mesh, coordinate field, and fibre field; SHA-256-pinned selected artifacts; matching subject/study/acquisition lineage; declared physical coordinate frames; a traceable frame path from the reviewed segmentation to the selected model-space artifacts; an expert-reviewed or expert-corrected selected segmentation; and QC covering the selected patient volume mesh.
+
+Passing this gate means the anatomy satisfies software-level patient provenance/readiness requirements. It does not prove segmentation accuracy or clinical validity.
+
+HeartTwin additionally fails closed when the patient record lacks:
 
 - patient CT or MRI for ventricular anatomy;
 - a digital ECG acquisition;
 - imaging source files;
 - an imaging coordinate frame;
 - ECG source files;
-- ECG sampling rate;
-- ECG lead definitions; or
-- an EP-ready, canonically fingerprinted anatomy bundle at execution time.
+- ECG sampling rate; or
+- ECG lead definitions.
 
 Generic fibres, missing scar characterization, standardized torso geometry, or protocol-derived electrode coordinates remain visible limitations rather than being silently promoted to patient-specific inputs.
 
 ## Workflow
 
-The executable path is:
+The strict executable path is:
 
 ```text
 PatientCase
     |
     +--> CardiAnatomy anatomy.build (optional when a bundle already exists)
     |        |
-    |        +--> anatomy.validate -- target ep
+    |        +--> anatomy.validate -- target patient_ep
     |                    |
-    |                    +--> canonical anatomy bundle fingerprint
+    |                    +--> reviewed + traceable canonical anatomy bundle
     |
     +--> calibration ECG evidence only
     |        |
@@ -79,22 +88,57 @@ PatientCase
     |                    |
     |                    +--> calibrated parameter set
     |
-    +--> CardiEP ep.simulate using calibrated parameters
+    +--> parameter semantics gate
+    |        |
+    |        +--> same backend: plumbing replay allowed
+    |        +--> different backend: BLOCKED until explicit mapping exists
+    |
+    +--> CardiEP ep.simulate
              |
              +--> independent forward prediction
 
-held-out ECG evidence -------------------------------------> separate evaluator
+held-out ECG evidence -------------------------------------> held-out evaluator
 ```
 
-The held-out observations are intentionally absent from the confirmation solver request. They are returned separately for downstream evaluation, preventing the confirmation model from conditioning on its own validation measurements.
+The held-out observations are absent from both calibration and confirmation solver requests. They are evaluated only after the prediction has been emitted.
 
 ## Scientific-grade versus plumbing-grade ECG
 
-CardiEP's current native `numpy-eikonal-v1` backend is useful for fast integration and inverse-loop development, but its ECG implementation is explicitly an exploratory pseudo-ECG rather than a physical clinical forward solver.
+CardiEP's native `numpy-eikonal-v1` backend remains useful for fast integration and inverse-loop development, but its ECG implementation is an exploratory pseudo-ECG rather than a physical clinical forward solver.
 
 HeartTwin therefore refuses to treat `numpy-eikonal-v1` as satisfying a scientific-grade lead-field workflow. It may still be used when a workflow explicitly sets `scientific_grade=false` and `observation_model="pseudo_ecg"` for software plumbing and synthetic testing.
 
-The intended scientific path is an external high-fidelity EP backend with an appropriate ECG forward model, such as an openCARP-based monodomain/lead-field adapter. That adapter is not implemented by this change and must not be inferred from the existence of an openCARP backend name in configuration.
+CardiEP now also provides `opencarp-external-v1`, a strict confirmation-only boundary for a user-installed openCARP/carputils experiment. The adapter requires lead-field ECG output, a standard 12-lead result, versioned execution provenance, and an exact request hash; it rejects pseudo-ECG output. The adapter does not vendor openCARP, does not provide the external experiment wrapper itself, and does not establish patient-level validity.
+
+## Cross-backend parameter semantics
+
+HeartTwin does not assume that equal-looking parameter names have equal physiological meaning across solvers. The current strict patient workflow therefore rejects implicit replay when:
+
+```text
+fast_backend != confirmation_backend
+```
+
+A scientific fast-model to openCARP workflow remains blocked until a versioned parameter-mapping contract exists. That contract must state, at minimum, source and target backends, source/target parameter names, units and conversions, semantic rationale, mapping version, and every source parameter that is intentionally ignored. Nothing may be silently renamed, rescaled, or dropped.
+
+Same-backend replay remains available for plumbing and controlled model-specific workflows.
+
+## Held-out ECG evaluator
+
+`evaluate_heldout_ecg` is downstream-only and has no calibration or solver interface. It refuses evidence that is not explicitly marked `withheld_from_fit`.
+
+It currently supports:
+
+- per-lead RMSE;
+- per-lead normalized RMSE;
+- per-lead correlation;
+- mean normalized waveform error;
+- mean correlation;
+- QRS-duration error when both waveforms have QRS annotations; and
+- predeclared acceptance criteria.
+
+Measured and predicted signals are normalized to common voltage units before comparison. Timing can use a fixed offset declared before evaluation, but the evaluator does not search the held-out waveform for an optimal post-hoc alignment.
+
+No universal "digital twin accuracy" threshold is built in. Acceptance criteria must be declared for the intended validation study.
 
 ## Example: integration/plumbing run
 
@@ -124,32 +168,23 @@ prepared = prepare_patient_ep_requests(
 
 This checks lineage and leakage plumbing. It is not an empirical patient-level validation result.
 
-## Intended scientific-grade run
+## Intended scientific path
 
-A scientific-grade configuration should use an explicitly installed and qualified backend, a physical ECG observation model, an EP-ready patient anatomy bundle, and a separately defined held-out evaluator. For example, conceptually:
+The intended confirmation backend is now available as a software boundary:
 
-```python
-spec = PatientEPWorkflowSpec(
-    patient_id="PSEUDO-001",
-    anatomy_acquisition_id="cmr-001",
-    calibration_evidence_ids=["ecg-fit"],
-    validation_evidence_ids=["ecg-holdout"],
-    fast_backend="<qualified fast activation backend>",
-    confirmation_backend="<qualified monodomain backend>",
-    observation_model="lead_field",
-    scientific_grade=True,
-    torso_mode="patient_specific",
-    electrode_mode="recorded",
-)
+```text
+confirmation_backend = "opencarp-external-v1"
 ```
 
-HeartTwin will not silently substitute the native pseudo-ECG when a scientific-grade lead-field workflow is requested.
+However, a scientific run is not yet end-to-end executable through the strict patient workflow because the qualified fast calibration model and explicit fast-model-to-openCARP parameter mapping are not yet implemented. The external openCARP experiment/wrapper must also be installed, configured, and independently validated for the intended use.
+
+HeartTwin deliberately blocks this incomplete pathway instead of substituting the native pseudo-ECG or copying parameters across solvers.
 
 ## Next engineering gates
 
-1. Add an explicit openCARP command/plugin adapter to CardiEP with pinned execution provenance and lead-field outputs.
-2. Add a held-out ECG evaluator that computes predefined QRS and waveform endpoints without feeding validation data back into fitting.
-3. Integrate one explicit CT/CMR reconstruction backend through CardiAnatomy and validate its segmentation/mesh outputs against independent reference labels and expert review.
-4. Add parameter mapping between fast activation and high-fidelity confirmation backends rather than assuming backend parameter names are interchangeable.
-5. Persist `PatientCase`, workflow specifications, predictions, residuals, limitations, and validation reports through CardiTrace.
+1. Add an explicit, versioned EP parameter-mapping contract and mapped replay workflow.
+2. Implement and qualify the external openCARP/carputils wrapper behind CardiEP's merged `opencarp-external-v1` boundary.
+3. Connect predicted and measured ECG artifacts to the held-out evaluator automatically while preserving evidence IDs and hashes.
+4. Persist `PatientCase`, workflow specifications, predictions, residuals, limitations, mappings, and validation reports through CardiTrace.
+5. Run one complete reviewed patient reconstruction + calibration + withheld prediction with predefined endpoints, then repeat across additional patients.
 6. Only after repeated-patient evaluation, extend the patient pathway toward mechanics and circulation.
