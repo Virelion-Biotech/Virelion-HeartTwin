@@ -1,13 +1,15 @@
 """Strict patient-EP entrypoint layered over the core HeartTwin workflow.
 
-This wrapper makes patient-specific anatomy readiness mandatory and prevents
-implicit parameter replay between heterogeneous electrophysiology backends.
-Cross-backend confirmation is permitted only through an explicit, versioned
-parameter-mapping contract that accounts for every calibrated source parameter.
+This wrapper makes patient-specific anatomy readiness mandatory, routes
+scientific ECG calibration through ElectroTrace, and prevents implicit parameter
+replay between heterogeneous electrophysiology backends. Cross-backend
+confirmation is permitted only through an explicit, versioned parameter-mapping
+contract that accounts for every calibrated source parameter.
 """
 from __future__ import annotations
 
 from copy import deepcopy
+from pathlib import Path
 from typing import Any
 
 from .contracts import AnatomyBundlePayload
@@ -15,6 +17,7 @@ from .ep_parameter_mapping import (
     EPParameterMappingSpec,
     apply_ep_parameter_mapping,
 )
+from .patient_ecg_bridge import prepare_patient_ecg_split
 from .patient_ep import (
     PatientEPWorkflowError,
     PatientEPWorkflowResult,
@@ -22,6 +25,7 @@ from .patient_ep import (
     _invoke,
     _reject_planned_backend_names,
     _selected_anatomy_acquisition,
+    _selected_evidence,
     prepare_patient_ep_requests,
 )
 from .patient_model import (
@@ -31,6 +35,8 @@ from .patient_model import (
     validate_patient_ep_workflow,
 )
 from .service_registry import ServiceRegistry
+
+_CAMPS_BACKEND = "camps-cdt-external-v1"
 
 
 def _require_patient_ep_ready(
@@ -140,6 +146,62 @@ def _confirmation_parameters(
     )
 
 
+def _electrotrace_patient_observations(
+    registry: ServiceRegistry,
+    *,
+    case: PatientCase,
+    spec: PatientEPWorkflowSpec,
+    measurement_settings: dict[str, Any] | None,
+    measurement_output_root: str | Path | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    """Prepare fit/holdout ECGs identically while keeping their roles isolated."""
+    fit_evidence, holdout_evidence = _selected_evidence(case, spec)
+    root = (
+        Path(measurement_output_root)
+        if measurement_output_root is not None
+        else Path("hearttwin-patient-ep") / case.patient_id / "electrotrace"
+    )
+    fit, holdout = prepare_patient_ecg_split(
+        registry,
+        case=case,
+        calibration_evidence=fit_evidence,
+        validation_evidence=holdout_evidence,
+        settings=measurement_settings,
+        require_standard_12_leads=True,
+        output_root=root,
+    )
+    fit_observations = [item.observation for item in fit]
+    holdout_observations = [item.observation for item in holdout]
+    provenance = {
+        "service": "ElectroTrace",
+        "capability": "electrical.prepare_calibration",
+        "schema_version": "electrotrace-ep-calibration-v1",
+        "calibration": [
+            {
+                "evidence_id": item.evidence_id,
+                "acquisition_id": item.acquisition_id,
+                "source_file_id": item.source_file_id,
+                "source_sha256": item.source_sha256,
+                "artifact_id": item.observation["artifact"]["artifact_id"],
+                "artifact_sha256": item.observation["artifact"]["sha256"],
+            }
+            for item in fit
+        ],
+        "validation": [
+            {
+                "evidence_id": item.evidence_id,
+                "acquisition_id": item.acquisition_id,
+                "source_file_id": item.source_file_id,
+                "source_sha256": item.source_sha256,
+                "artifact_id": item.observation["artifact"]["artifact_id"],
+                "artifact_sha256": item.observation["artifact"]["sha256"],
+            }
+            for item in holdout
+        ],
+    }
+    return fit_observations, holdout_observations, provenance
+
+
 def run_strict_patient_ep_workflow(
     registry: ServiceRegistry,
     *,
@@ -153,11 +215,16 @@ def run_strict_patient_ep_workflow(
     parameter_mapping: EPParameterMappingSpec | dict[str, Any] | None = None,
     calibration_settings: dict[str, Any] | None = None,
     confirmation_settings: dict[str, Any] | None = None,
+    measurement_settings: dict[str, Any] | None = None,
+    measurement_output_root: str | Path | None = None,
 ) -> PatientEPWorkflowResult:
     """Run strict patient anatomy -> calibration -> unconditional confirmation.
 
-    Validation ECGs remain outside both calibration and confirmation solver
-    requests. They are returned as holdout references for downstream evaluation.
+    For the scientific Camps calibration backend, raw ECG acquisitions are first
+    transformed into immutable ElectroTrace calibration artifacts. Fit and
+    holdout acquisitions use the same fixed measurement-preparation settings,
+    but validation observations remain outside both calibration and confirmation
+    solver requests.
     """
     if (anatomy_bundle is None) == (anatomy_request is None):
         raise PatientEPWorkflowError(
@@ -205,7 +272,30 @@ def run_strict_patient_ep_workflow(
         confirmation_settings=confirmation_settings,
     )
 
-    calibration = _invoke(registry, "ep.calibrate", prepared.calibration_request)
+    calibration_request = deepcopy(prepared.calibration_request)
+    holdout_observations = list(prepared.holdout_observations)
+    measurement_provenance: dict[str, Any] | None = None
+    if spec.fast_backend == _CAMPS_BACKEND:
+        (
+            calibration_request["observations"],
+            holdout_observations,
+            measurement_provenance,
+        ) = _electrotrace_patient_observations(
+            registry,
+            case=case,
+            spec=spec,
+            measurement_settings=measurement_settings,
+            measurement_output_root=measurement_output_root,
+        )
+        settings = dict(calibration_request.get("settings") or {})
+        if "hearttwin_measurement_preparation" in settings:
+            raise PatientEPWorkflowError(
+                "calibration settings use reserved hearttwin_measurement_preparation key"
+            )
+        settings["hearttwin_measurement_preparation"] = measurement_provenance
+        calibration_request["settings"] = settings
+
+    calibration = _invoke(registry, "ep.calibrate", calibration_request)
     if str(calibration.get("subject_id")) != case.patient_id:
         raise PatientEPWorkflowError("EP calibration returned a different subject")
     if str(calibration.get("backend")) != spec.fast_backend:
@@ -266,6 +356,16 @@ def run_strict_patient_ep_workflow(
             "ECG electrode coordinates are not directly recorded for this patient"
         )
 
+    if measurement_provenance is not None:
+        calibration = deepcopy(calibration)
+        provenance = dict(calibration.get("provenance") or {})
+        if "hearttwin_measurement_preparation" in provenance:
+            raise PatientEPWorkflowError(
+                "EP backend supplied reserved hearttwin_measurement_preparation provenance"
+            )
+        provenance["hearttwin_measurement_preparation"] = measurement_provenance
+        calibration["provenance"] = provenance
+
     return PatientEPWorkflowResult(
         patient_id=case.patient_id,
         evidence_split=prepared.evidence_split,
@@ -273,7 +373,7 @@ def run_strict_patient_ep_workflow(
         anatomy_bundle=bundle.model_dump(mode="json"),
         calibration=calibration,
         confirmation=confirmation,
-        holdout_observations=prepared.holdout_observations,
+        holdout_observations=holdout_observations,
         scientific_grade=spec.scientific_grade,
         limitations=limitations,
     )
