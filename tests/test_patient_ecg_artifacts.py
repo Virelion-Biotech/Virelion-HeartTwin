@@ -8,6 +8,7 @@ import pytest
 
 from hearttwin.patient_ecg_artifacts import (
     PatientECGArtifactError,
+    _local_path,
     evaluate_patient_ep_holdouts,
 )
 from hearttwin.patient_ecg_eval import ECGEvaluationSpec
@@ -126,10 +127,7 @@ def test_evaluates_hash_pinned_holdout_without_solver_access(tmp_path: Path) -> 
 def test_rejects_tampered_holdout_bytes(tmp_path: Path) -> None:
     result = _fixture_result(tmp_path)
     holdout_uri = result["holdout_observations"][0]["artifact"]["uri"]
-    path = Path(holdout_uri.removeprefix("file://"))
-    if not path.is_file():
-        pytest.skip("fixture URI path representation differs on this platform")
-    path.write_text("tampered", encoding="utf-8")
+    _local_path(holdout_uri).write_text("tampered", encoding="utf-8")
     with pytest.raises(PatientECGArtifactError, match="SHA-256"):
         evaluate_patient_ep_holdouts(result, spec=ECGEvaluationSpec())
 
@@ -144,9 +142,7 @@ def test_rejects_non_withheld_measurement(tmp_path: Path) -> None:
 def test_rejects_posthoc_time_axis_mismatch(tmp_path: Path) -> None:
     result = _fixture_result(tmp_path)
     artifact = result["confirmation"]["outputs"][0]
-    path = Path(artifact["uri"].removeprefix("file://"))
-    if not path.is_file():
-        pytest.skip("fixture URI path representation differs on this platform")
+    path = _local_path(artifact["uri"])
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload["time_ms"] = [value + 2.0 for value in payload["time_ms"]]
     artifact["sha256"] = _write_json(path, payload)
@@ -157,9 +153,7 @@ def test_rejects_posthoc_time_axis_mismatch(tmp_path: Path) -> None:
 def test_rejects_dimensionless_predicted_ecg(tmp_path: Path) -> None:
     result = _fixture_result(tmp_path)
     artifact = result["confirmation"]["outputs"][0]
-    path = Path(artifact["uri"].removeprefix("file://"))
-    if not path.is_file():
-        pytest.skip("fixture URI path representation differs on this platform")
+    path = _local_path(artifact["uri"])
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload["units"] = "a.u."
     artifact["sha256"] = _write_json(path, payload)
