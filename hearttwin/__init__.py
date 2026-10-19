@@ -68,6 +68,14 @@ from .patient_ep import (
     prepare_patient_ep_requests,
     run_patient_ep_workflow,
 )
+from .patient_ep_strict import run_strict_patient_ep_workflow
+from .ep_parameter_mapping import (
+    EPParameterMappingResult,
+    EPParameterMappingSpec,
+    EPParameterMapRule,
+    IgnoredEPParameter,
+    apply_ep_parameter_mapping,
+)
 from .patient_ecg_eval import (
     ECGAcceptanceCriteria,
     ECGEvaluationSpec,
@@ -102,7 +110,9 @@ __all__ = [
     "PatientCase", "PatientCaseQC", "PatientEPWorkflowSpec", "assess_evidence_split",
     "assess_patient_case_for_ep", "validate_patient_ep_workflow",
     "PatientEPPreparedRequests", "PatientEPWorkflowError", "PatientEPWorkflowResult",
-    "prepare_patient_ep_requests", "run_patient_ep_workflow",
+    "prepare_patient_ep_requests", "run_patient_ep_workflow", "run_strict_patient_ep_workflow",
+    "EPParameterMapRule", "IgnoredEPParameter", "EPParameterMappingSpec",
+    "EPParameterMappingResult", "apply_ep_parameter_mapping",
     "ECGWaveform", "ECGAcceptanceCriteria", "ECGEvaluationSpec", "ECGLeadMetric",
     "ECGValidationReport", "evaluate_heldout_ecg",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
