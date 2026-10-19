@@ -37,6 +37,21 @@ from .patient_model import (
 from .service_registry import ServiceRegistry
 
 _CAMPS_BACKEND = "camps-cdt-external-v1"
+_OPENCARP_BACKEND = "opencarp-external-v1"
+_STANDARD_12_LEADS = [
+    "I",
+    "II",
+    "III",
+    "aVR",
+    "aVL",
+    "aVF",
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+]
 
 
 def _require_patient_ep_ready(
@@ -144,6 +159,112 @@ def _confirmation_parameters(
         },
         mapped.model_dump(mode="json"),
     )
+
+
+def _calibration_activation_reference(
+    *,
+    calibration: dict[str, Any],
+    spec: PatientEPWorkflowSpec,
+    anatomy_bundle_fingerprint: str,
+    mapping_result: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Preserve fast-model activation state when Camps is replayed in openCARP.
+
+    Scalar parameter mapping alone cannot represent inferred activation roots or
+    their timing. CardiEP's openCARP boundary therefore accepts a hash-pinned
+    activation target and requires the external wrapper to report how that target
+    was translated into an openCARP stimulation configuration.
+    """
+    if not (
+        spec.fast_backend == _CAMPS_BACKEND
+        and spec.confirmation_backend == _OPENCARP_BACKEND
+    ):
+        return None
+    if mapping_result is None:
+        raise PatientEPWorkflowError(
+            "Camps to openCARP confirmation requires a parameter mapping result"
+        )
+
+    simulated = calibration.get("simulated")
+    if not isinstance(simulated, dict):
+        raise PatientEPWorkflowError(
+            "Camps calibration must return a representative simulated result"
+        )
+    outputs = simulated.get("outputs")
+    if not isinstance(outputs, list):
+        raise PatientEPWorkflowError(
+            "Camps calibration simulated result has no output artifact list"
+        )
+    activation = [
+        item for item in outputs if isinstance(item, dict) and item.get("kind") == "activation_map"
+    ]
+    if len(activation) != 1:
+        raise PatientEPWorkflowError(
+            "Camps calibration must return exactly one activation_map for openCARP replay"
+        )
+    activation_ref = deepcopy(activation[0])
+    for field in ("artifact_id", "uri", "sha256"):
+        if not activation_ref.get(field):
+            raise PatientEPWorkflowError(
+                f"Camps calibration activation_map requires {field}"
+            )
+    digest = str(activation_ref["sha256"]).lower()
+    if len(digest) != 64:
+        raise PatientEPWorkflowError(
+            "Camps calibration activation_map must be SHA-256 pinned"
+        )
+    activation_ref["sha256"] = digest
+
+    mapping_fingerprint = mapping_result.get("mapping_fingerprint")
+    if not isinstance(mapping_fingerprint, str) or len(mapping_fingerprint) != 64:
+        raise PatientEPWorkflowError(
+            "Camps to openCARP replay requires a valid parameter mapping fingerprint"
+        )
+
+    return {
+        "role": "activation_target_from_fast_calibration",
+        "source_backend": spec.fast_backend,
+        "anatomy_bundle_fingerprint": anatomy_bundle_fingerprint,
+        "parameter_mapping_fingerprint": mapping_fingerprint,
+        "activation_ref": activation_ref,
+    }
+
+
+def _configure_confirmation_settings(
+    *,
+    spec: PatientEPWorkflowSpec,
+    settings: dict[str, Any],
+    calibration_reference: dict[str, Any] | None,
+) -> dict[str, Any]:
+    configured = deepcopy(settings)
+    if spec.confirmation_backend != _OPENCARP_BACKEND:
+        if calibration_reference is not None:
+            raise PatientEPWorkflowError(
+                "calibration activation references are currently defined only for openCARP confirmation"
+            )
+        return configured
+
+    expected = {
+        "ecg_forward_model": "lead_field",
+        "torso_mode": spec.torso_mode,
+        "electrode_mode": spec.electrode_mode,
+        "expected_leads": list(_STANDARD_12_LEADS),
+    }
+    for key, value in expected.items():
+        if key in configured and configured[key] != value:
+            raise PatientEPWorkflowError(
+                f"confirmation setting {key!r} conflicts with PatientEPWorkflowSpec"
+            )
+        configured[key] = value
+
+    if calibration_reference is not None:
+        reserved = "hearttwin_calibration_reference"
+        if reserved in configured:
+            raise PatientEPWorkflowError(
+                f"confirmation settings use reserved {reserved} key"
+            )
+        configured[reserved] = calibration_reference
+    return configured
 
 
 def _electrotrace_patient_observations(
@@ -326,6 +447,19 @@ def run_strict_patient_ep_workflow(
     )
     confirmation_request = deepcopy(prepared.confirmation_request_template)
     confirmation_request["parameters"] = confirmation_parameters
+
+    calibration_reference = _calibration_activation_reference(
+        calibration=calibration,
+        spec=spec,
+        anatomy_bundle_fingerprint=prepared.anatomy_bundle_fingerprint,
+        mapping_result=mapping_result,
+    )
+    confirmation_request["settings"] = _configure_confirmation_settings(
+        spec=spec,
+        settings=dict(confirmation_request.get("settings") or {}),
+        calibration_reference=calibration_reference,
+    )
+
     if mapping_result is not None:
         settings = dict(confirmation_request.get("settings") or {})
         settings["hearttwin_parameter_mapping"] = {
