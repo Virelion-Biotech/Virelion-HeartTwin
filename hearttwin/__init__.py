@@ -61,6 +61,13 @@ from .patient_model import (
     assess_patient_case_for_ep,
     validate_patient_ep_workflow,
 )
+from .patient_ep import (
+    PatientEPPreparedRequests,
+    PatientEPWorkflowError,
+    PatientEPWorkflowResult,
+    prepare_patient_ep_requests,
+    run_patient_ep_workflow,
+)
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -86,6 +93,8 @@ __all__ = [
     "PatientAcquisition", "PatientModelInput", "PatientEvidenceItem", "EvidenceSplitReport",
     "PatientCase", "PatientCaseQC", "PatientEPWorkflowSpec", "assess_evidence_split",
     "assess_patient_case_for_ep", "validate_patient_ep_workflow",
+    "PatientEPPreparedRequests", "PatientEPWorkflowError", "PatientEPWorkflowResult",
+    "prepare_patient_ep_requests", "run_patient_ep_workflow",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
