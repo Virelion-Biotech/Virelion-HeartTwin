@@ -10,6 +10,7 @@ from .mechanistic_workflow import run_mechanistic_twin_workflow
 from .patient_ep import prepare_patient_ep_requests
 from .patient_ep_strict import run_strict_patient_ep_workflow
 from .patient_model import PatientCase, PatientEPWorkflowSpec
+from .patient_report import build_patient_model_report
 
 
 class VirelionServices:
@@ -83,6 +84,15 @@ class VirelionServices:
             spec=spec,
             **kwargs,
         )
+
+    def patient_model_report(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Build the auditable patient-personalization and claim-ceiling report."""
+        return build_patient_model_report(case=case, spec=spec, **kwargs)
 
     def atlas(self, entity_id: str, **p: Any): return self.call("atlas.context", entity_id, **p)
     def design(self, entity_id: str, **p: Any): return self.call("design.generate", entity_id, **p)
