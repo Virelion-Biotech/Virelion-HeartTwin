@@ -6,7 +6,8 @@ import pytest
 
 from hearttwin import AnatomyBundlePayload
 from hearttwin.patient_ep import PatientEPWorkflowError
-from hearttwin.patient_ep_strict import _require_patient_ep_ready
+from hearttwin.patient_ep_strict import _require_patient_ep_ready, _require_safe_parameter_replay
+from hearttwin.patient_model import PatientEPWorkflowSpec
 
 
 @dataclass
@@ -60,3 +61,32 @@ def test_strict_entrypoint_rejects_changed_anatomy_fingerprint() -> None:
     adapter = _Adapter({"bundle_fingerprint": "b" * 64})
     with pytest.raises(PatientEPWorkflowError, match="changed the anatomy bundle fingerprint"):
         _require_patient_ep_ready(_Registry(adapter), _bundle())  # type: ignore[arg-type]
+
+
+def test_strict_entrypoint_rejects_implicit_cross_backend_parameter_replay() -> None:
+    spec = PatientEPWorkflowSpec(
+        patient_id="P1",
+        anatomy_acquisition_id="A1",
+        calibration_evidence_ids=["fit"],
+        validation_evidence_ids=["holdout"],
+        fast_backend="fast-activation-v1",
+        confirmation_backend="opencarp-external-v1",
+        observation_model="lead_field",
+        scientific_grade=True,
+    )
+    with pytest.raises(PatientEPWorkflowError, match="cross-backend parameter replay"):
+        _require_safe_parameter_replay(spec)
+
+
+def test_strict_entrypoint_allows_same_backend_parameter_replay() -> None:
+    spec = PatientEPWorkflowSpec(
+        patient_id="P1",
+        anatomy_acquisition_id="A1",
+        calibration_evidence_ids=["fit"],
+        validation_evidence_ids=["holdout"],
+        fast_backend="numpy-eikonal-v1",
+        confirmation_backend="numpy-eikonal-v1",
+        observation_model="pseudo_ecg",
+        scientific_grade=False,
+    )
+    _require_safe_parameter_replay(spec)
