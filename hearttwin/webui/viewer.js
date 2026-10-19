@@ -154,7 +154,7 @@
         return [x,p[1]*Math.cos(pitch)-z*Math.sin(pitch),p[1]*Math.sin(pitch)+z*Math.cos(pitch)];
       };
       const project=p=>[w/2+p[0]*scale,cy-p[1]*scale];
-      if(grid){context.strokeStyle='#263340';context.lineWidth=.6;for(let i=-4;i<=4;i++){for(const ends of [[[i,-2,-4],[i,-2,4]],[[-4,-2,i],[4,-2,i]]]){const a=project(transform(ends[0])),b=project(transform(ends[1]));context.beginPath();context.moveTo(...a);context.lineTo(...b);context.stroke();}}}
+      if(grid){context.strokeStyle='#d8cdd0';context.lineWidth=.6;for(let i=-4;i<=4;i++){for(const ends of [[[i,-2,-4],[i,-2,4]],[[-4,-2,i],[4,-2,i]]]){const a=project(transform(ends[0])),b=project(transform(ends[1]));context.beginPath();context.moveTo(...a);context.lineTo(...b);context.stroke();}}}
       const points=model.nodes.map(transform),screen=points.map(project);
       const rows=model.faces.map((f,i)=>({f,i,z:(points[f[0]][2]+points[f[1]][2]+points[f[2]][2])/3})).sort((a,b)=>a.z-b.z);
       const threshold=model.activation?model.min+(model.max-model.min)*Number($('activation-time').value)/1000:0;
