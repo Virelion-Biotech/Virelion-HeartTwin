@@ -5,7 +5,7 @@ The first patient-specific vertical slice is intentionally narrow:
     patient anatomy -> EP calibration -> independent forward confirmation
 
 Validation measurements are never passed into the calibration request and are
-not supplied to the confirmation solver.  They are returned as untouched
+not supplied to the confirmation solver. They are returned as untouched
 references for a separate evaluator so a solver cannot accidentally condition
 on its own holdout data.
 """
@@ -29,6 +29,21 @@ from .patient_model import (
     validate_patient_ep_workflow,
 )
 from .service_registry import ServiceRegistry
+
+
+# These names document the intended architecture but are not registered CardiEP
+# backends today. Fail explicitly instead of allowing a planned backend name to
+# look operational.
+_PLANNED_BACKENDS = {
+    "cardiep_eikonal": (
+        "planned patient fast-activation backend alias; use an actually registered "
+        "CardiEP backend such as numpy-eikonal-v1 for plumbing tests"
+    ),
+    "opencarp_monodomain": (
+        "planned openCARP confirmation backend; an openCARP command/plugin adapter "
+        "has not yet been implemented in CardiEP"
+    ),
+}
 
 
 class PatientEPWorkflowError(RuntimeError):
@@ -70,6 +85,18 @@ def _invoke(registry: ServiceRegistry, capability: str, payload: dict[str, Any])
     if not isinstance(output, dict):
         raise PatientEPWorkflowError(f"{capability} returned a non-object payload")
     return output
+
+
+def _reject_planned_backend_names(spec: PatientEPWorkflowSpec) -> None:
+    for field_name, backend in (
+        ("fast_backend", spec.fast_backend),
+        ("confirmation_backend", spec.confirmation_backend),
+    ):
+        explanation = _PLANNED_BACKENDS.get(backend)
+        if explanation is not None:
+            raise PatientEPWorkflowError(
+                f"{field_name}={backend!r} is not implemented: {explanation}"
+            )
 
 
 def _one_anatomy_artifact(bundle: AnatomyBundlePayload) -> dict[str, Any]:
@@ -201,6 +228,7 @@ def prepare_patient_ep_requests(
     """Prepare strict CardiEP requests without executing any scientific engine."""
     split = validate_patient_ep_workflow(case, spec)
     qc = assess_patient_case_for_ep(case)
+    _reject_planned_backend_names(spec)
     bundle = (
         anatomy_bundle
         if isinstance(anatomy_bundle, AnatomyBundlePayload)
@@ -302,6 +330,7 @@ def run_patient_ep_workflow(
 
     split = validate_patient_ep_workflow(case, spec)
     qc = assess_patient_case_for_ep(case)
+    _reject_planned_backend_names(spec)
 
     if anatomy_request is not None:
         request = deepcopy(anatomy_request)
