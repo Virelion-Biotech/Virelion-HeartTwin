@@ -61,6 +61,11 @@ from .patient_model import (
     assess_patient_case_for_ep,
     validate_patient_ep_workflow,
 )
+from .patient_ecg_bridge import (
+    PreparedECGEvidence,
+    prepare_patient_ecg_evidence,
+    prepare_patient_ecg_split,
+)
 from .patient_ep import (
     PatientEPPreparedRequests,
     PatientEPWorkflowError,
@@ -119,6 +124,7 @@ __all__ = [
     "PatientAcquisition", "PatientModelInput", "PatientEvidenceItem", "EvidenceSplitReport",
     "PatientCase", "PatientCaseQC", "PatientEPWorkflowSpec", "assess_evidence_split",
     "assess_patient_case_for_ep", "validate_patient_ep_workflow",
+    "PreparedECGEvidence", "prepare_patient_ecg_evidence", "prepare_patient_ecg_split",
     "PatientEPPreparedRequests", "PatientEPWorkflowError", "PatientEPWorkflowResult",
     "prepare_patient_ep_requests", "run_patient_ep_workflow", "run_strict_patient_ep_workflow",
     "EPParameterMapRule", "IgnoredEPParameter", "EPParameterMappingSpec",
