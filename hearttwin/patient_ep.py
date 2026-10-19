@@ -99,6 +99,27 @@ def _reject_planned_backend_names(spec: PatientEPWorkflowSpec) -> None:
             )
 
 
+def _selected_anatomy_acquisition(
+    case: PatientCase,
+    spec: PatientEPWorkflowSpec,
+) -> PatientAcquisition:
+    matches = [
+        item
+        for item in case.acquisitions
+        if item.acquisition_id == spec.anatomy_acquisition_id
+    ]
+    if len(matches) != 1:
+        raise PatientEPWorkflowError(
+            "anatomy_acquisition_id must resolve to exactly one patient acquisition"
+        )
+    acquisition = matches[0]
+    if acquisition.modality not in {"ct", "mri"}:
+        raise PatientEPWorkflowError(
+            "anatomy_acquisition_id must identify a CT or MRI acquisition"
+        )
+    return acquisition
+
+
 def _one_anatomy_artifact(bundle: AnatomyBundlePayload) -> dict[str, Any]:
     """Select one EP volume artifact; never silently choose between duplicates."""
     for kind in ("volume_mesh", "ep_volume_mesh"):
@@ -211,7 +232,38 @@ def _selected_evidence(
     by_id = {item.evidence_id: item for item in case.evidence}
     fit = [by_id[evidence_id] for evidence_id in spec.calibration_evidence_ids]
     holdout = [by_id[evidence_id] for evidence_id in spec.validation_evidence_ids]
+    wrong_fit = [item.evidence_id for item in fit if item.role != "calibration"]
+    if wrong_fit:
+        raise PatientEPWorkflowError(
+            "calibration_evidence_ids must reference evidence declared as calibration: "
+            + ", ".join(sorted(wrong_fit))
+        )
+    wrong_holdout = [
+        item.evidence_id
+        for item in holdout
+        if item.role != "validation" or not item.withheld_from_fit
+    ]
+    if wrong_holdout:
+        raise PatientEPWorkflowError(
+            "validation_evidence_ids must reference evidence declared as withheld validation: "
+            + ", ".join(sorted(wrong_holdout))
+        )
     return fit, holdout
+
+
+def _check_bundle_selection(
+    case: PatientCase,
+    spec: PatientEPWorkflowSpec,
+    bundle: AnatomyBundlePayload,
+) -> None:
+    _selected_anatomy_acquisition(case, spec)
+    if bundle.subject_id != case.patient_id:
+        raise PatientEPWorkflowError("Anatomy bundle subject does not match PatientCase")
+    if bundle.acquisition_id != spec.anatomy_acquisition_id:
+        raise PatientEPWorkflowError(
+            "Anatomy bundle acquisition does not match the explicitly selected patient "
+            "anatomy acquisition"
+        )
 
 
 def prepare_patient_ep_requests(
@@ -234,8 +286,7 @@ def prepare_patient_ep_requests(
         if isinstance(anatomy_bundle, AnatomyBundlePayload)
         else AnatomyBundlePayload.model_validate(anatomy_bundle)
     )
-    if bundle.subject_id != case.patient_id:
-        raise PatientEPWorkflowError("Anatomy bundle subject does not match PatientCase")
+    _check_bundle_selection(case, spec, bundle)
     if bundle.bundle_fingerprint is None:
         raise PatientEPWorkflowError(
             "Anatomy bundle must be canonicalized by anatomy.validate before EP preparation"
@@ -331,6 +382,7 @@ def run_patient_ep_workflow(
     split = validate_patient_ep_workflow(case, spec)
     qc = assess_patient_case_for_ep(case)
     _reject_planned_backend_names(spec)
+    selected_anatomy = _selected_anatomy_acquisition(case, spec)
 
     if anatomy_request is not None:
         request = deepcopy(anatomy_request)
@@ -338,13 +390,19 @@ def run_patient_ep_workflow(
         if declared is not None and str(declared) != case.patient_id:
             raise PatientEPWorkflowError("Anatomy request subject does not match patient")
         request["subject_id"] = case.patient_id
+        request_acquisition = request.get("acquisition")
+        if isinstance(request_acquisition, dict):
+            declared_acquisition = request_acquisition.get("acquisition_id")
+            if declared_acquisition is not None and str(declared_acquisition) != selected_anatomy.acquisition_id:
+                raise PatientEPWorkflowError(
+                    "Anatomy request acquisition does not match anatomy_acquisition_id"
+                )
         output = _invoke(registry, "anatomy.build", request)
         bundle = AnatomyBundlePayload.model_validate(output)
     else:
         bundle = AnatomyBundlePayload.model_validate(anatomy_bundle)
 
-    if bundle.subject_id != case.patient_id:
-        raise PatientEPWorkflowError("Anatomy bundle subject does not match patient")
+    _check_bundle_selection(case, spec, bundle)
 
     readiness = _invoke(
         registry,
