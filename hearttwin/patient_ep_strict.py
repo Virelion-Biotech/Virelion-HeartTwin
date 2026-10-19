@@ -168,64 +168,68 @@ def _calibration_activation_reference(
     anatomy_bundle_fingerprint: str,
     mapping_result: dict[str, Any] | None,
 ) -> dict[str, Any] | None:
-    """Preserve fast-model activation state when Camps is replayed in openCARP.
+    """Preserve cross-backend fast-calibration activation for openCARP confirmation.
 
-    Scalar parameter mapping alone cannot represent inferred activation roots or
-    their timing. CardiEP's openCARP boundary therefore accepts a hash-pinned
-    activation target and requires the external wrapper to report how that target
-    was translated into an openCARP stimulation configuration.
+    Scalar parameter mapping cannot, in general, represent the calibrated spatial
+    activation state. Whenever a different fast backend is explicitly mapped into
+    openCARP, HeartTwin therefore transfers exactly one hash-pinned activation map.
+    The openCARP wrapper remains responsible for declaring how that activation was
+    translated into its registered experiment profile.
     """
-    if not (
-        spec.fast_backend == _CAMPS_BACKEND
-        and spec.confirmation_backend == _OPENCARP_BACKEND
-    ):
+    if spec.confirmation_backend != _OPENCARP_BACKEND:
+        return None
+    if spec.fast_backend == _OPENCARP_BACKEND:
         return None
     if mapping_result is None:
         raise PatientEPWorkflowError(
-            "Camps to openCARP confirmation requires a parameter mapping result"
+            "Cross-backend openCARP confirmation requires a parameter mapping result"
         )
 
     simulated = calibration.get("simulated")
     if not isinstance(simulated, dict):
         raise PatientEPWorkflowError(
-            "Camps calibration must return a representative simulated result"
+            "Fast EP calibration must return a representative simulated result"
         )
     outputs = simulated.get("outputs")
     if not isinstance(outputs, list):
         raise PatientEPWorkflowError(
-            "Camps calibration simulated result has no output artifact list"
+            "Fast EP calibration simulated result has no output artifact list"
         )
     activation = [
         item for item in outputs if isinstance(item, dict) and item.get("kind") == "activation_map"
     ]
     if len(activation) != 1:
         raise PatientEPWorkflowError(
-            "Camps calibration must return exactly one activation_map for openCARP replay"
+            "Fast EP calibration must return exactly one activation_map for openCARP replay"
         )
     activation_ref = deepcopy(activation[0])
     for field in ("artifact_id", "uri", "sha256"):
         if not activation_ref.get(field):
             raise PatientEPWorkflowError(
-                f"Camps calibration activation_map requires {field}"
+                f"Fast EP calibration activation_map requires {field}"
             )
     digest = str(activation_ref["sha256"]).lower()
-    if len(digest) != 64:
+    if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
         raise PatientEPWorkflowError(
-            "Camps calibration activation_map must be SHA-256 pinned"
+            "Fast EP calibration activation_map must be SHA-256 pinned"
         )
     activation_ref["sha256"] = digest
 
     mapping_fingerprint = mapping_result.get("mapping_fingerprint")
-    if not isinstance(mapping_fingerprint, str) or len(mapping_fingerprint) != 64:
+    if (
+        not isinstance(mapping_fingerprint, str)
+        or len(mapping_fingerprint) != 64
+        or any(char not in "0123456789abcdef" for char in mapping_fingerprint.lower())
+    ):
         raise PatientEPWorkflowError(
-            "Camps to openCARP replay requires a valid parameter mapping fingerprint"
+            "Cross-backend openCARP replay requires a valid parameter mapping fingerprint"
         )
 
     return {
         "role": "activation_target_from_fast_calibration",
         "source_backend": spec.fast_backend,
         "anatomy_bundle_fingerprint": anatomy_bundle_fingerprint,
-        "parameter_mapping_fingerprint": mapping_fingerprint,
+        "parameter_mapping_fingerprint": mapping_fingerprint.lower(),
         "activation_ref": activation_ref,
     }
 
