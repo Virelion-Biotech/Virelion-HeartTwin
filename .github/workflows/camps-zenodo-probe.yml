@@ -12,61 +12,96 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Query public Zenodo record and sparse-scan meta_data tar
+      - name: Extract DTI004 public patient bundle and scan result index
         shell: python
         run: |
+          import csv
+          import hashlib
           import json
           import math
+          import pathlib
           import urllib.request
 
-          USER_AGENT = "HeartTwin-public-data-probe/1.1"
+          USER_AGENT = "HeartTwin-public-data-probe/1.2"
           record_url = "https://zenodo.org/api/records/14034739"
           req = urllib.request.Request(record_url, headers={"User-Agent": USER_AGENT})
           with urllib.request.urlopen(req, timeout=60) as response:
               record = json.load(response)
-
-          metadata = record.get("metadata", {})
-          print("TITLE", metadata.get("title"))
-          print("VERSION", metadata.get("version"))
-          print("LICENSE", (metadata.get("license") or {}).get("id"))
-          print("FILES", len(record.get("files", [])))
-
           files = {item.get("key"): item for item in record.get("files", [])}
-          for item in record.get("files", []):
-              print("TOPLEVEL", json.dumps({
-                  "key": item.get("key"),
-                  "size": item.get("size"),
-                  "checksum": item.get("checksum"),
-                  "links": item.get("links", {}),
-              }, sort_keys=True))
-
-          subject_item = files["Subject_names.txt"]
-          req = urllib.request.Request(
-              subject_item["links"]["self"], headers={"User-Agent": USER_AGENT}
-          )
-          with urllib.request.urlopen(req, timeout=60) as response:
-              print("SUBJECT_NAMES_BEGIN")
-              print(response.read().decode("utf-8", errors="replace"))
-              print("SUBJECT_NAMES_END")
-
           tar_url = files["meta_data.tar"]["links"]["self"]
 
           def fetch_range(start: int, end: int) -> bytes:
               request = urllib.request.Request(
                   tar_url,
-                  headers={
-                      "User-Agent": USER_AGENT,
-                      "Range": f"bytes={start}-{end}",
-                  },
+                  headers={"User-Agent": USER_AGENT, "Range": f"bytes={start}-{end}"},
               )
-              with urllib.request.urlopen(request, timeout=60) as response:
+              with urllib.request.urlopen(request, timeout=120) as response:
                   data = response.read()
-                  if len(data) != end - start + 1:
-                      raise RuntimeError(
-                          f"range request {start}-{end} returned {len(data)} bytes"
-                      )
-                  return data
+              if len(data) != end - start + 1:
+                  raise RuntimeError(f"range {start}-{end}: got {len(data)} bytes")
+              return data
 
+          # Exact offsets obtained by sparse tar-header traversal in run 2.
+          wanted = {
+              "DTI004_clinical_full_ecg.csv": (601171968, 103310),
+              "DTI004_clinical_qrs_ecg.csv": (601275904, 12413),
+              "DTI004_coarse_boundarynodefield_lvendo.csv": (646450688, 18942),
+              "DTI004_coarse_boundarynodefield_rvendo.csv": (646470144, 22789),
+              "DTI004_coarse_material_tetra.csv": (646493696, 570585),
+              "DTI004_coarse_nodefield_ab_cut.csv": (647065088, 693906),
+              "DTI004_coarse_nodefield_aprt.csv": (647759872, 701191),
+              "DTI004_coarse_nodefield_fibre.csv": (648461824, 2080537),
+              "DTI004_coarse_nodefield_normal.csv": (650543104, 2092032),
+              "DTI004_coarse_nodefield_rt.csv": (652635648, 690780),
+              "DTI004_coarse_nodefield_rvlv.csv": (653327360, 700812),
+              "DTI004_coarse_nodefield_sheet.csv": (654028800, 2079643),
+              "DTI004_coarse_nodefield_tm.csv": (656109056, 494224),
+              "DTI004_coarse_tetra.csv": (656604160, 4602932),
+              "DTI004_coarse_xyz.csv": (661208064, 1979240),
+              "DTI004_electrode_xyz.csv": (663187968, 536),
+          }
+          out = pathlib.Path("probe_out/DTI004")
+          out.mkdir(parents=True, exist_ok=True)
+          manifest = {}
+          for name, (start, size) in wanted.items():
+              payload = fetch_range(start, start + size - 1)
+              path = out / name
+              path.write_bytes(payload)
+              manifest[name] = {
+                  "size": size,
+                  "sha256": hashlib.sha256(payload).hexdigest(),
+                  "tar_data_offset": start,
+              }
+              print("EXTRACTED", name, size, manifest[name]["sha256"])
+
+          # Inspect the ECG contract without assuming orientation.
+          for name in ("DTI004_clinical_full_ecg.csv", "DTI004_clinical_qrs_ecg.csv"):
+              rows = list(csv.reader((out / name).open(newline="")))
+              widths = sorted({len(row) for row in rows})
+              numeric = []
+              for row in rows[:5]:
+                  try:
+                      numeric.append([float(x) for x in row[:12]])
+                  except ValueError:
+                      numeric.append(row[:12])
+              print("ECG_SHAPE", name, len(rows), widths)
+              print("ECG_HEAD", name, json.dumps(numeric))
+
+          # Basic geometry counts / bounds.
+          xyz_rows = [
+              [float(x) for x in row]
+              for row in csv.reader((out / "DTI004_coarse_xyz.csv").open(newline=""))
+              if row
+          ]
+          tetra_rows = [row for row in csv.reader((out / "DTI004_coarse_tetra.csv").open(newline="")) if row]
+          mins = [min(row[i] for row in xyz_rows) for i in range(3)]
+          maxs = [max(row[i] for row in xyz_rows) for i in range(3)]
+          print("GEOMETRY_NODES", len(xyz_rows))
+          print("GEOMETRY_TETRA_ROWS", len(tetra_rows))
+          print("GEOMETRY_BOUNDS", mins, maxs)
+          print("ELECTRODES", (out / "DTI004_electrode_xyz.csv").read_text())
+
+          # Continue sparse tar traversal and index only DTI004 QRS/activation/result artifacts.
           def parse_octal(raw: bytes) -> int:
               text = raw.rstrip(b"\0 ").lstrip(b" ")
               return int(text or b"0", 8)
@@ -74,32 +109,25 @@ jobs:
           offset = 0
           pending_longname = None
           pending_pax_path = None
-          matched = []
-          clinical_seen = False
-          clinical_tail = 0
-          max_entries = 6000
-
-          for index in range(max_entries):
+          indexed = []
+          for index in range(2500):
               header = fetch_range(offset, offset + 511)
               if header == b"\0" * 512:
                   print("TAR_END", index, offset)
                   break
-
               raw_name = header[0:100].split(b"\0", 1)[0].decode("utf-8", errors="replace")
               prefix = header[345:500].split(b"\0", 1)[0].decode("utf-8", errors="replace")
               name = f"{prefix}/{raw_name}" if prefix else raw_name
               size = parse_octal(header[124:136])
               typeflag = header[156:157]
               data_offset = offset + 512
-
               if typeflag in (b"L", b"K"):
                   payload = fetch_range(data_offset, data_offset + max(size, 1) - 1)[:size]
                   if typeflag == b"L":
                       pending_longname = payload.rstrip(b"\0\n").decode("utf-8", errors="replace")
               elif typeflag in (b"x", b"g"):
                   payload = fetch_range(data_offset, data_offset + max(size, 1) - 1)[:size]
-                  text = payload.decode("utf-8", errors="replace")
-                  for line in text.splitlines():
+                  for line in payload.decode("utf-8", errors="replace").splitlines():
                       parts = line.split(" ", 1)
                       if len(parts) == 2 and parts[1].startswith("path="):
                           pending_pax_path = parts[1][5:]
@@ -110,44 +138,40 @@ jobs:
                   elif pending_longname:
                       name = pending_longname
                       pending_longname = None
-
                   lower = name.lower()
-                  interesting = (
-                      "clinical_data" in lower
-                      or "clinical_qrs_ecg" in lower
-                      or "dti004" in lower
-                      or "dti024" in lower
-                      or "dti032" in lower
-                  )
-                  if interesting:
+                  if "dti004" in lower and any(
+                      token in lower
+                      for token in (
+                          "qrs_", "qrs/", "activation", "lat", "parameter_population",
+                          "theta_population", "root", "purkinje", "selected_parameter"
+                      )
+                  ):
                       row = {
                           "index": index,
                           "name": name,
                           "size": size,
-                          "header_offset": offset,
                           "data_offset": data_offset,
                           "type": typeflag.decode("ascii", errors="replace"),
                       }
-                      matched.append(row)
-                      print("MATCH", json.dumps(row, sort_keys=True))
-
-                  if "clinical_data/" in lower:
-                      clinical_seen = True
-                      clinical_tail = 0
-                  elif clinical_seen:
-                      clinical_tail += 1
-                      if clinical_tail >= 100:
-                          print("CLINICAL_SECTION_COMPLETE", index)
-                          break
-
+                      indexed.append(row)
+                      print("RESULT_MATCH", json.dumps(row, sort_keys=True))
               offset = data_offset + int(math.ceil(size / 512.0) * 512)
           else:
-              print("SCAN_LIMIT_REACHED", max_entries, offset)
+              print("SCAN_LIMIT_REACHED", offset)
 
-          ecg_rows = [row for row in matched if "ecg" in row["name"].lower()]
-          print("ECG_MATCH_COUNT", len(ecg_rows))
-          for subject in ("DTI004", "DTI024", "DTI032"):
-              rows = [row for row in ecg_rows if subject.lower() in row["name"].lower()]
-              print("SUBJECT_ECG_COUNT", subject, len(rows))
-              for row in rows:
-                  print("SUBJECT_ECG", subject, json.dumps(row, sort_keys=True))
+          (out / "extraction_manifest.json").write_text(
+              json.dumps({
+                  "zenodo_record": 14046617,
+                  "license": "CC-BY-4.0",
+                  "subject": "DTI004",
+                  "files": manifest,
+                  "result_index": indexed,
+              }, indent=2, sort_keys=True) + "\n"
+          )
+
+      - name: Upload DTI004 extraction package
+        uses: actions/upload-artifact@v4
+        with:
+          name: dti004-public-extraction
+          path: probe_out/DTI004
+          if-no-files-found: error
