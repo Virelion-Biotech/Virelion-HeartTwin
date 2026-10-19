@@ -528,6 +528,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         "/": "index.html",
                         "/index.html": "index.html",
                         "/app.js": "app.js",
+                        "/viewer.js": "viewer.js",
                         "/styles.css": "styles.css",
                         "/catalog.json": "catalog.json",
                     }

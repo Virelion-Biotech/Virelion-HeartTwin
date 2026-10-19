@@ -114,3 +114,54 @@ neither credentials nor compute endpoints are baked into the published frontend.
 A successful run confirms software execution. It does not qualify biological predictions
 or clinical use. Scientific gates and module limitations remain attached to the research
 outputs.
+
+## Model workspace
+
+The default view is a dark modeling workstation with a structure explorer, interactive
+3D surface display, view properties, workflow stages and an execution monitor. The
+initial six-layer heart is an original procedural schematic. It is not an anatomical
+atlas, patient reconstruction, computed result or simulation-ready cardiac mesh.
+
+Use **Import geometry** to inspect a JSON file locally in the browser. This action
+does not upload the file or submit a job. The viewer accepts zero-based triangular
+surfaces or tetrahedral meshes; it extracts exterior faces from tetrahedra and rejects
+non-manifold faces shared by more than two tetrahedra. For example:
+
+```json
+{
+  "geometry": {
+    "node_xyz": [[0,0,0], [1,0,0], [0,1,0], [0,0,1]],
+    "tetrahedra": [[0,1,2,3]],
+    "units": {"node_xyz": "mm"}
+  },
+  "activation_ms": [0, 10, 15, 20]
+}
+```
+
+This tetrahedron is a software-format example, not a heart model. A surface file may
+use `triangles` instead of `tetrahedra`. Coordinate units are displayed as unspecified
+if absent. The viewer fits geometry using one uniform scale without altering the
+stored input; arbitrary axes are X/Y/Z, not inferred patient anatomical orientations.
+Camera presets refer to display directions and do not register imported anatomy.
+
+Drag or use arrow keys to rotate; scroll or use plus/minus to zoom. Surface/mesh mode,
+structure visibility, opacity, ground grid and display clipping work locally. Clipping
+removes surface faces across a display plane; it does not create a capped cross-section
+or provide volumetric measurements. **Fit** resets the camera, and **Reset display
+settings** restores visibility and rendering controls.
+
+Activation colors and playback appear only when `activation_ms` is supplied with one
+finite value per geometry node in matching order. No heart motion, ECG or physiological
+measurements are invented. In **Runs & results**, **Open in model view** can inspect a
+completed run with inline `request.payload.geometry` and its result's matching activation
+array. Geometry referenced only by a worker-side filename must be imported separately
+with its corresponding result data; the frontend does not guess node correspondence.
+
+Current browser limits are 16 MiB per geometry JSON file, 30,000 vertices, 60,000 exterior
+surface faces and 80,000 input tetrahedra. This lightweight surface inspector does not
+replace commercial high-density volumetric rendering, segmentation or model preparation.
+Larger artifacts remain downloadable or accessible on the worker. Local geometry is
+kept only in the current tab's memory.
+
+See [UI design references](UI_DESIGN_REFERENCES.md) for the public commercial materials
+used to inform the workstation layout.
