@@ -100,6 +100,12 @@ def test_http_auth_origin_host_and_static(tmp_path):
         assert request(port, "GET", "/", auth=False)[0] == 200
         assert request(port, "GET", "/viewer.js", auth=False)[0] == 200
         assert request(port, "GET", "/heart-reference.json", auth=False)[0] == 200
+        logo_status, logo_headers, logo_body = request(
+            port, "GET", "/virelion-logo.png", auth=False
+        )
+        assert logo_status == 200
+        assert logo_headers["Content-Type"] == "image/png"
+        assert logo_body.startswith(b"\x89PNG\r\n\x1a\n")
         assert request(port, "GET", "/../web.py", auth=False)[0] == 404
 
 

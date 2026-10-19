@@ -124,11 +124,8 @@
         button.append(dot,document.createTextNode(layer.name));button.addEventListener('click',()=>{active=i;syncLayer();});row.append(visible,button);$('layer-tree').append(row);
         const option=document.createElement('option');option.value=i;option.textContent=layer.name;$('active-layer').append(option);
       });
-      $('scene-name').textContent=model.name;$('layer-count').textContent=model.layers.length;$('scene-source').textContent=model.reference?'ATLAS':model.schematic?'SCHEMATIC':'IMPORTED';
-      $('model-subtitle').textContent=model.reference?'BodyParts3D 4.0 · adult male reference anatomy · display mesh':model.schematic?'Schematic reference · no patient data loaded':label+' · inspect imported geometry';
+      $('layer-count').textContent=model.layers.length;
       $('model-source-note').textContent=model.reference?'DBCLS reference anatomy. Display surface is simplified; colors are illustrative. Ventricular cavities are spaces, not muscle tissue.':model.schematic?'Original procedural schematic for navigating the interface. Import your mesh to inspect research geometry.':label+'. Surface display does not establish mesh quality, anatomy accuracy or simulation readiness.';
-      $('viewport-title').textContent=model.reference?'ANATOMICAL REFERENCE':model.schematic?'SCHEMATIC ANATOMY':'IMPORTED GEOMETRY';
-      $('view-data-badge').textContent=model.reference?'BodyParts3D · DBCLS · CC BY 4.0':model.schematic?'Reference illustration · not a simulation':label;
       $('fact-source').textContent=model.reference?'BodyParts3D 4.0':model.schematic?'Schematic':'Imported JSON';
       $('fact-vertices').textContent=model.nodes.length.toLocaleString();$('fact-faces').textContent=model.faces.length.toLocaleString();
       $('fact-field').textContent=model.activation?'Activation (ms)':'None';
@@ -136,11 +133,11 @@
       $('geometry-units').textContent=model.schematic?'Schematic units':'Coordinate units: '+model.units;
       $('scalar-legend').classList.toggle('hidden',!model.activation);
       $('activation-play').disabled=!model.activation;$('activation-time').disabled=!model.activation;
-      $('timeline-source').textContent=model.activation?'RESULT DATA':'NO DATA';
+      document.querySelector('.timeline').hidden=!model.activation;
       $('timeline-label').textContent=model.activation?'Activation threshold · '+label:'Activation playback';
       if(model.activation){model.min=model.activation.reduce((a,b)=>Math.min(a,b),Infinity);model.max=model.activation.reduce((a,b)=>Math.max(a,b),-Infinity);$('scalar-min').textContent=model.min.toFixed(1);$('scalar-max').textContent=model.max.toFixed(1);$('activation-time').value=1000;}
       $('time-value').textContent=model.activation?model.max.toFixed(1)+' ms':'No result loaded';
-      $('view-orientation').textContent='FRONT';syncLayer();draw();
+      syncLayer();draw();
     }
     function draw() {
       if(!model)return;
@@ -177,15 +174,15 @@
         context.strokeStyle=color;context.lineWidth=1;context.beginPath();context.moveTo(...origin);context.lineTo(...end);context.stroke();context.fillStyle=color;context.font='9px ui-monospace, monospace';context.fillText(label,end[0]+3,end[1]-3);
       }
     }
-    function reset(){yaw=-.23;pitch=.07;zoom=1;$('view-orientation').textContent='FRONT';draw();}
+    function reset(){yaw=-.23;pitch=.07;zoom=1;draw();}
     let pointer=null;
     canvas.addEventListener('pointerdown',e=>{pointer=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);canvas.focus();});
-    canvas.addEventListener('pointermove',e=>{if(!pointer)return;yaw+=(e.clientX-pointer[0])*.008;pitch=Math.max(-1.5,Math.min(1.5,pitch+(e.clientY-pointer[1])*.008));pointer=[e.clientX,e.clientY];$('view-orientation').textContent='CUSTOM VIEW';draw();});
+    canvas.addEventListener('pointermove',e=>{if(!pointer)return;yaw+=(e.clientX-pointer[0])*.008;pitch=Math.max(-1.5,Math.min(1.5,pitch+(e.clientY-pointer[1])*.008));pointer=[e.clientX,e.clientY];draw();});
     canvas.addEventListener('pointerup',()=>pointer=null);canvas.addEventListener('pointercancel',()=>pointer=null);
     canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.min(3,Math.max(.4,zoom*Math.exp(-e.deltaY*.001)));draw();},{passive:false});
-    canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','0'].includes(e.key))return;e.preventDefault();if(e.key==='ArrowLeft')yaw-=.12;if(e.key==='ArrowRight')yaw+=.12;if(e.key==='ArrowUp')pitch=Math.min(1.5,pitch+.12);if(e.key==='ArrowDown')pitch=Math.max(-1.5,pitch-.12);if(['+','='].includes(e.key))zoom=Math.min(3,zoom*1.1);if(e.key==='-')zoom=Math.max(.4,zoom/1.1);if(e.key==='0')reset();else{$('view-orientation').textContent='CUSTOM VIEW';draw();}});
+    canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','0'].includes(e.key))return;e.preventDefault();if(e.key==='ArrowLeft')yaw-=.12;if(e.key==='ArrowRight')yaw+=.12;if(e.key==='ArrowUp')pitch=Math.min(1.5,pitch+.12);if(e.key==='ArrowDown')pitch=Math.max(-1.5,pitch-.12);if(['+','='].includes(e.key))zoom=Math.min(3,zoom*1.1);if(e.key==='-')zoom=Math.max(.4,zoom/1.1);if(e.key==='0')reset();else{draw();}});
     $('view-fit').addEventListener('click',reset);
-    document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{pitch=.07;yaw={front:-.23,back:Math.PI-.23,left:Math.PI/2}[b.dataset.view];$('view-orientation').textContent={front:'FRONT',back:'BACK',left:'SIDE'}[b.dataset.view];draw();}));
+    document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{pitch=.07;yaw={front:-.23,back:Math.PI-.23,left:Math.PI/2}[b.dataset.view];draw();}));
     const mode=mesh=>{wire=mesh;['mode-surface','mode-mesh'].forEach((id,i)=>{$(id).classList.toggle('active',Boolean(i)===mesh);$(id).setAttribute('aria-pressed',Boolean(i)===mesh);});draw();};
     $('mode-surface').addEventListener('click',()=>mode(false));$('mode-mesh').addEventListener('click',()=>mode(true));
     $('active-layer').addEventListener('change',()=>{active=Number($('active-layer').value);syncLayer();});
@@ -198,13 +195,13 @@
     $('reset-schematic').addEventListener('click',()=>{loadVersion++;load(schematic(),'Schematic reference');});
     async function loadReference(){
       const version=++loadVersion;
-      $('reference-status').textContent='Loading reference anatomy…';
+      $('load-anatomy').textContent='Loading heart…';
       try{
         if(!referenceRaw){const response=await fetch('heart-reference.json');if(!response.ok)throw Error('Reference download failed');referenceRaw=await decodeReference(await response.json());}
         if(version!==loadVersion)return;
         load(anatomicalReference(referenceRaw),'BodyParts3D anatomical reference');
-        $('reference-status').textContent='Reference anatomy available · 11 structures';
-      }catch(error){$('reference-status').textContent='Anatomical reference unavailable. Retry to load it; the current view is unchanged.';}
+        $('load-anatomy').textContent='Reset heart';
+      }catch(error){$('load-anatomy').textContent='Retry loading heart';$('mesh-stat').textContent='Could not load anatomical heart. Please retry.';}
     }
     $('load-anatomy').addEventListener('click',loadReference);
     new ResizeObserver(draw).observe(canvas);
