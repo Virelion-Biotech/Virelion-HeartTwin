@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import pytest
-
 from hearttwin import AnatomyBundlePayload
-from hearttwin.patient_ep import PatientEPWorkflowError, prepare_patient_ep_requests
+from hearttwin.patient_ep import prepare_patient_ep_requests
 from hearttwin.patient_model import (
     CoordinateFrame,
     PatientAcquisition,
@@ -90,17 +88,28 @@ def _bundle() -> AnatomyBundlePayload:
     )
 
 
-def test_planned_default_backends_fail_explicitly() -> None:
+def test_default_patient_ep_backends_are_real_registered_backend_ids() -> None:
     spec = PatientEPWorkflowSpec(
         patient_id="P1",
         anatomy_acquisition_id="ct",
         calibration_evidence_ids=["fit-evidence"],
         validation_evidence_ids=["holdout-evidence"],
     )
-    with pytest.raises(PatientEPWorkflowError, match="not implemented"):
-        prepare_patient_ep_requests(
-            case=_case(),
-            spec=spec,
-            anatomy_bundle=_bundle(),
-            parameter_bounds={"isotropic_speed": (0.03, 0.10)},
-        )
+    assert spec.fast_backend == "camps-cdt-external-v1"
+    assert spec.confirmation_backend == "opencarp-external-v1"
+
+    prepared = prepare_patient_ep_requests(
+        case=_case(),
+        spec=spec,
+        anatomy_bundle=_bundle(),
+        parameter_bounds={"sheet_speed": (0.02, 0.08)},
+    )
+    assert prepared.calibration_request["backend"] == "camps-cdt-external-v1"
+    assert prepared.confirmation_request_template["backend"] == "opencarp-external-v1"
+    assert [
+        item["observation_id"] for item in prepared.calibration_request["observations"]
+    ] == ["fit-evidence"]
+    assert prepared.confirmation_request_template["observations"] == []
+    assert [item["observation_id"] for item in prepared.holdout_observations] == [
+        "holdout-evidence"
+    ]
