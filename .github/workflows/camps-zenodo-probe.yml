@@ -12,14 +12,16 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Query public Zenodo record manifest
+      - name: Query public Zenodo record and sparse-scan meta_data tar
         shell: python
         run: |
           import json
+          import math
           import urllib.request
 
-          url = "https://zenodo.org/api/records/14034739"
-          req = urllib.request.Request(url, headers={"User-Agent": "HeartTwin-public-data-probe/1.0"})
+          USER_AGENT = "HeartTwin-public-data-probe/1.1"
+          record_url = "https://zenodo.org/api/records/14034739"
+          req = urllib.request.Request(record_url, headers={"User-Agent": USER_AGENT})
           with urllib.request.urlopen(req, timeout=60) as response:
               record = json.load(response)
 
@@ -28,10 +30,124 @@ jobs:
           print("VERSION", metadata.get("version"))
           print("LICENSE", (metadata.get("license") or {}).get("id"))
           print("FILES", len(record.get("files", [])))
+
+          files = {item.get("key"): item for item in record.get("files", [])}
           for item in record.get("files", []):
-              print(json.dumps({
+              print("TOPLEVEL", json.dumps({
                   "key": item.get("key"),
                   "size": item.get("size"),
                   "checksum": item.get("checksum"),
                   "links": item.get("links", {}),
               }, sort_keys=True))
+
+          subject_item = files["Subject_names.txt"]
+          req = urllib.request.Request(
+              subject_item["links"]["self"], headers={"User-Agent": USER_AGENT}
+          )
+          with urllib.request.urlopen(req, timeout=60) as response:
+              print("SUBJECT_NAMES_BEGIN")
+              print(response.read().decode("utf-8", errors="replace"))
+              print("SUBJECT_NAMES_END")
+
+          tar_url = files["meta_data.tar"]["links"]["self"]
+
+          def fetch_range(start: int, end: int) -> bytes:
+              request = urllib.request.Request(
+                  tar_url,
+                  headers={
+                      "User-Agent": USER_AGENT,
+                      "Range": f"bytes={start}-{end}",
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  data = response.read()
+                  if len(data) != end - start + 1:
+                      raise RuntimeError(
+                          f"range request {start}-{end} returned {len(data)} bytes"
+                      )
+                  return data
+
+          def parse_octal(raw: bytes) -> int:
+              text = raw.rstrip(b"\0 ").lstrip(b" ")
+              return int(text or b"0", 8)
+
+          offset = 0
+          pending_longname = None
+          pending_pax_path = None
+          matched = []
+          clinical_seen = False
+          clinical_tail = 0
+          max_entries = 6000
+
+          for index in range(max_entries):
+              header = fetch_range(offset, offset + 511)
+              if header == b"\0" * 512:
+                  print("TAR_END", index, offset)
+                  break
+
+              raw_name = header[0:100].split(b"\0", 1)[0].decode("utf-8", errors="replace")
+              prefix = header[345:500].split(b"\0", 1)[0].decode("utf-8", errors="replace")
+              name = f"{prefix}/{raw_name}" if prefix else raw_name
+              size = parse_octal(header[124:136])
+              typeflag = header[156:157]
+              data_offset = offset + 512
+
+              if typeflag in (b"L", b"K"):
+                  payload = fetch_range(data_offset, data_offset + max(size, 1) - 1)[:size]
+                  if typeflag == b"L":
+                      pending_longname = payload.rstrip(b"\0\n").decode("utf-8", errors="replace")
+              elif typeflag in (b"x", b"g"):
+                  payload = fetch_range(data_offset, data_offset + max(size, 1) - 1)[:size]
+                  text = payload.decode("utf-8", errors="replace")
+                  for line in text.splitlines():
+                      parts = line.split(" ", 1)
+                      if len(parts) == 2 and parts[1].startswith("path="):
+                          pending_pax_path = parts[1][5:]
+              else:
+                  if pending_pax_path:
+                      name = pending_pax_path
+                      pending_pax_path = None
+                  elif pending_longname:
+                      name = pending_longname
+                      pending_longname = None
+
+                  lower = name.lower()
+                  interesting = (
+                      "clinical_data" in lower
+                      or "clinical_qrs_ecg" in lower
+                      or "dti004" in lower
+                      or "dti024" in lower
+                      or "dti032" in lower
+                  )
+                  if interesting:
+                      row = {
+                          "index": index,
+                          "name": name,
+                          "size": size,
+                          "header_offset": offset,
+                          "data_offset": data_offset,
+                          "type": typeflag.decode("ascii", errors="replace"),
+                      }
+                      matched.append(row)
+                      print("MATCH", json.dumps(row, sort_keys=True))
+
+                  if "clinical_data/" in lower:
+                      clinical_seen = True
+                      clinical_tail = 0
+                  elif clinical_seen:
+                      clinical_tail += 1
+                      if clinical_tail >= 100:
+                          print("CLINICAL_SECTION_COMPLETE", index)
+                          break
+
+              offset = data_offset + int(math.ceil(size / 512.0) * 512)
+          else:
+              print("SCAN_LIMIT_REACHED", max_entries, offset)
+
+          ecg_rows = [row for row in matched if "ecg" in row["name"].lower()]
+          print("ECG_MATCH_COUNT", len(ecg_rows))
+          for subject in ("DTI004", "DTI024", "DTI032"):
+              rows = [row for row in ecg_rows if subject.lower() in row["name"].lower()]
+              print("SUBJECT_ECG_COUNT", subject, len(rows))
+              for row in rows:
+                  print("SUBJECT_ECG", subject, json.dumps(row, sort_keys=True))
