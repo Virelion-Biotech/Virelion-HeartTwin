@@ -44,3 +44,6 @@ th{background:#f6f4f4;color:#6a6a6a}td,td strong{color:#333}tr[data-job]:hover{b
 dialog{background:#fff;color:var(--ink);border-color:#d8d0d1;box-shadow:0 25px 100px #3d061026}dialog::backdrop{background:#24101580}.status-dot{background:#97898c}.status-dot.online{background:#357759;box-shadow:0 0 0 3px #35775915}
 #toast{background:var(--blood);border-color:var(--blood-deep);color:#fff}footer{border-top:1px solid var(--line);color:#6a6a6a}
 @media(max-width:800px){.brand{font-size:22px}.workspace-heading h1{font-size:29px}}@media(max-width:600px){.workspace-heading h1,.page-heading.small h1{font-size:28px}}
+
+/* Keep the wordmark and analysis markers legible in the compact sidebar. */
+.brand{font-size:21px}.brand-mark{flex:none}.electrical{background:#4f849f}.mechanics{background:#a36d80}.flow{background:#478382}.therapy{background:#9b8051}
