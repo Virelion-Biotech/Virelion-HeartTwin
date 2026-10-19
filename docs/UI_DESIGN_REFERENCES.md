@@ -28,3 +28,13 @@ asset/element checks, JavaScript syntax and the existing HTTP gateway tests incl
 real subprocess execution. Browser visual QA could not run: the managed preview failed
 with `bwrap: Can't mount proc on /newroot/proc: Operation not permitted`. The original workstation was subsequently opened in the owner-signed-in browser.
 The anatomical reference update is verified against the deployed site separately.
+
+## Anatomical reference browser check, 2026-10-19
+
+The owner-signed-in production site loaded the BodyParts3D reference successfully,
+with 11 groups, 13,809 vertices and 22,859 faces. Checked coronary visibility,
+structure selection, opacity, restoring default-hidden cavities, back/front camera,
+mesh/surface mode and the source/license dialog. No warning/error console entries
+were reported. A visual issue with the shared input CSS exposing programmatic file
+controls was found and corrected with an explicit `[hidden]` display rule.
+This was a desktop browser check, not physical mobile or clinical anatomy validation.
