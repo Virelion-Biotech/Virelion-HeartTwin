@@ -1,7 +1,7 @@
 """Strict patient-EP entrypoint layered over the core HeartTwin workflow.
 
 The core patient EP module is intentionally backend-neutral and predates
-CardiAnatomy's stricter ``patient_ep`` readiness target.  This wrapper makes the
+CardiAnatomy's stricter ``patient_ep`` readiness target. This wrapper makes the
 new patient-evidence gate mandatory without duplicating calibration or
 confirmation logic.
 """
@@ -49,6 +49,25 @@ def _require_patient_ep_ready(
     return bundle.model_copy(update={"bundle_fingerprint": fingerprint})
 
 
+def _require_safe_parameter_replay(spec: PatientEPWorkflowSpec) -> None:
+    """Refuse implicit parameter transfer between heterogeneous EP backends.
+
+    The core plumbing workflow can replay one backend's calibrated parameter
+    dictionary into a confirmation run. That is acceptable only when both
+    stages use the same backend/parameter semantics. Cross-backend use requires
+    an explicit, versioned parameter-mapping contract with unit conversions and
+    declared unmapped parameters; HeartTwin does not infer such semantics from
+    matching parameter names.
+    """
+    if spec.fast_backend != spec.confirmation_backend:
+        raise PatientEPWorkflowError(
+            "Strict patient EP refuses implicit cross-backend parameter replay. "
+            "An explicit parameter-mapping contract is required before calibrated "
+            f"parameters may be transferred from {spec.fast_backend!r} to "
+            f"{spec.confirmation_backend!r}."
+        )
+
+
 def run_strict_patient_ep_workflow(
     registry: ServiceRegistry,
     *,
@@ -64,15 +83,20 @@ def run_strict_patient_ep_workflow(
 ) -> PatientEPWorkflowResult:
     """Require strict patient anatomy readiness before EP calibration.
 
-    Exactly one anatomy source is accepted.  When raw/staged anatomy input is
+    Exactly one anatomy source is accepted. When raw/staged anatomy input is
     supplied, reconstruction is executed first and its resulting bundle must
     pass CardiAnatomy's ``patient_ep`` gate before any ECG calibration request
-    is constructed.
+    is constructed. Cross-backend parameter replay is rejected until an
+    explicit parameter-mapping contract is supplied by a future workflow.
     """
     if (anatomy_bundle is None) == (anatomy_request is None):
         raise PatientEPWorkflowError(
             "Provide exactly one of anatomy_bundle or anatomy_request"
         )
+
+    # Enforce this before any external service invocation so an unsupported
+    # scientific workflow cannot consume patient data or compute resources.
+    _require_safe_parameter_replay(spec)
 
     if anatomy_request is not None:
         request = deepcopy(anatomy_request)
