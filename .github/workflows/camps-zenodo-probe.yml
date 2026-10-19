@@ -1,0 +1,37 @@
+name: Camps Zenodo manifest probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/camps-zenodo-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query public Zenodo record manifest
+        shell: python
+        run: |
+          import json
+          import urllib.request
+
+          url = "https://zenodo.org/api/records/14034739"
+          req = urllib.request.Request(url, headers={"User-Agent": "HeartTwin-public-data-probe/1.0"})
+          with urllib.request.urlopen(req, timeout=60) as response:
+              record = json.load(response)
+
+          metadata = record.get("metadata", {})
+          print("TITLE", metadata.get("title"))
+          print("VERSION", metadata.get("version"))
+          print("LICENSE", (metadata.get("license") or {}).get("id"))
+          print("FILES", len(record.get("files", [])))
+          for item in record.get("files", []):
+              print(json.dumps({
+                  "key": item.get("key"),
+                  "size": item.get("size"),
+                  "checksum": item.get("checksum"),
+                  "links": item.get("links", {}),
+              }, sort_keys=True))
