@@ -12,6 +12,11 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install probe dependency
+        run: python -m pip install --disable-pip-version-check numpy
       - name: Inspect public Case 3 ECG and geometry files
         shell: python
         run: |
