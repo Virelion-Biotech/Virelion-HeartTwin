@@ -11,6 +11,7 @@ from .patient_ep import prepare_patient_ep_requests
 from .patient_ep_strict import run_strict_patient_ep_workflow
 from .patient_model import PatientCase, PatientEPWorkflowSpec
 from .patient_report import build_patient_model_report
+from .patient_trace import record_patient_trace
 
 
 class VirelionServices:
@@ -93,6 +94,20 @@ class VirelionServices:
     ):
         """Build the auditable patient-personalization and claim-ceiling report."""
         return build_patient_model_report(case=case, spec=spec, **kwargs)
+
+    def trace_patient_ep(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Persist the patient workflow envelope through the CardiTrace boundary."""
+        return record_patient_trace(
+            self.registry,
+            case=case,
+            spec=spec,
+            **kwargs,
+        )
 
     def atlas(self, entity_id: str, **p: Any): return self.call("atlas.context", entity_id, **p)
     def design(self, entity_id: str, **p: Any): return self.call("design.generate", entity_id, **p)
