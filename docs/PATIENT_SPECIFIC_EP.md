@@ -91,7 +91,7 @@ PatientCase
     +--> parameter semantics gate
     |        |
     |        +--> same backend: plumbing replay allowed
-    |        +--> different backend: BLOCKED until explicit mapping exists
+    |        +--> different backend: BLOCKED unless an explicit mapping is wired
     |
     +--> CardiEP ep.simulate
              |
@@ -112,13 +112,23 @@ CardiEP now also provides `opencarp-external-v1`, a strict confirmation-only bou
 
 ## Cross-backend parameter semantics
 
-HeartTwin does not assume that equal-looking parameter names have equal physiological meaning across solvers. The current strict patient workflow therefore rejects implicit replay when:
+A matching parameter name is not evidence that two EP solvers represent the same physiological quantity or use the same units and conventions. HeartTwin now includes `EPParameterMappingSpec`, `EPParameterMapRule`, `IgnoredEPParameter`, and `apply_ep_parameter_mapping` to make cross-backend semantics explicit and auditable.
 
-```text
-fast_backend != confirmation_backend
-```
+A mapping contract declares:
 
-A scientific fast-model to openCARP workflow remains blocked until a versioned parameter-mapping contract exists. That contract must state, at minimum, source and target backends, source/target parameter names, units and conversions, semantic rationale, mapping version, and every source parameter that is intentionally ignored. Nothing may be silently renamed, rescaled, or dropped.
+- a stable mapping ID and mapping version;
+- source and target backend IDs;
+- every mapped source and target parameter name;
+- explicit source and target units;
+- an explicit scale and offset;
+- a semantic rationale for each rule;
+- every intentionally ignored source parameter and why it is ignored;
+- intended use and optional evidence reference; and
+- deterministic fingerprints for the mapping and the actual calibrated source parameter set.
+
+Application fails when an incoming calibrated parameter is neither mapped nor explicitly ignored, a required mapped parameter is missing, units disagree, a mapped value is non-finite, backend identities disagree, or multiple rules collide on a target parameter.
+
+The strict patient workflow still blocks cross-backend replay at execution time. This is intentional: the generic mapping machinery now exists, but no scientifically justified fast-model-to-openCARP mapping is bundled. Such a mapping must be created for a particular qualified fast model and openCARP experiment rather than guessed from parameter names.
 
 Same-backend replay remains available for plumbing and controlled model-specific workflows.
 
@@ -176,14 +186,14 @@ The intended confirmation backend is now available as a software boundary:
 confirmation_backend = "opencarp-external-v1"
 ```
 
-However, a scientific run is not yet end-to-end executable through the strict patient workflow because the qualified fast calibration model and explicit fast-model-to-openCARP parameter mapping are not yet implemented. The external openCARP experiment/wrapper must also be installed, configured, and independently validated for the intended use.
+However, a scientific run is not yet end-to-end executable through the strict patient workflow because a qualified fast calibration model and a scientifically justified mapping from that model into the selected openCARP experiment are not yet supplied. The external openCARP experiment/wrapper must also be installed, configured, and independently validated for the intended use.
 
 HeartTwin deliberately blocks this incomplete pathway instead of substituting the native pseudo-ECG or copying parameters across solvers.
 
 ## Next engineering gates
 
-1. Add an explicit, versioned EP parameter-mapping contract and mapped replay workflow.
-2. Implement and qualify the external openCARP/carputils wrapper behind CardiEP's merged `opencarp-external-v1` boundary.
+1. Define and review a concrete mapping from a selected qualified fast/inverse EP model into the selected openCARP experiment, then wire the existing mapping contract into confirmation replay.
+2. Implement and qualify the external openCARP/carputils experiment wrapper behind CardiEP's merged `opencarp-external-v1` boundary.
 3. Connect predicted and measured ECG artifacts to the held-out evaluator automatically while preserving evidence IDs and hashes.
 4. Persist `PatientCase`, workflow specifications, predictions, residuals, limitations, mappings, and validation reports through CardiTrace.
 5. Run one complete reviewed patient reconstruction + calibration + withheld prediction with predefined endpoints, then repeat across additional patients.
