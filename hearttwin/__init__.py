@@ -68,6 +68,14 @@ from .patient_ep import (
     prepare_patient_ep_requests,
     run_patient_ep_workflow,
 )
+from .patient_ecg_eval import (
+    ECGAcceptanceCriteria,
+    ECGEvaluationSpec,
+    ECGLeadMetric,
+    ECGValidationReport,
+    ECGWaveform,
+    evaluate_heldout_ecg,
+)
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -95,6 +103,8 @@ __all__ = [
     "assess_patient_case_for_ep", "validate_patient_ep_workflow",
     "PatientEPPreparedRequests", "PatientEPWorkflowError", "PatientEPWorkflowResult",
     "prepare_patient_ep_requests", "run_patient_ep_workflow",
+    "ECGWaveform", "ECGAcceptanceCriteria", "ECGEvaluationSpec", "ECGLeadMetric",
+    "ECGValidationReport", "evaluate_heldout_ecg",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
