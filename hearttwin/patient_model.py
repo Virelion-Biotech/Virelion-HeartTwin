@@ -469,8 +469,8 @@ class PatientEPWorkflowSpec(BaseModel):
     calibration_evidence_ids: list[str]
     validation_evidence_ids: list[str]
     validation_mode: ValidationMode = "within_patient_holdout"
-    fast_backend: str = "cardiep_eikonal"
-    confirmation_backend: str = "opencarp_monodomain"
+    fast_backend: str = "camps-cdt-external-v1"
+    confirmation_backend: str = "opencarp-external-v1"
     observation_model: Literal["lead_field", "pseudo_ecg"] = "lead_field"
     scientific_grade: bool = True
     torso_mode: Literal["patient_specific", "standardized", "not_modeled"] = "standardized"
