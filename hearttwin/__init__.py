@@ -89,6 +89,12 @@ from .patient_ecg_eval import (
     ECGWaveform,
     evaluate_heldout_ecg,
 )
+from .patient_ecg_artifacts import (
+    PatientECGArtifactError,
+    evaluate_patient_ep_holdouts,
+    waveform_from_electrotrace_holdout,
+    waveform_from_predicted_ecg,
+)
 from .patient_report import (
     PatientModelReport,
     PersonalizationDomainReport,
@@ -130,7 +136,9 @@ __all__ = [
     "EPParameterMapRule", "IgnoredEPParameter", "EPParameterMappingSpec",
     "EPParameterMappingResult", "apply_ep_parameter_mapping",
     "ECGWaveform", "ECGAcceptanceCriteria", "ECGEvaluationSpec", "ECGLeadMetric",
-    "ECGValidationReport", "evaluate_heldout_ecg",
+    "ECGValidationReport", "evaluate_heldout_ecg", "PatientECGArtifactError",
+    "waveform_from_electrotrace_holdout", "waveform_from_predicted_ecg",
+    "evaluate_patient_ep_holdouts",
     "PersonalizationDomainReport", "PatientModelReport", "build_patient_model_report",
     "PatientTraceEnvelope", "build_patient_trace_payload", "record_patient_trace",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",

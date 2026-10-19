@@ -10,6 +10,7 @@ from .mechanistic_workflow import run_mechanistic_twin_workflow
 from .patient_ep import prepare_patient_ep_requests
 from .patient_ep_strict import run_strict_patient_ep_workflow
 from .patient_model import PatientCase, PatientEPWorkflowSpec
+from .patient_ecg_artifacts import evaluate_patient_ep_holdouts
 from .patient_report import build_patient_model_report
 from .patient_trace import record_patient_trace
 
@@ -85,6 +86,31 @@ class VirelionServices:
             spec=spec,
             **kwargs,
         )
+
+    def evaluate_patient_ep_holdouts(self, result: Any, **kwargs: Any):
+        """Evaluate immutable held-out ECG artifacts after patient EP confirmation."""
+        return evaluate_patient_ep_holdouts(result, **kwargs)
+
+    def run_patient_ep_with_holdout_evaluation(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        *,
+        evaluation_spec: Any,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """Run strict patient EP first, then evaluate holdouts in a separate downstream step."""
+        result = run_strict_patient_ep_workflow(
+            self.registry,
+            case=case,
+            spec=spec,
+            **kwargs,
+        )
+        reports = evaluate_patient_ep_holdouts(result, spec=evaluation_spec)
+        return {
+            "workflow": result.model_dump(mode="json"),
+            "validation": [item.model_dump(mode="json") for item in reports],
+        }
 
     def patient_model_report(
         self,
