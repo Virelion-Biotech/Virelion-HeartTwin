@@ -1,0 +1,114 @@
+name: PhysioNet Case 3 probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/physionet-case3-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect public Case 3 ECG and geometry files
+        shell: python
+        run: |
+          import io
+          import re
+          import urllib.request
+          import numpy as np
+
+          BASE = 'https://physionet.org/files/challenge-2007/1.0.0/data/'
+          FILES = {
+              'readme': 'readme.txt',
+              'case': 'case0003.dat',
+              'b120': 'case0003_b120.pts',
+              'b352': 'case0003_b352.pts',
+              'ventr': 'case0003-tri/case3_ventr.tri',
+              'torso': 'case0003-tri/case3_torso.tri',
+              'elnodes123': 'case0003-tri/elnodes_123_370.lst',
+              'elnodes120': 'case0003-tri/elnodes_120_352.lst',
+              'ecgs': 'case0003-tri/ecgs_case3.asc',
+              'loader': 'case0003-tri/get_370_lead_signals.m',
+          }
+
+          def fetch(path):
+              req = urllib.request.Request(BASE + path, headers={'User-Agent':'HeartTwin-case3-probe/1.0'})
+              with urllib.request.urlopen(req, timeout=120) as r:
+                  return r.read()
+
+          def preview(name, data, head=12, tail=16):
+              text = data.decode('utf-8', errors='replace')
+              lines = text.splitlines()
+              print(f'===== {name} bytes={len(data)} lines={len(lines)} =====')
+              print('---HEAD---')
+              for line in lines[:head]: print(line)
+              print('---TAIL---')
+              for line in lines[-tail:]: print(line)
+
+          blobs = {}
+          for key, path in FILES.items():
+              blobs[key] = fetch(path)
+              preview(key, blobs[key])
+
+          # Extract all purely numeric rows from the challenge data file and report shape.
+          for key in ('case','ecgs'):
+              text = blobs[key].decode('utf-8', errors='replace')
+              numeric = []
+              widths = {}
+              for line in text.splitlines():
+                  fields = line.strip().replace(',', ' ').split()
+                  if not fields: continue
+                  try:
+                      row = [float(x) for x in fields]
+                  except ValueError:
+                      continue
+                  numeric.append(row)
+                  widths[len(row)] = widths.get(len(row),0)+1
+              print('NUMERIC_WIDTHS', key, sorted(widths.items()))
+              if numeric:
+                  modal = max(widths, key=widths.get)
+                  arr = np.asarray([r for r in numeric if len(r)==modal], dtype=float)
+                  print('NUMERIC_MODAL', key, arr.shape, 'min', float(np.min(arr)), 'max', float(np.max(arr)))
+                  print('FIRST_MODAL_ROW', key, arr[0,:min(20,modal)].tolist())
+                  print('LAST_MODAL_ROW', key, arr[-1,:min(20,modal)].tolist())
+
+          # Parse PTS files with simple first-line count convention.
+          for key in ('b120','b352'):
+              text = blobs[key].decode('utf-8', errors='replace')
+              rows=[]
+              for line in text.splitlines():
+                  f=line.strip().split()
+                  if len(f)==3:
+                      try: rows.append([float(x) for x in f])
+                      except ValueError: pass
+                  elif len(f)==4:
+                      try: rows.append([float(x) for x in f[-3:]])
+                      except ValueError: pass
+              arr=np.asarray(rows,float)
+              print('PTS',key,arr.shape,'bbox_min',arr.min(axis=0).tolist(),'bbox_max',arr.max(axis=0).tolist())
+              print('PTS_FIRST10',key,arr[:10].tolist())
+
+          # Parse .lst integer node indices.
+          for key in ('elnodes123','elnodes120'):
+              text=blobs[key].decode('utf-8',errors='replace')
+              ints=[]
+              for line in text.splitlines()[1:]:
+                  m=re.match(r'\s*(-?\d+)\s*$', line)
+                  if m: ints.append(int(m.group(1)))
+              print('LST',key,'count',len(ints),'minmax',(min(ints),max(ints)) if ints else None,'first20',ints[:20])
+
+          # Surface file coarse metadata without assuming full parser.
+          for key in ('ventr','torso'):
+              text=blobs[key].decode('utf-8',errors='replace')
+              numeric=[]
+              for line in text.splitlines():
+                  f=line.strip().split()
+                  try: row=[float(x) for x in f]
+                  except ValueError: continue
+                  numeric.append(row)
+              widths={}
+              for r in numeric: widths[len(r)]=widths.get(len(r),0)+1
+              print('TRI_WIDTHS',key,sorted(widths.items()))
