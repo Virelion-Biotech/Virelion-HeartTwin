@@ -1,0 +1,583 @@
+{
+  "dataset": "BodyParts3D",
+  "version": "4.0",
+  "variant": "IS-A geometry archive, polygon reduction rate 99%; IS-A and PART-OF mappings",
+  "retrieved": "2026-09-22",
+  "license": "CC-BY-4.0",
+  "licenseUrl": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "credit": "BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International",
+  "inputs": [
+    {
+      "file": "isa_BP3D_4.0_obj_99.zip",
+      "url": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/isa_BP3D_4.0_obj_99.zip",
+      "sha256": "40665852c49f218326590e204db91064a1ecfc3c6f8cbd7bbbcaac62c7cd409e"
+    },
+    {
+      "file": "partof_element_parts.txt",
+      "url": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/partof_element_parts.txt",
+      "sha256": "3f5f6df1028eb122b30de77c711597b6bb8e5541658e5985859fd228adbf88ea"
+    },
+    {
+      "file": "isa_element_parts.txt",
+      "url": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/isa_element_parts.txt",
+      "sha256": "a3de74423f943b0d724ae8f59b3a817f87c423a544f8db98113b1980817cbeaf"
+    }
+  ],
+  "transform": {
+    "sourceBoundsMm": {
+      "min": [
+        -36.3037,
+        -176.605,
+        1174.19
+      ],
+      "max": [
+        79.3913,
+        -49.8449,
+        1317.09
+      ]
+    },
+    "centerMm": [
+      21.5438,
+      -113.22494999999999,
+      1245.6399999999999
+    ],
+    "scale": 0.02,
+    "axes": "[x, z, -y]"
+  },
+  "runtime": {
+    "file": "heart.glb",
+    "bytes": 2524400,
+    "sha256": "b80a727d022a4ab07ccfcf15caccc228eaccb6d69ec0e72923324946ac35a946"
+  },
+  "structures": [
+    {
+      "id": "right-atrium",
+      "fma": "FMA9457",
+      "sourceName": "wall of right atrium",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2439",
+          "sha256": "6e87510c607541b53b124f8224b6be74cb9b7351e29102246053b30a7260d8dd",
+          "bytes": 1211683,
+          "vertices": 9887,
+          "triangles": 17784
+        }
+      ]
+    },
+    {
+      "id": "left-atrium",
+      "fma": "FMA9531",
+      "sourceName": "wall of left atrium",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2438",
+          "sha256": "ad28c5925374c6648bafb77ac9a89163316c101559cb730906208c96266ae078",
+          "bytes": 510077,
+          "vertices": 4284,
+          "triangles": 7544
+        }
+      ]
+    },
+    {
+      "id": "ventricular-wall",
+      "fma": "FMA13884",
+      "sourceName": "wall of ventricle",
+      "mapping": "isa",
+      "sources": [
+        {
+          "element": "FJ2428",
+          "sha256": "ac3c7d6714bed8cf549c97b013546541cf67e189dad2107092a59758aa3ccc45",
+          "bytes": 2660930,
+          "vertices": 21053,
+          "triangles": 37442
+        }
+      ]
+    },
+    {
+      "id": "right-ventricle",
+      "fma": "FMA9291",
+      "sourceName": "cavity of right ventricle",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2423",
+          "sha256": "f0d7cbf9e10c0fcefe96741700605e7080d4a627fe214b4c8d5647d970e085f7",
+          "bytes": 113621,
+          "vertices": 973,
+          "triangles": 1918
+        }
+      ]
+    },
+    {
+      "id": "left-ventricle",
+      "fma": "FMA9466",
+      "sourceName": "cavity of left ventricle",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2422",
+          "sha256": "8844c5fc464d23fdc785d1d254d666a4d3b70b14b73ec90ca0c77ba4aff3dd37",
+          "bytes": 102171,
+          "vertices": 879,
+          "triangles": 1722
+        }
+      ]
+    },
+    {
+      "id": "ascending-aorta",
+      "fma": "FMA3736",
+      "sourceName": "ascending aorta",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ3413",
+          "sha256": "764f23e432a9308e0780c586f9d1638db1fbcc52a5019ae61817b4b1de323870",
+          "bytes": 24686,
+          "vertices": 229,
+          "triangles": 396
+        }
+      ]
+    },
+    {
+      "id": "aortic-arch",
+      "fma": "FMA3768",
+      "sourceName": "arch of aorta",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ3411",
+          "sha256": "9eeb5e5a627e8145f03961c661c9c66d8fdc55ed1234d04b84212b87a21d902c",
+          "bytes": 41743,
+          "vertices": 381,
+          "triangles": 670
+        }
+      ]
+    },
+    {
+      "id": "pulmonary-trunk",
+      "fma": "FMA8612",
+      "sourceName": "pulmonary trunk",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2966",
+          "sha256": "7d4fbfbeebdb541b4053e62e6ba9e55bdbc8d1354de8192f94d7c6008812ab3f",
+          "bytes": 89640,
+          "vertices": 871,
+          "triangles": 1302
+        }
+      ]
+    },
+    {
+      "id": "superior-vena-cava",
+      "fma": "FMA4720",
+      "sourceName": "superior vena cava",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ3645",
+          "sha256": "5cc007c2ea51255df641225630e83ddbf3e5c4545dffe4814b098c9199ceb26c",
+          "bytes": 36208,
+          "vertices": 318,
+          "triangles": 598
+        }
+      ]
+    },
+    {
+      "id": "left-coronary",
+      "fma": "FMA50040",
+      "sourceName": "left coronary artery",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2631",
+          "sha256": "ca7d8c0c82982ef1c838cd2224650c810adc3e52aaf6b345f0cdb77d7b068c5e",
+          "bytes": 187038,
+          "vertices": 1549,
+          "triangles": 3032
+        },
+        {
+          "element": "FJ2632",
+          "sha256": "74d743ebe7ccb06a69244bccb59789cbb094af1f3b279e24be5541b9d01d2f6c",
+          "bytes": 8543,
+          "vertices": 91,
+          "triangles": 108
+        },
+        {
+          "element": "FJ2633",
+          "sha256": "ba9e2eca1abc7946b27b8adb9846f1b626c7cc3e942da1a2cd2301e0c02bcf1f",
+          "bytes": 32810,
+          "vertices": 318,
+          "triangles": 492
+        },
+        {
+          "element": "FJ2634",
+          "sha256": "575eec8663acbae025b51ad8fa42dc6229f35d6f5d25673912c76cb59f117aec",
+          "bytes": 14842,
+          "vertices": 158,
+          "triangles": 196
+        },
+        {
+          "element": "FJ2635",
+          "sha256": "bc02d461ae79073f21f350b3c9751d7ccb973ea3c74f8c58bc9a2aeafc533281",
+          "bytes": 51353,
+          "vertices": 495,
+          "triangles": 766
+        },
+        {
+          "element": "FJ2636",
+          "sha256": "119cc81d1816f1db4c3d64add10efa63c9148e3177b74d10184f7a1e579581e5",
+          "bytes": 28744,
+          "vertices": 282,
+          "triangles": 420
+        },
+        {
+          "element": "FJ2637",
+          "sha256": "d4fa7aa9a6e224a3c7fea1264f4d81ea076ec7baaa8b1c8b3da8e1053bbf4e4a",
+          "bytes": 13104,
+          "vertices": 144,
+          "triangles": 160
+        },
+        {
+          "element": "FJ2638",
+          "sha256": "bad6520fcbcea112ca400ba5328e52f7b2ff680346b5b2591db2e97394f9b6e5",
+          "bytes": 22808,
+          "vertices": 246,
+          "triangles": 290
+        },
+        {
+          "element": "FJ2639",
+          "sha256": "a80ec5085d0430fa9ae5b643042742bb9757cfd23d3f0280e162751b91acda5f",
+          "bytes": 11513,
+          "vertices": 122,
+          "triangles": 150
+        },
+        {
+          "element": "FJ2640",
+          "sha256": "7391892f7c4a8ab6165bf17e6e5ba1367267f14b2cf845233456cb5945f31e14",
+          "bytes": 20309,
+          "vertices": 218,
+          "triangles": 260
+        },
+        {
+          "element": "FJ2641",
+          "sha256": "0a9b2c86202434b7aa66c2499c680c40c5d3ebce6bc3ef73c927018ff2c81718",
+          "bytes": 31770,
+          "vertices": 322,
+          "triangles": 442
+        },
+        {
+          "element": "FJ2642",
+          "sha256": "2f6dbb44742cd505762e3f24eb2ed3e9ed929f7a909ac28db4df68393e098888",
+          "bytes": 58861,
+          "vertices": 525,
+          "triangles": 964
+        },
+        {
+          "element": "FJ2643",
+          "sha256": "3ee93d012a24f6fb93c92faa6eb35d918a3875b58cb0dd52ca5e3dc010ee55cf",
+          "bytes": 29632,
+          "vertices": 269,
+          "triangles": 478
+        },
+        {
+          "element": "FJ2644",
+          "sha256": "91b7c72f9fd221c63dd14932b7e66a0331e96d1b0aff3bfbec21f12187530467",
+          "bytes": 20055,
+          "vertices": 193,
+          "triangles": 306
+        },
+        {
+          "element": "FJ2645",
+          "sha256": "d6dcbc3294545f857df903393a6db47b268e3a97e8a0c87a0ab5bef056469eee",
+          "bytes": 22289,
+          "vertices": 224,
+          "triangles": 318
+        },
+        {
+          "element": "FJ2646",
+          "sha256": "4549b2c6a0bf1d15057bd6185fdafbec846deecc464b6cbfb19f7cedb68b815c",
+          "bytes": 30477,
+          "vertices": 287,
+          "triangles": 470
+        },
+        {
+          "element": "FJ2647",
+          "sha256": "18044f3caa4b23c89e8ce42555df29326c1ff1bdbf4b52559473dfb8368b040a",
+          "bytes": 21395,
+          "vertices": 216,
+          "triangles": 306
+        },
+        {
+          "element": "FJ2648",
+          "sha256": "33bdf6f3048e9c940710c1cfc27e59af549f37c14b58ba24bd12f3bd5b284d73",
+          "bytes": 20026,
+          "vertices": 203,
+          "triangles": 286
+        },
+        {
+          "element": "FJ2649",
+          "sha256": "d4833bb0b60ee79f526150ad7ba9124e326aba8cd48000711bf3a6b0997b0ce0",
+          "bytes": 81031,
+          "vertices": 692,
+          "triangles": 1380
+        },
+        {
+          "element": "FJ2650",
+          "sha256": "dd2c38fdc784311c955fb8b0420d70dfbdf16f0ce6e236a086dc5f350faae04c",
+          "bytes": 29816,
+          "vertices": 316,
+          "triangles": 396
+        },
+        {
+          "element": "FJ2651",
+          "sha256": "864567c4b15c3add5a8184edb142766538936e2ef17af4efa25acca67f4344d8",
+          "bytes": 37854,
+          "vertices": 395,
+          "triangles": 510
+        },
+        {
+          "element": "FJ2652",
+          "sha256": "fd5ee304558da1d1ffebb01ca7f59b374087667e71d473fe5401f355a2ff161f",
+          "bytes": 22767,
+          "vertices": 240,
+          "triangles": 308
+        },
+        {
+          "element": "FJ2653",
+          "sha256": "74fc42fbc783857619dccb5a753b06cbfce9abc6403f14e38f55bbb9fafdad80",
+          "bytes": 20958,
+          "vertices": 232,
+          "triangles": 252
+        },
+        {
+          "element": "FJ2654",
+          "sha256": "4e8467b12ca3374d25807d5de058cfb8d147ad2decd99f6debe57847a83099a1",
+          "bytes": 13776,
+          "vertices": 150,
+          "triangles": 172
+        },
+        {
+          "element": "FJ2737",
+          "sha256": "22aa075132e33f9a3d3be135515362b03ab84f12a0d641edde35e260fb2cd65b",
+          "bytes": 12641,
+          "vertices": 121,
+          "triangles": 204
+        }
+      ]
+    },
+    {
+      "id": "right-coronary",
+      "fma": "FMA50039",
+      "sourceName": "right coronary artery",
+      "mapping": "partof",
+      "sources": [
+        {
+          "element": "FJ2667",
+          "sha256": "4a43aa2911b4b1ee153d8948e5edfa99c078f374603a52c69100ab3ae2ef4362",
+          "bytes": 25908,
+          "vertices": 267,
+          "triangles": 360
+        },
+        {
+          "element": "FJ2668",
+          "sha256": "512479cec370a4390d5f2f0555fbdfc7ba3c2e8fb7b78b242cb4382ede30287f",
+          "bytes": 16400,
+          "vertices": 176,
+          "triangles": 216
+        },
+        {
+          "element": "FJ2670",
+          "sha256": "e734bab3fcf2ee2bfba0eb6f827f8894fd9ff86e261f4fff0cf1ec37c3f84073",
+          "bytes": 28943,
+          "vertices": 280,
+          "triangles": 442
+        },
+        {
+          "element": "FJ2671",
+          "sha256": "9ca85be93a017bc2a8aa7d565b3ec320620e4b22e78936b0d6f52b7cf3015be5",
+          "bytes": 32032,
+          "vertices": 313,
+          "triangles": 478
+        },
+        {
+          "element": "FJ2672",
+          "sha256": "032c1562f06b7c960e1524fd8259fa321d59426ba0a9e6df32b42eb2c79e8e11",
+          "bytes": 47950,
+          "vertices": 447,
+          "triangles": 742
+        },
+        {
+          "element": "FJ2673",
+          "sha256": "9ffff6952448478f178b3a4debe89cc0cb28035cf392f992c119768406f1cf32",
+          "bytes": 23827,
+          "vertices": 243,
+          "triangles": 338
+        },
+        {
+          "element": "FJ2674",
+          "sha256": "e4ff01e6ce03c7f0bfd28d099680623dd2e98829bde7efb9dbd9936029e3961d",
+          "bytes": 18806,
+          "vertices": 186,
+          "triangles": 284
+        },
+        {
+          "element": "FJ2675",
+          "sha256": "18496992ff047cc1578789bb356e181e91fd0bc3f59332f392b64ef02a91cc45",
+          "bytes": 14381,
+          "vertices": 148,
+          "triangles": 200
+        },
+        {
+          "element": "FJ2676",
+          "sha256": "5455ee32b46013949d56fbdbbe87d08988975d7e3504105b270ed942376a13f8",
+          "bytes": 22233,
+          "vertices": 233,
+          "triangles": 304
+        },
+        {
+          "element": "FJ2677",
+          "sha256": "475b16a4d4a365a732fa8dbc1757f57b81ca99847ef2d36dd160656994dae474",
+          "bytes": 18719,
+          "vertices": 198,
+          "triangles": 252
+        },
+        {
+          "element": "FJ2692",
+          "sha256": "c38882cfb2a4ff493aece22ced1f23c9e044bf9cc091f14d40c7256179d34ccf",
+          "bytes": 62836,
+          "vertices": 608,
+          "triangles": 930
+        },
+        {
+          "element": "FJ2693",
+          "sha256": "2f089666f8301e52400250614677a5c824bfa37fee55bfeb545904c8acffc063",
+          "bytes": 50460,
+          "vertices": 480,
+          "triangles": 766
+        },
+        {
+          "element": "FJ2694",
+          "sha256": "8579bbf2af9aa03a93604db0f05283334baf131b26ca17d9bbd9c1ff281ee048",
+          "bytes": 30018,
+          "vertices": 305,
+          "triangles": 424
+        },
+        {
+          "element": "FJ2695",
+          "sha256": "8a50ff9ad16191e3fd6cadb480943d212796d9cba391659c186be731b8f68d6a",
+          "bytes": 15952,
+          "vertices": 163,
+          "triangles": 236
+        },
+        {
+          "element": "FJ2696",
+          "sha256": "0d90aa40e3ac1a0d4423d19da7c8a9f4446063bdae1b7246f97669c6db3720df",
+          "bytes": 26375,
+          "vertices": 286,
+          "triangles": 336
+        },
+        {
+          "element": "FJ2697",
+          "sha256": "da528958c3c9784dc6ed9c04cd0a8d1fe6678c66e3792e0c258b1b51c9a07874",
+          "bytes": 17355,
+          "vertices": 188,
+          "triangles": 220
+        },
+        {
+          "element": "FJ2698",
+          "sha256": "d253c0270030d4f2845f99ec3658e0e0ac9a79bda8e6d2e3ec1cae9d1942c9bd",
+          "bytes": 17208,
+          "vertices": 195,
+          "triangles": 200
+        },
+        {
+          "element": "FJ2699",
+          "sha256": "4434305060b28d0b294b33cc18cdeb62f7a525f1282500c24dfb558205ec54a5",
+          "bytes": 11081,
+          "vertices": 126,
+          "triangles": 126
+        },
+        {
+          "element": "FJ2700",
+          "sha256": "2c4dacf7f7029de9075b4671085accefcf96200b4dbaba8a130ac1c3b177ebc6",
+          "bytes": 19411,
+          "vertices": 197,
+          "triangles": 280
+        },
+        {
+          "element": "FJ2714",
+          "sha256": "d7d9ed93cb831b5beb98cdbbb814d2628e38efcc524028a4a291ee6144ea5c03",
+          "bytes": 51286,
+          "vertices": 482,
+          "triangles": 794
+        },
+        {
+          "element": "FJ2715",
+          "sha256": "f18dda103cde54e3a21c811c33f2dc3cf25f000eaff460703c696e76cc6a0e3f",
+          "bytes": 17086,
+          "vertices": 185,
+          "triangles": 218
+        },
+        {
+          "element": "FJ2716",
+          "sha256": "0efa7807739a27fd0fd8ee6fb043ebdc17c8c824b1d068ddcf8bc305a138ca19",
+          "bytes": 17573,
+          "vertices": 188,
+          "triangles": 232
+        },
+        {
+          "element": "FJ2717",
+          "sha256": "3fb3cd79b66f9ec1be89382534eef8b9294328d6e7c17a7b48e87dd879316579",
+          "bytes": 24857,
+          "vertices": 259,
+          "triangles": 340
+        },
+        {
+          "element": "FJ2718",
+          "sha256": "f08dbbc4cb90043b874b8483b378c0da44a573a6dccbb17530f8f07e8c32ba0c",
+          "bytes": 13359,
+          "vertices": 139,
+          "triangles": 186
+        },
+        {
+          "element": "FJ2719",
+          "sha256": "56493dd7e056b7c7cb462293402c3fa42dbb82c572dc746dfee5685eb4afe94a",
+          "bytes": 28572,
+          "vertices": 299,
+          "triangles": 380
+        },
+        {
+          "element": "FJ2720",
+          "sha256": "425ff09df45ea552c0d9a6d3cb57ec55a16ca5ca37e0736bf6ba5dea6cdf03a9",
+          "bytes": 22827,
+          "vertices": 233,
+          "triangles": 320
+        },
+        {
+          "element": "FJ2721",
+          "sha256": "36858ad1fc4dd8f39de435eb42715c02b75976da212e9f322723e222d9862922",
+          "bytes": 18826,
+          "vertices": 198,
+          "triangles": 256
+        },
+        {
+          "element": "FJ2722",
+          "sha256": "ba9b6f6885b2fa65dd32aa1799dd1d3c77f2a95baac9dcab816704ad74fcd0d3",
+          "bytes": 23583,
+          "vertices": 244,
+          "triangles": 320
+        },
+        {
+          "element": "FJ2723",
+          "sha256": "cd008769cb9d565a75bf6b91b5ad3bd482932e37c4747837f6c9446cd23b73a2",
+          "bytes": 281611,
+          "vertices": 2255,
+          "triangles": 4502
+        }
+      ]
+    }
+  ]
+}

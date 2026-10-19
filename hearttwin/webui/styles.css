@@ -8,3 +8,7 @@
 
 /* Orientation axes are drawn in the geometry camera frame. */
 .axis-gizmo{display:none}
+
+.reference-controls{display:grid;gap:10px;margin-top:12px}.reference-controls .button{font-size:9px;padding:7px 5px}.reference-controls .text-button{text-align:left;font-size:9px}#reference-status{font-size:8px;color:#8199ad;line-height:1.6;margin:0}#anatomy-dialog form{float:right}#anatomy-dialog>p{font-size:11px;margin:14px 0}.credit-links{display:flex;gap:16px;flex-wrap:wrap;font-size:10px;margin-top:20px}@media(max-width:600px){.reference-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}.reference-controls .button{padding:6px 9px}.reference-controls #reference-status{flex-basis:100%;font-size:8px}}
+/* Keep programmatic upload controls hidden despite the shared input styling. */
+[hidden]{display:none!important}

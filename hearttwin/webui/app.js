@@ -47,6 +47,7 @@ function initialize(){state.viewer=HeartTwinGeometry.init();setupWorkspace();set
 fetch('catalog.json').then(r=>{if(!r.ok)throw Error('Module catalog could not be loaded.');return r.json();}).then(c=>{state.catalog=c.services;initialize();}).catch(e=>toast(e.message));
 
 function setupWorkspace(){
+ on('anatomy-credits','click',()=>$('anatomy-dialog').showModal());
  on('import-geometry','click',()=>$('geometry-file').click());
  on('geometry-file','change',async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>16*1024**2)throw Error('Viewer JSON files must be under 16 MiB. Larger outputs remain available on the worker.');const raw=JSON.parse(await file.text());if(!state.viewer)throw Error('Geometry rendering is unavailable in this browser.');state.viewer.load(raw,'Local file: '+file.name);toast('Geometry loaded locally. No file was uploaded to the worker.');});
  on('view-job-geometry','click',()=>{if(!state.job||state.job.status!=='ok')throw Error('Select a completed run with inline geometry and matching activation data.');const g=state.job.request?.payload?.geometry;if(!g?.node_xyz)throw Error('This run has no inline node_xyz geometry. Import a geometry JSON file with the corresponding mesh and node order.');if(!state.viewer)throw Error('Geometry rendering is unavailable in this browser.');state.viewer.load({geometry:g,result:state.job.result},'Completed run: '+state.job.job_id);navigate('overview');});

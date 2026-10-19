@@ -16,13 +16,25 @@ image-derived anatomy and procedural planning; Sim4Life is a broader computation
 simulation platform; Living Heart is a multiphysics cardiac model. Their commercial,
 scientific or regulatory claims do not transfer to HeartTwin through UI similarity.
 
-No commercial logos, screenshots, anatomical meshes, product copy or private code are
-embedded in the application. The heart shown before import is a labeled, original
-schematic generated from simple parametric surfaces, with no invented result field.
+No commercial logos, screenshots, product copy or private code are embedded.
+The default model is now an openly licensed BodyParts3D anatomical reference;
+[its separate source, license and modifications](anatomy/README.md) are recorded.
+The original procedural schematic remains an optional view. Neither supplies an
+invented physiological result field.
 
 Validation for this UI change includes executable geometry tests (surface extraction,
 indices, units, node-order/activation contracts, finite values and viewer limits), static
 asset/element checks, JavaScript syntax and the existing HTTP gateway tests including
 real subprocess execution. Browser visual QA could not run: the managed preview failed
-with `bwrap: Can't mount proc on /newroot/proc: Operation not permitted`. The UI was not
-visually verified in a browser in this runtime.
+with `bwrap: Can't mount proc on /newroot/proc: Operation not permitted`. The original workstation was subsequently opened in the owner-signed-in browser.
+The anatomical reference update is verified against the deployed site separately.
+
+## Anatomical reference browser check, 2026-10-19
+
+The owner-signed-in production site loaded the BodyParts3D reference successfully,
+with 11 groups, 13,809 vertices and 22,859 faces. Checked coronary visibility,
+structure selection, opacity, restoring default-hidden cavities, back/front camera,
+mesh/surface mode and the source/license dialog. No warning/error console entries
+were reported. A visual issue with the shared input CSS exposing programmatic file
+controls was found and corrected with an explicit `[hidden]` display rule.
+This was a desktop browser check, not physical mobile or clinical anatomy validation.
