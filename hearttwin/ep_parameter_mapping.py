@@ -1,7 +1,7 @@
 """Explicit parameter semantics for replay between heterogeneous EP backends.
 
 A matching parameter name is not evidence that two solvers use the same
-physiological quantity, units, convention, or numerical meaning.  This module
+physiological quantity, units, convention, or numerical meaning. This module
 therefore makes cross-backend replay an explicit, versioned transformation.
 Nothing is auto-renamed, auto-converted, or silently dropped.
 """
@@ -76,8 +76,10 @@ class EPParameterMappingSpec(BaseModel):
             raise ValueError("source_backend and target_backend must be non-empty")
         if self.source_backend == self.target_backend:
             raise ValueError("cross-backend mapping requires different source and target backends")
-        if not self.rules:
-            raise ValueError("at least one parameter mapping rule is required")
+        if not self.rules and not self.ignored_source_parameters:
+            raise ValueError(
+                "mapping must declare at least one mapped or explicitly ignored source parameter"
+            )
 
         sources = [rule.source_parameter for rule in self.rules]
         targets = [rule.target_parameter for rule in self.rules]
