@@ -7,6 +7,8 @@ from .orchestrator import HeartTwin
 from .service_registry import ServiceRegistry
 from .workflow import run_multimodal_workflow
 from .mechanistic_workflow import run_mechanistic_twin_workflow
+from .patient_ep import prepare_patient_ep_requests, run_patient_ep_workflow
+from .patient_model import PatientCase, PatientEPWorkflowSpec
 
 
 class VirelionServices:
@@ -55,6 +57,29 @@ class VirelionServices:
         return run_mechanistic_twin_workflow(
             self.registry,
             entity_id=entity_id,
+            **kwargs,
+        )
+
+    def prepare_patient_ep(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Prepare patient EP solver requests without executing a solver."""
+        return prepare_patient_ep_requests(case=case, spec=spec, **kwargs)
+
+    def run_patient_ep(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        **kwargs: Any,
+    ):
+        """Run the patient anatomy → EP calibration → independent prediction path."""
+        return run_patient_ep_workflow(
+            self.registry,
+            case=case,
+            spec=spec,
             **kwargs,
         )
 
