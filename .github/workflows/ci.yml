@@ -28,5 +28,10 @@ jobs:
       - run: pip install -e '.[dev]'
       - run: python -m compileall -q hearttwin tests
       - run: ruff check hearttwin/argo_readiness.py tests/test_argo_readiness.py hearttwin/web.py hearttwin/web_job.py tests/test_web_workbench.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check hearttwin/webui/app.js && node --check hearttwin/webui/viewer.js
+      - run: node --test tests/webui_geometry.test.cjs
       - run: pytest -q
       - run: hearttwin doctor

@@ -98,6 +98,7 @@ def test_http_auth_origin_host_and_static(tmp_path):
             "runnable"
         ]
         assert request(port, "GET", "/", auth=False)[0] == 200
+        assert request(port, "GET", "/viewer.js", auth=False)[0] == 200
         assert request(port, "GET", "/../web.py", auth=False)[0] == 404
 
 
