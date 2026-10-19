@@ -119,8 +119,11 @@ outputs.
 
 The default view is a dark modeling workstation with a structure explorer, interactive
 3D surface display, view properties, workflow stages and an execution monitor. The
-initial six-layer heart is an original procedural schematic. It is not an anatomical
-atlas, patient reconstruction, computed result or simulation-ready cardiac mesh.
+default heart is an attributed BodyParts3D adult male anatomical reference, with
+11 selectable source-mapped groups. It is a simplified surface for visualization,
+not a patient reconstruction, computed result or simulation-ready cardiac volume mesh.
+See [anatomy provenance and license](anatomy/README.md). **Show schematic** retains
+the original six-layer procedural illustration as an explicitly labeled optional view.
 
 Use **Import geometry** to inspect a JSON file locally in the browser. This action
 does not upload the file or submit a job. The viewer accepts zero-based triangular
@@ -161,7 +164,8 @@ Current browser limits are 16 MiB per geometry JSON file, 30,000 vertices, 60,00
 surface faces and 80,000 input tetrahedra. This lightweight surface inspector does not
 replace commercial high-density volumetric rendering, segmentation or model preparation.
 Larger artifacts remain downloadable or accessible on the worker. Local geometry is
-kept only in the current tab's memory.
+kept only in the current tab's memory. The bundled anatomical reference is compressed
+for delivery and verified before decoding; it works without a compute connection.
 
 See [UI design references](UI_DESIGN_REFERENCES.md) for the public commercial materials
 used to inform the workstation layout.

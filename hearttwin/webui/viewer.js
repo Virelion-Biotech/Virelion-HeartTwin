@@ -78,11 +78,35 @@
     vessel('Pulmonary artery',[74,145,172],[[-.13,.65,.65],[-.18,1.13,.68],[-.32,1.5,.67],[-.69,1.72,.5],[-1.03,1.72,.4]],.24);
     return {nodes:nodes.map(p => [p[0],p[1]-.2,p[2]]),faces,faceLayer,layers,activation:null,units:'Schematic units',name:'Schematic heart',schematic:true};
   }
+  function anatomicalReference(raw) {
+    const parsed=parseGeometry(raw);
+    if(!Array.isArray(raw.layers)||raw.layers.length!==11||!Array.isArray(raw.face_layers)||raw.face_layers.length!==parsed.faces.length)
+      throw Error('Reference anatomy structure mapping is invalid.');
+    if(!raw.layers.every(l=>typeof l.name==='string'&&l.name.length<100&&typeof l.visible==='boolean'&&Array.isArray(l.color)&&l.color.length===3&&l.color.every(c=>Number.isInteger(c)&&c>=0&&c<=255)))
+      throw Error('Reference anatomy layer properties are invalid.');
+    if(!raw.face_layers.every(i=>Number.isInteger(i)&&i>=0&&i<raw.layers.length))throw Error('Reference anatomy face mapping is invalid.');
+    return {...parsed,name:'BodyParts3D heart',reference:true,activation:null,
+      layers:raw.layers.map(l=>({...l,opacity:1,defaultVisible:l.visible})),faceLayer:[...raw.face_layers]};
+  }
+  async function decodeReference(envelope) {
+    if(envelope.schema!=='hearttwin-anatomy-reference/1'||envelope.encoding!=='gzip-base64'||typeof envelope.data!=='string'||envelope.data.length>3*1024**2)
+      throw Error('Reference anatomy asset is invalid.');
+    const bytes=Uint8Array.from(atob(envelope.data),c=>c.charCodeAt(0));
+    const reader=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
+    const chunks=[];let size=0;
+    try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>16*1024**2)throw Error('Reference anatomy exceeds its decoded limit.');chunks.push(value);}}
+    finally{await reader.cancel();}
+    const plain=new Uint8Array(size);let offset=0;for(const chunk of chunks){plain.set(chunk,offset);offset+=chunk.length;}
+    const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',plain)),b=>b.toString(16).padStart(2,'0')).join('');
+    if(digest!==envelope.geometry_sha256)throw Error('Reference anatomy integrity check failed.');
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
   function init() {
     const $ = id => document.getElementById(id), canvas=$('heart-canvas');
     if (!canvas) return;
     const context=canvas.getContext('2d');
     if(!context){$('mesh-stat').textContent='Canvas rendering is unavailable in this browser.';return;}
+    let loadVersion=0,referenceRaw=null;
     let model, yaw=-.23,pitch=.07,zoom=1,wire=false,clip=1,grid=true,active=0,playing=false,frame=0,last=0;
     function stop(){playing=false;cancelAnimationFrame(frame);$('activation-play').textContent='▶';$('activation-play').setAttribute('aria-label','Play activation sequence');}
     function syncLayer(){const layer=model.layers[active];$('model-opacity').value=Math.round(layer.opacity*100);$('opacity-value').textContent=Math.round(layer.opacity*100)+'%';$('active-layer').value=active;document.querySelectorAll('.layer-select').forEach(b=>b.classList.toggle('selected',Number(b.dataset.layer)===active));}
@@ -94,18 +118,18 @@
       $('layer-tree').replaceChildren();$('active-layer').replaceChildren();
       model.layers.forEach((layer,i)=>{
         const row=document.createElement('div');row.className='layer-row';
-        const visible=document.createElement('input');visible.type='checkbox';visible.checked=true;visible.setAttribute('aria-label','Show '+layer.name);visible.addEventListener('change',()=>{layer.visible=visible.checked;draw();});
+        const visible=document.createElement('input');visible.type='checkbox';visible.checked=layer.visible;visible.setAttribute('aria-label','Show '+layer.name);visible.addEventListener('change',()=>{layer.visible=visible.checked;draw();});
         const button=document.createElement('button');button.className='layer-select';button.dataset.layer=i;
         const dot=document.createElement('span');dot.className='layer-dot';dot.style.backgroundColor=`rgb(${layer.color.join(',')})`;
         button.append(dot,document.createTextNode(layer.name));button.addEventListener('click',()=>{active=i;syncLayer();});row.append(visible,button);$('layer-tree').append(row);
         const option=document.createElement('option');option.value=i;option.textContent=layer.name;$('active-layer').append(option);
       });
-      $('scene-name').textContent=model.name;$('layer-count').textContent=model.layers.length;$('scene-source').textContent=model.schematic?'REFERENCE':'IMPORTED';
-      $('model-subtitle').textContent=model.schematic?'Schematic reference · no patient data loaded':label+' · inspect imported geometry';
-      $('model-source-note').textContent=model.schematic?'Original procedural schematic for navigating the interface. Import your mesh to inspect research geometry.':label+'. Surface display does not establish mesh quality, anatomy accuracy or simulation readiness.';
-      $('viewport-title').textContent=model.schematic?'SCHEMATIC ANATOMY':'IMPORTED GEOMETRY';
-      $('view-data-badge').textContent=model.schematic?'Reference illustration · not a simulation':label;
-      $('fact-source').textContent=model.schematic?'Schematic':'Imported JSON';
+      $('scene-name').textContent=model.name;$('layer-count').textContent=model.layers.length;$('scene-source').textContent=model.reference?'ATLAS':model.schematic?'SCHEMATIC':'IMPORTED';
+      $('model-subtitle').textContent=model.reference?'BodyParts3D 4.0 · adult male reference anatomy · display mesh':model.schematic?'Schematic reference · no patient data loaded':label+' · inspect imported geometry';
+      $('model-source-note').textContent=model.reference?'DBCLS reference anatomy. Display surface is simplified; colors are illustrative. Ventricular cavities are spaces, not muscle tissue.':model.schematic?'Original procedural schematic for navigating the interface. Import your mesh to inspect research geometry.':label+'. Surface display does not establish mesh quality, anatomy accuracy or simulation readiness.';
+      $('viewport-title').textContent=model.reference?'ANATOMICAL REFERENCE':model.schematic?'SCHEMATIC ANATOMY':'IMPORTED GEOMETRY';
+      $('view-data-badge').textContent=model.reference?'BodyParts3D · DBCLS · CC BY 4.0':model.schematic?'Reference illustration · not a simulation':label;
+      $('fact-source').textContent=model.reference?'BodyParts3D 4.0':model.schematic?'Schematic':'Imported JSON';
       $('fact-vertices').textContent=model.nodes.length.toLocaleString();$('fact-faces').textContent=model.faces.length.toLocaleString();
       $('fact-field').textContent=model.activation?'Activation (ms)':'None';
       $('mesh-stat').textContent=model.nodes.length.toLocaleString()+' vertices · '+model.faces.length.toLocaleString()+' surface faces';
@@ -167,15 +191,26 @@
     $('active-layer').addEventListener('change',()=>{active=Number($('active-layer').value);syncLayer();});
     $('model-opacity').addEventListener('input',()=>{model.layers[active].opacity=Number($('model-opacity').value)/100;$('opacity-value').textContent=$('model-opacity').value+'%';draw();});
     $('show-grid').addEventListener('change',()=>{grid=$('show-grid').checked;draw();});$('clip-plane').addEventListener('input',()=>{clip=Number($('clip-plane').value)/100;draw();});
-    $('reset-display').addEventListener('click',()=>{model.layers.forEach(l=>{l.visible=true;l.opacity=1;});$('layer-tree').querySelectorAll('input').forEach(c=>c.checked=true);clip=1;$('clip-plane').value=100;grid=true;$('show-grid').checked=true;mode(false);syncLayer();reset();});
+    $('reset-display').addEventListener('click',()=>{model.layers.forEach(l=>{l.visible=l.defaultVisible??true;l.opacity=1;});$('layer-tree').querySelectorAll('input').forEach((c,i)=>c.checked=model.layers[i].visible);clip=1;$('clip-plane').value=100;grid=true;$('show-grid').checked=true;mode(false);syncLayer();reset();});
     $('activation-time').addEventListener('input',()=>{if(model.activation){$('time-value').textContent=(model.min+(model.max-model.min)*Number($('activation-time').value)/1000).toFixed(1)+' ms';draw();}});
     function tick(t){if(!playing||document.hidden){stop();return;}const slider=$('activation-time');slider.value=Math.min(1000,Number(slider.value)+(t-last)/5);last=t;slider.dispatchEvent(new Event('input'));if(Number(slider.value)>=1000){stop();return;}frame=requestAnimationFrame(tick);}
     $('activation-play').addEventListener('click',()=>{if(!model.activation)return;if(playing){stop();return;}if(Number($('activation-time').value)>=1000)$('activation-time').value=0;playing=true;last=performance.now();$('activation-play').textContent='Ⅱ';$('activation-play').setAttribute('aria-label','Pause activation sequence');frame=requestAnimationFrame(tick);});
-    $('reset-schematic').addEventListener('click',()=>load(schematic(),'Schematic reference'));
+    $('reset-schematic').addEventListener('click',()=>{loadVersion++;load(schematic(),'Schematic reference');});
+    async function loadReference(){
+      const version=++loadVersion;
+      $('reference-status').textContent='Loading reference anatomy…';
+      try{
+        if(!referenceRaw){const response=await fetch('heart-reference.json');if(!response.ok)throw Error('Reference download failed');referenceRaw=await decodeReference(await response.json());}
+        if(version!==loadVersion)return;
+        load(anatomicalReference(referenceRaw),'BodyParts3D anatomical reference');
+        $('reference-status').textContent='Reference anatomy available · 11 structures';
+      }catch(error){$('reference-status').textContent='Anatomical reference unavailable. Retry to load it; the current view is unchanged.';}
+    }
+    $('load-anatomy').addEventListener('click',loadReference);
     new ResizeObserver(draw).observe(canvas);
-    load(schematic(),'Schematic reference');
-    return {load:(raw,label)=>load(parseGeometry(raw),label),redraw:draw,stop};
+    load(schematic(),'Schematic reference');loadReference();
+    return {load:(raw,label)=>{loadVersion++;load(parseGeometry(raw),label);},redraw:draw,stop};
   }
-  if(typeof module !== 'undefined' && module.exports) module.exports={parseGeometry,schematic};
-  else root.HeartTwinGeometry={parseGeometry,schematic,init};
+  if(typeof module !== 'undefined' && module.exports) module.exports={parseGeometry,schematic,anatomicalReference,decodeReference};
+  else root.HeartTwinGeometry={parseGeometry,schematic,anatomicalReference,decodeReference,init};
 })(typeof window !== 'undefined' ? window : globalThis);

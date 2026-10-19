@@ -1,0 +1,252 @@
+{
+  "dataset": "BodyParts3D 4.0 adult male reference",
+  "source_url": "https://raw.githubusercontent.com/organui/heart-3d/main/public/models/heart.glb",
+  "source_glb_sha256": "b80a727d022a4ab07ccfcf15caccc228eaccb6d69ec0e72923324946ac35a946",
+  "source_license": "CC-BY-4.0",
+  "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "modifications": [
+    "OrganUI's source selection and OBJ-to-GLB conversion retained",
+    "GLB display scale divided by 0.02 to restore millimetre dimensions, retaining centered Y-up axes",
+    "Per-structure quadric surface decimation for display only; coordinates rounded to 5 decimal places",
+    "Converted to compact JSON, gzipped and base64 encoded; illustrative colors adjusted",
+    "Ventricular cavity surfaces hidden initially; no activation or physiological field added"
+  ],
+  "tool_versions": {
+    "numpy": "2.3.5",
+    "fast_simplification": "0.2.0"
+  },
+  "asset_sha256": "f5ad9872dd220e08f36ab27086d8cd6e75c871008d55ef87510382bfa3569652",
+  "geometry_sha256": "c6d3c5acd4f526df52d74ceb2ff038bee7faaa606f469b070afedf28996dff1b",
+  "vertices": 13809,
+  "surface_faces": 22859,
+  "structures": [
+    {
+      "id": "right-atrium",
+      "label": "Right atrial wall",
+      "source_fma": "FMA9457",
+      "source_elements": [
+        "FJ2439"
+      ],
+      "before": {
+        "vertices": 9887,
+        "faces": 17784
+      },
+      "after": {
+        "vertices": 1678,
+        "faces": 2800
+      }
+    },
+    {
+      "id": "left-atrium",
+      "label": "Left atrial wall",
+      "source_fma": "FMA9531",
+      "source_elements": [
+        "FJ2438"
+      ],
+      "before": {
+        "vertices": 4284,
+        "faces": 7544
+      },
+      "after": {
+        "vertices": 1022,
+        "faces": 1799
+      }
+    },
+    {
+      "id": "ventricular-wall",
+      "label": "Ventricular wall (combined)",
+      "source_fma": "FMA13884",
+      "source_elements": [
+        "FJ2428"
+      ],
+      "before": {
+        "vertices": 21053,
+        "faces": 37442
+      },
+      "after": {
+        "vertices": 4998,
+        "faces": 8499
+      }
+    },
+    {
+      "id": "right-ventricle",
+      "label": "Right ventricular cavity",
+      "source_fma": "FMA9291",
+      "source_elements": [
+        "FJ2423"
+      ],
+      "before": {
+        "vertices": 973,
+        "faces": 1918
+      },
+      "after": {
+        "vertices": 478,
+        "faces": 949
+      }
+    },
+    {
+      "id": "left-ventricle",
+      "label": "Left ventricular cavity",
+      "source_fma": "FMA9466",
+      "source_elements": [
+        "FJ2422"
+      ],
+      "before": {
+        "vertices": 879,
+        "faces": 1722
+      },
+      "after": {
+        "vertices": 432,
+        "faces": 850
+      }
+    },
+    {
+      "id": "ascending-aorta",
+      "label": "Ascending aorta",
+      "source_fma": "FMA3736",
+      "source_elements": [
+        "FJ3413"
+      ],
+      "before": {
+        "vertices": 229,
+        "faces": 396
+      },
+      "after": {
+        "vertices": 229,
+        "faces": 396
+      }
+    },
+    {
+      "id": "aortic-arch",
+      "label": "Aortic arch",
+      "source_fma": "FMA3768",
+      "source_elements": [
+        "FJ3411"
+      ],
+      "before": {
+        "vertices": 381,
+        "faces": 670
+      },
+      "after": {
+        "vertices": 381,
+        "faces": 670
+      }
+    },
+    {
+      "id": "pulmonary-trunk",
+      "label": "Pulmonary trunk",
+      "source_fma": "FMA8612",
+      "source_elements": [
+        "FJ2966"
+      ],
+      "before": {
+        "vertices": 871,
+        "faces": 1302
+      },
+      "after": {
+        "vertices": 556,
+        "faces": 899
+      }
+    },
+    {
+      "id": "superior-vena-cava",
+      "label": "Superior vena cava",
+      "source_fma": "FMA4720",
+      "source_elements": [
+        "FJ3645"
+      ],
+      "before": {
+        "vertices": 318,
+        "faces": 598
+      },
+      "after": {
+        "vertices": 318,
+        "faces": 598
+      }
+    },
+    {
+      "id": "left-coronary",
+      "label": "Left coronary artery tree",
+      "source_fma": "FMA50040",
+      "source_elements": [
+        "FJ2631",
+        "FJ2632",
+        "FJ2633",
+        "FJ2634",
+        "FJ2635",
+        "FJ2636",
+        "FJ2637",
+        "FJ2638",
+        "FJ2639",
+        "FJ2640",
+        "FJ2641",
+        "FJ2642",
+        "FJ2643",
+        "FJ2644",
+        "FJ2645",
+        "FJ2646",
+        "FJ2647",
+        "FJ2648",
+        "FJ2649",
+        "FJ2650",
+        "FJ2651",
+        "FJ2652",
+        "FJ2653",
+        "FJ2654",
+        "FJ2737"
+      ],
+      "before": {
+        "vertices": 8008,
+        "faces": 12666
+      },
+      "after": {
+        "vertices": 1760,
+        "faces": 2600
+      }
+    },
+    {
+      "id": "right-coronary",
+      "label": "Right coronary artery tree",
+      "source_fma": "FMA50039",
+      "source_elements": [
+        "FJ2667",
+        "FJ2668",
+        "FJ2670",
+        "FJ2671",
+        "FJ2672",
+        "FJ2673",
+        "FJ2674",
+        "FJ2675",
+        "FJ2676",
+        "FJ2677",
+        "FJ2692",
+        "FJ2693",
+        "FJ2694",
+        "FJ2695",
+        "FJ2696",
+        "FJ2697",
+        "FJ2698",
+        "FJ2699",
+        "FJ2700",
+        "FJ2714",
+        "FJ2715",
+        "FJ2716",
+        "FJ2717",
+        "FJ2718",
+        "FJ2719",
+        "FJ2720",
+        "FJ2721",
+        "FJ2722",
+        "FJ2723"
+      ],
+      "before": {
+        "vertices": 9521,
+        "faces": 14682
+      },
+      "after": {
+        "vertices": 1957,
+        "faces": 2799
+      }
+    }
+  ]
+}

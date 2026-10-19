@@ -46,3 +46,23 @@ test('reference schematic has valid selectable layers and contains no simulated 
  assert(m.nodes.every(p=>p.every(Number.isFinite)));
  assert.equal(new Set(m.faceLayer).size,6);
 });
+
+test('bundled anatomical asset verifies its hash and retains eleven source-mapped groups',async()=>{
+ const fs=require('node:fs'),crypto=require('node:crypto');
+ const {decodeReference,anatomicalReference}=require('../hearttwin/webui/viewer.js');
+ const bytes=fs.readFileSync(require('node:path').join(__dirname,'../hearttwin/webui/heart-reference.json'));
+ const manifest=JSON.parse(fs.readFileSync(require('node:path').join(__dirname,'../docs/anatomy/reference-manifest.json')));
+ assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.asset_sha256);
+ const raw=await decodeReference(JSON.parse(bytes));const m=anatomicalReference(raw);
+ assert.equal(m.reference,true);assert.equal(m.schematic,false);assert.equal(m.activation,null);
+ assert.equal(m.layers.length,11);assert.equal(m.nodes.length,manifest.vertices);assert.equal(m.faces.length,manifest.surface_faces);
+ assert.equal(m.units,'mm');assert.equal(m.faceLayer.length,m.faces.length);
+ assert(m.layers.some(l=>l.name==='Ventricular wall (combined)'&&l.source_id==='FMA13884'));
+ assert.equal(m.layers.filter(l=>l.name.includes('cavity')&&!l.visible).length,2);
+ assert.equal(new Set(m.faceLayer).size,11);
+ assert(m.layers.every(l=>l.source_id&&l.opacity===1));
+ const envelope=JSON.parse(bytes);envelope.geometry_sha256='0'.repeat(64);
+ await assert.rejects(decodeReference(envelope),/integrity/);
+ const bad=structuredClone(raw);bad.face_layers[0]=11;
+ assert.throws(()=>anatomicalReference(bad),/mapping/);
+});
