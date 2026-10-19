@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -158,4 +159,16 @@ def test_rejects_dimensionless_predicted_ecg(tmp_path: Path) -> None:
     payload["units"] = "a.u."
     artifact["sha256"] = _write_json(path, payload)
     with pytest.raises(PatientECGArtifactError, match="physical voltage units"):
+        evaluate_patient_ep_holdouts(result, spec=ECGEvaluationSpec())
+
+
+def test_rejects_multiple_holdouts_without_prediction_mapping(tmp_path: Path) -> None:
+    result = _fixture_result(tmp_path)
+    second = deepcopy(result["holdout_observations"][0])
+    second["observation_id"] = "holdout-2"
+    second["artifact"]["artifact_id"] = "holdout-artifact-2"
+    second["artifact"]["metadata"]["evidence_id"] = "holdout-evidence-2"
+    result["holdout_observations"].append(second)
+
+    with pytest.raises(PatientECGArtifactError, match="exactly one held-out ECG"):
         evaluate_patient_ep_holdouts(result, spec=ECGEvaluationSpec())
