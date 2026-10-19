@@ -91,6 +91,27 @@ class VirelionServices:
         """Evaluate immutable held-out ECG artifacts after patient EP confirmation."""
         return evaluate_patient_ep_holdouts(result, **kwargs)
 
+    def run_patient_ep_with_holdout_evaluation(
+        self,
+        case: PatientCase,
+        spec: PatientEPWorkflowSpec,
+        *,
+        evaluation_spec: Any,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """Run strict patient EP first, then evaluate holdouts in a separate downstream step."""
+        result = run_strict_patient_ep_workflow(
+            self.registry,
+            case=case,
+            spec=spec,
+            **kwargs,
+        )
+        reports = evaluate_patient_ep_holdouts(result, spec=evaluation_spec)
+        return {
+            "workflow": result.model_dump(mode="json"),
+            "validation": [item.model_dump(mode="json") for item in reports],
+        }
+
     def patient_model_report(
         self,
         case: PatientCase,
