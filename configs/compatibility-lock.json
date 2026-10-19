@@ -1,5 +1,5 @@
 {
-  "lock_version": 5,
+  "lock_version": 6,
   "generated_from": "requirements-services.txt",
   "repositories": [
     {
@@ -29,7 +29,7 @@
     },
     {
       "name": "Virelion-CardiEP",
-      "sha": "ef62889923ad3b4ce3c048d0d3339f4a5fa0afb7",
+      "sha": "a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede",
       "role": "native"
     },
     {
