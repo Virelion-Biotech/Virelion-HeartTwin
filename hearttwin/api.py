@@ -7,7 +7,8 @@ from .orchestrator import HeartTwin
 from .service_registry import ServiceRegistry
 from .workflow import run_multimodal_workflow
 from .mechanistic_workflow import run_mechanistic_twin_workflow
-from .patient_ep import prepare_patient_ep_requests, run_patient_ep_workflow
+from .patient_ep import prepare_patient_ep_requests
+from .patient_ep_strict import run_strict_patient_ep_workflow
 from .patient_model import PatientCase, PatientEPWorkflowSpec
 
 
@@ -75,8 +76,8 @@ class VirelionServices:
         spec: PatientEPWorkflowSpec,
         **kwargs: Any,
     ):
-        """Run the patient anatomy → EP calibration → independent prediction path."""
-        return run_patient_ep_workflow(
+        """Run patient EP only after strict patient-specific anatomy readiness checks."""
+        return run_strict_patient_ep_workflow(
             self.registry,
             case=case,
             spec=spec,
