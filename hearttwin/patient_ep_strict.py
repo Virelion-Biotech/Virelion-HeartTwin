@@ -1,9 +1,9 @@
 """Strict patient-EP entrypoint layered over the core HeartTwin workflow.
 
-The core patient EP module is intentionally backend-neutral and predates
-CardiAnatomy's stricter ``patient_ep`` readiness target. This wrapper makes the
-new patient-evidence gate mandatory without duplicating calibration or
-confirmation logic.
+This wrapper makes patient-specific anatomy readiness mandatory and prevents
+implicit parameter replay between heterogeneous electrophysiology backends.
+Cross-backend confirmation is permitted only through an explicit, versioned
+parameter-mapping contract that accounts for every calibrated source parameter.
 """
 from __future__ import annotations
 
@@ -11,21 +11,26 @@ from copy import deepcopy
 from typing import Any
 
 from .contracts import AnatomyBundlePayload
-from .patient_ep import PatientEPWorkflowError, PatientEPWorkflowResult, run_patient_ep_workflow
-from .patient_model import PatientCase, PatientEPWorkflowSpec
+from .ep_parameter_mapping import (
+    EPParameterMappingSpec,
+    apply_ep_parameter_mapping,
+)
+from .patient_ep import (
+    PatientEPWorkflowError,
+    PatientEPWorkflowResult,
+    _check_bundle_selection,
+    _invoke,
+    _reject_planned_backend_names,
+    _selected_anatomy_acquisition,
+    prepare_patient_ep_requests,
+)
+from .patient_model import (
+    PatientCase,
+    PatientEPWorkflowSpec,
+    assess_patient_case_for_ep,
+    validate_patient_ep_workflow,
+)
 from .service_registry import ServiceRegistry
-
-
-def _invoke(registry: ServiceRegistry, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
-    adapter = registry.capability(capability)
-    if adapter is None:
-        raise PatientEPWorkflowError(f"No service advertises {capability}")
-    if not adapter.available():
-        raise PatientEPWorkflowError(f"{adapter.spec.name} is unavailable for {capability}")
-    output = adapter.invoke(capability, payload)
-    if not isinstance(output, dict):
-        raise PatientEPWorkflowError(f"{capability} returned a non-object payload")
-    return output
 
 
 def _require_patient_ep_ready(
@@ -49,23 +54,90 @@ def _require_patient_ep_ready(
     return bundle.model_copy(update={"bundle_fingerprint": fingerprint})
 
 
-def _require_safe_parameter_replay(spec: PatientEPWorkflowSpec) -> None:
-    """Refuse implicit parameter transfer between heterogeneous EP backends.
+def _coerce_mapping(
+    parameter_mapping: EPParameterMappingSpec | dict[str, Any] | None,
+) -> EPParameterMappingSpec | None:
+    if parameter_mapping is None:
+        return None
+    if isinstance(parameter_mapping, EPParameterMappingSpec):
+        return parameter_mapping
+    return EPParameterMappingSpec.model_validate(parameter_mapping)
 
-    The core plumbing workflow can replay one backend's calibrated parameter
-    dictionary into a confirmation run. That is acceptable only when both
-    stages use the same backend/parameter semantics. Cross-backend use requires
-    an explicit, versioned parameter-mapping contract with unit conversions and
-    declared unmapped parameters; HeartTwin does not infer such semantics from
-    matching parameter names.
-    """
-    if spec.fast_backend != spec.confirmation_backend:
+
+def _require_safe_parameter_replay(
+    spec: PatientEPWorkflowSpec,
+    parameter_mapping: EPParameterMappingSpec | dict[str, Any] | None = None,
+) -> EPParameterMappingSpec | None:
+    """Require explicit semantics before parameters cross backend boundaries."""
+    mapping = _coerce_mapping(parameter_mapping)
+    if spec.fast_backend == spec.confirmation_backend:
+        if mapping is not None:
+            raise PatientEPWorkflowError(
+                "parameter_mapping must be omitted when calibration and confirmation use "
+                "the same backend"
+            )
+        return None
+
+    if mapping is None:
         raise PatientEPWorkflowError(
             "Strict patient EP refuses implicit cross-backend parameter replay. "
-            "An explicit parameter-mapping contract is required before calibrated "
-            f"parameters may be transferred from {spec.fast_backend!r} to "
-            f"{spec.confirmation_backend!r}."
+            "Provide an explicit EPParameterMappingSpec with units, mapping rules, "
+            "and declared ignored parameters."
         )
+    if mapping.source_backend != spec.fast_backend:
+        raise PatientEPWorkflowError(
+            "parameter mapping source_backend does not match fast_backend"
+        )
+    if mapping.target_backend != spec.confirmation_backend:
+        raise PatientEPWorkflowError(
+            "parameter mapping target_backend does not match confirmation_backend"
+        )
+    return mapping
+
+
+def _confirmation_parameters(
+    *,
+    spec: PatientEPWorkflowSpec,
+    parameter_payload: dict[str, Any],
+    mapping: EPParameterMappingSpec | None,
+    fallback_units: dict[str, str] | None,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    values = parameter_payload.get("values")
+    if not isinstance(values, dict) or not values:
+        raise PatientEPWorkflowError("EP calibration returned no calibrated parameter set")
+    units = dict(parameter_payload.get("units") or fallback_units or {})
+
+    if spec.fast_backend == spec.confirmation_backend:
+        return (
+            {
+                "values": {str(name): float(value) for name, value in values.items()},
+                "units": units,
+                "source": "calibrated",
+            },
+            None,
+        )
+
+    if mapping is None:  # defensive; guarded by _require_safe_parameter_replay
+        raise PatientEPWorkflowError("cross-backend replay reached execution without mapping")
+    try:
+        mapped = apply_ep_parameter_mapping(
+            mapping,
+            source_backend=spec.fast_backend,
+            target_backend=spec.confirmation_backend,
+            values={str(name): float(value) for name, value in values.items()},
+            units=units,
+        )
+    except (TypeError, ValueError) as exc:
+        raise PatientEPWorkflowError(f"EP parameter mapping failed: {exc}") from exc
+
+    return (
+        {
+            "values": dict(mapped.values),
+            "units": dict(mapped.units),
+            "source": "calibrated",
+        },
+        mapped.model_dump(mode="json"),
+    )
 
 
 def run_strict_patient_ep_workflow(
@@ -78,25 +150,25 @@ def run_strict_patient_ep_workflow(
     parameter_bounds: dict[str, tuple[float, float]],
     initial_parameters: dict[str, float] | None = None,
     parameter_units: dict[str, str] | None = None,
+    parameter_mapping: EPParameterMappingSpec | dict[str, Any] | None = None,
     calibration_settings: dict[str, Any] | None = None,
     confirmation_settings: dict[str, Any] | None = None,
 ) -> PatientEPWorkflowResult:
-    """Require strict patient anatomy readiness before EP calibration.
+    """Run strict patient anatomy -> calibration -> unconditional confirmation.
 
-    Exactly one anatomy source is accepted. When raw/staged anatomy input is
-    supplied, reconstruction is executed first and its resulting bundle must
-    pass CardiAnatomy's ``patient_ep`` gate before any ECG calibration request
-    is constructed. Cross-backend parameter replay is rejected until an
-    explicit parameter-mapping contract is supplied by a future workflow.
+    Validation ECGs remain outside both calibration and confirmation solver
+    requests. They are returned as holdout references for downstream evaluation.
     """
     if (anatomy_bundle is None) == (anatomy_request is None):
         raise PatientEPWorkflowError(
             "Provide exactly one of anatomy_bundle or anatomy_request"
         )
 
-    # Enforce this before any external service invocation so an unsupported
-    # scientific workflow cannot consume patient data or compute resources.
-    _require_safe_parameter_replay(spec)
+    validate_patient_ep_workflow(case, spec)
+    qc = assess_patient_case_for_ep(case)
+    _reject_planned_backend_names(spec)
+    mapping = _require_safe_parameter_replay(spec, parameter_mapping)
+    selected_anatomy = _selected_anatomy_acquisition(case, spec)
 
     if anatomy_request is not None:
         request = deepcopy(anatomy_request)
@@ -104,20 +176,104 @@ def run_strict_patient_ep_workflow(
         if declared is not None and str(declared) != case.patient_id:
             raise PatientEPWorkflowError("Anatomy request subject does not match patient")
         request["subject_id"] = case.patient_id
+        request_acquisition = request.get("acquisition")
+        if isinstance(request_acquisition, dict):
+            declared_acquisition = request_acquisition.get("acquisition_id")
+            if (
+                declared_acquisition is not None
+                and str(declared_acquisition) != selected_anatomy.acquisition_id
+            ):
+                raise PatientEPWorkflowError(
+                    "Anatomy request acquisition does not match anatomy_acquisition_id"
+                )
         built = _invoke(registry, "anatomy.build", request)
         bundle = AnatomyBundlePayload.model_validate(built)
     else:
         bundle = AnatomyBundlePayload.model_validate(anatomy_bundle)
 
+    _check_bundle_selection(case, spec, bundle)
     bundle = _require_patient_ep_ready(registry, bundle)
-    return run_patient_ep_workflow(
-        registry,
+
+    prepared = prepare_patient_ep_requests(
         case=case,
         spec=spec,
-        anatomy_bundle=bundle.model_dump(mode="json"),
+        anatomy_bundle=bundle,
         parameter_bounds=parameter_bounds,
         initial_parameters=initial_parameters,
         parameter_units=parameter_units,
         calibration_settings=calibration_settings,
         confirmation_settings=confirmation_settings,
+    )
+
+    calibration = _invoke(registry, "ep.calibrate", prepared.calibration_request)
+    if str(calibration.get("subject_id")) != case.patient_id:
+        raise PatientEPWorkflowError("EP calibration returned a different subject")
+    if str(calibration.get("backend")) != spec.fast_backend:
+        raise PatientEPWorkflowError("EP calibration backend identity changed")
+    parameter_payload = calibration.get("parameters")
+    if not isinstance(parameter_payload, dict):
+        raise PatientEPWorkflowError("EP calibration returned no parameter payload")
+
+    confirmation_parameters, mapping_result = _confirmation_parameters(
+        spec=spec,
+        parameter_payload=parameter_payload,
+        mapping=mapping,
+        fallback_units=parameter_units,
+    )
+    confirmation_request = deepcopy(prepared.confirmation_request_template)
+    confirmation_request["parameters"] = confirmation_parameters
+    if mapping_result is not None:
+        settings = dict(confirmation_request.get("settings") or {})
+        settings["hearttwin_parameter_mapping"] = {
+            "mapping_id": mapping_result["mapping_id"],
+            "mapping_version": mapping_result["mapping_version"],
+            "mapping_fingerprint": mapping_result["mapping_fingerprint"],
+            "source_parameter_fingerprint": mapping_result[
+                "source_parameter_fingerprint"
+            ],
+        }
+        confirmation_request["settings"] = settings
+
+    confirmation = _invoke(registry, "ep.simulate", confirmation_request)
+    if str(confirmation.get("subject_id")) != case.patient_id:
+        raise PatientEPWorkflowError("EP confirmation returned a different subject")
+    if str(confirmation.get("backend")) != spec.confirmation_backend:
+        raise PatientEPWorkflowError("EP confirmation backend identity changed")
+    if confirmation.get("provenance", {}).get("anatomy_bundle_fingerprint") not in {
+        None,
+        prepared.anatomy_bundle_fingerprint,
+    }:
+        raise PatientEPWorkflowError("EP confirmation lost anatomy lineage")
+
+    if mapping_result is not None:
+        confirmation = deepcopy(confirmation)
+        provenance = dict(confirmation.get("provenance") or {})
+        if "hearttwin_parameter_mapping" in provenance:
+            raise PatientEPWorkflowError(
+                "EP backend supplied reserved hearttwin_parameter_mapping provenance"
+            )
+        provenance["hearttwin_parameter_mapping"] = mapping_result
+        confirmation["provenance"] = provenance
+
+    limitations = list(qc.warnings)
+    if spec.torso_mode != "patient_specific":
+        limitations.append(
+            "ECG forward model does not use a patient-specific torso; morphology/amplitude "
+            "personalization is therefore incomplete"
+        )
+    if spec.electrode_mode != "recorded":
+        limitations.append(
+            "ECG electrode coordinates are not directly recorded for this patient"
+        )
+
+    return PatientEPWorkflowResult(
+        patient_id=case.patient_id,
+        evidence_split=prepared.evidence_split,
+        patient_qc=qc,
+        anatomy_bundle=bundle.model_dump(mode="json"),
+        calibration=calibration,
+        confirmation=confirmation,
+        holdout_observations=prepared.holdout_observations,
+        scientific_grade=spec.scientific_grade,
+        limitations=limitations,
     )
