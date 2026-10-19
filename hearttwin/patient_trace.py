@@ -1,6 +1,13 @@
-"""CardiTrace handoff for patient-specific HeartTwin workflows."""
+"""CardiTrace handoff for patient-specific HeartTwin workflows.
+
+The trace boundary deliberately minimizes patient-data locators. Raw source URIs
+and free-form source metadata are not copied into CardiTrace; hashes and stable
+pseudonymous IDs preserve integrity and lineage without duplicating potentially
+identifying filesystem/DICOM paths into the audit log.
+"""
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -28,6 +35,63 @@ class PatientTraceEnvelope(BaseModel):
     fingerprints: dict[str, str] = Field(default_factory=dict)
 
 
+def _redacted_uri(record: dict[str, Any]) -> str:
+    stable_id = record.get("artifact_id") or record.get("file_id")
+    if stable_id:
+        return f"redacted://{stable_id}"
+    digest = record.get("sha256")
+    if isinstance(digest, str) and digest:
+        return f"redacted://sha256/{digest[:16]}"
+    return "redacted://locator"
+
+
+def _redact_artifact_uris(value: Any) -> Any:
+    """Recursively remove storage locators while preserving artifact identity/hash."""
+    if isinstance(value, list):
+        return [_redact_artifact_uris(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    result = {key: _redact_artifact_uris(item) for key, item in value.items()}
+    if "uri" in result:
+        result["uri"] = _redacted_uri(result)
+    return result
+
+
+def _trace_safe_case(case_json: dict[str, Any]) -> dict[str, Any]:
+    """Return a minimized case snapshot suitable for the provenance store.
+
+    The exact original case is still bound by ``patient_case_sha256``. CardiTrace
+    receives only redacted source locators and no free-form patient/acquisition/
+    source-file metadata. Every source file must be content-hash pinned first.
+    """
+    safe = deepcopy(case_json)
+    safe["metadata"] = {}
+    for encounter in safe.get("encounters", []):
+        if isinstance(encounter, dict):
+            encounter["metadata"] = {}
+    for acquisition in safe.get("acquisitions", []):
+        if not isinstance(acquisition, dict):
+            continue
+        acquisition_metadata = acquisition.get("metadata")
+        primary_file_id = None
+        if isinstance(acquisition_metadata, dict):
+            primary_file_id = acquisition_metadata.get("primary_file_id")
+        acquisition["metadata"] = (
+            {} if primary_file_id is None else {"primary_file_id": primary_file_id}
+        )
+        for source in acquisition.get("source_files", []):
+            if not isinstance(source, dict):
+                continue
+            digest = source.get("sha256")
+            if not isinstance(digest, str) or len(digest) != 64:
+                raise ValueError(
+                    f"patient trace requires SHA-256 pinned source file {source.get('file_id')!r}"
+                )
+            source["uri"] = _redacted_uri(source)
+            source["metadata"] = {}
+    return safe
+
+
 def build_patient_trace_payload(
     *,
     case: PatientCase,
@@ -48,9 +112,17 @@ def build_patient_trace_payload(
         if parameter_mapping.target_backend != spec.confirmation_backend:
             raise ValueError("parameter mapping target backend differs from workflow")
 
-    case_json = case.model_dump(mode="json")
+    original_case_json = case.model_dump(mode="json")
+    case_json = _trace_safe_case(original_case_json)
     spec_json = spec.model_dump(mode="json")
-    result_json = None if workflow_result is None else workflow_result.model_dump(mode="json")
+    original_result_json = (
+        None if workflow_result is None else workflow_result.model_dump(mode="json")
+    )
+    result_json = (
+        None
+        if original_result_json is None
+        else _redact_artifact_uris(original_result_json)
+    )
     report_json = None if report is None else report.model_dump(mode="json")
     mapping_json = None
     if parameter_mapping is not None:
@@ -60,11 +132,14 @@ def build_patient_trace_payload(
         }
 
     fingerprints = {
-        "patient_case_sha256": sha256(case_json),
+        # Bind the exact in-memory case while storing a minimized copy.
+        "patient_case_sha256": sha256(original_case_json),
+        "trace_patient_case_sha256": sha256(case_json),
         "workflow_spec_sha256": sha256(spec_json),
     }
-    if result_json is not None:
-        fingerprints["workflow_result_sha256"] = sha256(result_json)
+    if original_result_json is not None and result_json is not None:
+        fingerprints["workflow_result_sha256"] = sha256(original_result_json)
+        fingerprints["trace_workflow_result_sha256"] = sha256(result_json)
     if report_json is not None:
         fingerprints["patient_model_report_sha256"] = sha256(report_json)
     if mapping_json is not None:
@@ -79,6 +154,7 @@ def build_patient_trace_payload(
             "research_use_only": True,
             "claim_ceiling": claim_ceiling,
             "validation_mode": spec.validation_mode,
+            "source_locators_redacted": True,
         },
         patient_case=case_json,
         workflow_spec=spec_json,
@@ -98,7 +174,7 @@ def record_patient_trace(
     report: PatientModelReport | None = None,
     parameter_mapping: EPParameterMappingSpec | None = None,
 ) -> dict[str, Any]:
-    """Record the patient workflow through the registered CardiTrace boundary."""
+    """Record the minimized patient workflow through the CardiTrace boundary."""
     envelope = build_patient_trace_payload(
         case=case,
         spec=spec,
