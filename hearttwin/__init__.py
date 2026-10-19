@@ -84,6 +84,11 @@ from .patient_ecg_eval import (
     ECGWaveform,
     evaluate_heldout_ecg,
 )
+from .patient_report import (
+    PatientModelReport,
+    PersonalizationDomainReport,
+    build_patient_model_report,
+)
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -115,6 +120,7 @@ __all__ = [
     "EPParameterMappingResult", "apply_ep_parameter_mapping",
     "ECGWaveform", "ECGAcceptanceCriteria", "ECGEvaluationSpec", "ECGLeadMetric",
     "ECGValidationReport", "evaluate_heldout_ecg",
+    "PersonalizationDomainReport", "PatientModelReport", "build_patient_model_report",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
