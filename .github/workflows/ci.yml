@@ -32,6 +32,6 @@ jobs:
         with:
           node-version: "22"
       - run: node --check hearttwin/webui/app.js && node --check hearttwin/webui/viewer.js
-      - run: node --test tests/webui_geometry.test.cjs
+      - run: node --test tests/webui_geometry.test.cjs tests/webui_tasks.test.cjs
       - run: pytest -q
       - run: hearttwin doctor
