@@ -89,6 +89,11 @@ from .patient_report import (
     PersonalizationDomainReport,
     build_patient_model_report,
 )
+from .patient_trace import (
+    PatientTraceEnvelope,
+    build_patient_trace_payload,
+    record_patient_trace,
+)
 from .cardiac_twin import (
     CardiacDigitalTwin, CalibrationSpec, ConductionNetwork, ECGObservation,
     EPParameters, MeshGeometry, PseudoECG, ScarMap, TwinSimulation,
@@ -121,6 +126,7 @@ __all__ = [
     "ECGWaveform", "ECGAcceptanceCriteria", "ECGEvaluationSpec", "ECGLeadMetric",
     "ECGValidationReport", "evaluate_heldout_ecg",
     "PersonalizationDomainReport", "PatientModelReport", "build_patient_model_report",
+    "PatientTraceEnvelope", "build_patient_trace_payload", "record_patient_trace",
     "CardiacDigitalTwin", "CalibrationSpec", "ConductionNetwork",
     "ECGObservation", "EPParameters", "MeshGeometry", "PseudoECG",
     "ScarMap", "TwinSimulation", "UpstreamCardiacDigitalTwinAdapter",
