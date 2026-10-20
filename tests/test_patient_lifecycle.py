@@ -447,3 +447,15 @@ def test_real_circulation_inference_loop(tmp_path):
     assert output["heldout_acceptance_passed"] is True
     assert output["inference"]["backend"] == "native-map-de-v1"
     assert output["clinical_qualification"] == "not_established"
+
+
+def test_runtime_manifest_records_installed_electrotrace():
+    pytest.importorskip("electrotrace")
+    from importlib.metadata import version
+    from hearttwin.patient_execution import runtime_manifest
+
+    manifest = runtime_manifest()["packages"]["electrotrace"]
+    assert manifest["installed"] is True
+    assert manifest["version"] == version("electrotrace")
+    assert "__init__.py" in manifest["source_files"]
+    assert len(manifest["source_fingerprint"]) == 64
