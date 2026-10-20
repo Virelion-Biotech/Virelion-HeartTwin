@@ -21,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--refine-calibration", action="store_true")
     args = parser.parse_args()
     out = args.output
     out.mkdir(parents=True, exist_ok=True)
@@ -28,13 +29,16 @@ def main():
     train = json.loads((args.baseline/"observations/LV_calibration.json").read_text())
     schedule = np.loadtxt(args.baseline/"schedule.txt")
     variants = [(False, False), (True, False), (False, True), (True, True)]
+    if args.refine_calibration:
+        variants = [(True, True, False), (True, True, True)]
     save(out/"protocol.json", {"selection":"First 17 original calibration points fit, next six inner temporal validation; lowest inner RMSE",
-        "variants":[{"nonlinear_passive":n,"asymmetric_activation":a} for n,a in variants],
+        "variants":[{"nonlinear_passive":v[0],"asymmetric_activation":v[1],"phase":len(v)>2 and v[2]} for v in variants],
+        "refinement":args.refine_calibration,"refinement_trigger":"Calibration curvature hit its predeclared upper bound; early calibration ejection remains delayed. Prior outer results already seen; still development only.",
         "development_only":True,"original_outer_previously_seen":True,
         "max_nfev":65,"starts":2,"no_new_independent_validation":True,
         "constitutive_law":"P=external+(1-a)*emin*expm1(k*(V-V0))/k+a*emax*(V-V0); k=0 retains linear model",
         "pressure_scale":"Not identified from volumes; conditional parameters only",
-        "bounds":{"emax":[.2,8.],"duration":[.25,.7],"mitral_R":[.001,.2],"emin":[.001,.1],"k":[0.,.025],"peak_fraction":[.25,.75]}})
+        "bounds":{"emax":[.2,8.],"duration":[.25,.7],"mitral_R":[.001,.2],"emin":[1e-6 if args.refine_calibration else .001,.1],"k":[0.,.05 if args.refine_calibration else .025],"peak_fraction":[.25,.75],"phase":[-.15,.05]}})
     def payload(x, variant, times, destination):
         p = deepcopy(base)
         lv = p["compartments"]["LV"]
@@ -47,6 +51,9 @@ def main():
             cursor += 2
         if variant[1]:
             lv["activation_peak_fraction"] = float(x[cursor])
+            cursor += 1
+        if len(variant) > 2 and variant[2]:
+            lv["activation_start_s"] = float(x[cursor] % p["cycle_length_s"])
         p["time_s"] = list(map(float,times))
         p["output_dir"] = str(destination)
         return p
@@ -54,8 +61,8 @@ def main():
         low,high = [.2,.25,.001],[8.,.7,.2]
         starts = [[2.,.5,.01],[1.,.45,.005]]
         if variant[0]:
-            low += [.001,0.]
-            high += [.1,.025]
+            low += [1e-6 if args.refine_calibration else .001,0.]
+            high += [.1,.05 if args.refine_calibration else .025]
             starts[0] += [.01,.015]
             starts[1] += [.02,.008]
         if variant[1]:
@@ -63,6 +70,11 @@ def main():
             high += [.75]
             starts[0] += [.4]
             starts[1] += [.6]
+        if len(variant) > 2 and variant[2]:
+            low += [-.15]
+            high += [.05]
+            starts[0] += [-.04]
+            starts[1] += [-.08]
         trials = []
         for start in starts:
             def residual(x):
