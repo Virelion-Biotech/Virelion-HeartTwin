@@ -1,0 +1,45 @@
+{
+  "record": "https://zenodo.org/records/10526554",
+  "version": "1.1",
+  "license": {
+    "id": "cc-by-nc-4.0"
+  },
+  "metadata_sha256": "3cb99de8cca956ecdca112c98897243c38bc103a7141a140dca9673a9454596f",
+  "files": {
+    "Data.zip": {
+      "url": "https://zenodo.org/api/records/10526554/files/Data.zip/content",
+      "bytes": 7596,
+      "publisher_md5": "d36dd94650477432e2f1ee19c50b189a",
+      "sha256": "a923f7e9b24b6a3a8d2f9b0901c4269f10ca588d2c596d0df0e3b5d08adea8eb"
+    },
+    "LabelIDs.txt": {
+      "url": "https://zenodo.org/api/records/10526554/files/LabelIDs.txt/content",
+      "bytes": 1265,
+      "publisher_md5": "9cf108dcd68fc97e76f51eaf86212a9a",
+      "sha256": "6afd24819d6fced8e0aab281c4cc0df52365cca45dbbc974e6ab85e8af8f05de"
+    },
+    "M.vtu": {
+      "url": "https://zenodo.org/api/records/10526554/files/M.vtu/content",
+      "bytes": 8722885,
+      "publisher_md5": "d2c9a077ef355b985d6dcb3740eb493a",
+      "sha256": "b9b8f4777656fbf1a50d33d553c850f0262ec91614aa6f4beb774711f218aa29"
+    },
+    "Surfaces.zip": {
+      "url": "https://zenodo.org/api/records/10526554/files/Surfaces.zip/content",
+      "bytes": 1468779,
+      "publisher_md5": "c9fa25053693429ffe9f6d315f300a08",
+      "sha256": "745c5aac560ef5dc7a64262589449e8711422ddc4a372d3b1975c1d0013899f6"
+    },
+    "TetGen.zip": {
+      "url": "https://zenodo.org/api/records/10526554/files/TetGen.zip/content",
+      "bytes": 6618978,
+      "publisher_md5": "19275432fa12eacbca43a2d8053be98e",
+      "sha256": "20ab5acea552007126b927a8f4f0a289e7e9969b41896c1c576d81a60f9ecf29"
+    }
+  },
+  "attribution": "Gerach, Schuler, Wachter and Loewe; Zenodo 10526554; Gerach et al., Mathematics 2021, 9, 1247; Gerach and Loewe, J Physiol 2024, JP285022",
+  "not_downloaded": [
+    "EP.vtu (640 MB); not needed for this mechanics/circulation audit"
+  ],
+  "redistribution": "Source files retained in Colab, not redistributed in HeartTwin; CC BY-NC 4.0 is not a blanket commercial-use permission."
+}

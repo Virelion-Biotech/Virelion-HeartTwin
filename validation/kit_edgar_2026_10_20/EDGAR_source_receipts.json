@@ -1,0 +1,79 @@
+{
+  "page": "https://edgar.sci.utah.edu/2025/07/10/bratislava_2020_p034/",
+  "files": {
+    "Documentation-7.zip": {
+      "url": "https://edgar.sci.utah.edu/wp-content/uploads/2025/07/Documentation-7.zip",
+      "sha256": "e882818ed0c43361ca1abda6ba7ccf274569eafe51d3a250760cebd77f4bc333",
+      "bytes": 235439
+    },
+    "Geometries-7.zip": {
+      "url": "https://edgar.sci.utah.edu/wp-content/uploads/2025/07/Geometries-7.zip",
+      "sha256": "c30713723520f18ca74c7fe8b56d9b3fb51ea49a2b575ec02ebfad663aeef3b8",
+      "bytes": 323052
+    }
+  },
+  "archive_inventory": {
+    "Documentation-7.zip": [
+      {
+        "path": "Documentation/P034_read_me2.txt",
+        "bytes": 4202
+      },
+      {
+        "path": "Documentation/P034_CARTO_PA_RAO.jpg",
+        "bytes": 139229
+      },
+      {
+        "path": "Documentation/electrodesMappingPrinciple.jpg",
+        "bytes": 133460
+      }
+    ],
+    "Geometries-7.zip": [
+      {
+        "path": "Geometries/P034_EndoEpi.mat",
+        "bytes": 95784
+      },
+      {
+        "path": "Geometries/electrodesPos_Numbered.pts",
+        "bytes": 5288
+      },
+      {
+        "path": "Geometries/P034_Epi.mat",
+        "bytes": 55687
+      },
+      {
+        "path": "Geometries/P034_R_lung.mat",
+        "bytes": 14576
+      },
+      {
+        "path": "Geometries/pacingSitePosition.pts",
+        "bytes": 38
+      },
+      {
+        "path": "Geometries/electrodesPositions.pts",
+        "bytes": 4756
+      },
+      {
+        "path": "Geometries/P034_L_lung.mat",
+        "bytes": 13897
+      },
+      {
+        "path": "Geometries/P034_Torso.mat",
+        "bytes": 29831
+      },
+      {
+        "path": "Geometries/P034_RV_RA.mat",
+        "bytes": 55161
+      },
+      {
+        "path": "Geometries/electrodesMapping.txt",
+        "bytes": 3297
+      },
+      {
+        "path": "Geometries/P034_LV_LA.mat",
+        "bytes": 47829
+      }
+    ]
+  },
+  "attribution": "Institute of Measurement Science, Slovak Academy of Sciences and National Institute for Cardiovascular Diseases, Bratislava; Aras et al. 2015, doi:10.1016/j.jelectrocard.2015.08.008; Svehlikova et al. CinC 2019 doi:10.22489/CinC.2019.303; full acknowledgements and additional citations on source page/readme.",
+  "rights": "Source files are not redistributed. No explicit licence identifier was supplied by the inspected P034 archives/page; free registration/download is not proof of unrestricted redistribution."
+}

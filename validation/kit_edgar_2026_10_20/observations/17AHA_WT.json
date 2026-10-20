@@ -1,0 +1,41 @@
+{
+  "values": [
+    2.707534,
+    1.830229,
+    1.341386,
+    1.390852,
+    1.181914,
+    2.991716,
+    3.187815,
+    2.691087,
+    2.27157,
+    2.097498,
+    3.203117,
+    3.836964,
+    5.716756,
+    5.826501,
+    4.007623,
+    4.551656,
+    1.249688
+  ],
+  "unit": "mm",
+  "labels": [
+    "Basal anterior [mm]",
+    "Basal anteroseptal [mm]",
+    "Basal inferoseptal [mm]",
+    "Basal inferior [mm]",
+    "Basal inferolateral [mm]",
+    "Basal anterolateral [mm]",
+    "Mid anterior [mm]",
+    "Mid anteroseptal [mm]",
+    "Mid inferoseptal [mm]",
+    "Mid inferior [mm]",
+    "Mid inferolateral [mm]",
+    "Mid anterolateral [mm]",
+    "Apical anterior [mm]",
+    "Apical septal [mm]",
+    "Apical inferior [mm]",
+    "Apical lateral [mm]",
+    "Apex [mm]"
+  ]
+}

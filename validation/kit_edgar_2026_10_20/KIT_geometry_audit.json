@@ -1,0 +1,82 @@
+{
+  "source": "TetGen.zip/H/heartT4.*; source millimetres converted explicitly to metres",
+  "nodes": 32505,
+  "tetrahedra": 128976,
+  "positive_tetrahedra": 128976,
+  "nonpositive_tetrahedra": 0,
+  "minimum_determinant_m3": 3.9948332788719635e-10,
+  "absolute_tetrahedral_volume_mL": 1426.2492248162919,
+  "material_counts": {
+    "30": 27862,
+    "31": 49935,
+    "32": 21451,
+    "33": 15811,
+    "34": 585,
+    "35": 783,
+    "36": 1530,
+    "37": 1162,
+    "38": 2709,
+    "39": 2548,
+    "60": 3233,
+    "61": 1367
+  },
+  "fiber_norm_range": [
+    0.9999991761686606,
+    1.0000008075566738
+  ],
+  "sheet_norm_range": [
+    0.023997101533310226,
+    1.0000007942906846
+  ],
+  "max_abs_normalized_fiber_sheet_dot": 1.3482507144248567e-05,
+  "surfaces": {
+    "LA": {
+      "nodes": 1646,
+      "triangles": 3288,
+      "signed_volume_mL": 70.4087016291077,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "qualification": "Geometric audit only; no cavity-to-wall registration or expert review asserted."
+    },
+    "LV": {
+      "nodes": 3190,
+      "triangles": 6376,
+      "signed_volume_mL": 200.56312305856713,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "qualification": "Geometric audit only; no cavity-to-wall registration or expert review asserted."
+    },
+    "RA": {
+      "nodes": 2130,
+      "triangles": 4256,
+      "signed_volume_mL": 98.5481367355228,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "qualification": "Geometric audit only; no cavity-to-wall registration or expert review asserted."
+    },
+    "RV": {
+      "nodes": 3518,
+      "triangles": 7032,
+      "signed_volume_mL": 188.51165464192488,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "qualification": "Geometric audit only; no cavity-to-wall registration or expert review asserted."
+    }
+  },
+  "meshio_vtu": "meshio 5.3.5 failed reading this publisher M.vtu with a compressed-base64 error; use the accompanying official TetGen export. No source geometry repairs performed.",
+  "native_mesh_preflight": {
+    "status": "REJECTED",
+    "error": "Mesh requires 4..5000 finite 3D nodes",
+    "scope": "Source-size preflight only, empty cavity placeholder; not a complete four-cavity conversion."
+  },
+  "full_spatial_benchmark": {
+    "status": "NOT_RUN",
+    "blockers": [
+      "Published mesh exceeds native 5000-node/20000-tetrahedron limits; guarded loader rejects it.",
+      "Need reviewed cavity/wall/material/coordinate mapping, fibre/sheet qualification, constitutive parameters, loaded reference state and boundary conditions.",
+      "No measured patient voltage field, pressures or complete circulation initial state supplied.",
+      "No mesh coarsening, fibre orthogonalisation or physiology defaults silently substituted."
+    ]
+  },
+  "native_loader_sha256": "c4f3e723479683ee161c4403e170bea2c8875363e98d161e6860ffb6c8bbadb2"
+}

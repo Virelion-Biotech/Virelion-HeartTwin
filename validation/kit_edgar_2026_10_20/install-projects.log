@@ -1,0 +1,41 @@
+Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+  Cloning https://github.com/Virelion-Biotech/Virelion-CardiMech.git (to revision 5dc14d886ccbda5a1398b863f9ae7821bbffa18b) to /tmp/pip-req-build-ctjjaher
+  Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiMech.git /tmp/pip-req-build-ctjjaher
+  Running command git rev-parse -q --verify 'sha^5dc14d886ccbda5a1398b863f9ae7821bbffa18b'
+  Running command git fetch -q https://github.com/Virelion-Biotech/Virelion-CardiMech.git 5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+  Resolved https://github.com/Virelion-Biotech/Virelion-CardiMech.git to commit 5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Obtaining file:///content/HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/source
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: numpy<3,>=1.26 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from virelion-cardimech==0.4.0) (2.2.6)
+Requirement already satisfied: pydantic<3,>=2.6 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from virelion-cardimech==0.4.0) (2.12.3)
+Requirement already satisfied: PyYAML<7,>=6.0 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from virelion-hearttwin==0.3.0) (6.0.3)
+Requirement already satisfied: annotated-types>=0.6.0 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardimech==0.4.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.41.4 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardimech==0.4.0) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardimech==0.4.0) (4.16.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardimech==0.4.0) (0.4.4)
+Building wheels for collected packages: virelion-cardimech, virelion-hearttwin
+  Building wheel for virelion-cardimech (pyproject.toml): started
+  Building wheel for virelion-cardimech (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-cardimech: filename=virelion_cardimech-0.4.0-py3-none-any.whl size=42368 sha256=d098045e6a0a94cfd8d6ebb2672799346a0d03e4d2f289c9c08a7b208754e2a9
+  Stored in directory: /root/.cache/pip/wheels/9c/88/3e/654f825d3345af1791d4e04a0299252c58799e2ccbcba0081b
+  Building editable for virelion-hearttwin (pyproject.toml): started
+  Building editable for virelion-hearttwin (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-hearttwin: filename=virelion_hearttwin-0.3.0-0.editable-py3-none-any.whl size=4149 sha256=355ef219429369455198f82979ab35bd1ae85a622ddaa8cfeac97d6c83e7e86d
+  Stored in directory: /tmp/pip-ephem-wheel-cache-r6d2ufj8/wheels/0a/87/3b/77aa25ebfadec6f1c8e328c4915a19994ee66ca5faf324d1d2
+Successfully built virelion-cardimech virelion-hearttwin
+Installing collected packages: virelion-hearttwin, virelion-cardimech
+
+Successfully installed virelion-cardimech-0.4.0 virelion-hearttwin-0.3.0

@@ -1,0 +1,55 @@
+{
+  "runs": [
+    {
+      "start": [
+        2.0,
+        0.5,
+        0.01
+      ],
+      "x": [
+        1.5133347528507455,
+        0.4909659778681586,
+        0.0010000000006146284
+      ],
+      "calibration_SSE_mL2": 4334.3691339757,
+      "nfev": 6,
+      "converged": true,
+      "message": "`ftol` termination condition is satisfied.",
+      "optimality": 1.3208708935106277
+    },
+    {
+      "start": [
+        0.8,
+        0.4,
+        0.03
+      ],
+      "x": [
+        1.5133300842048423,
+        0.49096628640690404,
+        0.001000000000985174
+      ],
+      "calibration_SSE_mL2": 4334.369176895898,
+      "nfev": 7,
+      "converged": true,
+      "message": "`ftol` termination condition is satisfied.",
+      "optimality": 2.292562789717677
+    }
+  ],
+  "selected": {
+    "start": [
+      2.0,
+      0.5,
+      0.01
+    ],
+    "x": [
+      1.5133347528507455,
+      0.4909659778681586,
+      0.0010000000006146284
+    ],
+    "calibration_SSE_mL2": 4334.3691339757,
+    "nfev": 6,
+    "converged": true,
+    "message": "`ftol` termination condition is satisfied.",
+    "optimality": 1.3208708935106277
+  }
+}
