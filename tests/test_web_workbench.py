@@ -93,7 +93,7 @@ def test_http_auth_origin_host_and_static(tmp_path):
         assert status == 200
         assert headers["Access-Control-Allow-Origin"] == "https://workbench.example"
         catalog = json.loads(body)
-        assert len(catalog["services"]) == 22
+        assert len(catalog["services"]) == len(load_registry().services())
         assert not next(x for x in catalog["services"] if x["name"] == "CardiLearn")[
             "runnable"
         ]

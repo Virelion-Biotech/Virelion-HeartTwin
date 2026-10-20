@@ -1,4 +1,8 @@
 services:
+  - name: PatientNative
+    repository: Virelion-Biotech/Virelion-HeartTwin
+    capabilities: [patient.geometry.reconstruct, patient.leadfield.generate, patient.spatial_ep.simulate, patient.circulation.simulate]
+    builtin: patient_native
   - name: CardiAnatomy
     repository: Virelion-Biotech/Virelion-CardiAnatomy
     capabilities: [anatomy.health, anatomy.build, anatomy.validate, anatomy.tools, anatomy.microstructure.reference, anatomy.scar.classify, anatomy.presets, anatomy.registration.rigid, anatomy.geometry.measure, anatomy.manifest.audit, anatomy.series.rank, anatomy.segmentation.qc, anatomy.cine.phases, anatomy.transforms.compose, anatomy.transforms.invert, anatomy.correspondence.compare, anatomy.motion.summarize, anatomy.validation.segmentation, anatomy.validation.points]

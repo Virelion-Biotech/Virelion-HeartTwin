@@ -4,6 +4,11 @@ HeartTwin is the orchestration, state, provenance, interoperability, and cross-s
 
 HeartTwin does **not** replace specialist algorithms with one monolith. It connects dedicated Virelion repositories through native Python adapters, command adapters, CardiBridge transport, or HTTP service endpoints while preserving explicit scientific boundaries and provenance.
 
+Patient acquisition additions: [FHIR observation import, reviewed-label reconstruction,
+native reciprocal lead fields and spatial excitation](docs/PATIENT_NATIVE_PREPARATION.md).
+These research paths require explicit patient inputs and do not establish a fully
+personalized or clinically validated whole-heart system.
+
 > **Status note — 2026-10-08:** the stack has expanded substantially beyond the original multimodal workflow. The repository now includes a complete mechanistic path, a single-subject superstack continuity workflow, distributed operational rehearsal, cross-physics lineage in `CardiacState`, and a shared optical-stimulation compatibility contract. Several component repositories also received new CPU-verified releases on 2026-10-07/08. Those latest component heads are described below, but they are **not automatically equivalent to the frozen HeartTwin compatibility matrix** until that matrix is deliberately refreshed and requalified.
 
 

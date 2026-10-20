@@ -16,6 +16,8 @@ from .patient_observations import verified_bytes
 from .provenance import sha256
 
 CAPABILITIES = {
+    "patient.circulation.simulate",
+    "patient.geometry.reconstruct", "patient.leadfield.generate", "patient.spatial_ep.simulate",
     "patient.calibrate", "patient.ep",
     "anatomy.build",
     "anatomy.validate",
@@ -373,6 +375,8 @@ def execute_patient_plan(payload, registry, *, output_dir="patient-plan"):
                     usable_acquisition(job.case, acquisition_id, job.encounter_id, job.carry_forward)
                 result = execute_patient_ep(request, registry, output_dir=root / stage.stage_id)
         else:
+            if stage.capability.startswith(("patient.geometry.", "patient.leadfield.", "patient.spatial_ep.", "patient.circulation.")):
+                request["output_dir"] = str(root / stage.stage_id)
             result = invoke(registry, stage.capability, request)
 
         # Downstream artifact refs must preserve their bytes, not just their labels.

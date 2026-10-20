@@ -91,6 +91,12 @@ def normalize_observation(raw: bytes, *, format: str, unit: str):
 
 
 def verified_bytes(source):
+    if isinstance(source, dict):
+        from .patient_model import SourceFileRef
+        data = dict(source)
+        artifact_id = data.pop("artifact_id", "artifact")
+        data.pop("kind", None)
+        source = SourceFileRef.model_validate({"file_id": artifact_id, **data})
     parsed = urlparse(source.uri)
     if parsed.scheme not in {"", "file"} or parsed.netloc not in {"", "localhost"}:
         raise ValueError("Patient sources must be local/file artifacts")

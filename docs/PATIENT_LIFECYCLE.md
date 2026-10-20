@@ -111,7 +111,9 @@ case revision. Import accepts exact `time_s,value` CSV or JSON with explicit uni
 `{"value":80,"unit":"mmHg"}`, `{"values":[80,85],"time_s":[0,0.5],"unit":"mmHg"}`,
 or labelled fields using `labels` instead of `time_s`. Original and normalized
 files remain separately hash-pinned. There is no implicit unit conversion.
-This is a measurement-file import, not an EHR/FHIR or DICOM segmentation importer.
+The separate [native preparation path](PATIENT_NATIVE_PREPARATION.md) adds reviewed
+FHIR quantities and labelled-image tetrahedral reconstruction. Raw DICOM
+segmentation and automatic hospital configuration remain outside these importers.
 Imaging/ECG acquisitions continue through the installed CardiAnatomy/ElectroTrace
 adapters and their existing explicit metadata/readiness gates.
 
@@ -164,10 +166,11 @@ selected. Mechanics anatomy must be a unique hash-pinned artifact in that case.
 
 The stack has patient-bound orchestration and provenance across these native
 service routes. This does not mean every input is measured or every backend
-consumes full anatomy. Automatic image reconstruction, patient lead-field
-construction, general anatomical CFD/FSI, personalized cellular/regeneration
-biology, and validated patient-benefit prediction are not supplied by this change.
-They require qualified models/data beyond an orchestration layer. Native mechanics,
+consumes full anatomy. The [native preparation extension](PATIENT_NATIVE_PREPARATION.md)
+adds reviewed-label reconstruction and reciprocal lead-field generation. Raw-scan
+segmentation, general anatomical CFD/FSI, personalized cellular/regeneration
+biology, and validated patient-benefit prediction still require qualified models/data.
+Native mechanics,
 flow and intervention restrictions continue to apply. Configuring specialized
 EP/mechanics/therapy stages still requires a reviewed native solver template.
 
