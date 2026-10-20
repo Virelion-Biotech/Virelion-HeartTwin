@@ -28,6 +28,62 @@ def hemodynamic_observables(time_s, volumes, pressures, flows):
             "scalar_outputs": scalars, "units": units}
 
 
+def chamber_pressure(t, volume, p, cycle):
+    """Optional exponential passive law and asymmetric activation, explicitly supplied."""
+    elapsed = (t - p["activation_start_s"]) % cycle
+    duration = p["activation_duration_s"]
+    activation = 0.
+    if elapsed < duration:
+        if "activation_peak_fraction" not in p:
+            activation = np.sin(np.pi * elapsed / duration) ** 2
+        else:
+            peak = duration * p["activation_peak_fraction"]
+            phase = elapsed / peak if elapsed <= peak else (duration - elapsed) / (duration - peak)
+            activation = np.sin(np.pi * phase / 2) ** 2
+    delta = volume - p["unstressed_volume_mL"]
+    exponent = p.get("passive_exponent_per_mL", 0.)
+    passive = p["emin_mmHg_per_mL"] * delta
+    if exponent:
+        argument = exponent * delta
+        if argument > 600:
+            raise ValueError("Exponential passive pressure exceeds supported numerical range")
+        passive = p["emin_mmHg_per_mL"] * np.expm1(argument) / exponent
+    if not exponent:
+        # Preserve legacy evaluation order exactly when no nonlinear law is supplied.
+        pressure = (p["emin_mmHg_per_mL"] + activation * (p["emax_mmHg_per_mL"] - p["emin_mmHg_per_mL"])) * delta
+    else:
+        pressure = (1 - activation) * passive + activation * p["emax_mmHg_per_mL"] * delta
+    return p["external_pressure_mmHg"] + pressure
+
+
+def validate_activation_support(template, parameter_paths, calibration_end_s):
+    """Reject only provably inactive chamber emax parameters, not infer identifiability."""
+    end = float(calibration_end_s)
+    cycle = float(template["cycle_length_s"])
+    if not np.isfinite(end) or end < 0 or not np.isfinite(cycle) or cycle <= 0:
+        raise ValueError("Finite nonnegative calibration horizon and positive cycle required")
+    report = {}
+    for name, path in parameter_paths.items():
+        parts = path.split(".")
+        if len(parts) != 3 or parts[0] != "compartments" or parts[2] != "emax_mmHg_per_mL":
+            continue
+        chamber = parts[1]
+        if any("compartments." + chamber + "." + field in parameter_paths.values()
+               for field in ("activation_start_s", "activation_duration_s")):
+            report[name] = "timing_is_fitted_not_screened"
+            continue
+        p = template["compartments"][chamber]
+        start, duration = p["activation_start_s"], p["activation_duration_s"]
+        # Include a preceding cycle because activation may wrap over time zero.
+        active = any(max(0., start + n * cycle) < min(end, start + duration + n * cycle)
+                     for n in range(-1, int(np.ceil(end / cycle)) + 1))
+        report[name] = "activation_present_not_identifiability_proof" if active else "structurally_inactive"
+    inactive = [name for name, status in report.items() if status == "structurally_inactive"]
+    if inactive:
+        raise ValueError("Structurally inactive emax parameters in calibration horizon: " + ", ".join(inactive))
+    return report
+
+
 def simulate_closed_loop(payload):
     """Time-varying elastance chambers, compliant vessels, ideal diode valves.
 
@@ -52,13 +108,16 @@ def simulate_closed_loop(payload):
         chamber = name in {"LA", "LV", "RA", "RV"}
         keys = {"unstressed_volume_mL", "external_pressure_mmHg"}
         keys |= {"emin_mmHg_per_mL", "emax_mmHg_per_mL", "activation_start_s", "activation_duration_s"} if chamber else {"compliance_mL_per_mmHg"}
-        if set(values) != keys or not np.isfinite(list(values.values())).all() or values["unstressed_volume_mL"] < 0:
+        optional = {"passive_exponent_per_mL", "activation_peak_fraction"} if chamber else set()
+        if not keys <= set(values) or not set(values) <= keys | optional or not np.isfinite(list(values.values())).all() or values["unstressed_volume_mL"] < 0:
             raise ValueError("Declare exact finite chamber/vessel constitutive parameters")
         if chamber:
             if (not 0 < values["emin_mmHg_per_mL"] <= values["emax_mmHg_per_mL"]
                     or not 0 <= values["activation_start_s"] < cycle
                     or not 0 < values["activation_duration_s"] <= cycle):
                 raise ValueError("Invalid explicit chamber elastance or activation timing")
+            if values.get("passive_exponent_per_mL", 0.) < 0 or not 0 < values.get("activation_peak_fraction", .5) < 1:
+                raise ValueError("Passive exponent must be nonnegative and activation peak fraction in (0,1)")
         elif values["compliance_mL_per_mmHg"] <= 0:
             raise ValueError("Positive vessel compliance required")
     solver = payload["solver"]
@@ -72,12 +131,9 @@ def simulate_closed_loop(payload):
         for i, name in enumerate(COMPARTMENTS):
             p = params[name]
             if name in {"LA", "LV", "RA", "RV"}:
-                elapsed = (t - p["activation_start_s"]) % cycle
-                activation = np.sin(np.pi * elapsed / p["activation_duration_s"]) ** 2 if elapsed < p["activation_duration_s"] else 0.
-                elastance = p["emin_mmHg_per_mL"] + activation * (p["emax_mmHg_per_mL"] - p["emin_mmHg_per_mL"])
+                result.append(chamber_pressure(t, volumes[i], p, cycle))
             else:
-                elastance = 1 / p["compliance_mL_per_mmHg"]
-            result.append(p["external_pressure_mmHg"] + elastance * (volumes[i] - p["unstressed_volume_mL"]))
+                result.append(p["external_pressure_mmHg"] + (1 / p["compliance_mL_per_mmHg"]) * (volumes[i] - p["unstressed_volume_mL"]))
         return np.asarray(result)
 
     def flows(t, volumes):
