@@ -115,6 +115,12 @@ def read_observation(source, unit):
     )
 
 
+def output_unit(prediction, path):
+    """Resolve a qualified output path before legacy leaf-only unit metadata."""
+    units = prediction.get("units", {})
+    return units.get(path, units.get(path.split(".")[-1]))
+
+
 def sample_prediction(prediction, spec):
     """No extrapolation, phase shift, rescaling or data-dependent alignment."""
     from .patient_domain import value_at
@@ -123,7 +129,7 @@ def sample_prediction(prediction, spec):
         return sample_spatial_artifact(prediction, spec)
     value = value_at(prediction, spec["model_output"])
     values = finite_values(value if isinstance(value, list) else [value])
-    actual_unit = prediction.get("units", {}).get(spec["model_output"].split(".")[-1])
+    actual_unit = output_unit(prediction, spec["model_output"])
     # Some native mechanics contracts omit a unit map; caller must explicitly declare it.
     declared = spec.get("prediction_unit") or actual_unit
     if declared != spec["unit"] or (

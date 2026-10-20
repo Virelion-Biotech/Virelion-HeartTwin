@@ -21,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .patient_model import PatientCase, assess_evidence_split
 from .patient_execution import write_stage, runtime_manifest
 from .provenance import sha256
-from .patient_observations import read_observation, sample_prediction
+from .patient_observations import output_unit, read_observation, sample_prediction
 
 
 class ScalarTarget(BaseModel):
@@ -211,6 +211,12 @@ def validate_domain_job(job):
     source_roles = {}
     all_source_roles = {}
     for target in job.targets:
+        if job.native_capability:
+            native_units = {"pressure_mmHg": "mmHg", "volume_mL": "mL", "flow_mL_per_s": "mL/s"}
+            namespace = target.model_output.split(".")[0]
+            expected = native_units.get(namespace)
+            if expected is not None and (target.unit != expected or target.prediction_unit not in {None, expected}):
+                raise ValueError("Native prediction output and observation units disagree")
         if target.observation_kind == "curve" and not target.model_time:
             raise ValueError("Curve targets require an explicit prediction time path")
         if target.observation_kind == "field" and not (
@@ -483,9 +489,7 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
         if target.observation_kind == "scalar":
             observed_values = [read_scalar(source, target.unit)]
             predicted_values = [value_at(prediction, target.model_output)]
-            actual_unit = prediction.get("units", {}).get(
-                target.model_output.split(".")[-1]
-            )
+            actual_unit = output_unit(prediction, target.model_output)
             if actual_unit is not None and actual_unit != target.unit:
                 raise ValueError(
                     "Predicted output units differ from declared target unit"
