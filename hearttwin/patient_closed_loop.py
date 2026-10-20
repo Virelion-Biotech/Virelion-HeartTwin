@@ -75,7 +75,8 @@ def validate_activation_support(template, parameter_paths, calibration_end_s):
         p = template["compartments"][chamber]
         start, duration = p["activation_start_s"], p["activation_duration_s"]
         # Include a preceding cycle because activation may wrap over time zero.
-        active = any(max(0., start + n * cycle) < min(end, start + duration + n * cycle)
+        at_zero = 0. < (-start) % cycle < duration
+        active = at_zero or any(max(0., start + n * cycle) < min(end, start + duration + n * cycle)
                      for n in range(-1, int(np.ceil(end / cycle)) + 1))
         report[name] = "activation_present_not_identifiability_proof" if active else "structurally_inactive"
     inactive = [name for name, status in report.items() if status == "structurally_inactive"]

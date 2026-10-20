@@ -42,6 +42,7 @@ def test_inactive_emax_is_rejected_but_wrapped_activation_is_present():
     wrapped = deepcopy(template)
     wrapped["compartments"]["LA"]["activation_duration_s"] = .3
     assert "activation_present" in validate_activation_support(wrapped, paths, .05)["atrial_strength"]
+    assert "activation_present" in validate_activation_support(wrapped, paths, 0.)["atrial_strength"]
     # Moving the activation time is itself a fitted parameter, so a zero at the
     # initial template is insufficient proof of inactivity over its whole bounds.
     paths["start"] = "compartments.LA.activation_start_s"
