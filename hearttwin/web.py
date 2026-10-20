@@ -847,7 +847,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                             + acquisition["acquisition_id"],
                         ),
                     )
-                if suffix in {"encounters", "observations", "inputs"}:
+                if suffix in {"encounters", "observations", "inputs", "hospital-import"}:
                     principal.require("write", patient_id)
                     snapshot = app.patients.get(patient_id)
                     if value["expected_revision"] != snapshot["revision"]:
@@ -876,6 +876,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                                 "Observation file imports require the worker owner"
                             )
                         from .patient_ingest import import_observation
+                        from .patient_hospital import import_fhir_bundle
 
                         source_path = app.resolve_uploads(
                             {"$upload": value["upload_id"]}
@@ -883,14 +884,15 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         receipt = next(
                             x for x in app.uploads() if x["id"] == value["upload_id"]
                         )
-                        case, _ = import_observation(
+                        importer = import_fhir_bundle if suffix == "hospital-import" else import_observation
+                        case, _ = importer(
                             case,
                             {
                                 "file_id": receipt["id"],
                                 "uri": Path(source_path).as_uri(),
                                 "sha256": receipt["sha256"],
                             },
-                            value["observation"],
+                            value["mapping"] if suffix == "hospital-import" else value["observation"],
                             output_dir=app.root / "patient-observations" / patient_id,
                         )
                     return self.json(

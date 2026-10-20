@@ -33,6 +33,15 @@ def main():
     compare.add_argument("newer", type=int)
     backup = commands.add_parser("backup")
     backup.add_argument("output", type=Path)
+    hospital = commands.add_parser("hospital-import")
+    hospital.add_argument("patient_id")
+    hospital.add_argument("mapping", type=Path)
+    hospital.add_argument("--bundle", type=Path)
+    hospital.add_argument("--url")
+    hospital.add_argument("--token-env")
+    hospital.add_argument("--output-dir", type=Path, required=True)
+    hospital.add_argument("--expected-revision", type=int, required=True)
+    hospital.add_argument("--actor", required=True)
     args = parser.parse_args()
     store = PatientCaseStore(args.store)
     if args.command == "list":
@@ -44,6 +53,22 @@ def main():
             actor=args.actor,
             reason=args.reason,
         )
+    elif args.command == "hospital-import":
+        import hashlib
+        from .patient_hospital import fetch_fhir_bundle, import_fhir_bundle
+
+        if bool(args.bundle) == bool(args.url):
+            raise ValueError("Choose exactly one hospital Bundle file or HTTPS URL")
+        snapshot = store.get(args.patient_id, args.expected_revision)
+        if args.url:
+            source = fetch_fhir_bundle(args.url, output_dir=args.output_dir, token_env=args.token_env)
+        else:
+            path = args.bundle.resolve()
+            source = {"file_id": "fhir-bundle", "uri": path.as_uri(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+        case, report = import_fhir_bundle(snapshot["case"], source, json.loads(args.mapping.read_text()), output_dir=args.output_dir)
+        result = {"import": report, "snapshot": snapshot}
+        if report["imported"]:
+            result["snapshot"] = store.save(case, expected_revision=args.expected_revision, actor=args.actor, reason="Reviewed FHIR observation import")
     elif args.command == "backup":
         destination = args.output.resolve()
         if destination.exists():

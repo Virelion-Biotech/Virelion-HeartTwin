@@ -42,6 +42,12 @@ class ServiceAdapter:
         self.spec = spec
 
     def _builtin_available(self) -> bool:
+        if self.spec.builtin == "patient_native":
+            try:
+                __import__("scipy")
+                return True
+            except ImportError:
+                return False
         if self.spec.builtin == "cardiac_digital_twin":
             return True
         if not self.spec.builtin:
@@ -204,6 +210,9 @@ class ServiceAdapter:
     def invoke(self, capability: str, payload: dict[str, Any]) -> dict[str, Any]:
         if capability not in self.spec.capabilities:
             raise ValueError(f"{self.spec.name} does not advertise {capability}")
+        if self.spec.builtin == "patient_native":
+            from .patient_preparation import invoke
+            return invoke(capability, payload)
         if self.spec.builtin == "cardibridge":
             from .cardibridge_adapter import invoke_cardibridge
             return invoke_cardibridge(capability, payload, endpoint=self.spec.endpoint)
