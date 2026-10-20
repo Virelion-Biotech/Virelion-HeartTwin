@@ -170,3 +170,17 @@ Native FEM field targets can declare `field_quantity` (`displacement_x/y/z`,
 `field_anatomy_sha256`. These read and verify the emitted `spatial_mechanics_fields`
 artifact and compare only explicit `node:N`/`element:N` labels on that exact pinned
 mesh. They do not register an image or infer correspondence to a different mesh.
+
+A service plan may also include `patient.calibrate` or `patient.ep` composite
+stages. Their templates contain the corresponding domain/strict-EP configuration
+plus `subject_id`; case data, revision, fingerprint and visit are inherited from
+the parent plan and cannot be substituted. `patient.calibrate` forwards the
+parent visit/carry-forward declarations into domain execution; `patient.ep`
+checks the anatomy and fit acquisitions against that visit. A downstream binding
+such as `{"$result":"fit.inference.diagnostics.best_parameters.r"}` uses the
+calibrated parameter directly. Each composite keeps its own durable prediction,
+evaluation and binding artifacts. This connects calibration to later native
+mechanics, flow or intervention stages without manually retyping a fit.
+A composite calibration's declared holdout acceptance must pass before later
+stages execute. Failed results remain durable for review; a failed fit is not
+silently promoted into an intervention comparison.

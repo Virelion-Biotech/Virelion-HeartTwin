@@ -529,3 +529,35 @@ def test_real_circulation_recipe_consumes_case_inputs(tmp_path):
     assert any(x.get("input_id") == "measured-flow" and x["status"] == "MEASURED" for x in bindings)
     assert sum(x["status"] == "ASSUMED" for x in bindings) == 5
     assert report["stages"]["circulation"]["provenance"]["anatomy_consumed"] is False
+
+
+@pytest.mark.parametrize("accepted", [True, False])
+def test_composite_calibration_handoff_inherits_frozen_case(tmp_path, monkeypatch, accepted):
+    import hearttwin.patient_domain as domain
+
+    payload = plan(tmp_path)
+    payload["case"]["evidence"][0].update(role="calibration")
+    payload["stages"] = [{"stage_id": "fit", "capability": "patient.calibrate", "purpose": "Fit on frozen patient evidence", "template": {"subject_id": "P1", "domain": "circulation", "targets": [{"evidence_id": "ev1"}]}}]
+    payload["stages"].append({"stage_id": "flow", "capability": "flow.simulate", "purpose": "Use fitted parameter without manual copying", "template": {"subject_id": "P1", "resistance": {"$result": "fit.inference.diagnostics.best_parameters.r"}}})
+    calls = []
+    def calibrated(request, registry, *, output_dir):
+        assert request["case"] == payload["case"]
+        assert request["case_revision"] == 1
+        assert request["case_fingerprint"] == "a"*64
+        assert request["encounter_id"] == "visit1"
+        return {"patient_id": "P1", "heldout_acceptance_passed": accepted, "inference": {"diagnostics": {"best_parameters": {"r": 1.3}}}}
+    monkeypatch.setattr(domain, "execute_patient_domain", calibrated)
+    adapter = SimpleNamespace(available=lambda: True, invoke=lambda capability, request: calls.append(request) or {"subject_id": "P1"})
+    registry = SimpleNamespace(capability=lambda name: adapter)
+    if not accepted:
+        with pytest.raises(ValueError, match="downstream"):
+            execute_patient_plan(payload, registry, output_dir=tmp_path / "composite")
+        assert calls == []
+        assert (tmp_path / "composite/fit-result.json").is_file()
+        return
+    report = execute_patient_plan(payload, registry, output_dir=tmp_path / "composite")
+    assert calls[0]["resistance"] == 1.3
+    assert "fit" in report["stages"]
+    payload["stages"][0]["template"]["case_revision"] = 99
+    with pytest.raises(ValueError, match="inherit"):
+        validate_patient_plan(PatientPlanJob.model_validate(payload))

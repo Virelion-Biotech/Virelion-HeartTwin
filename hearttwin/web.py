@@ -915,6 +915,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                     from .patient_personalization import (
                         PatientPlanJob,
                         validate_patient_plan,
+                        patient_stage_capabilities,
                     )
 
                     expanded = app.patient_request({"payload": value})["payload"]
@@ -925,13 +926,12 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         {
                             "manifest": manifest,
                             "capabilities": {
-                                s.capability: bool(
-                                    app.registry.capability(s.capability)
-                                    and app.registry.capability(
-                                        s.capability
-                                    ).available()
+                                capability: bool(
+                                    app.registry.capability(capability)
+                                    and app.registry.capability(capability).available()
                                 )
-                                for s in job.stages
+                                for stage in job.stages
+                                for capability in patient_stage_capabilities(stage)
                             },
                             "clinical_qualification": "not_established",
                         },

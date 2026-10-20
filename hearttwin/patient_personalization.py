@@ -16,6 +16,7 @@ from .patient_observations import verified_bytes
 from .provenance import sha256
 
 CAPABILITIES = {
+    "patient.calibrate", "patient.ep",
     "anatomy.build",
     "anatomy.validate",
     "anatomy.geometry.measure",
@@ -68,8 +69,10 @@ def source_in_case(case, acquisition_id, file_id):
 
 def usable_acquisition(case, acquisition_id, encounter_id, carry_forward):
     acquisition = next(
-        a for a in case.acquisitions if a.acquisition_id == acquisition_id
+        (a for a in case.acquisitions if a.acquisition_id == acquisition_id), None
     )
+    if acquisition is None:
+        raise ValueError("Patient input acquisition is missing")
     if (
         acquisition.encounter_id != encounter_id
         and not carry_forward.get(acquisition_id, "").strip()
@@ -274,6 +277,8 @@ def validate_patient_plan(job, *, verify=False):
             raise ValueError("Unsupported patient plan capability")
         if stage.template.get("subject_id") != job.case.patient_id:
             raise ValueError("Each stage must explicitly identify this patient")
+        if stage.capability in {"patient.calibrate", "patient.ep"} and {"case", "case_revision", "case_fingerprint", "encounter_id", "carry_forward"} & stage.template.keys():
+            raise ValueError("Composite stages inherit their case, revision and encounter from the parent plan")
         missing = [
             p
             for p in numeric_literals(stage.template)
@@ -287,6 +292,15 @@ def validate_patient_plan(job, *, verify=False):
         resolve_patient_template(
             stage.template, job, results=results, audit=audit, verify=verify
         )
+        if stage.capability in {"patient.calibrate", "patient.ep"}:
+            ids = ([t["evidence_id"] for t in stage.template.get("targets", [])]
+                   if stage.capability == "patient.calibrate" else stage.template.get("spec", {}).get("calibration_evidence_ids", []))
+            calibration = [e for e in job.case.evidence if e.evidence_id in ids and e.role == "calibration"]
+            if not calibration:
+                raise ValueError("Composite patient stages require frozen calibration evidence")
+            for evidence in calibration:
+                audit.append({"path": "calibration_evidence", "evidence_id": evidence.evidence_id,
+                              "status": "MEASURED", "acquisition_id": evidence.acquisition_id})
         if not any(
             x["status"]
             in {
@@ -342,7 +356,24 @@ def execute_patient_plan(payload, registry, *, output_dir="patient-plan"):
         if request.get("subject_id") != job.case.patient_id:
             raise ValueError("Resolved patient identity mismatch")
         write_stage(root / (stage.stage_id + "-request.json"), request)
-        result = invoke(registry, stage.capability, request)
+        if stage.capability in {"patient.calibrate", "patient.ep"}:
+            request.pop("subject_id")
+            request.update(case=job.case.model_dump(mode="json"), case_revision=job.case_revision,
+                           case_fingerprint=job.case_fingerprint)
+            if stage.capability == "patient.calibrate":
+                from .patient_domain import execute_patient_domain
+                request.update(encounter_id=job.encounter_id, carry_forward=job.carry_forward)
+                result = execute_patient_domain(request, registry, output_dir=root / stage.stage_id)
+            else:
+                from .patient_execution import execute_patient_ep
+                spec = request.get("spec", {})
+                acquisition_ids = [spec.get("anatomy_acquisition_id")]
+                acquisition_ids += [e.acquisition_id for e in job.case.evidence if e.evidence_id in spec.get("calibration_evidence_ids", [])]
+                for acquisition_id in acquisition_ids:
+                    usable_acquisition(job.case, acquisition_id, job.encounter_id, job.carry_forward)
+                result = execute_patient_ep(request, registry, output_dir=root / stage.stage_id)
+        else:
+            result = invoke(registry, stage.capability, request)
 
         # Downstream artifact refs must preserve their bytes, not just their labels.
         def check_artifacts(value):
@@ -365,6 +396,8 @@ def execute_patient_plan(payload, registry, *, output_dir="patient-plan"):
 
         check_artifacts(result)
         write_stage(root / (stage.stage_id + "-result.json"), result)
+        if stage.capability in {"patient.calibrate", "patient.ep"} and result.get("heldout_acceptance_passed") is not True:
+            raise ValueError("Patient calibration failed declared held-out acceptance; downstream simulation stopped")
         results[stage.stage_id] = result
     report = {
         "patient_id": job.case.patient_id,
@@ -403,3 +436,11 @@ def longitudinal_changes(older, newer):
         "prior_fit_reusable_automatically": False,
         "reason": "Changed evidence or physiologic state requires explicit new-revision execution",
     }
+
+
+def patient_stage_capabilities(stage):
+    if stage.capability == "patient.calibrate":
+        return ["infer.run", "mechanics.simulate" if stage.template.get("domain") == "mechanics" else "flow.simulate"]
+    if stage.capability == "patient.ep":
+        return ["anatomy.validate", "ep.simulate", "ep.calibrate", "electrical.prepare_calibration"]
+    return [stage.capability]
