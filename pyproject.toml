@@ -11,6 +11,8 @@ dev = ["pytest>=8", "ruff>=0.6", "jsonschema>=4.23"]
 [project.scripts]
 hearttwin = "hearttwin.cli:main"
 hearttwin-web = "hearttwin.web:main"
+hearttwin-patient = "hearttwin.patient_cli:main"
+hearttwin-patient-workspace = "hearttwin.patient_workspace:main"
 
 [build-system]
 requires = ["setuptools>=68"]

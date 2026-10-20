@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import hmac
 import json
 import os
 import re
@@ -26,6 +25,8 @@ from urllib.parse import unquote, urlparse
 
 from .config import load_registry
 from .operations import JobQueue
+from .patient_store import PatientCaseStore, RevisionConflict
+from .patient_access import PatientAccess
 
 ID = re.compile(r"^[a-zA-Z0-9_-]{1,100}$")
 JSON_LIMIT = 2 * 1024 * 1024
@@ -56,6 +57,7 @@ class Workbench:
         origins=(),
         timeout=3600,
         max_upload=256 * 1024 * 1024,
+        patient_credentials=(),
     ):
         if len(token) < 32:
             raise ValueError("Workbench token must contain at least 32 characters")
@@ -64,6 +66,8 @@ class Workbench:
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.token, self.origins = token, set(origins)
+        self.access = PatientAccess(token, patient_credentials)
+        self.patients = PatientCaseStore(self.root / "patients.sqlite3")
         self.timeout, self.max_upload = timeout, max_upload
         self.registry = registry or load_registry()
         self.queue = JobQueue(self.root / "jobs.sqlite3")
@@ -225,6 +229,45 @@ class Workbench:
                         "payload": step["payload"],
                     }
                 )
+        elif kind == "patient_ep":
+            from .patient_execution import PatientEPJob
+            from .patient_model import validate_patient_ep_workflow
+
+            job = PatientEPJob.model_validate(request["payload"])
+            snapshot = self.patients.get(job.case.patient_id, job.case_revision)
+            if snapshot["fingerprint"] != job.case_fingerprint or snapshot[
+                "case"
+            ] != job.case.model_dump(mode="json"):
+                raise ValueError(
+                    "Patient job does not match its immutable case revision"
+                )
+            if any(
+                x["patient_id"] == job.case.patient_id and x["archived"]
+                for x in self.patients.list_cases()
+            ):
+                raise ValueError("Restore the patient case before submitting a run")
+            validate_patient_ep_workflow(job.case, job.spec)
+            if job.evaluation_spec.acceptance is None or not job.spec.scientific_grade:
+                raise ValueError(
+                    "Patient jobs require scientific execution and predeclared acceptance criteria"
+                )
+        elif kind == "patient_domain":
+            from .patient_domain import PatientDomainJob, validate_domain_job
+
+            job = PatientDomainJob.model_validate(request["payload"])
+            snapshot = self.patients.get(job.case.patient_id, job.case_revision)
+            if snapshot["fingerprint"] != job.case_fingerprint or snapshot[
+                "case"
+            ] != job.case.model_dump(mode="json"):
+                raise ValueError(
+                    "Patient domain job differs from immutable case revision"
+                )
+            if any(
+                x["patient_id"] == job.case.patient_id and x["archived"]
+                for x in self.patients.list_cases()
+            ):
+                raise ValueError("Restore the patient case before submitting a run")
+            validate_domain_job(job)
         elif kind == "mechanistic":
             required = [
                 "CardiAnatomy",
@@ -241,7 +284,9 @@ class Workbench:
                     "The mechanistic workflow requires all eight installed services"
                 )
         else:
-            raise ValueError("Supported job kinds: capability, sequence, mechanistic")
+            raise ValueError(
+                "Supported job kinds: capability, sequence, mechanistic, patient_ep, patient_domain"
+            )
         label = request.get("label", request.get("capability", kind))
         if not isinstance(label, str) or not label.strip() or len(label) > 160:
             raise ValueError("Job label must contain 1–160 characters")
@@ -264,7 +309,34 @@ class Workbench:
             raise ValueError(
                 "Idempotency key already belongs to a different request"
             ) from exc
+        if request["kind"] in {"patient_ep", "patient_domain"}:
+            payload = request["payload"]
+            try:
+                self.patients.bind_run(
+                    identifier,
+                    payload["case"]["patient_id"],
+                    payload["case_revision"],
+                    request,
+                )
+            except Exception:
+                self.cancel(identifier)
+                raise
         return self.job(identifier)
+
+    def patient_request(self, request):
+        """Expand a revision reference server-side; clients cannot substitute case data."""
+        request = dict(request)
+        payload = dict(request.get("payload") or {})
+        patient_id = payload.pop("patient_id")
+        revision = payload.get("case_revision")
+        if type(revision) is not int or revision < 1:
+            raise ValueError("Select an explicit positive case_revision")
+        snapshot = self.patients.get(patient_id, revision)
+        if "case" in payload or "case_fingerprint" in payload:
+            raise ValueError("Patient case and fingerprint are populated by the server")
+        payload.update(case=snapshot["case"], case_fingerprint=snapshot["fingerprint"])
+        request["payload"] = payload
+        return request
 
     def job(self, identifier, *, detail=True):
         if not ID.fullmatch(identifier):
@@ -352,6 +424,65 @@ class Workbench:
                 raise ValueError("Artifact integrity verification failed")
         return artifact
 
+    def patient_geometry(self, job_id):
+        job = self.job(job_id)
+        if job["status"] != "ok":
+            raise ValueError("Select a completed patient EP run")
+        artifacts = (
+            job.get("result", {})
+            .get("workflow", {})
+            .get("anatomy_bundle", {})
+            .get("artifacts", [])
+        )
+        candidates = [a for a in artifacts if a.get("kind") == "volume_mesh"]
+        selected = [
+            a
+            for a in candidates
+            if a.get("metadata", {}).get("selected_for_patient_model") is True
+        ]
+        candidates = selected or candidates
+        if len(candidates) != 1:
+            raise ValueError("Patient run has no unambiguous volume mesh")
+        artifact = candidates[0]
+        from .patient_ecg_artifacts import _local_path
+
+        path = _local_path(artifact["uri"])
+        if path.stat().st_size > 16 * 1024 * 1024:
+            raise ValueError(
+                "Patient mesh exceeds the browser limit; use the worker for visualization"
+            )
+        if self.file_hash(path) != artifact.get("sha256"):
+            raise ValueError("Patient display mesh failed SHA-256 verification")
+        raw = strict_json(path.read_bytes())
+        geometry = raw.get("fields", raw)
+        nodes = geometry.get("node_xyz")
+        tetra = geometry.get("tetrahedra", geometry.get("tetra"))
+        index_base = raw.get(
+            "index_base", artifact.get("metadata", {}).get("index_base")
+        )
+        if index_base not in {0, 1}:
+            raise ValueError("Display mesh must declare index_base explicitly")
+        if not isinstance(nodes, list) or not isinstance(tetra, list):
+            raise ValueError(
+                "Browser display requires JSON node_xyz and tetrahedra arrays"
+            )
+        if len(nodes) > 30000:
+            raise ValueError("Patient mesh exceeds the 30,000-node browser limit")
+        unit = raw.get("units", artifact.get("metadata", {}).get("units"))
+        if isinstance(unit, dict):
+            unit = unit.get("node_xyz")
+        if unit not in {"mm", "cm", "m"}:
+            raise ValueError("Display mesh requires explicit physical coordinate units")
+        return {
+            "geometry": {
+                "node_xyz": nodes,
+                "tetrahedra": [[i - index_base for i in cell] for cell in tetra],
+                "units": {"node_xyz": unit},
+            },
+            "source_sha256": artifact["sha256"],
+            "scope": "Patient anatomy only; no activation field is inferred for display",
+        }
+
     def cancel(self, identifier):
         with self.queue._connect() as db:
             changed = db.execute(
@@ -403,6 +534,7 @@ class Workbench:
                 )
                 # API credentials must not be inherited by numerical subprocesses.
                 environment.pop("HEARTTWIN_WEB_TOKEN", None)
+                environment.pop("HEARTTWIN_PATIENT_CREDENTIALS", None)
                 with (directory / "execution.log").open("wb") as log:
                     process = subprocess.Popen(
                         [sys.executable, "-m", "hearttwin.web_job"],
@@ -515,6 +647,218 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
         def do_POST(self):
             self.dispatch()
 
+        def read_json(self):
+            if self.headers.get("Transfer-Encoding"):
+                raise ValueError("A fixed Content-Length is required")
+            size = int(self.headers.get("Content-Length", "0"))
+            if not 0 < size <= JSON_LIMIT:
+                raise ValueError("Patient JSON exceeds its limit or is empty")
+            value = strict_json(self.rfile.read(size))
+            if not isinstance(value, dict):
+                raise ValueError("Patient request must be a JSON object")
+            return value
+
+        def patient_dispatch(self, path, principal):
+            if path == "/api/patients" and self.command == "GET":
+                return self.json(
+                    200,
+                    {
+                        "patients": [
+                            x
+                            for x in app.patients.list_cases()
+                            if principal.permits(x["patient_id"])
+                        ]
+                    },
+                )
+            match = re.fullmatch(r"/api/patients/([A-Za-z0-9_-]+)(?:/(.*))?", path)
+            if not match:
+                return self.json(404, {"error": "Not found"})
+            patient_id, suffix = match.groups()
+            principal.require("read", patient_id)
+            if self.command == "GET":
+                if not suffix:
+                    return self.json(200, app.patients.get(patient_id))
+                if suffix == "history":
+                    return self.json(
+                        200,
+                        {
+                            "revisions": app.patients.history(patient_id),
+                            "events": app.patients.events(patient_id),
+                        },
+                    )
+                if suffix == "readiness":
+                    return self.json(200, app.patients.readiness(patient_id))
+                revision = re.fullmatch(r"revisions/([1-9][0-9]*)", suffix)
+                if revision:
+                    return self.json(
+                        200, app.patients.get(patient_id, int(revision[1]))
+                    )
+                if suffix == "runs":
+                    return self.json(
+                        200,
+                        {
+                            "runs": [
+                                {k: v for k, v in item.items() if k != "request"}
+                                for item in app.patients.runs(patient_id)
+                            ]
+                        },
+                    )
+                run = re.fullmatch(
+                    r"runs/([A-Za-z0-9_-]+)(?:/(artifacts/.*|geometry))?", suffix
+                )
+                if run:
+                    if run[1] not in {
+                        x["run_id"] for x in app.patients.runs(patient_id)
+                    }:
+                        raise KeyError(run[1])
+                    job = app.job(run[1])
+                    # Scoped readers see results, not local source paths and execution logs.
+                    if principal.role != "owner":
+                        from .patient_trace import _redact_artifact_uris
+
+                        job.pop("request", None)
+                        job.pop("log", None)
+                        job = _redact_artifact_uris(job)
+                    if run[2]:
+                        if principal.role != "owner":
+                            raise PermissionError(
+                                "Raw artifacts require the trusted worker owner"
+                            )
+                        if run[2] == "geometry":
+                            return self.json(200, app.patient_geometry(run[1]))
+                        artifact = app.artifact(
+                            run[1], unquote(run[2].removeprefix("artifacts/"))
+                        )
+                        return self.send_bytes(
+                            200, artifact.read_bytes(), "application/octet-stream"
+                        )
+                    return self.json(200, job)
+            if self.command == "POST":
+                value = self.read_json()
+                if not suffix:
+                    principal.require("write", patient_id)
+                    if value.get("case", {}).get("patient_id") != patient_id:
+                        raise ValueError("Route patient differs from case patient")
+                    return self.json(
+                        201,
+                        app.patients.save(
+                            value["case"],
+                            expected_revision=value["expected_revision"],
+                            actor=principal.actor,
+                            reason=value["reason"],
+                        ),
+                    )
+                if suffix in {"review", "archive", "restore"}:
+                    principal.require(
+                        "review" if suffix == "review" else "archive", patient_id
+                    )
+                    return self.json(
+                        201,
+                        app.patients.event(
+                            patient_id,
+                            value["revision"],
+                            kind=suffix,
+                            actor=principal.actor,
+                            detail=value["detail"],
+                        ),
+                    )
+                if suffix == "attach":
+                    principal.require("write", patient_id)
+                    # Upload access is owner-only; no cross-case file discovery for scoped users.
+                    if principal.role != "owner":
+                        raise PermissionError(
+                            "Acquisition uploads require the worker owner"
+                        )
+                    from .patient_model import (
+                        PatientCase,
+                        PatientAcquisition,
+                        CoordinateFrame,
+                        PatientEvidenceItem,
+                    )
+
+                    snapshot = app.patients.get(patient_id)
+                    if value["expected_revision"] != snapshot["revision"]:
+                        raise RevisionConflict(
+                            "Patient changed; reload before attaching an acquisition"
+                        )
+                    case = snapshot["case"]
+                    receipt_id = value["upload_id"]
+                    source_path = app.resolve_uploads({"$upload": receipt_id})
+                    receipt = next(x for x in app.uploads() if x["id"] == receipt_id)
+                    acquisition = dict(value["acquisition"])
+                    acquisition.update(
+                        subject_id=patient_id,
+                        source_files=[
+                            {
+                                "file_id": receipt_id,
+                                "uri": Path(source_path).as_uri(),
+                                "sha256": receipt["sha256"],
+                            }
+                        ],
+                    )
+                    case["acquisitions"].append(
+                        PatientAcquisition.model_validate(acquisition).model_dump(
+                            mode="json"
+                        )
+                    )
+                    if value.get("frame"):
+                        frame = CoordinateFrame.model_validate(
+                            value["frame"]
+                        ).model_dump(mode="json")
+                        existing = [
+                            x
+                            for x in case["coordinate_frames"]
+                            if x["frame_id"] == frame["frame_id"]
+                        ]
+                        if existing and existing[0] != frame:
+                            raise ValueError(
+                                "Frame already exists with a different definition"
+                            )
+                        if not existing:
+                            case["coordinate_frames"].append(frame)
+                    if value.get("evidence"):
+                        evidence = dict(value["evidence"])
+                        evidence.update(
+                            subject_id=patient_id,
+                            acquisition_id=acquisition["acquisition_id"],
+                        )
+                        case["evidence"].append(
+                            PatientEvidenceItem.model_validate(evidence).model_dump(
+                                mode="json"
+                            )
+                        )
+                    return self.json(
+                        201,
+                        app.patients.save(
+                            PatientCase.model_validate(case),
+                            expected_revision=value["expected_revision"],
+                            actor=principal.actor,
+                            reason="Attach acquisition "
+                            + acquisition["acquisition_id"],
+                        ),
+                    )
+                if suffix == "compare":
+                    return self.json(
+                        200,
+                        app.patients.compare(
+                            patient_id, value["older"], value["newer"]
+                        ),
+                    )
+                if suffix == "runs":
+                    principal.require("execute", patient_id)
+                    if value.get("kind") not in {"patient_ep", "patient_domain"}:
+                        raise ValueError("Patient runs require a patient workflow kind")
+                    if value.get("payload", {}).get("patient_id") != patient_id:
+                        raise ValueError("Run patient differs from route patient")
+                    return self.json(
+                        202,
+                        app.submit(
+                            app.patient_request(value),
+                            self.headers.get("Idempotency-Key"),
+                        ),
+                    )
+            return self.json(404, {"error": "Not found"})
+
         def dispatch(self):
             try:
                 host = self.headers.get("Host", "").split(":")[0]
@@ -549,9 +893,38 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         mime,
                     )
                 supplied = self.headers.get("Authorization", "")
-                if not hmac.compare_digest(supplied, "Bearer " + app.token):
+                principal = app.access.authenticate(supplied)
+                if principal is None:
                     return self.json(
                         401, {"error": "A valid workbench token is required"}
+                    )
+                if path.startswith("/api/patients"):
+                    return self.patient_dispatch(path, principal)
+                if path == "/api/identity" and self.command == "GET":
+                    return self.json(
+                        200,
+                        {
+                            "actor": principal.actor,
+                            "role": principal.role,
+                            "patients": list(principal.patients),
+                        },
+                    )
+                if principal.role != "owner":
+                    if self.command == "GET" and path == "/api/catalog":
+                        return self.json(
+                            200,
+                            {
+                                "services": [],
+                                "execution": "patient-scoped",
+                                "worker": "online",
+                                "upload_limit_bytes": 0,
+                            },
+                        )
+                    return self.json(
+                        403,
+                        {
+                            "error": "Use assigned patient endpoints with this credential"
+                        },
                     )
                 if self.command == "GET" and path == "/api/catalog":
                     return self.json(200, app.catalog())
@@ -613,6 +986,10 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         ),
                     )
                 return self.json(404, {"error": "Not found"})
+            except PermissionError as exc:
+                self.json(403, {"error": str(exc)})
+            except RevisionConflict as exc:
+                self.json(409, {"error": str(exc)})
             except KeyError:
                 self.json(404, {"error": "Requested item is unavailable"})
             except (ValueError, TypeError, json.JSONDecodeError) as exc:
@@ -649,7 +1026,13 @@ def main():
         parser.error("Non-loopback binding requires an explicit HEARTTWIN_WEB_TOKEN")
     token = supplied or secrets.token_urlsafe(32)
     app = Workbench(
-        args.workspace, token, origins=args.allow_origin, timeout=args.timeout
+        args.workspace,
+        token,
+        origins=args.allow_origin,
+        timeout=args.timeout,
+        patient_credentials=json.loads(
+            os.environ.get("HEARTTWIN_PATIENT_CREDENTIALS", "[]")
+        ),
     )
     if args.public_host:
         app.public_host = args.public_host

@@ -111,7 +111,10 @@ from .cardiac_twin import (
     UpstreamCardiacDigitalTwinAdapter,
 )
 
+from .patient_store import PatientCaseStore, RevisionConflict
+
 __all__ = [
+    "PatientCaseStore", "RevisionConflict",
     "HeartTwin", "VirelionServices", "load_registry",
     "CardiacState", "Observation", "AlignmentPolicy", "AlignmentReport",
     "Provenance", "ServiceResult", "TwinRun",
