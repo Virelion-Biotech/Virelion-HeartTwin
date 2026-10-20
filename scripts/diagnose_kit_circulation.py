@@ -94,7 +94,8 @@ def solver_and_transport(base, output):
     if completed.returncode:
         raise RuntimeError(completed.stderr)
     forwarded = json.loads(completed.stdout)
-    compare = lambda other: max(float(np.max(np.abs(np.asarray(other["volume_mL"][c]) - direct["volume_mL"][c]))) for c in COMPARTMENTS)
+    def compare(other):
+        return max(float(np.max(np.abs(np.asarray(other["volume_mL"][c]) - direct["volume_mL"][c]))) for c in COMPARTMENTS)
     p0 = np.array([direct["pressure_mmHg"][c][0] for c in COMPARTMENTS])
     q0 = np.array([direct["flow_mL_per_s"][c + "_to_" + COMPARTMENTS[(i + 1) % 8]][0] for i, c in enumerate(COMPARTMENTS)])
     train = json.loads((base / "observations/LV_calibration.json").read_text())
@@ -153,11 +154,15 @@ def model_assumptions(base, output):
         low, high = [.1, .25, .001], [8., .7, .2]
         starts = [[2., .5, .01], [.8, .4, .03]]
         if variant["phase"]:
-            low += [-.2]; high += [.1]
-            starts[0] += [-.06]; starts[1] += [-.12]
+            low += [-.2]
+            high += [.1]
+            starts[0] += [-.06]
+            starts[1] += [-.12]
         if variant["filling"]:
-            low += [30., 330.]; high += [120., 500.]
-            starts[0] += [60., 400.]; starts[1] += [85., 450.]
+            low += [30., 330.]
+            high += [120., 500.]
+            starts[0] += [60., 400.]
+            starts[1] += [85., 450.]
         return low, high, starts
 
     def payload(x, variant, times, destination):
