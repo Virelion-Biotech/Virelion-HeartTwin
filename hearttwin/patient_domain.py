@@ -124,8 +124,12 @@ def effective_template(job, *, verify=False):
     from .patient_personalization import resolve_patient_template
 
     audit = []
-    context = SimpleNamespace(case=job.case, encounter_id=job.encounter_id, carry_forward=job.carry_forward)
-    template = resolve_patient_template(job.forward_template, context, audit=audit, verify=verify)
+    context = SimpleNamespace(
+        case=job.case, encounter_id=job.encounter_id, carry_forward=job.carry_forward
+    )
+    template = resolve_patient_template(
+        job.forward_template, context, audit=audit, verify=verify
+    )
     if audit and job.encounter_id is None:
         raise ValueError("Patient input mappings require an explicit encounter")
     return template, audit
@@ -138,9 +142,18 @@ def validate_domain_job(job):
             raise ValueError("Unknown patient encounter")
         for target in job.targets:
             evidence, _ = source_for_target(job, target)
-            acquisition = next(a for a in job.case.acquisitions if a.acquisition_id == evidence.acquisition_id)
-            if acquisition.encounter_id != job.encounter_id and not job.carry_forward.get(acquisition.acquisition_id, "").strip():
-                raise ValueError("Target from another physiologic state requires a carry-forward rationale")
+            acquisition = next(
+                a
+                for a in job.case.acquisitions
+                if a.acquisition_id == evidence.acquisition_id
+            )
+            if (
+                acquisition.encounter_id != job.encounter_id
+                and not job.carry_forward.get(acquisition.acquisition_id, "").strip()
+            ):
+                raise ValueError(
+                    "Target from another physiologic state requires a carry-forward rationale"
+                )
     if template.get("subject_id") != job.case.patient_id:
         raise ValueError("Forward template subject must match patient")
     if not template.get("backend"):
@@ -190,14 +203,25 @@ def validate_domain_job(job):
     for target in job.targets:
         if target.observation_kind == "curve" and not target.model_time:
             raise ValueError("Curve targets require an explicit prediction time path")
-        if target.observation_kind == "field" and not (target.model_labels or (target.field_quantity and target.field_anatomy_sha256)):
+        if target.observation_kind == "field" and not (
+            target.model_labels
+            or (target.field_quantity and target.field_anatomy_sha256)
+        ):
             raise ValueError("Field targets require an explicit prediction label path")
         item, source = source_for_target(job, target)
         evidence.append(item)
-        acquisition = next(a for a in job.case.acquisitions if a.acquisition_id == item.acquisition_id)
+        acquisition = next(
+            a for a in job.case.acquisitions if a.acquisition_id == item.acquisition_id
+        )
         for artifact in acquisition.source_files:
-            if artifact.sha256 and artifact.sha256 in all_source_roles and all_source_roles[artifact.sha256] != item.role:
-                raise ValueError("Calibration and holdout acquisitions share source bytes")
+            if (
+                artifact.sha256
+                and artifact.sha256 in all_source_roles
+                and all_source_roles[artifact.sha256] != item.role
+            ):
+                raise ValueError(
+                    "Calibration and holdout acquisitions share source bytes"
+                )
             if artifact.sha256:
                 all_source_roles[artifact.sha256] = item.role
         if item.role not in {"calibration", "validation"}:
@@ -293,15 +317,30 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
         if not isinstance(anatomy, dict) or not anatomy.get("sha256"):
             raise ValueError("Patient mechanics requires hash-pinned anatomy_ref")
         from .patient_observations import verified_bytes
-        matches = [(a, source) for a in job.case.acquisitions for source in a.source_files
-                   if source.uri == anatomy.get("uri") and source.sha256 == anatomy.get("sha256")]
+
+        matches = [
+            (a, source)
+            for a in job.case.acquisitions
+            for source in a.source_files
+            if source.uri == anatomy.get("uri")
+            and source.sha256 == anatomy.get("sha256")
+        ]
         if len(matches) != 1:
-            raise ValueError("Mechanics anatomy must be a unique hash-pinned artifact in this patient case")
+            raise ValueError(
+                "Mechanics anatomy must be a unique hash-pinned artifact in this patient case"
+            )
         acquisition, source = matches[0]
-        if any(e.acquisition_id == acquisition.acquisition_id and e.role in {"validation", "excluded"} for e in job.case.evidence):
-            raise ValueError("Mechanics anatomy cannot consume held-out or excluded evidence")
+        if any(
+            e.acquisition_id == acquisition.acquisition_id
+            and e.role in {"validation", "excluded"}
+            for e in job.case.evidence
+        ):
+            raise ValueError(
+                "Mechanics anatomy cannot consume held-out or excluded evidence"
+            )
         verified_bytes(source)
-        template["settings"]["inline_series"] = True
+        if template["backend"] == "numpy-lumped-v1":
+            template["settings"]["inline_series"] = True
     likelihood = []
     sampling = []
     for target in job.targets:
@@ -320,7 +359,10 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
                 spec.update(time_s=observation.time_s, labels=observation.labels)
                 # Only fit axes/correspondences enter inference, never withheld values/axes.
                 sampling.append(spec)
-                output_path, observation_path = "patient_sampled.t" + str(len(sampling) - 1), "values"
+                output_path, observation_path = (
+                    "patient_sampled.t" + str(len(sampling) - 1),
+                    "values",
+                )
             likelihood.append(
                 {
                     "term_id": target.evidence_id,
@@ -388,9 +430,13 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
         if target.observation_kind == "scalar":
             observed_values = [read_scalar(source, target.unit)]
             predicted_values = [value_at(prediction, target.model_output)]
-            actual_unit = prediction.get("units", {}).get(target.model_output.split(".")[-1])
+            actual_unit = prediction.get("units", {}).get(
+                target.model_output.split(".")[-1]
+            )
             if actual_unit is not None and actual_unit != target.unit:
-                raise ValueError("Predicted output units differ from declared target unit")
+                raise ValueError(
+                    "Predicted output units differ from declared target unit"
+                )
         else:
             observation = read_observation(source, target.unit)
             if target.observation_kind == "curve" and observation.time_s is None:
@@ -402,22 +448,34 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
             observed_values = observation.values
             predicted_values = sample_prediction(prediction, spec)
         if len(predicted_values) != len(observed_values) or any(
-            isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v)
+            isinstance(v, bool)
+            or not isinstance(v, (int, float))
+            or not math.isfinite(v)
             for v in predicted_values
         ):
-            raise ValueError("Declared prediction must align with finite observation values")
+            raise ValueError(
+                "Declared prediction must align with finite observation values"
+            )
         errors = [float(p) - o for p, o in zip(predicted_values, observed_values)]
-        residuals.append({
-            "evidence_id": target.evidence_id, "source_sha256": source.sha256,
-            "observed": observed_values[0] if target.observation_kind == "scalar" else observed_values,
-            "predicted": predicted_values[0] if target.observation_kind == "scalar" else predicted_values,
-            "unit": target.unit, "observation_kind": target.observation_kind,
-            "error": errors[0] if target.observation_kind == "scalar" else errors,
-            "rmse": math.sqrt(sum(e*e for e in errors) / len(errors)),
-            "maximum_absolute_error": max(abs(e) for e in errors),
-            "max_abs_error": target.max_abs_error,
-            "passed": all(abs(e) <= target.max_abs_error for e in errors),
-        })
+        residuals.append(
+            {
+                "evidence_id": target.evidence_id,
+                "source_sha256": source.sha256,
+                "observed": observed_values[0]
+                if target.observation_kind == "scalar"
+                else observed_values,
+                "predicted": predicted_values[0]
+                if target.observation_kind == "scalar"
+                else predicted_values,
+                "unit": target.unit,
+                "observation_kind": target.observation_kind,
+                "error": errors[0] if target.observation_kind == "scalar" else errors,
+                "rmse": math.sqrt(sum(e * e for e in errors) / len(errors)),
+                "maximum_absolute_error": max(abs(e) for e in errors),
+                "max_abs_error": target.max_abs_error,
+                "passed": all(abs(e) <= target.max_abs_error for e in errors),
+            }
+        )
     output = {
         "patient_id": job.case.patient_id,
         "case_revision": job.case_revision,
