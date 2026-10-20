@@ -80,7 +80,7 @@ def execute_patient_ep(payload, registry, *, output_dir="patient"):
         "virelion-hearttwin",
         "virelion-cardiep",
         "virelion-cardianatomy",
-        "virelion-electrotrace",
+        "electrotrace",
         "virelion-cardiinfer",
     ):
         try:
@@ -177,7 +177,7 @@ def runtime_manifest():
         "virelion-hearttwin",
         "virelion-cardiep",
         "virelion-cardianatomy",
-        "virelion-electrotrace",
+        "electrotrace",
         "virelion-cardiinfer",
         "virelion-cardimech",
         "virelion-cardiflow",
@@ -200,7 +200,7 @@ def runtime_manifest():
             "virelion-hearttwin": "hearttwin",
             "virelion-cardiep": "cardiep",
             "virelion-cardianatomy": "cardianatomy",
-            "virelion-electrotrace": "electrotrace",
+            "electrotrace": "electrotrace",
             "virelion-cardiinfer": "cardiinfer",
             "virelion-cardimech": "cardimech",
             "virelion-cardiflow": "cardiflow",
