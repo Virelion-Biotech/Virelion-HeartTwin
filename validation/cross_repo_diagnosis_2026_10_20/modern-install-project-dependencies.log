@@ -1,0 +1,51 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Collecting pip==25.1.1
+  Using cached pip-25.1.1-py3-none-any.whl.metadata (3.6 kB)
+Requirement already satisfied: numpy>=1.24 in ./HeartTwin_Diagnosis_20261020/scipy-current/lib/python3.13/site-packages (from electrotrace==1.10.0) (2.5.4)
+Collecting pandas>=2.0 (from electrotrace==1.10.0)
+  Using cached pandas-3.0.6-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+Requirement already satisfied: scipy>=1.10 in ./HeartTwin_Diagnosis_20261020/scipy-current/lib/python3.13/site-packages (from electrotrace==1.10.0) (1.18.1)
+Collecting scikit-learn>=1.4 (from electrotrace==1.10.0)
+  Using cached scikit_learn-1.9.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.3 kB)
+Collecting python-dateutil>=2.8.2 (from pandas>=2.0->electrotrace==1.10.0)
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas>=2.0->electrotrace==1.10.0)
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting joblib>=1.4.0 (from scikit-learn>=1.4->electrotrace==1.10.0)
+  Using cached joblib-1.6.0-py3-none-any.whl.metadata (6.5 kB)
+Collecting narwhals>=2.0.1 (from scikit-learn>=1.4->electrotrace==1.10.0)
+  Using cached narwhals-2.27.1-py3-none-any.whl.metadata (15 kB)
+Collecting threadpoolctl>=3.5.0 (from scikit-learn>=1.4->electrotrace==1.10.0)
+  Using cached threadpoolctl-3.7.0-py3-none-any.whl.metadata (24 kB)
+Collecting cloudpickle>=3.0 (from joblib>=1.4.0->scikit-learn>=1.4->electrotrace==1.10.0)
+  Using cached cloudpickle-3.1.2-py3-none-any.whl.metadata (7.1 kB)
+Using cached pip-25.1.1-py3-none-any.whl (1.8 MB)
+Using cached pandas-3.0.6-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (10.8 MB)
+Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Using cached scikit_learn-1.9.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (9.1 MB)
+Using cached joblib-1.6.0-py3-none-any.whl (306 kB)
+Using cached cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+Using cached narwhals-2.27.1-py3-none-any.whl (483 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Using cached threadpoolctl-3.7.0-py3-none-any.whl (26 kB)
+Building wheels for collected packages: electrotrace
+  Building editable for electrotrace (pyproject.toml): started
+  Building editable for electrotrace (pyproject.toml): finished with status 'done'
+  Created wheel for electrotrace: filename=electrotrace-1.10.0-0.editable-py3-none-any.whl size=7405 sha256=35e38020486e011a0d81fd635d14759a59140bfc69b64e619f1f95e8e32ba41a
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ojn6dzq8/wheels/dc/29/e5/4c9ff07ba9d68f2ce294cfd54ba2b5c64901a11e2a42cc146c
+Successfully built electrotrace
+Installing collected packages: threadpoolctl, six, pip, narwhals, cloudpickle, python-dateutil, joblib, scikit-learn, pandas, electrotrace
+  Attempting uninstall: electrotrace
+    Found existing installation: electrotrace 1.10.0
+    Uninstalling electrotrace-1.10.0:
+      Successfully uninstalled electrotrace-1.10.0
+
+Successfully installed cloudpickle-3.1.2 electrotrace-1.10.0 joblib-1.6.0 narwhals-2.27.1 pandas-3.0.6 pip-25.1.1 python-dateutil-2.9.0.post0 scikit-learn-1.9.1 six-1.17.0 threadpoolctl-3.7.0

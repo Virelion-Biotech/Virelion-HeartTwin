@@ -1,0 +1,7 @@
+{
+  "commit": "a4cf37ad2e1ed6719a23befa2be5e47af4b4d1de",
+  "baseline_environment": "SciPy 1.16.3, NumPy 2.2.6",
+  "alternate_environment": "SciPy 1.18.1, NumPy 2.5.4",
+  "full_suite_cwd": "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed",
+  "scientific_scope": "Explicit undefined Welch test and exact all-identical rank null; no change to KIT solver"
+}

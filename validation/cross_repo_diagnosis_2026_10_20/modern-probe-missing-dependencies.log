@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "<string>", line 2, in <module>
+    from electrotrace.statistics import compare_groups
+  File "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/src/electrotrace/__init__.py", line 5, in <module>
+    from .calibration import (
+    ...<4 lines>...
+    )
+  File "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/src/electrotrace/calibration.py", line 17, in <module>
+    from .detectors import get_detector
+  File "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/src/electrotrace/detectors.py", line 13, in <module>
+    from .validation_detectors import detect_r_peaks, detect_r_peaks_two_stage
+  File "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/src/electrotrace/validation_detectors.py", line 9, in <module>
+    from .candidate_suppressor import CandidateSuppressor, _candidate_features
+  File "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/src/electrotrace/candidate_suppressor.py", line 14, in <module>
+    from sklearn.ensemble import RandomForestClassifier
+ModuleNotFoundError: No module named 'sklearn'

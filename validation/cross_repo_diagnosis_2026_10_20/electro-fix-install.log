@@ -1,0 +1,31 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: numpy>=1.24 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from electrotrace==1.10.0) (2.2.6)
+Requirement already satisfied: pandas>=2.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from electrotrace==1.10.0) (3.0.6)
+Requirement already satisfied: scipy>=1.10 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from electrotrace==1.10.0) (1.16.3)
+Requirement already satisfied: scikit-learn>=1.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from electrotrace==1.10.0) (1.9.1)
+Requirement already satisfied: python-dateutil>=2.8.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pandas>=2.0->electrotrace==1.10.0) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from python-dateutil>=2.8.2->pandas>=2.0->electrotrace==1.10.0) (1.17.0)
+Requirement already satisfied: joblib>=1.4.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from scikit-learn>=1.4->electrotrace==1.10.0) (1.6.0)
+Requirement already satisfied: narwhals>=2.0.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from scikit-learn>=1.4->electrotrace==1.10.0) (2.27.1)
+Requirement already satisfied: threadpoolctl>=3.5.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from scikit-learn>=1.4->electrotrace==1.10.0) (3.7.0)
+Requirement already satisfied: cloudpickle>=3.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from joblib>=1.4.0->scikit-learn>=1.4->electrotrace==1.10.0) (3.1.2)
+Building wheels for collected packages: electrotrace
+  Building editable for electrotrace (pyproject.toml): started
+  Building editable for electrotrace (pyproject.toml): finished with status 'done'
+  Created wheel for electrotrace: filename=electrotrace-1.10.0-0.editable-py3-none-any.whl size=7405 sha256=f0395844e84aef454e1cce6347eefca2119054cc29e79216fadcf75012a775f5
+  Stored in directory: /tmp/pip-ephem-wheel-cache-1obr9gr9/wheels/dc/29/e5/4c9ff07ba9d68f2ce294cfd54ba2b5c64901a11e2a42cc146c
+Successfully built electrotrace
+Installing collected packages: electrotrace
+  Attempting uninstall: electrotrace
+    Found existing installation: electrotrace 1.10.0
+    Uninstalling electrotrace-1.10.0:
+      Successfully uninstalled electrotrace-1.10.0
+Successfully installed electrotrace-1.10.0

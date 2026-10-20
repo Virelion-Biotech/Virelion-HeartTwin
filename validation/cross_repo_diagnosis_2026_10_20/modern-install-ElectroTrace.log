@@ -1,0 +1,17 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: electrotrace
+  Building editable for electrotrace (pyproject.toml): started
+  Building editable for electrotrace (pyproject.toml): finished with status 'done'
+  Created wheel for electrotrace: filename=electrotrace-1.10.0-0.editable-py3-none-any.whl size=7405 sha256=87421fb733768932ea717751c1bc91a8790a04b5abb50d9c941f664d6b5ce6ac
+  Stored in directory: /tmp/pip-ephem-wheel-cache-kqk8fi0p/wheels/dc/29/e5/4c9ff07ba9d68f2ce294cfd54ba2b5c64901a11e2a42cc146c
+Successfully built electrotrace
+Installing collected packages: electrotrace
+Successfully installed electrotrace-1.10.0
