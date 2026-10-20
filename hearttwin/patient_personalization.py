@@ -16,6 +16,7 @@ from .patient_observations import verified_bytes
 from .provenance import sha256
 
 CAPABILITIES = {
+    "patient.coupled.simulate", "patient.images.segment", "patient.images.nnunet",
     "patient.circulation.simulate",
     "patient.geometry.reconstruct", "patient.leadfield.generate", "patient.spatial_ep.simulate",
     "patient.calibrate", "patient.ep",
@@ -219,7 +220,7 @@ def resolve_patient_template(
         if (
             isinstance(job, PatientPlanJob)
             and "uri" in value
-            and "artifact_id" in value
+            and any(key in value for key in ("artifact_id", "file_id", "sha256"))
             and not str(value["uri"]).startswith("urn:hearttwin:case:")
         ):
             raise ValueError(
@@ -375,7 +376,7 @@ def execute_patient_plan(payload, registry, *, output_dir="patient-plan"):
                     usable_acquisition(job.case, acquisition_id, job.encounter_id, job.carry_forward)
                 result = execute_patient_ep(request, registry, output_dir=root / stage.stage_id)
         else:
-            if stage.capability.startswith(("patient.geometry.", "patient.leadfield.", "patient.spatial_ep.", "patient.circulation.")):
+            if stage.capability.startswith(("patient.geometry.", "patient.leadfield.", "patient.spatial_ep.", "patient.circulation.", "patient.coupled.", "patient.images.")):
                 request["output_dir"] = str(root / stage.stage_id)
             result = invoke(registry, stage.capability, request)
 

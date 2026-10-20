@@ -42,6 +42,12 @@ def main():
     hospital.add_argument("--output-dir", type=Path, required=True)
     hospital.add_argument("--expected-revision", type=int, required=True)
     hospital.add_argument("--actor", required=True)
+    imaging = commands.add_parser("hospital-images")
+    imaging.add_argument("patient_id")
+    imaging.add_argument("config", type=Path)
+    imaging.add_argument("--output-dir", type=Path, required=True)
+    imaging.add_argument("--expected-revision", type=int, required=True)
+    imaging.add_argument("--actor", required=True)
     args = parser.parse_args()
     store = PatientCaseStore(args.store)
     if args.command == "list":
@@ -53,6 +59,13 @@ def main():
             actor=args.actor,
             reason=args.reason,
         )
+    elif args.command == "hospital-images":
+        from .patient_dicomweb import import_hospital_images
+
+        snapshot = store.get(args.patient_id, args.expected_revision)
+        case, report = import_hospital_images(snapshot["case"], json.loads(args.config.read_text()), output_dir=args.output_dir)
+        result = {"snapshot": store.save(case, expected_revision=args.expected_revision, actor=args.actor,
+                                         reason="Import configured hospital imaging acquisition"), "import": report}
     elif args.command == "hospital-import":
         import hashlib
         from .patient_hospital import fetch_fhir_bundle, import_fhir_bundle

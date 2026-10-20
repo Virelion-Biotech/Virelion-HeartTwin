@@ -847,6 +847,20 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                             + acquisition["acquisition_id"],
                         ),
                     )
+                if suffix == "hospital-imaging-import":
+                    principal.require("write", patient_id)
+                    if principal.role != "owner":
+                        raise PermissionError("Hospital network imports require the worker owner")
+                    snapshot = app.patients.get(patient_id)
+                    if value["expected_revision"] != snapshot["revision"]:
+                        raise RevisionConflict("Patient changed; reload before hospital imaging import")
+                    from .patient_dicomweb import import_hospital_images
+
+                    case, report = import_hospital_images(snapshot["case"], value["config"],
+                        output_dir=app.root / "patient-images" / secrets.token_hex(16))
+                    result = app.patients.save(case, expected_revision=value["expected_revision"], actor=principal.actor,
+                                               reason="Import configured hospital imaging acquisition")
+                    return self.json(201, {"snapshot": result, "import": report})
                 if suffix in {"encounters", "observations", "inputs", "hospital-import"}:
                     principal.require("write", patient_id)
                     snapshot = app.patients.get(patient_id)
