@@ -72,3 +72,35 @@ def test_inactive_strength_rejected_before_inference_without_opening_holdout(tmp
     monkeypatch.setattr(domain, "invoke", forbidden_inference)
     with pytest.raises(ValueError, match="Structurally inactive"):
         domain.execute_patient_domain(request, object(), output_dir=tmp_path/"run")
+
+
+def test_nonlinear_parameter_real_native_inverse_and_replay(tmp_path):
+    pytest.importorskip("scipy")
+    pytest.importorskip("cardiinfer")
+    import hashlib
+    import json
+    from test_patient_native_calibration import native_calibration_request
+    from hearttwin.config import load_registry
+    from hearttwin.patient_closed_loop import simulate_closed_loop
+    from hearttwin.patient_domain import execute_patient_domain
+    request = native_calibration_request(tmp_path)
+    truth_request = deepcopy(request["forward_template"])
+    truth_request["compartments"]["LV"]["passive_exponent_per_mL"] = .01
+    truth = simulate_closed_loop(truth_request)
+    for target, chamber_name, times in [
+        (request["targets"][0], "LV", [.1, .2, .3]),
+        (request["targets"][1], "SA", [.15, .25, .35]),
+    ]:
+        name = target["evidence_id"]
+        raw = json.dumps({"time_s": times, "values": np.interp(times, truth["time_s"], truth["pressure_mmHg"][chamber_name]).tolist(), "unit": "mmHg"}).encode()
+        (tmp_path/(name+".json")).write_bytes(raw)
+        acquisition = next(a for a in request["case"]["acquisitions"] if a["acquisition_id"] == name)
+        acquisition["source_files"][0]["sha256"] = hashlib.sha256(raw).hexdigest()
+    request["forward_template"]["compartments"]["LV"]["passive_exponent_per_mL"] = .008
+    request["parameter_paths"] = {"k": "compartments.LV.passive_exponent_per_mL"}
+    request["parameter_bounds"] = {"k": [.005, .015]}
+    request["parameter_units"] = {"k": "1/mL"}
+    result = execute_patient_domain(request, load_registry(), output_dir=tmp_path/"nonlinear-inverse")
+    assert result["inference"]["backend"] == "native-map-de-v1"
+    assert result["heldout_acceptance_passed"] is True
+    assert (tmp_path/"nonlinear-inverse/activation-support.json").is_file()
