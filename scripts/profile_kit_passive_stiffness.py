@@ -27,6 +27,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--baseline",type=Path,required=True)
     parser.add_argument("--output",type=Path,required=True)
+    parser.add_argument("--fixed-phase", action="store_true")
     args=parser.parse_args()
     out=args.output
     out.mkdir(parents=True,exist_ok=True)
@@ -36,9 +37,12 @@ def main():
     grid=[.005,.0125,.025,.05,.075,.1]
     low,high=[.2,.25,.001,.5,.25,-.15],[8.,.7,.2,40.,.75,.05]
     starts=[[1.77,.48,.006,10.,.58,0.],[2.,.5,.01,15.,.5,-.04]]
+    if args.fixed_phase:
+        low,high=low[:-1],high[:-1]
+        starts=[x[:-1] for x in starts]
     protocol={"kind":"Exploratory calibration-only stiffness profile; not new independent validation",
         "prior_outer_values_seen":True,"selection":"Fit first 17 calibration points; choose k by lowest RMSE on next six calibration points, then refit six remaining coordinates on all 23",
-        "k_grid_per_mL":grid,"coordinates":["LV_emax","activation_duration","mitral_R","conditional_passive_pressure_at_initial_measured_LV_volume","peak_fraction","activation_start"],
+        "k_grid_per_mL":grid,"fixed_phase":args.fixed_phase,"coordinates":["LV_emax","activation_duration","mitral_R","conditional_passive_pressure_at_initial_measured_LV_volume","peak_fraction","activation_start"][:len(low)],
         "bounds":[low,high],"starts":starts,"max_nfev":55,
         "parameterization":"emin=P_ref*k/expm1(k*(V_ref-V0)); k=0 uses P_ref/(V_ref-V0). Algebraically identical exponential passive law.",
         "reference_volume_mL":train["values"][0],"reference_pressure_is_measured":False,
@@ -54,7 +58,7 @@ def main():
         lv["emin_mmHg_per_mL"]=float(reference_elastance(x[3],k,train["values"][0],lv["unstressed_volume_mL"]))
         lv["passive_exponent_per_mL"]=k
         lv["activation_peak_fraction"]=float(x[4])
-        lv["activation_start_s"]=float(x[5]%p["cycle_length_s"])
+        lv["activation_start_s"]=0. if args.fixed_phase else float(x[5]%p["cycle_length_s"])
         p["time_s"]=list(map(float,times))
         p["output_dir"]=str(destination)
         return p
