@@ -445,7 +445,8 @@ def longitudinal_changes(older, newer):
 
 def patient_stage_capabilities(stage):
     if stage.capability == "patient.calibrate":
-        return ["infer.run", "mechanics.simulate" if stage.template.get("domain") == "mechanics" else "flow.simulate"]
+        forward = stage.template.get("native_capability") or ("mechanics.simulate" if stage.template.get("domain") == "mechanics" else "flow.simulate")
+        return ["infer.run", forward]
     if stage.capability == "patient.ep":
         return ["anatomy.validate", "ep.simulate", "ep.calibrate", "electrical.prepare_calibration"]
     return [stage.capability]

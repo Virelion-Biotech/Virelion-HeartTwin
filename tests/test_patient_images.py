@@ -191,12 +191,3 @@ def test_dicomweb_pins_instances_and_refuses_mismatched_patient(tmp_path, monkey
     config["dicom_patient_id"] = "OTHER-PATIENT"
     with pytest.raises(ValueError, match="different patient"):
         retrieve_dicom_instances(config, output_dir=tmp_path)
-
-
-def test_patient_plan_rejects_unbound_plain_source_reference():
-    from hearttwin.patient_personalization import PatientPlanJob, resolve_patient_template
-
-    job = PatientPlanJob(case={"patient_id": "P1", "encounters": [{"encounter_id": "v"}]}, case_revision=1,
-                         case_fingerprint="0" * 64, encounter_id="v", stages=[{"stage_id": "s", "capability": "patient.images.segment", "purpose": "test", "template": {}}])
-    with pytest.raises(ValueError, match="must use"):
-        resolve_patient_template({"uri": "file:///unbound-image", "sha256": "0" * 64}, job)

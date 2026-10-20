@@ -17,7 +17,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from .patient_closed_loop import COMPARTMENTS, VALVE_EDGES
+from .patient_closed_loop import COMPARTMENTS, VALVE_EDGES, hemodynamic_observables
 from .patient_geometry import write_artifact
 from .patient_observations import verified_bytes
 
@@ -258,6 +258,8 @@ def simulate_coupled(payload):
         for iteration in range(iterations + 1):
             residual, jacobian, state = coupled_system(x, previous_volume=previous, dt=dt, tension=tension, **common)
             norm = float(np.max(np.abs(residual)))
+            if not np.isfinite(residual).all():
+                raise ValueError("Nonfinite monolithic residual")
             if norm <= 1:
                 break
             if iteration == iterations:
@@ -299,4 +301,6 @@ def simulate_coupled(payload):
               "states": records, "request": payload, "mechanics_engine_sha256": engine,
               "coupling": "monolithic equilibrium, four cavity-volume constraints and eight backward-Euler volume balances",
               "qualification": "Quasi-static compressible neo-Hookean P1 myocardium, prescribed fibre active stress and ideal diode valves; no patient/clinical qualification or fluid-field FSI"}
-    return {"coupled": write_artifact(payload["output_dir"], "coupled", result)}
+    return {"coupled": write_artifact(payload["output_dir"], "coupled", result),
+            **hemodynamic_observables(times.tolist(), [s["volumes_mL"] for s in records],
+                                      [s["pressures_mmHg"] for s in records], [s["flows_mL_per_s"] for s in records])}

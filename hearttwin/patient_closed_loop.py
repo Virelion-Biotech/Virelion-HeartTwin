@@ -10,6 +10,21 @@ COMPARTMENTS = ["LA", "LV", "SA", "SV", "RA", "RV", "PA", "PV"]
 VALVE_EDGES = {0, 1, 4, 5}
 
 
+def hemodynamic_observables(time_s, volumes, pressures, flows):
+    """Named projections for patient fitting; ranges are not labelled stroke volume."""
+    v, p, q = (np.asarray(x, dtype=float) for x in (volumes, pressures, flows))
+    scalars, units = {}, {}
+    for i, name in enumerate(COMPARTMENTS):
+        scalars[name + "_final_pressure"] = float(p[-1, i])
+        scalars[name + "_volume_range"] = float(v[:, i].max() - v[:, i].min())
+        units[name + "_final_pressure"] = "mmHg"
+        units[name + "_volume_range"] = "mL"
+    return {"time_s": list(time_s), "pressure_mmHg": {name: p[:, i].tolist() for i, name in enumerate(COMPARTMENTS)},
+            "volume_mL": {name: v[:, i].tolist() for i, name in enumerate(COMPARTMENTS)},
+            "flow_mL_per_s": {name + "_to_" + COMPARTMENTS[(i+1) % 8]: q[:, i].tolist() for i, name in enumerate(COMPARTMENTS)},
+            "scalar_outputs": scalars, "units": units}
+
+
 def simulate_closed_loop(payload):
     """Time-varying elastance chambers, compliant vessels, ideal diode valves.
 
@@ -93,4 +108,5 @@ def simulate_closed_loop(payload):
               "flows_mL_per_s": [flows(t, v).tolist() for t, v in zip(times, volume)],
               "maximum_volume_drift_mL": drift, "parameters": payload,
               "qualification": "Lumped elastance/compliance with ideal diode valves; no spatial wall mechanics, valve inertia, reflex control or clinical qualification"}
-    return {"circulation": write_artifact(payload["output_dir"], "closed-loop", output), "maximum_volume_drift_mL": drift}
+    return {"circulation": write_artifact(payload["output_dir"], "closed-loop", output), "maximum_volume_drift_mL": drift,
+            **hemodynamic_observables(times.tolist(), volume, output["pressures_mmHg"], output["flows_mL_per_s"])}

@@ -67,6 +67,8 @@ def main():
                 "hearttwin/patient_dicomweb.py",
                 "tests/test_patient_coupled.py",
                 "tests/test_patient_images.py",
+                "tests/test_patient_native_calibration.py",
+                "tests/test_patient_hospital_http.py",
                 "hearttwin/patient_geometry.py",
                 "hearttwin/patient_volume_conductor.py",
                 "hearttwin/patient_spatial_ep.py",

@@ -13,7 +13,7 @@ def main():
     request = json.loads(os.environ["HEARTTWIN_PAYLOAD"])
     spec = request["context"]["patient_forward"]
     capability = spec["capability"]
-    if capability not in {"mechanics.simulate", "flow.simulate"}:
+    if capability not in {"mechanics.simulate", "flow.simulate", "patient.circulation.simulate", "patient.coupled.simulate"}:
         raise ValueError("Patient forward capability is unsupported")
     template = spec["template"]
     if template.get("subject_id") != request["subject_id"]:
@@ -23,6 +23,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix="hearttwin-forward-") as directory:
         if capability == "mechanics.simulate":
             payload.setdefault("settings", {})["output_dir"] = directory
+        elif capability.startswith("patient."):
+            payload["output_dir"] = directory
         output = invoke(load_registry(), capability, payload)
         if spec.get("sampling"):
             output["patient_sampled"] = {

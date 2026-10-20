@@ -4,6 +4,10 @@ PR #52 merged as `d17f796c925c32c111f88350a5edb17ae7c136b5`.
 This follow-on adds executable research paths. It does not establish a fully
 personalized whole-heart model or clinical accuracy.
 
+The subsequent [coupled-model extension](PATIENT_COUPLED_MODELS.md) adds raw-image
+processing, configured DICOMweb retrieval and spatial four-cavity mechanics/circuit
+coupling. Its full Edge Colab validation is tracked separately and is still pending.
+
 Install `pip install -e '.[patient-native]'`. The CLI
 `hearttwin-patient-prepare CAPABILITY request.json` and registry `PatientNative`
 expose `patient.geometry.reconstruct`, `patient.leadfield.generate` and
