@@ -36,6 +36,7 @@ def test_qualified_units_take_precedence_over_ambiguous_legacy_leaf():
     ("flow_mL_per_s.LV_to_SA", "mL"),
 ])
 def test_native_calibration_rejects_dimensionally_wrong_output_before_inference(tmp_path, path, wrong):
+    pytest.importorskip("scipy")
     request = native_calibration_request(tmp_path)
     request["targets"][0].update(model_output=path, unit=wrong, prediction_unit=wrong)
     with pytest.raises(ValueError, match="output and observation units"):
