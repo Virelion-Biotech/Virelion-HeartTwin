@@ -507,3 +507,25 @@ def test_real_fem_field_replay_keeps_native_settings_and_mesh_binding(tmp_path):
     assert report["heldout_acceptance_passed"]
     assert report["heldout_residuals"][0]["predicted"][0] == pytest.approx(.0202)
     # This fixture tests native FEM replay and observation correspondence, not material identifiability.
+
+
+def test_real_circulation_recipe_consumes_case_inputs(tmp_path):
+    pytest.importorskip("cardiflow")
+    from hearttwin.config import load_registry
+
+    raw = b'time_s,value\n0,0\n0.1,30\n0.2,80\n0.3,120\n0.4,70\n0.5,20\n0.6,0\n'
+    path = tmp_path / "measured-flow.csv"
+    path.write_bytes(raw)
+    source = {"file_id": "flow-raw", "uri": path.as_uri(), "sha256": hashlib.sha256(raw).hexdigest()}
+    spec = {"encounter_id": "visit1", "acquisition_id": "flow-acq", "evidence_id": "flow-evidence", "format": "csv", "unit": "mL/s", "role": "context", "modality": "echo", "domain": "circulation", "variable": "inlet_flow", "input_id": "measured-flow"}
+    case, _ = import_observation({"patient_id": "P1", "encounters": [{"encounter_id": "visit1"}]}, source, spec, output_dir=tmp_path / "normalized")
+    data = case.model_dump(mode="json")
+    for variable, value, unit in [("proximal_resistance", .08, "mmHg*s/mL"), ("distal_resistance", 1.1, "mmHg*s/mL"), ("compliance", 1.7, "mL/mmHg"), ("distal_pressure_mmHg", 4., "mmHg"), ("initial_capacitor_pressure", 80., "mmHg")]:
+        data["model_inputs"].append({"input_id": variable, "domain": "circulation", "variable": variable, "value": value, "unit": unit, "status": "ASSUMED", "assumption_reason": "Explicit synthetic fixture parameter; not patient measured"})
+    payload = {**circulation_recipe(data, "visit1"), "case": data, "case_revision": 1, "case_fingerprint": "a"*64}
+    report = execute_patient_plan(payload, load_registry(), output_dir=tmp_path / "native-plan")
+    assert report["stages"]["circulation"]["qc"]["passed"]
+    bindings = report["personalization_manifest"][0]["bindings"]
+    assert any(x.get("input_id") == "measured-flow" and x["status"] == "MEASURED" for x in bindings)
+    assert sum(x["status"] == "ASSUMED" for x in bindings) == 5
+    assert report["stages"]["circulation"]["provenance"]["anatomy_consumed"] is False
