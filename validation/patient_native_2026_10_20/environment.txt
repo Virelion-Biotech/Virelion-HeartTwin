@@ -1,0 +1,36 @@
+annotated-types==0.8.0
+attrs==26.1.0
+cloudpickle==3.1.2
+electrotrace @ git+https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git@51adddec49efa182f9707524cb59a16b4be554d7
+iniconfig==2.3.1
+joblib==1.6.0
+jsonschema==4.25.1
+jsonschema-specifications==2025.9.1
+narwhals==2.27.1
+nibabel==5.3.2
+numpy==2.2.6
+packaging==26.3
+pandas==3.0.6
+pluggy==1.7.0
+pydantic==2.12.3
+pydantic_core==2.41.4
+Pygments==2.21.0
+pytest==8.4.2
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+referencing==0.37.0
+rpds-py==2026.9.1
+ruff==0.14.1
+scikit-learn==1.9.1
+scipy==1.16.3
+six==1.17.0
+threadpoolctl==3.7.0
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+virelion-cardianatomy @ git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@e3cc3450c49b84334dd2da696f33a75f4f61557f
+virelion-cardiep @ git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@f9bfcb78cdb857e5995ce244d8645f7370d6b3bb
+virelion-cardiflow @ git+https://github.com/Virelion-Biotech/Virelion-CardiFlow.git@670d370635ba09b2908f7e6736299719e86fc36b
+virelion-cardiinfer @ git+https://github.com/Virelion-Biotech/Virelion-CardiInfer.git@b4f0c3c30da5986c6a98dba6ceccf1e1de95c881
+virelion-cardimech @ git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+# Editable Git install with no remote (virelion-hearttwin==0.3.0)
+-e /content/HeartTwin_Patient_Lifecycle/150c9acd679f/source

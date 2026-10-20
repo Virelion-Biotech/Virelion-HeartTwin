@@ -1,0 +1,67 @@
+{
+  "source_commit": "1e18d2c292bb0c5d93cd8e90cca885d2951ef1b9",
+  "components": {
+    "Virelion-CardiEP": "f9bfcb78cdb857e5995ce244d8645f7370d6b3bb",
+    "Virelion-CardiAnatomy": "e3cc3450c49b84334dd2da696f33a75f4f61557f",
+    "Virelion-CardiInfer": "b4f0c3c30da5986c6a98dba6ceccf1e1de95c881",
+    "Virelion-CardiMech": "5dc14d886ccbda5a1398b863f9ae7821bbffa18b",
+    "Virelion-CardiFlow": "670d370635ba09b2908f7e6736299719e86fc36b",
+    "Virelion-ElectroTrace": "51adddec49efa182f9707524cb59a16b4be554d7"
+  },
+  "counts": {
+    "tests": 145,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "checks": {
+    "scope": "software and synthetic infrastructure only",
+    "clinical_qualification": "not_established",
+    "components_requested": true,
+    "checks": [
+      {
+        "check": "python-compile",
+        "exit_code": 0,
+        "seconds": 0.1660692829996151
+      },
+      {
+        "check": "patient-and-workbench-tests",
+        "exit_code": 0,
+        "seconds": 42.061692537
+      },
+      {
+        "check": "patient-lint",
+        "exit_code": 0,
+        "seconds": 0.06458290599994143
+      },
+      {
+        "check": "gateway-import-order",
+        "exit_code": 0,
+        "seconds": 0.0644633460001387
+      },
+      {
+        "check": "javascript-syntax",
+        "exit_code": 0,
+        "seconds": 0.03249622199973601
+      },
+      {
+        "check": "geometry-tests",
+        "exit_code": 0,
+        "seconds": 0.46601098699966315
+      }
+    ],
+    "status": "SOFTWARE_PASSED",
+    "files": {
+      "geometry-tests.log": "d9be41d6142e9c0186f42f2708a4afd73d49ef9d5e0d9d797efa3339b061d640",
+      "javascript-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-import-order.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "patient-lint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "python-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "patient-tests.xml": "a9fa2b55c9d8e71e9a2f18a8c2b22e3cf0bfa0b460808d36fce25a1708f29d62",
+      "patient-and-workbench-tests.log": "1c8e920293d6a429a3a0b4edaf7cbb950dbc88fe4cc5c37a2719fef83953bd1c"
+    }
+  },
+  "clinical_qualification": "not_established",
+  "browser": "User Edge / Colab",
+  "live_worker_browser_review": "outstanding"
+}

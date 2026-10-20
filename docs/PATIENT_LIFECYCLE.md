@@ -166,10 +166,11 @@ selected. Mechanics anatomy must be a unique hash-pinned artifact in that case.
 
 The stack has patient-bound orchestration and provenance across these native
 service routes. This does not mean every input is measured or every backend
-consumes full anatomy. Automatic image reconstruction, patient lead-field
-construction, general anatomical CFD/FSI, personalized cellular/regeneration
-biology, and validated patient-benefit prediction are not supplied by this change.
-They require qualified models/data beyond an orchestration layer. Native mechanics,
+consumes full anatomy. The [native preparation extension](PATIENT_NATIVE_PREPARATION.md)
+adds reviewed-label reconstruction and reciprocal lead-field generation. Raw-scan
+segmentation, general anatomical CFD/FSI, personalized cellular/regeneration
+biology, and validated patient-benefit prediction still require qualified models/data.
+Native mechanics,
 flow and intervention restrictions continue to apply. Configuring specialized
 EP/mechanics/therapy stages still requires a reviewed native solver template.
 
