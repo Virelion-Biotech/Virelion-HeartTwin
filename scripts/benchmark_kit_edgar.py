@@ -316,17 +316,8 @@ def main():
     np.savetxt(args.output / "schedule.txt", schedule)
     geometry = geometry_audit(args.data_dir, args.output)
     result = circulation_benchmark(args.output, audit)
-    save(args.output / "EDGAR_status.json", {"status": "BLOCKED_LOGIN", "dataset": "Bratislava Human Mapping Data",
-        "url": "https://edgar.sci.utah.edu/", "catalog": "https://www.ecg-imaging.org/edgar-database",
-        "observed": "User Edge showed Please Login to access EDGAR data; Username, Password and Register here.",
-        "data_downloaded": False, "electrical_benchmark_run": False, "metrics": None,
-        "next": "User signs in to EDGAR in Edge, then download Bratislava recordings plus matching geometry, electrode mapping, units, time sampling and pacing annotations. Freeze a beat/site split before calibration.",
-        "limitations": ["Catalog confirms torso recordings and MRI-derived heart/lung/torso geometry, not raw MRI, pressure or cine motion availability.",
-                        "Do not assume standard 12-lead channels or electrode correspondence; inspect actual archive.",
-                        "No clinical electrical accuracy or independent cardiac ground truth can be claimed before files and annotations are inspected.",
-                        "EDGAR and KIT are different people; measurements must never be combined as one patient."]})
     save(args.output / "RUN_STATUS.json", {"KIT": result["status"], "KIT_spatial": geometry["full_spatial_benchmark"]["status"],
-        "EDGAR": "BLOCKED_LOGIN", "seconds": time.monotonic() - started, "clinical_qualification": "NOT_ESTABLISHED"})
+        "EDGAR": "RUN_SEPARATELY_WITH_benchmark_edgar_p034.py", "seconds": time.monotonic() - started, "clinical_qualification": "NOT_ESTABLISHED"})
     print(json.dumps(result, indent=2), flush=True)
 
 
