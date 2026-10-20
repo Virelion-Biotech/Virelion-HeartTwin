@@ -8,10 +8,13 @@
         "patient.geometry.reconstruct",
         "patient.leadfield.generate",
         "patient.spatial_ep.simulate",
-        "patient.circulation.simulate"
+        "patient.circulation.simulate",
+        "patient.coupled.simulate",
+        "patient.images.segment",
+        "patient.images.nnunet"
       ],
       "group": "Models",
-      "description": "Prepare reviewed patient geometry, native lead fields and research spatial/circulation models.",
+      "description": "Import and process patient images, generate lead fields, and run spatial heart/circulation research models.",
       "scope": "Requires explicit reviewed data and parameters; no clinical qualification.",
       "runnable": false,
       "installed": null,

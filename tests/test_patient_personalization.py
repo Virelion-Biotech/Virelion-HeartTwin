@@ -561,3 +561,12 @@ def test_composite_calibration_handoff_inherits_frozen_case(tmp_path, monkeypatc
     payload["stages"][0]["template"]["case_revision"] = 99
     with pytest.raises(ValueError, match="inherit"):
         validate_patient_plan(PatientPlanJob.model_validate(payload))
+
+
+def test_patient_plan_rejects_unbound_plain_source_reference():
+    from hearttwin.patient_personalization import PatientPlanJob, resolve_patient_template
+
+    job = PatientPlanJob(case={"patient_id": "P1", "encounters": [{"encounter_id": "v"}]}, case_revision=1,
+                         case_fingerprint="0" * 64, encounter_id="v", stages=[{"stage_id": "s", "capability": "patient.images.segment", "purpose": "test", "template": {}}])
+    with pytest.raises(ValueError, match="must use"):
+        resolve_patient_template({"uri": "file:///unbound-image", "sha256": "0" * 64}, job)

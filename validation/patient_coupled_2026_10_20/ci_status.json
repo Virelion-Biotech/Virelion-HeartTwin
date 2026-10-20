@@ -1,0 +1,44 @@
+{
+  "workflow_runs": [
+    {
+      "id": 39439248880,
+      "name": "HeartTwin current-main integration",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 180,
+      "jobs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439248880/jobs",
+      "logs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439248880/logs",
+      "workflow_id": 374440988
+    },
+    {
+      "id": 39439249665,
+      "name": "Operational rehearsal",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 163,
+      "jobs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439249665/jobs",
+      "logs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439249665/logs",
+      "workflow_id": 372689268
+    },
+    {
+      "id": 39439248832,
+      "name": "HeartTwin integration",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 491,
+      "jobs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439248832/jobs",
+      "logs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439248832/logs",
+      "workflow_id": 360813313
+    },
+    {
+      "id": 39439248782,
+      "name": "CI",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 514,
+      "jobs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439248782/jobs",
+      "logs_url": "https://api.github.com/repos/Virelion-Biotech/Virelion-HeartTwin/actions/runs/39439248782/logs",
+      "workflow_id": 354153176
+    }
+  ]
+}

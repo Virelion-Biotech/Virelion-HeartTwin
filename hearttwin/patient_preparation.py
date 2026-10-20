@@ -8,6 +8,15 @@ from pathlib import Path
 
 
 def invoke(capability, payload):
+    if capability == "patient.coupled.simulate":
+        from .patient_coupled import simulate_coupled
+        return simulate_coupled(payload)
+    if capability == "patient.images.segment":
+        from .patient_images import segment_seeded
+        return segment_seeded(payload)
+    if capability == "patient.images.nnunet":
+        from .patient_segmentation import segment_nnunet
+        return segment_nnunet(payload)
     if capability == "patient.circulation.simulate":
         from .patient_closed_loop import simulate_closed_loop
         return simulate_closed_loop(payload)

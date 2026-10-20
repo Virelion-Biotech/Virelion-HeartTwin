@@ -46,6 +46,7 @@ class PatientDomainJob(BaseModel):
     case_revision: int = Field(ge=1)
     case_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     domain: Literal["mechanics", "circulation"]
+    native_capability: Literal["patient.circulation.simulate", "patient.coupled.simulate"] | None = None
     forward_template: dict[str, Any]
     parameter_paths: dict[str, str]
     parameter_bounds: dict[str, tuple[float, float]]
@@ -137,6 +138,11 @@ def effective_template(job, *, verify=False):
 
 def validate_domain_job(job):
     template, _ = effective_template(job)
+    if job.native_capability:
+        expected_domain = "mechanics" if job.native_capability == "patient.coupled.simulate" else "circulation"
+        expected_backend = "monolithic-four-cavity-v1" if job.domain == "mechanics" else "native-four-chamber-v1"
+        if job.domain != expected_domain or template.get("backend") != expected_backend or job.encounter_id is None:
+            raise ValueError("Native calibration requires matching domain/backend and a frozen encounter")
     if job.encounter_id is not None:
         if job.encounter_id not in {e.encounter_id for e in job.case.encounters}:
             raise ValueError("Unknown patient encounter")
@@ -176,7 +182,11 @@ def validate_domain_job(job):
         else ("boundary_conditions.",)
     )
     for name, path in job.parameter_paths.items():
-        if not path.startswith(allowed):
+        if job.native_capability:
+            expected_unit = native_parameter_unit(job.native_capability, path)
+            if expected_unit is None or job.parameter_units[name] != expected_unit:
+                raise ValueError("Native calibration parameters must name supported physiology fields with exact units")
+        elif not path.startswith(allowed):
             raise ValueError(
                 "Parameters may only update declared physiology fields, not backend or geometry"
             )
@@ -277,6 +287,28 @@ def invoke(registry, capability, payload):
     return result
 
 
+def native_parameter_unit(capability, path):
+    import re
+
+    if re.fullmatch(r"edge_resistance_mmHg_s_per_mL\.\d+", path):
+        return "mmHg*s/mL"
+    if capability == "patient.coupled.simulate":
+        if path in {"passive_Pa.mu", "passive_Pa.kappa"} or re.fullmatch(r"activation.maximum_tension_Pa\.\d+", path):
+            return "Pa"
+        if path in {"activation.rise_tau_s", "activation.decay_tau_s"}:
+            return "s"
+        if path in {"activation.voltage_threshold_V", "activation.voltage_slope_V"}:
+            return "V"
+        match = re.fullmatch(r"vessels\.(SA|SV|PA|PV)\.(compliance_mL_per_mmHg|unstressed_volume_mL|external_pressure_mmHg)", path)
+    else:
+        match = re.fullmatch(r"compartments\.(LA|LV|RA|RV|SA|SV|PA|PV)\.(compliance_mL_per_mmHg|unstressed_volume_mL|external_pressure_mmHg|emin_mmHg_per_mL|emax_mmHg_per_mL|activation_start_s|activation_duration_s)", path)
+    if match:
+        field = match.group(2)
+        return {"compliance_mL_per_mmHg": "mL/mmHg", "unstressed_volume_mL": "mL", "external_pressure_mmHg": "mmHg",
+                "emin_mmHg_per_mL": "mmHg/mL", "emax_mmHg_per_mL": "mmHg/mL", "activation_start_s": "s", "activation_duration_s": "s"}[field]
+    return None
+
+
 def forward_payload(template, paths, parameters):
     if set(parameters) != set(paths):
         raise ValueError("Inference parameters differ from declared parameter paths")
@@ -306,10 +338,31 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
             "carry_forward": job.carry_forward,
         },
     )
-    capability = "mechanics.simulate" if job.domain == "mechanics" else "flow.simulate"
+    capability = job.native_capability or ("mechanics.simulate" if job.domain == "mechanics" else "flow.simulate")
     template = deepcopy(template)
     # Large intermediate artifacts belong to the run directory, not the input dataset.
-    if job.domain == "mechanics":
+    if job.native_capability:
+        template["output_dir"] = str((root / "forward").resolve())
+        from .patient_personalization import usable_acquisition
+        from .patient_observations import verified_bytes
+
+        def check_native_sources(value):
+            if isinstance(value, dict):
+                if "uri" in value and "sha256" in value:
+                    matches = [(a, s) for a in job.case.acquisitions for s in a.source_files
+                               if s.uri == value["uri"] and s.sha256 == value["sha256"]]
+                    if len(matches) != 1:
+                        raise ValueError("Native calibration sources must be uniquely frozen in the patient case")
+                    acquisition, source = matches[0]
+                    usable_acquisition(job.case, acquisition.acquisition_id, job.encounter_id, job.carry_forward)
+                    verified_bytes(source)
+                for child in value.values():
+                    check_native_sources(child)
+            elif isinstance(value, list):
+                for child in value:
+                    check_native_sources(child)
+        check_native_sources(template)
+    elif job.domain == "mechanics":
         template.setdefault("settings", {})["output_dir"] = str(
             (root / "forward").resolve()
         )
@@ -394,7 +447,7 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
     }
     inference_request = {
         "subject_id": job.case.patient_id,
-        "model_service": "CardiMech" if job.domain == "mechanics" else "CardiFlow",
+        "model_service": "PatientNative" if job.native_capability else ("CardiMech" if job.domain == "mechanics" else "CardiFlow"),
         "model_capability": capability,
         "backend": "native-map-de-v1",
         "priors": [

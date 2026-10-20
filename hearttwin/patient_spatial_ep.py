@@ -68,6 +68,7 @@ def simulate_spatial_ep(payload):
     times = np.arange(steps + 1) * dt
     voltage = p["rest_V"] + p["amplitude_V"] * np.asarray(history)
     output = {"schema": "hearttwin-cubic-excitable-v1", "subject_id": payload["subject_id"], "mesh": mesh_ref,
+              "coordinate_frame": payload["coordinate_frame"],
               "time_s": times.tolist(), "node_ids": list(range(n)), "voltage_V": voltage.tolist(),
               "model": "du=div(D grad u)+(u(u-a)(1-u)-w+I)/tau_u; dw=(u-bw)/tau_w",
               "parameters": p, "stimuli": stimuli, "initial_u": payload["initial_u"], "initial_w": payload["initial_w"],

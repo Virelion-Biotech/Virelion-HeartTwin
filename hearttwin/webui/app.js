@@ -107,3 +107,5 @@ on('prepare-circulation-recipe','click',async()=>{const config=await patientPost
 on('preview-patient-plan','click',async()=>{if($('patient-task').value!=='patient_plan')throw Error('Select a patient-bound service plan.');const result=await patientPost('plan-preview',{...JSON.parse($('patient-run-config').value),patient_id:state.patient.patient_id,case_revision:state.patient.revision});$('patient-plan-preview').textContent=pretty(result);});
 
 on('import-patient-fhir','click',async()=>{await patientPost('hospital-import',{expected_revision:state.patient.revision,upload_id:$('patient-fhir-upload').value,mapping:JSON.parse($('patient-fhir-mapping').value)});await openPatient(state.patient.patient_id);toast('Reviewed hospital observations imported into a new case revision.');});
+
+on('import-patient-dicom','click',async()=>{const result=await patientPost('hospital-imaging-import',{expected_revision:state.patient.revision,config:JSON.parse($('patient-dicom-config').value)});await openPatient(state.patient.patient_id);toast(String(result.import.instance_count)+' image instances imported after patient and geometry checks.');});

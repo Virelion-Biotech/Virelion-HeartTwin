@@ -1,0 +1,77 @@
+{
+  "source_commit": "c2aa34f99453713207d10dc26d11b1fe161a7815",
+  "components": {
+    "Virelion-CardiEP": "f9bfcb78cdb857e5995ce244d8645f7370d6b3bb",
+    "Virelion-CardiAnatomy": "e3cc3450c49b84334dd2da696f33a75f4f61557f",
+    "Virelion-CardiInfer": "b4f0c3c30da5986c6a98dba6ceccf1e1de95c881",
+    "Virelion-CardiMech": "5dc14d886ccbda5a1398b863f9ae7821bbffa18b",
+    "Virelion-CardiFlow": "670d370635ba09b2908f7e6736299719e86fc36b",
+    "Virelion-ElectroTrace": "51adddec49efa182f9707524cb59a16b4be554d7"
+  },
+  "counts": {
+    "tests": 170,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "checks": {
+    "scope": "software and synthetic infrastructure only",
+    "clinical_qualification": "not_established",
+    "components_requested": true,
+    "checks": [
+      {
+        "check": "python-compile",
+        "exit_code": 0,
+        "seconds": 0.4668206220000002
+      },
+      {
+        "check": "patient-and-workbench-tests",
+        "exit_code": 0,
+        "seconds": 67.45091849599999
+      },
+      {
+        "check": "patient-lint",
+        "exit_code": 0,
+        "seconds": 0.11661227199999757
+      },
+      {
+        "check": "gateway-import-order",
+        "exit_code": 0,
+        "seconds": 0.06454461599997785
+      },
+      {
+        "check": "javascript-syntax",
+        "exit_code": 0,
+        "seconds": 0.06472491900001387
+      },
+      {
+        "check": "geometry-tests",
+        "exit_code": 0,
+        "seconds": 0.5231100400000059
+      }
+    ],
+    "status": "SOFTWARE_PASSED",
+    "files": {
+      "geometry-tests.log": "3c8c81ca60c7d426c2d4f2093488bd7bb449245feb9a69255f80fa6bb89ec337",
+      "javascript-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-import-order.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "patient-lint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "python-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "patient-tests.xml": "514f61477e04c34983ebc4d2395e8a65c8eeb620b3f33489b8b8e20ac0c508a3",
+      "patient-and-workbench-tests.log": "0e0eaac2f884152b5a61ee0656c5db61078ed34e88bfb835920b8a6663543b96"
+    }
+  },
+  "clinical_qualification": "not_established",
+  "browser": "User Edge / Colab",
+  "nnunet_test_scope": "Synthetic adapter contract, not a trained anatomical model",
+  "live_worker_browser_review": {
+    "status": "blocked",
+    "worker_api_smoke": "passed",
+    "browser": "User Edge",
+    "route": "Official Colab kernel-port proxy",
+    "error": "ERR_BLOCKED_BY_CLIENT",
+    "end_to_end_browser_review": "not_completed",
+    "scope": "Synthetic empty worker only; no private patient data",
+    "worker_stopped": true
+  }
+}
