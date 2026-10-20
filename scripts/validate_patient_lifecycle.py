@@ -60,6 +60,7 @@ def main():
                 "hearttwin/patient_personalization.py",
                 "hearttwin/patient_ingest.py",
                 "hearttwin/patient_hospital.py",
+                "hearttwin/patient_closed_loop.py",
                 "hearttwin/patient_geometry.py",
                 "hearttwin/patient_volume_conductor.py",
                 "hearttwin/patient_spatial_ep.py",

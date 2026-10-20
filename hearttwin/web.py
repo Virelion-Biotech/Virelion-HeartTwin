@@ -875,8 +875,8 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                             raise PermissionError(
                                 "Observation file imports require the worker owner"
                             )
-                        from .patient_ingest import import_observation
                         from .patient_hospital import import_fhir_bundle
+                        from .patient_ingest import import_observation
 
                         source_path = app.resolve_uploads(
                             {"$upload": value["upload_id"]}

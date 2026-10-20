@@ -7,7 +7,7 @@ personalized whole-heart model or clinical accuracy.
 Install `pip install -e '.[patient-native]'`. The CLI
 `hearttwin-patient-prepare CAPABILITY request.json` and registry `PatientNative`
 expose `patient.geometry.reconstruct`, `patient.leadfield.generate` and
-`patient.spatial_ep.simulate`. These are also accepted patient-plan stages, so
+`patient.spatial_ep.simulate`, plus `patient.circulation.simulate`. These are also accepted patient-plan stages, so
 `$source`, `$input`, `$result`, encounter, holdout and revision gates apply.
 Stage outputs are content-addressed JSON files. Patient plans choose stage output
 directories on the worker and hash-check returned artifacts.
@@ -134,6 +134,20 @@ It does not add Purkinje anatomy, ion-channel personalization, active myocardial
 mechanics, valves, four-chamber fluid–structure coupling or a closed-loop reflex model.
 
 ## Qualification and remaining work
+
+`patient.circulation.simulate` adds a separate eight-compartment closed loop:
+LA → LV → systemic arteries → systemic veins → RA → RV → pulmonary arteries →
+pulmonary veins → LA. Four ideal diode valves gate mitral/aortic/tricuspid/pulmonary
+flow. Chambers use explicitly supplied time-varying elastance; vessels use explicit
+compliance. All eight initial volumes, edge resistances, unstressed volumes,
+external pressures, atrial/ventricular activation timings and integration controls
+are required; no physiological defaults are inferred. Outputs include per-compartment
+pressure/volume, per-edge flow and a blood-volume conservation diagnostic.
+The synthetic test uses a manufactured zero-flow equilibrium and an activated LV
+to check valve direction and conservation. The request contract is documented by
+`circulation_request` in `tests/test_patient_native_preparation.py`.
+This is a lumped model; it does not supply spatial active wall mechanics, valve
+inertia/regurgitation, reflex control, or automatic coupling to the spatial EP solver.
 
 All assistant-run checks belong in the user's Edge Colab. The existing validation
 script includes the new synthetic numerical and hospital-boundary tests.

@@ -76,6 +76,24 @@ def test_review_and_source_tampering_rejected(tmp_path):
         reconstruct_labels(p)
 
 
+def test_reconstructed_cavity_is_closed_and_oriented_into_wall(tmp_path):
+    from collections import Counter
+
+    p = image_request(tmp_path, (3, 3, 3))
+    image = read(p["source"])
+    image["labels"][1][1][1] = 2
+    p["source"] = {"file_id": "reviewed-image", **write_artifact(tmp_path, "shell-labels", image)}
+    p["review"]["source_sha256"] = p["source"]["sha256"]
+    mesh = read(reconstruct_labels(p)["mesh"])
+    faces, nodes = np.asarray(mesh["cavity_faces"]), np.asarray(mesh["nodes"])
+    assert len(faces) == 12
+    edges = Counter((int(a), int(b)) for f in faces for a, b in zip(f, np.roll(f, -1)))
+    assert all(count == 1 and edges[b, a] == 1 for (a, b), count in edges.items())
+    x = nodes[faces]
+    volume = np.einsum("ei,ei->e", x[:, 0], np.cross(x[:, 1], x[:, 2])).sum() / 6
+    assert volume == pytest.approx(0.001 * 0.002 * 0.003)
+
+
 def test_reciprocity_matches_independent_forward_solve_and_gauge(tmp_path):
     p = conductor(tmp_path)
     result = read(generate_leadfield(p)["leadfield"])
@@ -184,3 +202,119 @@ def test_hospital_fail_closed(tmp_path, change):
     source = {"file_id": "hospital", **write_artifact(tmp_path, "modified", bundle)}
     with pytest.raises(ValueError):
         import_fhir_bundle(case, source, mapping, output_dir=tmp_path)
+
+
+def test_fhir_client_collects_pages_without_leaking_token(tmp_path, monkeypatch):
+    import io
+    import urllib.request
+    from hearttwin.patient_hospital import fetch_fhir_bundle
+
+    requests = []
+    pages = [
+        {"resourceType": "Bundle", "type": "searchset", "entry": [], "link": [{"relation": "next", "url": "?page=2"}]},
+        {"resourceType": "Bundle", "type": "searchset", "entry": [{"resource": {"resourceType": "Observation", "id": "p2"}}]},
+    ]
+
+    class Opener:
+        def open(self, request, timeout):
+            requests.append(request)
+            return io.BytesIO(json.dumps(pages[len(requests) - 1]).encode())
+
+    monkeypatch.setenv("SYNTHETIC_FHIR_TOKEN", "not-a-real-credential")
+    monkeypatch.setattr(urllib.request, "build_opener", lambda *a: Opener())
+    result = fetch_fhir_bundle("https://hospital.invalid/fhir/Observation?page=1", output_dir=tmp_path, token_env="SYNTHETIC_FHIR_TOKEN")
+    assert len(requests) == 2 and requests[1].full_url.endswith("?page=2")
+    assert requests[0].get_header("Authorization") == "Bearer not-a-real-credential"
+    assert "not-a-real-credential" not in json.dumps(result)
+    assert read(result)["entry"][0]["resource"]["id"] == "p2"
+
+
+@pytest.mark.parametrize("next_url", ["https://other.invalid/fhir/Observation", "https://hospital.invalid/elsewhere", "https://hospital.invalid/fhir/Observation"])
+def test_fhir_client_refuses_cross_origin_resource_and_loop(tmp_path, monkeypatch, next_url):
+    import io
+    import urllib.request
+    from hearttwin.patient_hospital import fetch_fhir_bundle
+
+    calls = []
+
+    class Opener:
+        def open(self, request, timeout):
+            calls.append(request.full_url)
+            return io.BytesIO(json.dumps({"resourceType": "Bundle", "type": "searchset", "link": [{"relation": "next", "url": next_url}]}).encode())
+
+    monkeypatch.setattr(urllib.request, "build_opener", lambda *a: Opener())
+    with pytest.raises(ValueError, match="pagination"):
+        fetch_fhir_bundle("https://hospital.invalid/fhir/Observation", output_dir=tmp_path)
+    assert len(calls) == 1
+
+
+def test_native_reconstruction_runs_through_frozen_patient_plan(tmp_path):
+    from hearttwin.config import load_registry
+    from hearttwin.patient_personalization import execute_patient_plan
+    from hearttwin.patient_store import PatientCaseStore
+
+    p = image_request(tmp_path)
+    snapshot = PatientCaseStore(tmp_path / "cases.db").save({
+        "patient_id": "P1", "encounters": [{"encounter_id": "visit"}],
+        "acquisitions": [{"acquisition_id": "image", "subject_id": "P1", "encounter_id": "visit", "modality": "mri", "source_files": [p["source"]]}],
+    }, expected_revision=0, actor="owner", reason="Synthetic image")
+    p["source"] = {"$source": {"acquisition_id": "image", "file_id": "reviewed-image", "kind": "reviewed_label_image"}}
+    request = {"case": snapshot["case"], "case_revision": snapshot["revision"], "case_fingerprint": snapshot["fingerprint"], "encounter_id": "visit",
+               "stages": [{"stage_id": "mesh", "capability": "patient.geometry.reconstruct", "purpose": "Reviewed synthetic geometry",
+                           "template": p, "literal_rationale": {"tissue_labels.0": "Synthetic wall label", "cavity_labels.0": "Synthetic cavity label"}}]}
+    result = execute_patient_plan(request, load_registry(), output_dir=tmp_path / "plan")
+    assert len(read(result["stages"]["mesh"]["mesh"])["tetrahedra"]) == 48
+    assert result["case_fingerprint"] == snapshot["fingerprint"]
+    assert result["personalization_manifest"][0]["bindings"][0]["source_sha256"] == snapshot["case"]["acquisitions"][0]["source_files"][0]["sha256"]
+
+
+def test_nifti_centres_are_converted_to_physical_voxel_corners(tmp_path):
+    nib = pytest.importorskip("nibabel")
+    import hashlib
+
+    p = image_request(tmp_path, (1, 1, 1))
+    image = nib.Nifti1Image(np.ones((1, 1, 1), dtype=np.int16), np.diag([2., 3., 4., 1.]))
+    image.header.set_xyzt_units("mm")
+    raw = image.to_bytes()
+    path = tmp_path / "labels.nii"
+    path.write_bytes(raw)
+    p.update(format="nifti-labels", coordinate_frame="NIFTI_RAS", source={"file_id": "nifti", "uri": path.as_uri(), "sha256": hashlib.sha256(raw).hexdigest()})
+    p["review"]["source_sha256"] = p["source"]["sha256"]
+    mesh = read(reconstruct_labels(p)["mesh"])
+    np.testing.assert_allclose(np.asarray(mesh["nodes"]).min(axis=0), [-0.001, -0.0015, -0.002])
+    np.testing.assert_allclose(np.asarray(mesh["nodes"]).max(axis=0), [0.001, 0.0015, 0.002])
+
+
+def circulation_request(tmp_path):
+    from hearttwin.patient_closed_loop import COMPARTMENTS
+
+    compartments = {}
+    for name in COMPARTMENTS:
+        p = {"unstressed_volume_mL": 0., "external_pressure_mmHg": 0.}
+        if name in {"LA", "LV", "RA", "RV"}:
+            p.update(emin_mmHg_per_mL=1., emax_mmHg_per_mL=1., activation_start_s=0., activation_duration_s=0.3)
+        else:
+            p["compliance_mL_per_mmHg"] = 1.
+        compartments[name] = p
+    return {"subject_id": "P1", "compartments": compartments, "cycle_length_s": 1.,
+            "initial_volumes_mL": [80.] * 8, "edge_resistance_mmHg_s_per_mL": [1.] * 8,
+            "time_s": np.linspace(0., 1., 101).tolist(), "solver": {"rtol": 1e-8, "atol_mL": 1e-9, "max_step_s": 0.01}, "output_dir": str(tmp_path)}
+
+
+def test_closed_loop_manufactured_equilibrium_and_conservation(tmp_path):
+    from hearttwin.patient_closed_loop import simulate_closed_loop
+
+    p = circulation_request(tmp_path)
+    equilibrium = read(simulate_closed_loop(p)["circulation"])
+    np.testing.assert_allclose(equilibrium["volumes_mL"], 80.)
+    np.testing.assert_allclose(equilibrium["flows_mL_per_s"], 0.)
+    p["compartments"]["LV"]["emax_mmHg_per_mL"] = 2.
+    driven = read(simulate_closed_loop(p)["circulation"])
+    np.testing.assert_allclose(np.asarray(driven["volumes_mL"]).sum(axis=1), 640., atol=1e-8)
+    q = np.asarray(driven["flows_mL_per_s"])
+    assert q[:, 1].max() > 1
+    assert np.all(q[:, [0, 1, 4, 5]] >= 0)
+    assert driven["maximum_volume_drift_mL"] < 1e-8
+    p["edge_resistance_mmHg_s_per_mL"][0] = 0
+    with pytest.raises(ValueError, match="resistances"):
+        simulate_closed_loop(p)

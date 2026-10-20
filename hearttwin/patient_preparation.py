@@ -8,6 +8,9 @@ from pathlib import Path
 
 
 def invoke(capability, payload):
+    if capability == "patient.circulation.simulate":
+        from .patient_closed_loop import simulate_closed_loop
+        return simulate_closed_loop(payload)
     if capability == "patient.geometry.reconstruct":
         from .patient_geometry import reconstruct_labels
         return reconstruct_labels(payload)

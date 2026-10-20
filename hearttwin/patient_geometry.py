@@ -95,7 +95,7 @@ def reconstruct_labels(payload):
         if len(adjacency) != 1:
             continue
         eid = adjacency[0]
-        face = list(face)
+        face = list(map(int, face))
         x = nodes[face]
         normal = np.cross(x[1] - x[0], x[2] - x[0])
         if normal @ (nodes[tets[eid]].mean(axis=0) - x.mean(axis=0)) > 0:

@@ -2,6 +2,22 @@
   "schema_version": "hearttwin-workbench/1",
   "services": [
     {
+      "name": "PatientNative",
+      "repository": "Virelion-Biotech/Virelion-HeartTwin",
+      "capabilities": [
+        "patient.geometry.reconstruct",
+        "patient.leadfield.generate",
+        "patient.spatial_ep.simulate",
+        "patient.circulation.simulate"
+      ],
+      "group": "Models",
+      "description": "Prepare reviewed patient geometry, native lead fields and research spatial/circulation models.",
+      "scope": "Requires explicit reviewed data and parameters; no clinical qualification.",
+      "runnable": false,
+      "installed": null,
+      "gate": null
+    },
+    {
       "name": "CardiAnatomy",
       "repository": "Virelion-Biotech/Virelion-CardiAnatomy",
       "capabilities": [
