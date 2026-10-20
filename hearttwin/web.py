@@ -25,8 +25,8 @@ from urllib.parse import unquote, urlparse
 
 from .config import load_registry
 from .operations import JobQueue
-from .patient_store import PatientCaseStore, RevisionConflict
 from .patient_access import PatientAccess
+from .patient_store import PatientCaseStore, RevisionConflict
 
 ID = re.compile(r"^[a-zA-Z0-9_-]{1,100}$")
 JSON_LIMIT = 2 * 1024 * 1024
@@ -463,7 +463,7 @@ class Workbench:
         if index_base not in {0, 1}:
             raise ValueError("Display mesh must declare index_base explicitly")
         if not isinstance(nodes, list) or not isinstance(tetra, list):
-            raise ValueError(
+            raise TypeError(
                 "Browser display requires JSON node_xyz and tetrahedra arrays"
             )
         if len(nodes) > 30000:
@@ -655,7 +655,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                 raise ValueError("Patient JSON exceeds its limit or is empty")
             value = strict_json(self.rfile.read(size))
             if not isinstance(value, dict):
-                raise ValueError("Patient request must be a JSON object")
+                raise TypeError("Patient request must be a JSON object")
             return value
 
         def patient_dispatch(self, path, principal):
@@ -770,9 +770,9 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                             "Acquisition uploads require the worker owner"
                         )
                     from .patient_model import (
-                        PatientCase,
-                        PatientAcquisition,
                         CoordinateFrame,
+                        PatientAcquisition,
+                        PatientCase,
                         PatientEvidenceItem,
                     )
 
