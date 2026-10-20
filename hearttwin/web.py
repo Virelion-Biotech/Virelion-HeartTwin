@@ -914,8 +914,8 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                     principal.require("execute", patient_id)
                     from .patient_personalization import (
                         PatientPlanJob,
-                        validate_patient_plan,
                         patient_stage_capabilities,
+                        validate_patient_plan,
                     )
 
                     expanded = app.patient_request({"payload": value})["payload"]

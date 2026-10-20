@@ -70,6 +70,7 @@ def main():
             ],
         ),
     ]
+    commands.append(("gateway-import-order", [sys.executable, "-m", "ruff", "check", "--select", "I", "hearttwin/web.py"]))
     if shutil.which("node"):
         commands.extend(
             [
