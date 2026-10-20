@@ -1,0 +1,5 @@
+{
+  "final_commit": "2b5228d9fa9a3edb195b642c6c9b4d33a6486971",
+  "numerical_diagnostics_commit": "dc6f6270ba0232e927edc448af2701e8d4ca9cc2",
+  "changes_after_numerical_run": "Optional SciPy guard in test; lambda-to-def and semicolon formatting only; no numerical calculation changes."
+}

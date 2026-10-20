@@ -1,0 +1,129 @@
+Collecting hypothesis>=6.100
+  Downloading hypothesis-6.170.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.6 kB)
+Collecting wfdb>=4.1
+  Downloading wfdb-4.3.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting pyedflib>=0.1.38
+  Downloading pyedflib-0.1.42.tar.gz (2.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.3/2.3 MB 10.6 MB/s eta 0:00:00
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting skops>=0.14
+  Downloading skops-0.16.0-py3-none-any.whl.metadata (4.3 kB)
+Collecting flask>=3.0
+  Downloading flask-3.1.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting sortedcontainers<3.0.0,>=2.1.0 (from hypothesis>=6.100)
+  Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl.metadata (10 kB)
+Collecting aiohttp>=3.10.11 (from wfdb>=4.1)
+  Downloading aiohttp-3.14.5-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+Collecting fsspec>=2023.10.0 (from wfdb>=4.1)
+  Downloading fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: matplotlib>=3.2.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from wfdb>=4.1) (3.11.2)
+Requirement already satisfied: numpy>=1.26.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from wfdb>=4.1) (2.2.6)
+Requirement already satisfied: pandas>=2.2.3 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from wfdb>=4.1) (3.0.6)
+Collecting requests>=2.8.1 (from wfdb>=4.1)
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: scipy>=1.13.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from wfdb>=4.1) (1.16.3)
+Collecting soundfile>=0.10.0 (from wfdb>=4.1)
+  Downloading soundfile-0.14.0-py2.py3-none-manylinux_2_28_x86_64.whl.metadata (18 kB)
+Requirement already satisfied: packaging>=17.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from skops>=0.14) (26.3)
+Collecting prettytable>=3.9 (from skops>=0.14)
+  Downloading prettytable-3.18.0-py3-none-any.whl.metadata (37 kB)
+Requirement already satisfied: scikit-learn>=1.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from skops>=0.14) (1.9.1)
+Collecting blinker>=1.9.0 (from flask>=3.0)
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting click>=8.1.3 (from flask>=3.0)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting itsdangerous>=2.2.0 (from flask>=3.0)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting jinja2>=3.1.2 (from flask>=3.0)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting markupsafe>=2.1.1 (from flask>=3.0)
+  Downloading markupsafe-3.0.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting werkzeug>=3.1.0 (from flask>=3.0)
+  Downloading werkzeug-3.1.9-py3-none-any.whl.metadata (4.1 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Requirement already satisfied: attrs>=17.3.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from aiohttp>=3.10.11->wfdb>=4.1) (26.1.0)
+Collecting frozenlist>=1.1.1 (from aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading frozenlist-1.8.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+Collecting multidict<8.0,>=4.5 (from aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading multidict-7.1.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.2 kB)
+Collecting propcache>=0.2.0 (from aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading propcache-0.5.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
+Collecting yarl<2.0,>=1.25.1 (from aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading yarl-1.25.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
+Collecting idna>=2.0 (from yarl<2.0,>=1.25.1->aiohttp>=3.10.11->wfdb>=4.1)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Requirement already satisfied: contourpy>=1.0.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (1.4.0)
+Requirement already satisfied: cycler>=0.10 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (4.67.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (1.5.1)
+Requirement already satisfied: pillow>=9 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (13.0.0)
+Requirement already satisfied: pyparsing>=3 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (3.3.3)
+Requirement already satisfied: python-dateutil>=2.7 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from matplotlib>=3.2.2->wfdb>=4.1) (2.9.0.post0)
+Collecting wcwidth>=0.3.5 (from prettytable>=3.9->skops>=0.14)
+  Downloading wcwidth-0.9.3-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (23 kB)
+Requirement already satisfied: six>=1.5 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from python-dateutil>=2.7->matplotlib>=3.2.2->wfdb>=4.1) (1.17.0)
+Collecting charset_normalizer<4,>=2 (from requests>=2.8.1->wfdb>=4.1)
+  Downloading charset_normalizer-3.5.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+Collecting urllib3<3,>=1.26 (from requests>=2.8.1->wfdb>=4.1)
+  Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting certifi>=2023.5.7 (from requests>=2.8.1->wfdb>=4.1)
+  Downloading certifi-2026.10.19-py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: joblib>=1.4.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from scikit-learn>=1.2->skops>=0.14) (1.6.0)
+Requirement already satisfied: narwhals>=2.0.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from scikit-learn>=1.2->skops>=0.14) (2.27.1)
+Requirement already satisfied: threadpoolctl>=3.5.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from scikit-learn>=1.2->skops>=0.14) (3.7.0)
+Requirement already satisfied: cloudpickle>=3.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from joblib>=1.4.0->scikit-learn>=1.2->skops>=0.14) (3.1.2)
+Collecting cffi>=1.0 (from soundfile>=0.10.0->wfdb>=4.1)
+  Downloading cffi-2.1.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+Requirement already satisfied: typing-extensions in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from soundfile>=0.10.0->wfdb>=4.1) (4.16.0)
+Collecting pycparser (from cffi>=1.0->soundfile>=0.10.0->wfdb>=4.1)
+  Downloading pycparser-3.11-py3-none-any.whl.metadata (8.2 kB)
+Downloading hypothesis-6.170.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 11.2 MB/s eta 0:00:00
+Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Downloading wfdb-4.3.1-py3-none-any.whl (163 kB)
+Downloading skops-0.16.0-py3-none-any.whl (148 kB)
+Downloading flask-3.1.3-py3-none-any.whl (103 kB)
+Downloading aiohttp-3.14.5-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 13.9 MB/s eta 0:00:00
+Downloading multidict-7.1.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (481 kB)
+Downloading yarl-1.25.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+Downloading frozenlist-1.8.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (234 kB)
+Downloading fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (23 kB)
+Downloading prettytable-3.18.0-py3-none-any.whl (37 kB)
+Downloading propcache-0.5.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (234 kB)
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading charset_normalizer-3.5.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (254 kB)
+Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+Downloading certifi-2026.10.19-py3-none-any.whl (136 kB)
+Downloading soundfile-0.14.0-py2.py3-none-manylinux_2_28_x86_64.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 7.8 MB/s eta 0:00:00
+Downloading cffi-2.1.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+Downloading wcwidth-0.9.3-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (770 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 770.0/770.0 kB 8.2 MB/s eta 0:00:00
+Downloading werkzeug-3.1.9-py3-none-any.whl (228 kB)
+Downloading pycparser-3.11-py3-none-any.whl (51 kB)
+Building wheels for collected packages: pyedflib
+  Building wheel for pyedflib (pyproject.toml): started
+  Building wheel for pyedflib (pyproject.toml): finished with status 'done'
+  Created wheel for pyedflib: filename=pyedflib-0.1.42-cp313-cp313-linux_x86_64.whl size=2852039 sha256=0318187ee1649645c2aa631ca84bb2502f52f071056d338e1688b8d9ac2deed8
+  Stored in directory: /root/.cache/pip/wheels/ac/16/3e/5299c8a6b023bfd3d7204240ca5de940a49bede1edb30015ab
+Successfully built pyedflib
+Installing collected packages: sortedcontainers, wcwidth, urllib3, pyedflib, pycparser, propcache, multidict, markupsafe, itsdangerous, idna, hypothesis, fsspec, frozenlist, click, charset_normalizer, certifi, blinker, aiohappyeyeballs, yarl, werkzeug, requests, prettytable, jinja2, cffi, aiosignal, soundfile, skops, flask, aiohttp, wfdb
+
+Successfully installed aiohappyeyeballs-2.7.1 aiohttp-3.14.5 aiosignal-1.4.0 blinker-1.9.0 certifi-2026.10.19 cffi-2.1.1 charset_normalizer-3.5.2 click-8.5.0 flask-3.1.3 frozenlist-1.8.0 fsspec-2026.9.0 hypothesis-6.170.5 idna-3.20 itsdangerous-2.2.0 jinja2-3.1.6 markupsafe-3.0.4 multidict-7.1.0 prettytable-3.18.0 propcache-0.5.4 pycparser-3.11 pyedflib-0.1.42 requests-2.34.2 skops-0.16.0 sortedcontainers-2.4.0 soundfile-0.14.0 urllib3-2.8.0 wcwidth-0.9.3 werkzeug-3.1.9 wfdb-4.3.1 yarl-1.25.1

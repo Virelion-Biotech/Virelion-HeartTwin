@@ -1,0 +1,46 @@
+{
+  "sample_counts": {
+    "LV_volume": 35,
+    "LV_epicardial_enclosed_volume": 35,
+    "LV_AVPD": 35,
+    "RV_AVPD": 35,
+    "LV_AVPV": 35,
+    "RV_AVPV": 35
+  },
+  "RV_volume_samples": 2,
+  "RV_epicardial_volume_samples": 0,
+  "time_windows_s": {
+    "LV_volume": [
+      0.0,
+      1.227
+    ],
+    "LV_epicardial_enclosed_volume": [
+      0.0,
+      1.227
+    ],
+    "LV_AVPD": [
+      0.0,
+      1.190667
+    ],
+    "RV_AVPD": [
+      0.0,
+      1.190667
+    ],
+    "LV_AVPV": [
+      0.0,
+      1.190667
+    ],
+    "RV_AVPV": [
+      0.0,
+      1.190667
+    ]
+  },
+  "LV_observed_range_mL": [
+    89.394606,
+    227.00721
+  ],
+  "LV_first_frame_volume_mL": 221.644518,
+  "RV_first_frame_volume_mL": 194.545622,
+  "clock_policy": "Preserve independent measured time grids; no phase shifting or time warping. Same volunteer does not establish simultaneous acquisition.",
+  "independence": "AVPV is a related motion derivative; WT and fractional WT share source measurements. They are not independent validation experiments."
+}

@@ -1,0 +1,7 @@
+{
+  "original": "51adddec49efa182f9707524cb59a16b4be554d7",
+  "fixed": "6e42474a2a7627aeef79f1712d8a451dec6aaab1",
+  "scope": "Undefined Welch statistics are null with explicit status; no patient model changes",
+  "test_cwd": "/content/HeartTwin_Diagnosis_20261020/ElectroTrace-fixed",
+  "prior_failure": "Original rerun used /content rather than repository cwd; Git-provenance fixture could not resolve a Git HEAD. Original log and XML retained."
+}

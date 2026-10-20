@@ -1,0 +1,41 @@
+{
+  "values": [
+    39.250852,
+    26.194368,
+    21.148483,
+    19.885462,
+    12.772066,
+    45.302353,
+    54.28534,
+    43.195316,
+    30.190623,
+    25.173706,
+    36.681726,
+    54.537501,
+    92.63534,
+    84.467785,
+    57.63318,
+    65.662868,
+    18.663087
+  ],
+  "unit": "%",
+  "labels": [
+    "Basal anterior [%]",
+    "Basal anteroseptal [%]",
+    "Basal inferoseptal [%]",
+    "Basal inferior [%]",
+    "Basal inferolateral [%]",
+    "Basal anterolateral [%]",
+    "Mid anterior [%]",
+    "Mid anteroseptal [%]",
+    "Mid inferoseptal [%]",
+    "Mid inferior [%]",
+    "Mid inferolateral [%]",
+    "Mid anterolateral [%]",
+    "Apical anterior [%]",
+    "Apical septal [%]",
+    "Apical inferior [%]",
+    "Apical lateral [%]",
+    "Apex [%]"
+  ]
+}

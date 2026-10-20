@@ -1,0 +1,24 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/Virelion-HeartTwin
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: pydantic<3,>=2.6 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-hearttwin==0.3.0) (2.12.3)
+Requirement already satisfied: PyYAML<7,>=6.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-hearttwin==0.3.0) (6.0.3)
+Requirement already satisfied: numpy<3,>=1.26 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-hearttwin==0.3.0) (2.2.6)
+Requirement already satisfied: annotated-types>=0.6.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.41.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0) (4.16.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0) (0.4.4)
+Building wheels for collected packages: virelion-hearttwin
+  Building editable for virelion-hearttwin (pyproject.toml): started
+  Building editable for virelion-hearttwin (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-hearttwin: filename=virelion_hearttwin-0.3.0-0.editable-py3-none-any.whl size=4130 sha256=fbfe6bd1efe21fc9bde04d1e8abcd20906838fdf2bf2dcfda720063c9f7bead5
+  Stored in directory: /tmp/pip-ephem-wheel-cache-5t3lr4et/wheels/7d/8c/df/191fe8b8367e6bb19106040e8ddd01348bff9e813799e9a18e
+Successfully built virelion-hearttwin
+Installing collected packages: virelion-hearttwin
+Successfully installed virelion-hearttwin-0.3.0

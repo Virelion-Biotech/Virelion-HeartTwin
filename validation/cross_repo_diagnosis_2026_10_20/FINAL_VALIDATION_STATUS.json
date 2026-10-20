@@ -1,0 +1,35 @@
+{
+  "status": "SOFTWARE_PASSED",
+  "clinical_validation": "NOT_ESTABLISHED",
+  "HeartTwin_patient_tests": 180,
+  "final_changed_file_regressions": 10,
+  "original_component_tests": {
+    "CardiMech": 90,
+    "CardiFlow": 102,
+    "CardiInfer": 137,
+    "CardiEP": 189,
+    "CardiAnatomy": 276,
+    "ElectroTrace": 375
+  },
+  "ElectroTrace_fixed_tests": 379,
+  "ElectroTrace_fixed_commit": "6e42474a2a7627aeef79f1712d8a451dec6aaab1",
+  "model_selected": "original_three_parameter",
+  "LV_development_RMSE_mL": 22.86854649759186,
+  "persistence_RMSE_mL": 8.061338997774605,
+  "remaining": [
+    "KIT physiological prediction inadequacy",
+    "pressure scale not identified",
+    "native spatial capacity/reference state",
+    "EDGAR missing waveforms and nonmanifold geometry"
+  ],
+  "retained_failures": [
+    "missing Hypothesis in initial component test environment",
+    "diagnostic lint before formatting fix",
+    "ElectroTrace fixed suite launched outside repository before cwd correction"
+  ],
+  "optimizer_limit": "One unselected phase-and-filling trial hit max_nfev=45; selected trial and final fit terminated successfully. No global optimum claim.",
+  "ElectroTrace_final_tests": 380,
+  "ElectroTrace_final_commit": "a4cf37ad2e1ed6719a23befa2be5e47af4b4d1de",
+  "alternate_SciPy_regressions": 5,
+  "all_original_component_processes_completed": true
+}

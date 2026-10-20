@@ -1,0 +1,19 @@
+{
+  "source_sha256": "b9b8f4777656fbf1a50d33d553c850f0262ec91614aa6f4beb774711f218aa29",
+  "meshio_original": {
+    "status": "failed",
+    "type": "Error",
+    "message": "Invalid base64-encoded string: number of data characters (8656165) cannot be 1 more than a multiple of 4"
+  },
+  "VTK_reader": {
+    "status": "read",
+    "points": 32505,
+    "tetrahedra": 128976
+  },
+  "canonical_meshio_read": "PASS; point values and tetrahedral connectivity preserved",
+  "canonical_sha256": "7b5703f8cec9198dacac03cec0e56473c62db02c810cc92c88200dd94e2cc4f1",
+  "VTK_vs_TetGen_max_same_index_coordinate_error_mm": 3.808593746157385e-06,
+  "VTK_vs_TetGen_equal_tetrahedral_indices": true,
+  "diagnosis": "Publisher data is readable by VTK; failure in meshio's compressed appended encoding path is an I/O compatibility problem, not proof of corrupt anatomy.",
+  "remedy": "Use official TetGen or this lossless VTK canonical export for meshio; retain both source hashes. This does not bypass native solver size limits."
+}

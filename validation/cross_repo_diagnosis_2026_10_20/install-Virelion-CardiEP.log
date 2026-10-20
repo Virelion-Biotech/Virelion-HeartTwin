@@ -1,0 +1,23 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/Virelion-CardiEP
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: numpy<3,>=1.26 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardiep==0.3.0) (2.2.6)
+Requirement already satisfied: pydantic<3,>=2.6 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardiep==0.3.0) (2.12.3)
+Requirement already satisfied: annotated-types>=0.6.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiep==0.3.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.41.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiep==0.3.0) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiep==0.3.0) (4.16.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiep==0.3.0) (0.4.4)
+Building wheels for collected packages: virelion-cardiep
+  Building editable for virelion-cardiep (pyproject.toml): started
+  Building editable for virelion-cardiep (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-cardiep: filename=virelion_cardiep-0.3.0-0.editable-py3-none-any.whl size=2783 sha256=adcb1e9e38e3bb8abe47aea45f12cf73de3b10d587b1dc21c558130d7408001e
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ymuebeqk/wheels/24/9b/03/2697a3bcbcd29f5e8b33b4cb817a33850e9ce77e331e46dc56
+Successfully built virelion-cardiep
+Installing collected packages: virelion-cardiep
+Successfully installed virelion-cardiep-0.3.0

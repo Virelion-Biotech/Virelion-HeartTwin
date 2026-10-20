@@ -1,5 +1,5 @@
 {
-  "lock_version": 6,
+  "lock_version": 7,
   "generated_from": "requirements-services.txt",
   "repositories": [
     {
@@ -69,7 +69,7 @@
     },
     {
       "name": "Virelion-ElectroTrace",
-      "sha": "51adddec49efa182f9707524cb59a16b4be554d7",
+      "sha": "a4cf37ad2e1ed6719a23befa2be5e47af4b4d1de",
       "role": "command"
     },
     {

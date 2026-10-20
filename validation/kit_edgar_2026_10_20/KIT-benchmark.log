@@ -1,0 +1,62 @@
+/content/HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/venv/lib/python3.13/site-packages/meshio/stl/_stl.py:40: RuntimeWarning: overflow encountered in scalar multiply
+  if 84 + num_triangles * 50 == filesize_bytes:
+FIT {"start": [2.0, 0.5, 0.01], "x": [1.5133347528507455, 0.4909659778681586, 0.0010000000006146284], "calibration_SSE_mL2": 4334.3691339757, "nfev": 6, "converged": true, "message": "`ftol` termination condition is satisfied.", "optimality": 1.3208708935106277}
+FIT {"start": [0.8, 0.4, 0.03], "x": [1.5133300842048423, 0.49096628640690404, 0.001000000000985174], "calibration_SSE_mL2": 4334.369176895898, "nfev": 7, "converged": true, "message": "`ftol` termination condition is satisfied.", "optimality": 2.292562789717677}
+{
+  "status": "COMPLETED_EXPLORATORY",
+  "frozen_prediction_sha256": "ab4208d8deebdd846d973e007fa3e257d68bc222206d5771d799274f3928418d",
+  "calibration": {
+    "n": 23,
+    "RMSE_mL": 13.727739504812364,
+    "MAE_mL": 11.93678784624544,
+    "maximum_absolute_error_mL": 24.04256791399675,
+    "bias_mL": -0.8257142509191234
+  },
+  "temporal_holdout": {
+    "n": 12,
+    "RMSE_mL": 22.86854649759186,
+    "MAE_mL": 19.152885408965385,
+    "maximum_absolute_error_mL": 35.7606118452814,
+    "bias_mL": 19.152885408965385
+  },
+  "persistence_baseline_holdout": {
+    "n": 12,
+    "RMSE_mL": 8.061338997774605,
+    "MAE_mL": 6.193007833333328,
+    "maximum_absolute_error_mL": 16.477362,
+    "bias_mL": -2.0393256666666773
+  },
+  "RV_ES_holdout": {
+    "time_s": 0.36088235300000004,
+    "observed_mL": 65.938406,
+    "predicted_mL": 87.81039733554829,
+    "absolute_error_mL": 21.871991335548287
+  },
+  "volume_conservation_drift_mL": 1.8189894035458565e-12,
+  "pressure_scaling_nonidentifiability": [
+    {
+      "pressure_scale": 0.5,
+      "max_volume_change_mL": 0.0,
+      "max_pressure_scaling_error_mmHg": 0.0,
+      "LV_peak_pressure_mmHg": 76.07159211904735
+    },
+    {
+      "pressure_scale": 2.0,
+      "max_volume_change_mL": 0.0,
+      "max_pressure_scaling_error_mmHg": 0.0,
+      "LV_peak_pressure_mmHg": 304.2863684761894
+    }
+  ],
+  "tolerance_refinement_max_LV_difference_mL": 0.0006256445828540791,
+  "interpretation": "Volume-only fitting cannot identify absolute pressure, resistance and elastance scale. Conditional fit quality does not validate those parameters or a whole-heart twin.",
+  "not_predicted": [
+    "AVPD/AVPV",
+    "regional wall thickening",
+    "ECG",
+    "patient pressures",
+    "spatial stress or displacement"
+  ],
+  "clinical_qualification": "NOT_ESTABLISHED",
+  "mesh_convergence": "NOT_RUN; no spatial solve",
+  "population_uncertainty": "NOT_ESTIMATED; one volunteer, no validated noise model"
+}

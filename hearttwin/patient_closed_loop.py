@@ -13,12 +13,15 @@ VALVE_EDGES = {0, 1, 4, 5}
 def hemodynamic_observables(time_s, volumes, pressures, flows):
     """Named projections for patient fitting; ranges are not labelled stroke volume."""
     v, p, q = (np.asarray(x, dtype=float) for x in (volumes, pressures, flows))
-    scalars, units = {}, {}
+    scalars, units = {}, {"time_s": "s"}
     for i, name in enumerate(COMPARTMENTS):
         scalars[name + "_final_pressure"] = float(p[-1, i])
         scalars[name + "_volume_range"] = float(v[:, i].max() - v[:, i].min())
         units[name + "_final_pressure"] = "mmHg"
         units[name + "_volume_range"] = "mL"
+        units["pressure_mmHg." + name] = "mmHg"
+        units["volume_mL." + name] = "mL"
+        units["flow_mL_per_s." + name + "_to_" + COMPARTMENTS[(i + 1) % 8]] = "mL/s"
     return {"time_s": list(time_s), "pressure_mmHg": {name: p[:, i].tolist() for i, name in enumerate(COMPARTMENTS)},
             "volume_mL": {name: v[:, i].tolist() for i, name in enumerate(COMPARTMENTS)},
             "flow_mL_per_s": {name + "_to_" + COMPARTMENTS[(i+1) % 8]: q[:, i].tolist() for i, name in enumerate(COMPARTMENTS)},

@@ -1,0 +1,7 @@
+{
+  "runner_sha256": "b2ae4f6348b63678abbccf48e9aca9151b6abbec80e04ad4d53674f9a5b1b79a",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+  "native_circulation_sha256": "cdbf5d78e47a9c417ec31974668a6fa3208df8e4d15fb473d0ea073568bd4675",
+  "execution": "User Edge Colab; source/benchmark pins recorded by notebook"
+}

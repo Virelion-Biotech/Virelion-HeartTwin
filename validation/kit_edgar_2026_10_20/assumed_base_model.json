@@ -1,0 +1,88 @@
+{
+  "subject_id": "KIT-Gerach-10526554-volunteer",
+  "compartments": {
+    "LA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.15,
+      "emax_mmHg_per_mL": 0.35,
+      "activation_start_s": 1.05,
+      "activation_duration_s": 0.25
+    },
+    "LV": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.05,
+      "emax_mmHg_per_mL": 2.0,
+      "activation_start_s": 0.0,
+      "activation_duration_s": 0.5
+    },
+    "RA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.1,
+      "emax_mmHg_per_mL": 0.25,
+      "activation_start_s": 1.05,
+      "activation_duration_s": 0.25
+    },
+    "RV": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.03,
+      "emax_mmHg_per_mL": 0.5,
+      "activation_start_s": 0.0,
+      "activation_duration_s": 0.5
+    },
+    "SA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 1.5
+    },
+    "SV": {
+      "unstressed_volume_mL": 2600.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 30.0
+    },
+    "PA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 5.0
+    },
+    "PV": {
+      "unstressed_volume_mL": 300.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 10.0
+    }
+  },
+  "cycle_length_s": 1.3,
+  "initial_volumes_mL": [
+    60.0,
+    221.644518,
+    150.0,
+    2800.0,
+    60.0,
+    194.545622,
+    150.0,
+    400.0
+  ],
+  "edge_resistance_mmHg_s_per_mL": [
+    0.01,
+    0.01,
+    1.0,
+    0.05,
+    0.01,
+    0.01,
+    0.1,
+    0.02
+  ],
+  "time_s": [
+    0.0,
+    0.1
+  ],
+  "solver": {
+    "rtol": 1e-06,
+    "atol_mL": 1e-07,
+    "max_step_s": 0.003
+  },
+  "output_dir": "/content/HeartTwin_KIT_EDGAR_20261020/retained-351aaa776f41/results"
+}

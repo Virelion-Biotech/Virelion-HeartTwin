@@ -1,0 +1,24 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/Virelion-CardiInfer
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: numpy<3,>=1.26 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardiinfer==0.6.0) (2.2.6)
+Requirement already satisfied: scipy>=1.11.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardiinfer==0.6.0) (1.16.3)
+Requirement already satisfied: pydantic<3,>=2.6 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardiinfer==0.6.0) (2.12.3)
+Requirement already satisfied: annotated-types>=0.6.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiinfer==0.6.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.41.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiinfer==0.6.0) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiinfer==0.6.0) (4.16.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiinfer==0.6.0) (0.4.4)
+Building wheels for collected packages: virelion-cardiinfer
+  Building editable for virelion-cardiinfer (pyproject.toml): started
+  Building editable for virelion-cardiinfer (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-cardiinfer: filename=virelion_cardiinfer-0.6.0-0.editable-py3-none-any.whl size=8116 sha256=f72ec990f5b1cb4cd9a2e6289e75bb505caaeede69f5b4aeec2e55734ed0154c
+  Stored in directory: /tmp/pip-ephem-wheel-cache-cv8b268w/wheels/98/f1/d1/dc3d498965ee4d014ddc0e7f8ef907188d6cd350e505a2c5ed
+Successfully built virelion-cardiinfer
+Installing collected packages: virelion-cardiinfer
+Successfully installed virelion-cardiinfer-0.6.0

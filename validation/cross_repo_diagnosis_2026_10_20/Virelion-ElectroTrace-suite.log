@@ -1,0 +1,14 @@
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 57%]
+........................................................................ [ 76%]
+........................................................................ [ 96%]
+...............                                                          [100%]
+=============================== warnings summary ===============================
+tests/test_hardening.py::test_statistics_zero_variance_effect_size_is_explicit
+  /content/HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages/scipy/stats/_axis_nan_policy.py:579: RuntimeWarning: Precision loss occurred in moment calculation due to catastrophic cancellation. This occurs when the data are nearly identical. Results may be unreliable.
+    res = hypotest_fun_out(*samples, **kwds)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /content/HeartTwin_Diagnosis_20261020/results/Virelion-ElectroTrace-suite.xml -
+375 passed, 1 warning in 39.03s

@@ -1,0 +1,45 @@
+TAP version 13
+# Subtest: two tetrahedra expose six boundary faces; their shared face is removed
+ok 1 - two tetrahedra expose six boundary faces; their shared face is removed
+  ---
+  duration_ms: 14.182124
+  ...
+# Subtest: triangular surfaces preserve indexing and normalize all coordinates with one scale
+ok 2 - triangular surfaces preserve indexing and normalize all coordinates with one scale
+  ---
+  duration_ms: 8.056153
+  ...
+# Subtest: completed job geometry pairs only with same-order finite activation values
+ok 3 - completed job geometry pairs only with same-order finite activation values
+  ---
+  duration_ms: 10.362125
+  ...
+# Subtest: malformed cells, nonfinite coordinates and nonmanifold tetrahedra are rejected
+ok 4 - malformed cells, nonfinite coordinates and nonmanifold tetrahedra are rejected
+  ---
+  duration_ms: 3.873551
+  ...
+# Subtest: oversized meshes fail explicitly without silently reducing scientific data
+ok 5 - oversized meshes fail explicitly without silently reducing scientific data
+  ---
+  duration_ms: 122.500916
+  ...
+# Subtest: reference schematic has valid selectable layers and contains no simulated activation
+ok 6 - reference schematic has valid selectable layers and contains no simulated activation
+  ---
+  duration_ms: 73.91609
+  ...
+# Subtest: bundled anatomical asset verifies its hash and retains eleven source-mapped groups
+ok 7 - bundled anatomical asset verifies its hash and retains eleven source-mapped groups
+  ---
+  duration_ms: 1012.034569
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1609.90085

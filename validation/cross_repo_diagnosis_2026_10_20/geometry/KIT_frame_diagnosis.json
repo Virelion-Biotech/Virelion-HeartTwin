@@ -1,0 +1,33 @@
+{
+  "maximum_angular_correction_rad": 1.348250714468859e-05,
+  "maximum_abs_dot": 2.220446049250313e-16,
+  "declared_angular_bound_rad": 2e-05,
+  "review_status": "pending",
+  "maximum_normal_correction_rad": 1.6170938955133334e-05,
+  "frame_handedness_counts": {
+    "right": 51603,
+    "left": 77373
+  },
+  "qualification": "Numerical frame repair candidate, not measured patient microstructure",
+  "candidate_sha256": "40c36ec7e7d4570d91a5c43041212bc37db3ab229342bff048dcc25384ea781a",
+  "source_bases_sha256": "ca67691953a3b2db81020f91d3aedab5da2a0cbce734933b98fdb929c7000860",
+  "original_normal_sign_counts": {
+    "positive": 51603,
+    "negative": 77373,
+    "zero": 0
+  },
+  "diagnosis": "Published finite-precision directions do not exactly meet the native orthogonality contract. Fibre/sheet projection is bounded explicitly; normal handedness is preserved rather than forced to another convention.",
+  "native_size_gate": {
+    "nodes": 32505,
+    "node_limit": 5000,
+    "tetrahedra": 128976,
+    "element_limit": 20000,
+    "status": "CAPACITY_LIMIT_UNCHANGED"
+  },
+  "scientific_blockers": [
+    "reference-state and boundary qualification",
+    "cavity/material mapping",
+    "activation and patient circulation measurements",
+    "mesh-convergence and scalable solve validation"
+  ]
+}

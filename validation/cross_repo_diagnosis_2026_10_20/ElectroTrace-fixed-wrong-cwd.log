@@ -1,0 +1,429 @@
+........................................................................ [ 18%]
+................................FFF.FF.F................................ [ 37%]
+........................................................................ [ 56%]
+........................................................................ [ 75%]
+........................................................................ [ 94%]
+...................                                                      [100%]
+=================================== FAILURES ===================================
+__________ test_derivation_report_rejects_changed_implementation_hash __________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_rejects0')
+
+    def test_derivation_report_rejects_changed_implementation_hash(tmp_path):
+        path = _derivation_report(tmp_path / "derive.json")
+        report = json.loads(path.read_text())
+        report["implementation_hashes"]["electrotrace.validation_detectors"] = "f" * 64
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(SystemExit, match="implementation hashes do not match"):
+>           eval_script._load_polarity_threshold_report(path)
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_rejects0/derive.json')
+
+    def _load_polarity_threshold_report(path: Path) -> tuple[dict, float, float]:
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"cannot read polarity threshold report {path}: {exc}") from exc
+    
+        if report.get("schema") != DERIVATION_SCHEMA:
+            raise SystemExit(
+                f"unsupported polarity threshold report schema: {report.get('schema')!r}; "
+                f"expected {DERIVATION_SCHEMA!r}"
+            )
+        if report.get("freeze_eligible") is not True:
+            raise SystemExit("polarity threshold report is not freeze_eligible")
+        if report.get("selection_status") != "development_only_full_pool":
+            raise SystemExit("polarity threshold report was not derived from the full development pool")
+    
+        report_head = str(report.get("git_head") or "")
+        if not report_head or report_head == "unknown":
+>           raise SystemExit("polarity threshold report lacks a verifiable git commit")
+E           SystemExit: polarity threshold report lacks a verifiable git commit
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:169: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_rejects0')
+
+    def test_derivation_report_rejects_changed_implementation_hash(tmp_path):
+        path = _derivation_report(tmp_path / "derive.json")
+        report = json.loads(path.read_text())
+        report["implementation_hashes"]["electrotrace.validation_detectors"] = "f" * 64
+        path.write_text(json.dumps(report), encoding="utf-8")
+>       with pytest.raises(SystemExit, match="implementation hashes do not match"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'implementation hashes do not match'
+E        Input: 'polarity threshold report lacks a verifiable git commit'
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:160: AssertionError
+----------------------------- Captured stderr call -----------------------------
+fatal: not a git repository (or any of the parent directories): .git
+_________ test_derivation_report_must_contain_complete_input_hash_set __________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_co0')
+
+    def test_derivation_report_must_contain_complete_input_hash_set(tmp_path):
+        path = _derivation_report(tmp_path / "derive.json")
+        report = json.loads(path.read_text())
+        report["input_hashes"].pop(next(iter(report["input_hashes"])))
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(SystemExit, match="exact 36-record core input hash set"):
+>           eval_script._load_polarity_threshold_report(path)
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_co0/derive.json')
+
+    def _load_polarity_threshold_report(path: Path) -> tuple[dict, float, float]:
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"cannot read polarity threshold report {path}: {exc}") from exc
+    
+        if report.get("schema") != DERIVATION_SCHEMA:
+            raise SystemExit(
+                f"unsupported polarity threshold report schema: {report.get('schema')!r}; "
+                f"expected {DERIVATION_SCHEMA!r}"
+            )
+        if report.get("freeze_eligible") is not True:
+            raise SystemExit("polarity threshold report is not freeze_eligible")
+        if report.get("selection_status") != "development_only_full_pool":
+            raise SystemExit("polarity threshold report was not derived from the full development pool")
+    
+        report_head = str(report.get("git_head") or "")
+        if not report_head or report_head == "unknown":
+>           raise SystemExit("polarity threshold report lacks a verifiable git commit")
+E           SystemExit: polarity threshold report lacks a verifiable git commit
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:169: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_co0')
+
+    def test_derivation_report_must_contain_complete_input_hash_set(tmp_path):
+        path = _derivation_report(tmp_path / "derive.json")
+        report = json.loads(path.read_text())
+        report["input_hashes"].pop(next(iter(report["input_hashes"])))
+        path.write_text(json.dumps(report), encoding="utf-8")
+>       with pytest.raises(SystemExit, match="exact 36-record core input hash set"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'exact 36-record core input hash set'
+E        Input: 'polarity threshold report lacks a verifiable git commit'
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:169: AssertionError
+----------------------------- Captured stderr call -----------------------------
+fatal: not a git repository (or any of the parent directories): .git
+______ test_derivation_report_must_name_exact_canonical_development_pool _______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_na0')
+
+    def test_derivation_report_must_name_exact_canonical_development_pool(tmp_path):
+        path = _derivation_report(tmp_path / "derive.json")
+        report = json.loads(path.read_text())
+        report["protocol"]["development_pool_records"][0] = "999"
+        path.write_text(json.dumps(report), encoding="utf-8")
+        with pytest.raises(SystemExit, match="exact canonical 36-record development pool"):
+>           eval_script._load_polarity_threshold_report(path)
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_na0/derive.json')
+
+    def _load_polarity_threshold_report(path: Path) -> tuple[dict, float, float]:
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"cannot read polarity threshold report {path}: {exc}") from exc
+    
+        if report.get("schema") != DERIVATION_SCHEMA:
+            raise SystemExit(
+                f"unsupported polarity threshold report schema: {report.get('schema')!r}; "
+                f"expected {DERIVATION_SCHEMA!r}"
+            )
+        if report.get("freeze_eligible") is not True:
+            raise SystemExit("polarity threshold report is not freeze_eligible")
+        if report.get("selection_status") != "development_only_full_pool":
+            raise SystemExit("polarity threshold report was not derived from the full development pool")
+    
+        report_head = str(report.get("git_head") or "")
+        if not report_head or report_head == "unknown":
+>           raise SystemExit("polarity threshold report lacks a verifiable git commit")
+E           SystemExit: polarity threshold report lacks a verifiable git commit
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:169: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_na0')
+
+    def test_derivation_report_must_name_exact_canonical_development_pool(tmp_path):
+        path = _derivation_report(tmp_path / "derive.json")
+        report = json.loads(path.read_text())
+        report["protocol"]["development_pool_records"][0] = "999"
+        path.write_text(json.dumps(report), encoding="utf-8")
+>       with pytest.raises(SystemExit, match="exact canonical 36-record development pool"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'exact canonical 36-record development pool'
+E        Input: 'polarity threshold report lacks a verifiable git commit'
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:178: AssertionError
+----------------------------- Captured stderr call -----------------------------
+fatal: not a git repository (or any of the parent directories): .git
+_ test_derivation_report_must_prove_evaluation_separation[True-True-used INCART] _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_pr1')
+freeze_eligible = True, incart_used = True, message = 'used INCART'
+
+    @pytest.mark.parametrize(
+        ("freeze_eligible", "incart_used", "message"),
+        [
+            (False, False, "not freeze_eligible"),
+            (True, True, "used INCART"),
+        ],
+    )
+    def test_derivation_report_must_prove_evaluation_separation(
+        tmp_path, freeze_eligible, incart_used, message
+    ):
+        path = _derivation_report(
+            tmp_path / "derive.json",
+            freeze_eligible=freeze_eligible,
+            incart_used=incart_used,
+        )
+        with pytest.raises(SystemExit, match=message):
+>           eval_script._load_polarity_threshold_report(path)
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:198: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_pr1/derive.json')
+
+    def _load_polarity_threshold_report(path: Path) -> tuple[dict, float, float]:
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"cannot read polarity threshold report {path}: {exc}") from exc
+    
+        if report.get("schema") != DERIVATION_SCHEMA:
+            raise SystemExit(
+                f"unsupported polarity threshold report schema: {report.get('schema')!r}; "
+                f"expected {DERIVATION_SCHEMA!r}"
+            )
+        if report.get("freeze_eligible") is not True:
+            raise SystemExit("polarity threshold report is not freeze_eligible")
+        if report.get("selection_status") != "development_only_full_pool":
+            raise SystemExit("polarity threshold report was not derived from the full development pool")
+    
+        report_head = str(report.get("git_head") or "")
+        if not report_head or report_head == "unknown":
+>           raise SystemExit("polarity threshold report lacks a verifiable git commit")
+E           SystemExit: polarity threshold report lacks a verifiable git commit
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:169: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_derivation_report_must_pr1')
+freeze_eligible = True, incart_used = True, message = 'used INCART'
+
+    @pytest.mark.parametrize(
+        ("freeze_eligible", "incart_used", "message"),
+        [
+            (False, False, "not freeze_eligible"),
+            (True, True, "used INCART"),
+        ],
+    )
+    def test_derivation_report_must_prove_evaluation_separation(
+        tmp_path, freeze_eligible, incart_used, message
+    ):
+        path = _derivation_report(
+            tmp_path / "derive.json",
+            freeze_eligible=freeze_eligible,
+            incart_used=incart_used,
+        )
+>       with pytest.raises(SystemExit, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'used INCART'
+E        Input: 'polarity threshold report lacks a verifiable git commit'
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:197: AssertionError
+----------------------------- Captured stderr call -----------------------------
+fatal: not a git repository (or any of the parent directories): .git
+______ test_evaluator_threads_verified_report_gate_and_records_provenance ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7cb7ac8701b0>
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_evaluator_threads_verifie0')
+
+    def test_evaluator_threads_verified_report_gate_and_records_provenance(monkeypatch, tmp_path):
+        model_file = _base_runtime(monkeypatch, tmp_path)
+        derivation = _derivation_report(tmp_path / "derive.json", v2=0.07, width=0.38)
+    
+        seen = []
+        real = eval_script.detect_r_peaks_two_stage
+    
+        def spy(*args, **kwargs):
+            seen.append(
+                (kwargs.get("width_override_confidence"), kwargs.get("v2_gate_confidence"))
+            )
+            return real(*args, **kwargs)
+    
+        monkeypatch.setattr(eval_script, "detect_r_peaks_two_stage", spy)
+        out = tmp_path / "report.json"
+        monkeypatch.setattr(
+            sys,
+            "argv",
+            [
+                "evaluate_frozen_model_mitdb.py",
+                "--mitdb-dir",
+                str(tmp_path),
+                "--model",
+                str(model_file),
+                "--records",
+                "105",
+                "--polarity-threshold-report",
+                str(derivation),
+                "--output",
+                str(out),
+            ],
+        )
+>       assert eval_script.main() == 0
+               ^^^^^^^^^^^^^^^^^^
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:289: in main
+    derivation_report, report_width, report_v2 = _load_polarity_threshold_report(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-root/pytest-9/test_evaluator_threads_verifie0/derive.json')
+
+    def _load_polarity_threshold_report(path: Path) -> tuple[dict, float, float]:
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"cannot read polarity threshold report {path}: {exc}") from exc
+    
+        if report.get("schema") != DERIVATION_SCHEMA:
+            raise SystemExit(
+                f"unsupported polarity threshold report schema: {report.get('schema')!r}; "
+                f"expected {DERIVATION_SCHEMA!r}"
+            )
+        if report.get("freeze_eligible") is not True:
+            raise SystemExit("polarity threshold report is not freeze_eligible")
+        if report.get("selection_status") != "development_only_full_pool":
+            raise SystemExit("polarity threshold report was not derived from the full development pool")
+    
+        report_head = str(report.get("git_head") or "")
+        if not report_head or report_head == "unknown":
+>           raise SystemExit("polarity threshold report lacks a verifiable git commit")
+E           SystemExit: polarity threshold report lacks a verifiable git commit
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:169: SystemExit
+----------------------------- Captured stderr call -----------------------------
+fatal: not a git repository (or any of the parent directories): .git
+__________ test_cli_values_must_match_authoritative_derivation_report __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7cb7ac8f99f0>
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_cli_values_must_match_aut0')
+
+    def test_cli_values_must_match_authoritative_derivation_report(monkeypatch, tmp_path):
+        derivation = _derivation_report(tmp_path / "derive.json", v2=0.07, width=0.38)
+        monkeypatch.setattr(
+            sys,
+            "argv",
+            [
+                "evaluate_frozen_model_mitdb.py",
+                "--mitdb-dir",
+                str(tmp_path),
+                "--model",
+                str(tmp_path / "model.skops"),
+                "--width-override-confidence",
+                "0.30",
+                "--polarity-threshold-report",
+                str(derivation),
+            ],
+        )
+        with pytest.raises(SystemExit, match="disagrees"):
+>           eval_script.main()
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:281: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:289: in main
+    derivation_report, report_width, report_v2 = _load_polarity_threshold_report(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-root/pytest-9/test_cli_values_must_match_aut0/derive.json')
+
+    def _load_polarity_threshold_report(path: Path) -> tuple[dict, float, float]:
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"cannot read polarity threshold report {path}: {exc}") from exc
+    
+        if report.get("schema") != DERIVATION_SCHEMA:
+            raise SystemExit(
+                f"unsupported polarity threshold report schema: {report.get('schema')!r}; "
+                f"expected {DERIVATION_SCHEMA!r}"
+            )
+        if report.get("freeze_eligible") is not True:
+            raise SystemExit("polarity threshold report is not freeze_eligible")
+        if report.get("selection_status") != "development_only_full_pool":
+            raise SystemExit("polarity threshold report was not derived from the full development pool")
+    
+        report_head = str(report.get("git_head") or "")
+        if not report_head or report_head == "unknown":
+>           raise SystemExit("polarity threshold report lacks a verifiable git commit")
+E           SystemExit: polarity threshold report lacks a verifiable git commit
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/scripts/evaluate_frozen_model_mitdb.py:169: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7cb7ac8f99f0>
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-9/test_cli_values_must_match_aut0')
+
+    def test_cli_values_must_match_authoritative_derivation_report(monkeypatch, tmp_path):
+        derivation = _derivation_report(tmp_path / "derive.json", v2=0.07, width=0.38)
+        monkeypatch.setattr(
+            sys,
+            "argv",
+            [
+                "evaluate_frozen_model_mitdb.py",
+                "--mitdb-dir",
+                str(tmp_path),
+                "--model",
+                str(tmp_path / "model.skops"),
+                "--width-override-confidence",
+                "0.30",
+                "--polarity-threshold-report",
+                str(derivation),
+            ],
+        )
+>       with pytest.raises(SystemExit, match="disagrees"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'disagrees'
+E        Input: 'polarity threshold report lacks a verifiable git commit'
+
+HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py:280: AssertionError
+----------------------------- Captured stderr call -----------------------------
+fatal: not a git repository (or any of the parent directories): .git
+- generated xml file: /content/HeartTwin_Diagnosis_20261020/results/ElectroTrace-fixed-suite.xml -
+=========================== short test summary info ============================
+FAILED HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py::test_derivation_report_rejects_changed_implementation_hash
+FAILED HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py::test_derivation_report_must_contain_complete_input_hash_set
+FAILED HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py::test_derivation_report_must_name_exact_canonical_development_pool
+FAILED HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py::test_derivation_report_must_prove_evaluation_separation[True-True-used INCART]
+FAILED HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py::test_evaluator_threads_verified_report_gate_and_records_provenance
+FAILED HeartTwin_Diagnosis_20261020/ElectroTrace-fixed/tests/test_evaluate_v2_gate.py::test_cli_values_must_match_authoritative_derivation_report
+6 failed, 373 passed in 29.67s
