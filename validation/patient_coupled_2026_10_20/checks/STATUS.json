@@ -1,0 +1,47 @@
+{
+  "scope": "software and synthetic infrastructure only",
+  "clinical_qualification": "not_established",
+  "components_requested": true,
+  "checks": [
+    {
+      "check": "python-compile",
+      "exit_code": 0,
+      "seconds": 0.4668206220000002
+    },
+    {
+      "check": "patient-and-workbench-tests",
+      "exit_code": 0,
+      "seconds": 67.45091849599999
+    },
+    {
+      "check": "patient-lint",
+      "exit_code": 0,
+      "seconds": 0.11661227199999757
+    },
+    {
+      "check": "gateway-import-order",
+      "exit_code": 0,
+      "seconds": 0.06454461599997785
+    },
+    {
+      "check": "javascript-syntax",
+      "exit_code": 0,
+      "seconds": 0.06472491900001387
+    },
+    {
+      "check": "geometry-tests",
+      "exit_code": 0,
+      "seconds": 0.5231100400000059
+    }
+  ],
+  "status": "SOFTWARE_PASSED",
+  "files": {
+    "geometry-tests.log": "3c8c81ca60c7d426c2d4f2093488bd7bb449245feb9a69255f80fa6bb89ec337",
+    "javascript-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gateway-import-order.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "patient-lint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "python-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "patient-tests.xml": "514f61477e04c34983ebc4d2395e8a65c8eeb620b3f33489b8b8e20ac0c508a3",
+    "patient-and-workbench-tests.log": "0e0eaac2f884152b5a61ee0656c5db61078ed34e88bfb835920b8a6663543b96"
+  }
+}

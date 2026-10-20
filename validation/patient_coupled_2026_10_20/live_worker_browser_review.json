@@ -1,0 +1,10 @@
+{
+  "status": "blocked",
+  "worker_api_smoke": "passed",
+  "browser": "User Edge",
+  "route": "Official Colab kernel-port proxy",
+  "error": "ERR_BLOCKED_BY_CLIENT",
+  "end_to_end_browser_review": "not_completed",
+  "scope": "Synthetic empty worker only; no private patient data",
+  "worker_stopped": true
+}

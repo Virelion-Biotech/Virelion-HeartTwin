@@ -151,7 +151,10 @@ retrieval, owner-only network access and rejection of unbound plain URI/SHA inpu
 Assistant-run validation is restricted to the user's Edge Colab. No local tests
 were run. The first implementation commit passed automatic CI and both component
 integration workflows; those environments skipped imaging tests without optional
-dependencies. Full Colab validation of the final implementation is still pending
-because Edge tab-control commands timed out. There is no current clinical accuracy
+dependencies. After browser control recovered, the full Edge Colab run passed 170 tests with
+zero failures, errors or skips, plus all six validation-script checks. The live
+worker authenticated API smoke passed, but Edge blocked the official Colab proxy
+with ERR_BLOCKED_BY_CLIENT. Its browser end-to-end review therefore remains
+uncompleted; the synthetic worker was stopped afterward. There is no current clinical accuracy
 or live-worker browser end-to-end qualification claim. The prior 145-test Colab
 record belongs to PR #53 and must not be presented as validation of this extension.

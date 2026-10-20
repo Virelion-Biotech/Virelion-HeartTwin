@@ -8,7 +8,7 @@ Patient acquisition additions: [FHIR observation import, reviewed-label reconstr
 native reciprocal lead fields and spatial excitation](docs/PATIENT_NATIVE_PREPARATION.md).
 The [coupled-model extension](docs/PATIENT_COUPLED_MODELS.md) adds four-cavity spatial
 wall/circulation coupling, native calibration, raw-image processing, pinned nnU-Net
-inference and owner-configured DICOMweb retrieval. Its full Colab validation is pending.
+inference and owner-configured DICOMweb retrieval. Its software/synthetic Colab checks passed; clinical qualification and live-worker browser review remain unestablished.
 These research paths require explicit patient inputs and do not establish a fully
 personalized or clinically validated whole-heart system.
 

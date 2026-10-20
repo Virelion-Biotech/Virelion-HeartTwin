@@ -6,7 +6,7 @@ personalized whole-heart model or clinical accuracy.
 
 The subsequent [coupled-model extension](PATIENT_COUPLED_MODELS.md) adds raw-image
 processing, configured DICOMweb retrieval and spatial four-cavity mechanics/circuit
-coupling. Its full Edge Colab validation is tracked separately and is still pending.
+coupling. Its separate Edge Colab run passed 170 software/synthetic tests. Live-worker browser review remains blocked.
 
 Install `pip install -e '.[patient-native]'`. The CLI
 `hearttwin-patient-prepare CAPABILITY request.json` and registry `PatientNative`
