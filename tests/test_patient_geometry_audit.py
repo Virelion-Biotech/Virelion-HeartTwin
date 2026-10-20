@@ -34,5 +34,8 @@ def test_bounded_frame_candidate_corrects_rounding_and_preserves_handedness():
     assert result["maximum_angular_correction_rad"] < 2e-5
     with pytest.raises(ValueError, match="angular bound"):
         rounded_frame_candidate([[1., 0., 0.]], [[.1, 1., 0.]], max_angular_correction_rad=2e-5)
-    with pytest.raises(ValueError, match="handedness"):
-        rounded_frame_candidate([[1., 0., 0.]], [[0., 1., 0.]], normal=[[0., 0., -1.]], max_angular_correction_rad=2e-5)
+    left = rounded_frame_candidate([[1., 0., 0.]], [[0., 1., 0.]], normal=[[0., 0., -1.]], max_angular_correction_rad=2e-5)
+    assert left["frame_handedness_counts"] == {"right": 0, "left": 1}
+    assert left["normal"] == [[0., 0., -1.]]
+    with pytest.raises(ValueError, match="normal correction"):
+        rounded_frame_candidate([[1., 0., 0.]], [[0., 1., 0.]], normal=[[1., 0., 0.]], max_angular_correction_rad=2e-5)

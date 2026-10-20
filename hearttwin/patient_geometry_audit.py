@@ -104,14 +104,22 @@ def rounded_frame_candidate(fiber, sheet, *, max_angular_correction_rad, normal=
         raise ValueError("Fibre and sheet are collinear")
     s /= norms[:, None]
     n = np.cross(f, s)
+    handedness = np.ones(len(n), dtype=int)
+    normal_correction = np.zeros(len(n))
     if normal is not None:
         original_normal = np.asarray(normal, dtype=float)
         if original_normal.shape != n.shape or not np.isfinite(original_normal).all() or np.any(np.linalg.norm(original_normal, axis=1) == 0):
             raise ValueError("Finite aligned original normal directions required")
-        if np.any(np.sum(n * original_normal, axis=1) <= 0):
-            raise ValueError("Candidate conflicts with the supplied frame handedness")
+        cosine = np.sum(n * original_normal, axis=1) / np.linalg.norm(original_normal, axis=1)
+        handedness = np.where(cosine >= 0, 1, -1)
+        normal_correction = np.arccos(np.clip(np.abs(cosine), 0., 1.))
+        if np.any(normal_correction > bound):
+            raise ValueError("Supplied normal correction exceeds explicit angular bound")
+        n *= handedness[:, None]
     return {"fiber": f.tolist(), "sheet": s.tolist(), "normal": n.tolist(),
             "maximum_angular_correction_rad": float(angular_correction.max()),
             "maximum_abs_dot": float(np.abs(np.sum(f * s, axis=1)).max()),
             "declared_angular_bound_rad": bound, "review_status": "pending",
+            "maximum_normal_correction_rad": float(normal_correction.max()),
+            "frame_handedness_counts": {"right": int((handedness > 0).sum()), "left": int((handedness < 0).sum())},
             "qualification": "Numerical frame repair candidate, not measured patient microstructure"}
