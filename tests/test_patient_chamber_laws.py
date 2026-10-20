@@ -53,3 +53,21 @@ def test_optional_native_parameters_have_explicit_units():
     capability = "patient.circulation.simulate"
     assert native_parameter_unit(capability, "compartments.LV.passive_exponent_per_mL") == "1/mL"
     assert native_parameter_unit(capability, "compartments.LV.activation_peak_fraction") == "1"
+
+
+def test_inactive_strength_rejected_before_inference_without_opening_holdout(tmp_path, monkeypatch):
+    pytest.importorskip("scipy")
+    from test_patient_native_calibration import native_calibration_request
+    import hearttwin.patient_domain as domain
+    request = native_calibration_request(tmp_path)
+    request["forward_template"]["compartments"]["LA"]["activation_start_s"] = .6
+    request["forward_template"]["compartments"]["LA"]["activation_duration_s"] = .2
+    request["parameter_paths"] = {"atrial": "compartments.LA.emax_mmHg_per_mL"}
+    request["parameter_bounds"] = {"atrial": [1., 2.]}
+    request["parameter_units"] = {"atrial": "mmHg/mL"}
+    (tmp_path / "hold.json").unlink()
+    def forbidden_inference(*args, **kwargs):
+        raise AssertionError("Inference must not run for a provably inactive parameter")
+    monkeypatch.setattr(domain, "invoke", forbidden_inference)
+    with pytest.raises(ValueError, match="Structurally inactive"):
+        domain.execute_patient_domain(request, object(), output_dir=tmp_path/"run")
