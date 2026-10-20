@@ -36,6 +36,10 @@ def execute(request: dict[str, Any], registry=None) -> Any:
         from .patient_execution import execute_patient_ep
 
         return execute_patient_ep(payload, registry)
+    if kind == "patient_plan":
+        from .patient_personalization import execute_patient_plan
+
+        return execute_patient_plan(payload, registry)
     if kind == "patient_domain":
         from .patient_domain import execute_patient_domain
 

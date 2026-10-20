@@ -445,3 +445,8 @@ workspace exporter reuse the specialist component contracts. See
 [patient lifecycle setup, API, deployment and remaining empirical gates](docs/PATIENT_LIFECYCLE.md).
 Patient infrastructure and successful software execution do not establish
 patient prediction accuracy or clinical qualification.
+
+Patient workflows now include visit/state tracking, guided scalar/curve imports,
+provenance-bearing native service plans, explicit cross-module handoffs and
+curve/labelled-field calibration. See [patient lifecycle](docs/PATIENT_LIFECYCLE.md#patient-native-workflow-completion)
+for bindings, the circulation task builder, and native solver boundaries.

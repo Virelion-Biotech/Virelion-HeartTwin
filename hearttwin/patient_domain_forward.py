@@ -6,6 +6,7 @@ import os
 import tempfile
 from .config import load_registry
 from .patient_domain import forward_payload, invoke
+from .patient_observations import sample_prediction
 
 
 def main():
@@ -23,6 +24,11 @@ def main():
         if capability == "mechanics.simulate":
             payload.setdefault("settings", {})["output_dir"] = directory
         output = invoke(load_registry(), capability, payload)
+        if spec.get("sampling"):
+            output["patient_sampled"] = {
+                "t" + str(index): sample_prediction(output, target)
+                for index, target in enumerate(spec["sampling"])
+            }
         print(json.dumps(output, allow_nan=False))
 
 

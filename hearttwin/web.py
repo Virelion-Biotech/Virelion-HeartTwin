@@ -251,10 +251,14 @@ class Workbench:
                 raise ValueError(
                     "Patient jobs require scientific execution and predeclared acceptance criteria"
                 )
-        elif kind == "patient_domain":
+        elif kind in {"patient_domain", "patient_plan"}:
             from .patient_domain import PatientDomainJob, validate_domain_job
 
-            job = PatientDomainJob.model_validate(request["payload"])
+            if kind == "patient_plan":
+                from .patient_personalization import PatientPlanJob
+                job = PatientPlanJob.model_validate(request["payload"])
+            else:
+                job = PatientDomainJob.model_validate(request["payload"])
             snapshot = self.patients.get(job.case.patient_id, job.case_revision)
             if snapshot["fingerprint"] != job.case_fingerprint or snapshot[
                 "case"
@@ -267,7 +271,11 @@ class Workbench:
                 for x in self.patients.list_cases()
             ):
                 raise ValueError("Restore the patient case before submitting a run")
-            validate_domain_job(job)
+            if kind == "patient_plan":
+                from .patient_personalization import validate_patient_plan
+                validate_patient_plan(job)
+            else:
+                validate_domain_job(job)
         elif kind == "mechanistic":
             required = [
                 "CardiAnatomy",
@@ -309,7 +317,7 @@ class Workbench:
             raise ValueError(
                 "Idempotency key already belongs to a different request"
             ) from exc
-        if request["kind"] in {"patient_ep", "patient_domain"}:
+        if request["kind"] in {"patient_ep", "patient_domain", "patient_plan"}:
             payload = request["payload"]
             try:
                 self.patients.bind_run(
@@ -837,6 +845,54 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                             + acquisition["acquisition_id"],
                         ),
                     )
+                if suffix in {"encounters", "observations", "inputs"}:
+                    principal.require("write", patient_id)
+                    snapshot = app.patients.get(patient_id)
+                    if value["expected_revision"] != snapshot["revision"]:
+                        raise RevisionConflict("Patient changed; reload before adding patient data")
+                    case = snapshot["case"]
+                    if suffix == "encounters":
+                        from .patient_model import PatientEncounter
+                        encounter = PatientEncounter.model_validate(value["encounter"])
+                        case["encounters"].append(encounter.model_dump(mode="json"))
+                    elif suffix == "inputs":
+                        from .patient_model import PatientModelInput
+                        item = PatientModelInput.model_validate(value["input"])
+                        case["model_inputs"] = [x for x in case["model_inputs"] if x["input_id"] != item.input_id]
+                        case["model_inputs"].append(item.model_dump(mode="json"))
+                    else:
+                        if principal.role != "owner":
+                            raise PermissionError("Observation file imports require the worker owner")
+                        from .patient_ingest import import_observation
+                        source_path = app.resolve_uploads({"$upload": value["upload_id"]})
+                        receipt = next(x for x in app.uploads() if x["id"] == value["upload_id"])
+                        case, _ = import_observation(case, {
+                            "file_id": receipt["id"], "uri": Path(source_path).as_uri(),
+                            "sha256": receipt["sha256"]}, value["observation"],
+                            output_dir=app.root / "patient-observations" / patient_id)
+                    return self.json(201, app.patients.save(case,
+                        expected_revision=value["expected_revision"], actor=principal.actor,
+                        reason=value.get("reason") or "Add patient " + suffix))
+                if suffix == "circulation-recipe":
+                    principal.require("execute", patient_id)
+                    from .patient_recipes import circulation_recipe
+                    snapshot = app.patients.get(patient_id, value["case_revision"])
+                    return self.json(200, circulation_recipe(snapshot["case"], value["encounter_id"]))
+                if suffix == "plan-preview":
+                    principal.require("execute", patient_id)
+                    from .patient_personalization import PatientPlanJob, validate_patient_plan
+                    expanded = app.patient_request({"payload": value})["payload"]
+                    job = PatientPlanJob.model_validate(expanded)
+                    manifest = validate_patient_plan(job, verify=True)
+                    return self.json(200, {"manifest": manifest,
+                        "capabilities": {s.capability: bool(app.registry.capability(s.capability)
+                        and app.registry.capability(s.capability).available()) for s in job.stages},
+                        "clinical_qualification": "not_established"})
+                if suffix == "longitudinal":
+                    from .patient_personalization import longitudinal_changes
+                    older = app.patients.get(patient_id, value["older"])
+                    newer = app.patients.get(patient_id, value["newer"])
+                    return self.json(200, longitudinal_changes(older["case"], newer["case"]))
                 if suffix == "compare":
                     return self.json(
                         200,
@@ -846,7 +902,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                     )
                 if suffix == "runs":
                     principal.require("execute", patient_id)
-                    if value.get("kind") not in {"patient_ep", "patient_domain"}:
+                    if value.get("kind") not in {"patient_ep", "patient_domain", "patient_plan"}:
                         raise ValueError("Patient runs require a patient workflow kind")
                     if value.get("payload", {}).get("patient_id") != patient_id:
                         raise ValueError("Run patient differs from route patient")

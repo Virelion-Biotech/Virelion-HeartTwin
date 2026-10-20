@@ -95,3 +95,78 @@ For provisioned access, set `HEARTTWIN_PATIENT_CREDENTIALS` to a JSON list whose
 6. Validate intervention response and longitudinal prediction before treatment-effect claims.
 
 The Colab lifecycle notebook runs software and optional synthetic domain checks. It cannot satisfy these empirical gates by itself.
+
+## Patient-native workflow completion
+
+The workbench now records visits/physiological state, imports scalar and time-series
+measurements, edits provenance-bearing model inputs, previews input bindings and
+assembles a 0D circulation task from case inputs. Every action creates an immutable
+case revision. Import accepts exact `time_s,value` CSV or JSON with explicit units:
+`{"value":80,"unit":"mmHg"}`, `{"values":[80,85],"time_s":[0,0.5],"unit":"mmHg"}`,
+or labelled fields using `labels` instead of `time_s`. Original and normalized
+files remain separately hash-pinned. There is no implicit unit conversion.
+This is a measurement-file import, not an EHR/FHIR or DICOM segmentation importer.
+Imaging/ECG acquisitions continue through the installed CardiAnatomy/ElectroTrace
+adapters and their existing explicit metadata/readiness gates.
+
+`patient_plan` binds a visit, frozen case revision and ordered native service stages.
+Supported scientific stages cover anatomy, ECG/motion analysis, EP, mechanics,
+flow, therapy, cellular/twin simulation and imaging/safety adapters. Availability
+is checked against the worker; adding orchestration does not install missing
+models or broaden a solver's scientific scope.
+
+Each template declares `subject_id` and uses these explicit bindings:
+
+- `{"$input":"input-id","unit":"mmHg"}` copies a case input only with matching units.
+  Optional `path` selects an explicit child of a structured input, e.g. `values`.
+- `{"$source":{"acquisition_id":"mesh-acq","file_id":"mesh","kind":"volume_mesh"}}`
+  passes a hash-verified case source in the native artifact contract.
+- `{"$result":"mechanics.outputs.0"}` passes an exact preceding-stage result.
+
+Every numeric literal requires a `literal_rationale` keyed by its exact template
+path, e.g. `settings.cycles`. Every stage also needs measured/estimated patient
+input, a patient artifact, or a preceding patient-stage result. Assumed and
+population inputs are preserved as such in the personalization manifest.
+UNKNOWN inputs, unit mismatches, withheld/excluded inputs, duplicate holdout
+content, unbound artifact references and forward references are rejected.
+Acquisitions from another or unknown visit require an explicit `carry_forward`
+rationale keyed by acquisition ID. No previous fit is automatically inherited
+when evidence or physiological state changes. The longitudinal comparison states
+which inputs/visits/evidence changed and requires an explicit new run.
+
+The circulation builder requires uniquely named circulation inputs:
+`proximal_resistance`, `distal_resistance` (mmHg*s/mL), `compliance` (mL/mmHg),
+`distal_pressure_mmHg`, `initial_capacitor_pressure` (mmHg), and `inlet_flow`
+(mL/s, a structured curve with `values`/`time_s`). It supplies no physiological
+defaults. Required native fluid contract constants are marked as not consumed by
+the 0D model. Its case reference is not a patient geometry or a claim of CFD.
+
+`patient_domain` now accepts `observation_kind: curve` with `model_time`, or
+`field` with `model_labels`, in addition to scalar targets. Curve fit axes come
+only from calibration acquisitions. The command forward adapter samples model
+outputs with explicit linear interpolation; extrapolation and automatic phase
+shifts are forbidden. Fields require exact label correspondence. Native output
+units must match; a backend without unit metadata requires `prediction_unit`.
+Held-out files are opened only after independent prediction is durably written;
+acceptance requires every held-out sample to satisfy the predeclared absolute
+error bound. Reports also include RMSE and maximum absolute error. MAP remains a
+point estimate; fitting does not establish identifiability or posterior coverage.
+Forward templates may use the same `$input`/`$source` bindings when an encounter is
+selected. Mechanics anatomy must be a unique hash-pinned artifact in that case.
+
+### Engineering and scientific boundaries
+
+The stack has patient-bound orchestration and provenance across these native
+service routes. This does not mean every input is measured or every backend
+consumes full anatomy. Automatic image reconstruction, patient lead-field
+construction, general anatomical CFD/FSI, personalized cellular/regeneration
+biology, and validated patient-benefit prediction are not supplied by this change.
+They require qualified models/data beyond an orchestration layer. Native mechanics,
+flow and intervention restrictions continue to apply. Configuring specialized
+EP/mechanics/therapy stages still requires a reviewed native solver template.
+
+Native FEM field targets can declare `field_quantity` (`displacement_x/y/z`,
+`green_strain_xx/yy/zz/xy/xz/yz`, or `cauchy_stress_xx/yy/zz/xy/xz/yz`) and
+`field_anatomy_sha256`. These read and verify the emitted `spatial_mechanics_fields`
+artifact and compare only explicit `node:N`/`element:N` labels on that exact pinned
+mesh. They do not register an image or infer correspondence to a different mesh.

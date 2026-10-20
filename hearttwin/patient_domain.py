@@ -1,4 +1,4 @@
-"""Evidence-bound scalar mechanics/circulation personalization.
+"""Evidence-bound scalar, curve and labelled-field mechanics/circulation personalization.
 
 Narrow v1: explicit scalar observables and units, bounded MAP calibration,
 independent forward replay and downstream held-out residuals. No clinical or
@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .patient_model import PatientCase, assess_evidence_split
 from .patient_execution import write_stage, runtime_manifest
 from .provenance import sha256
+from .patient_observations import read_observation, sample_prediction
 
 
 class ScalarTarget(BaseModel):
@@ -31,6 +32,12 @@ class ScalarTarget(BaseModel):
     unit: str = Field(min_length=1)
     noise_sd: float = Field(gt=0, allow_inf_nan=False)
     max_abs_error: float = Field(ge=0, allow_inf_nan=False)
+    observation_kind: Literal["scalar", "curve", "field"] = "scalar"
+    model_time: str | None = None
+    model_labels: str | None = None
+    prediction_unit: str | None = None
+    field_quantity: str | None = None
+    field_anatomy_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
 
 
 class PatientDomainJob(BaseModel):
@@ -47,6 +54,8 @@ class PatientDomainJob(BaseModel):
     sampler_settings: dict[str, Any] = Field(default_factory=dict)
     seed: int = 42
     record_trace: bool = False
+    encounter_id: str | None = None
+    carry_forward: dict[str, str] = Field(default_factory=dict)
 
 
 def source_for_target(job, target):
@@ -110,10 +119,31 @@ def set_at(value, path, number):
         value[parts[-1]] = number
 
 
+def effective_template(job, *, verify=False):
+    from types import SimpleNamespace
+    from .patient_personalization import resolve_patient_template
+
+    audit = []
+    context = SimpleNamespace(case=job.case, encounter_id=job.encounter_id, carry_forward=job.carry_forward)
+    template = resolve_patient_template(job.forward_template, context, audit=audit, verify=verify)
+    if audit and job.encounter_id is None:
+        raise ValueError("Patient input mappings require an explicit encounter")
+    return template, audit
+
+
 def validate_domain_job(job):
-    if job.forward_template.get("subject_id") != job.case.patient_id:
+    template, _ = effective_template(job)
+    if job.encounter_id is not None:
+        if job.encounter_id not in {e.encounter_id for e in job.case.encounters}:
+            raise ValueError("Unknown patient encounter")
+        for target in job.targets:
+            evidence, _ = source_for_target(job, target)
+            acquisition = next(a for a in job.case.acquisitions if a.acquisition_id == evidence.acquisition_id)
+            if acquisition.encounter_id != job.encounter_id and not job.carry_forward.get(acquisition.acquisition_id, "").strip():
+                raise ValueError("Target from another physiologic state requires a carry-forward rationale")
+    if template.get("subject_id") != job.case.patient_id:
         raise ValueError("Forward template subject must match patient")
-    if not job.forward_template.get("backend"):
+    if not template.get("backend"):
         raise ValueError("Forward template backend must be explicit")
     if not job.targets or len({x.evidence_id for x in job.targets}) != len(job.targets):
         raise ValueError("Declare unique scalar target evidence IDs")
@@ -145,7 +175,7 @@ def validate_domain_job(job):
             or not job.parameter_units[name].strip()
         ):
             raise ValueError("Bounds must be finite/increasing and units explicit")
-        initial = value_at(job.forward_template, path)
+        initial = value_at(template, path)
         if (
             isinstance(initial, bool)
             or not isinstance(initial, (int, float))
@@ -156,9 +186,20 @@ def validate_domain_job(job):
             )
     evidence = []
     source_roles = {}
+    all_source_roles = {}
     for target in job.targets:
+        if target.observation_kind == "curve" and not target.model_time:
+            raise ValueError("Curve targets require an explicit prediction time path")
+        if target.observation_kind == "field" and not (target.model_labels or (target.field_quantity and target.field_anatomy_sha256)):
+            raise ValueError("Field targets require an explicit prediction label path")
         item, source = source_for_target(job, target)
         evidence.append(item)
+        acquisition = next(a for a in job.case.acquisitions if a.acquisition_id == item.acquisition_id)
+        for artifact in acquisition.source_files:
+            if artifact.sha256 and artifact.sha256 in all_source_roles and all_source_roles[artifact.sha256] != item.role:
+                raise ValueError("Calibration and holdout acquisitions share source bytes")
+            if artifact.sha256:
+                all_source_roles[artifact.sha256] = item.role
         if item.role not in {"calibration", "validation"}:
             raise ValueError(
                 "Target evidence must be explicitly calibration or validation"
@@ -187,8 +228,8 @@ def validate_domain_job(job):
             for child in value:
                 reject_embedded_observations(child)
 
-    reject_embedded_observations(job.forward_template)
-    encoded = json.dumps(job.forward_template)
+    reject_embedded_observations(template)
+    encoded = json.dumps(template)
     for target in job.targets:
         item, source = source_for_target(job, target)
         if item.role == "validation" and (
@@ -226,6 +267,7 @@ def forward_payload(template, paths, parameters):
 def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
     job = PatientDomainJob.model_validate(payload)
     split = validate_domain_job(job)
+    template, input_audit = effective_template(job, verify=True)
     root = Path(output_dir)
     write_stage(
         root / "binding.json",
@@ -235,10 +277,13 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
             "request_sha256": sha256(job.model_dump(mode="json")),
             "evidence_split": split.model_dump(mode="json"),
             "runtime": runtime_manifest(),
+            "input_bindings": input_audit,
+            "encounter_id": job.encounter_id,
+            "carry_forward": job.carry_forward,
         },
     )
     capability = "mechanics.simulate" if job.domain == "mechanics" else "flow.simulate"
-    template = deepcopy(job.forward_template)
+    template = deepcopy(template)
     # Large intermediate artifacts belong to the run directory, not the input dataset.
     if job.domain == "mechanics":
         template.setdefault("settings", {})["output_dir"] = str(
@@ -247,12 +292,35 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
         anatomy = template.get("anatomy_ref")
         if not isinstance(anatomy, dict) or not anatomy.get("sha256"):
             raise ValueError("Patient mechanics requires hash-pinned anatomy_ref")
+        from .patient_observations import verified_bytes
+        matches = [(a, source) for a in job.case.acquisitions for source in a.source_files
+                   if source.uri == anatomy.get("uri") and source.sha256 == anatomy.get("sha256")]
+        if len(matches) != 1:
+            raise ValueError("Mechanics anatomy must be a unique hash-pinned artifact in this patient case")
+        acquisition, source = matches[0]
+        if any(e.acquisition_id == acquisition.acquisition_id and e.role in {"validation", "excluded"} for e in job.case.evidence):
+            raise ValueError("Mechanics anatomy cannot consume held-out or excluded evidence")
+        verified_bytes(source)
         template["settings"]["inline_series"] = True
     likelihood = []
+    sampling = []
     for target in job.targets:
         evidence, source = source_for_target(job, target)
         if evidence.role == "calibration":
-            read_scalar(source, target.unit)
+            if target.observation_kind == "scalar":
+                read_scalar(source, target.unit)
+                output_path, observation_path = target.model_output, "value"
+            else:
+                observation = read_observation(source, target.unit)
+                if target.observation_kind == "curve" and observation.time_s is None:
+                    raise ValueError("Curve source requires explicit time_s")
+                if target.observation_kind == "field" and observation.labels is None:
+                    raise ValueError("Field source requires explicit labels")
+                spec = target.model_dump(mode="json")
+                spec.update(time_s=observation.time_s, labels=observation.labels)
+                # Only fit axes/correspondences enter inference, never withheld values/axes.
+                sampling.append(spec)
+                output_path, observation_path = "patient_sampled.t" + str(len(sampling) - 1), "values"
             likelihood.append(
                 {
                     "term_id": target.evidence_id,
@@ -262,11 +330,11 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
                         "uri": source.uri,
                         "sha256": source.sha256,
                     },
-                    "model_output": target.model_output,
+                    "model_output": output_path,
                     "discrepancy": "gaussian",
                     "noise_parameters": {"sigma": target.noise_sd},
                     "weight": 1.0,
-                    "metadata": {"observation_path": "value"},
+                    "metadata": {"observation_path": observation_path},
                 }
             )
     context = {
@@ -279,6 +347,7 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
             "capability": capability,
             "template": template,
             "parameter_paths": job.parameter_paths,
+            "sampling": sampling,
         },
     }
     inference_request = {
@@ -316,32 +385,39 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
         evidence, source = source_for_target(job, target)
         if evidence.role != "validation":
             continue
-        observed = read_scalar(source, target.unit)
-        predicted = value_at(prediction, target.model_output)
-        if (
-            isinstance(predicted, bool)
-            or not isinstance(predicted, (int, float))
-            or not math.isfinite(predicted)
+        if target.observation_kind == "scalar":
+            observed_values = [read_scalar(source, target.unit)]
+            predicted_values = [value_at(prediction, target.model_output)]
+            actual_unit = prediction.get("units", {}).get(target.model_output.split(".")[-1])
+            if actual_unit is not None and actual_unit != target.unit:
+                raise ValueError("Predicted output units differ from declared target unit")
+        else:
+            observation = read_observation(source, target.unit)
+            if target.observation_kind == "curve" and observation.time_s is None:
+                raise ValueError("Curve holdout requires explicit time_s")
+            if target.observation_kind == "field" and observation.labels is None:
+                raise ValueError("Field holdout requires explicit labels")
+            spec = target.model_dump(mode="json")
+            spec.update(time_s=observation.time_s, labels=observation.labels)
+            observed_values = observation.values
+            predicted_values = sample_prediction(prediction, spec)
+        if len(predicted_values) != len(observed_values) or any(
+            isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v)
+            for v in predicted_values
         ):
-            raise ValueError("Declared output must resolve to a finite scalar")
-        actual_unit = prediction.get("units", {}).get(
-            target.model_output.split(".")[-1]
-        )
-        if actual_unit is not None and actual_unit != target.unit:
-            raise ValueError("Predicted output units differ from declared target unit")
-        error = float(predicted) - observed
-        residuals.append(
-            {
-                "evidence_id": target.evidence_id,
-                "source_sha256": source.sha256,
-                "observed": observed,
-                "predicted": predicted,
-                "unit": target.unit,
-                "error": error,
-                "max_abs_error": target.max_abs_error,
-                "passed": abs(error) <= target.max_abs_error,
-            }
-        )
+            raise ValueError("Declared prediction must align with finite observation values")
+        errors = [float(p) - o for p, o in zip(predicted_values, observed_values)]
+        residuals.append({
+            "evidence_id": target.evidence_id, "source_sha256": source.sha256,
+            "observed": observed_values[0] if target.observation_kind == "scalar" else observed_values,
+            "predicted": predicted_values[0] if target.observation_kind == "scalar" else predicted_values,
+            "unit": target.unit, "observation_kind": target.observation_kind,
+            "error": errors[0] if target.observation_kind == "scalar" else errors,
+            "rmse": math.sqrt(sum(e*e for e in errors) / len(errors)),
+            "maximum_absolute_error": max(abs(e) for e in errors),
+            "max_abs_error": target.max_abs_error,
+            "passed": all(abs(e) <= target.max_abs_error for e in errors),
+        })
     output = {
         "patient_id": job.case.patient_id,
         "case_revision": job.case_revision,
