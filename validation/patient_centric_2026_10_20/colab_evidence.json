@@ -1,0 +1,67 @@
+{
+  "source_commit": "a99794a21f3ee3d0b84cf58d48a46732b7cd558a",
+  "components": {
+    "Virelion-CardiEP": "f9bfcb78cdb857e5995ce244d8645f7370d6b3bb",
+    "Virelion-CardiAnatomy": "e3cc3450c49b84334dd2da696f33a75f4f61557f",
+    "Virelion-CardiInfer": "b4f0c3c30da5986c6a98dba6ceccf1e1de95c881",
+    "Virelion-CardiMech": "5dc14d886ccbda5a1398b863f9ae7821bbffa18b",
+    "Virelion-CardiFlow": "670d370635ba09b2908f7e6736299719e86fc36b",
+    "Virelion-ElectroTrace": "51adddec49efa182f9707524cb59a16b4be554d7"
+  },
+  "counts": {
+    "tests": 123,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "checks": {
+    "scope": "software and synthetic infrastructure only",
+    "clinical_qualification": "not_established",
+    "components_requested": true,
+    "checks": [
+      {
+        "check": "python-compile",
+        "exit_code": 0,
+        "seconds": 0.41678735499999675
+      },
+      {
+        "check": "patient-and-workbench-tests",
+        "exit_code": 0,
+        "seconds": 41.76393488299999
+      },
+      {
+        "check": "patient-lint",
+        "exit_code": 0,
+        "seconds": 0.06638769699998193
+      },
+      {
+        "check": "gateway-import-order",
+        "exit_code": 0,
+        "seconds": 0.06438208800000211
+      },
+      {
+        "check": "javascript-syntax",
+        "exit_code": 0,
+        "seconds": 0.03242618899997751
+      },
+      {
+        "check": "geometry-tests",
+        "exit_code": 0,
+        "seconds": 0.4666679310000177
+      }
+    ],
+    "status": "SOFTWARE_PASSED",
+    "files": {
+      "geometry-tests.log": "301593a59fafe04e931387ea8163fc0d473e0d937c32011a2c8e5189a97fa729",
+      "javascript-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gateway-import-order.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "patient-lint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "python-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "patient-tests.xml": "0fbe5ec9d4d6759cd52a1a45fdfa6be03596bfd0a29235b45fb061b91bd74498",
+      "patient-and-workbench-tests.log": "afef6d51bb966534dd8509321ac590dd329fca9b5b75ed42f2e16fb965e35e8f"
+    }
+  },
+  "clinical_qualification": "not_established",
+  "ui_fixture": "Offline synthetic read-only fixture; not live-worker E2E",
+  "archive_sha256": "6240e44ae2ca2b3aec130e94e9ca2e738546c8f1b560c237e76d5b0671ee2e06"
+}

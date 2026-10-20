@@ -435,3 +435,18 @@ native JSON contracts. See [the workbench setup guide](docs/WEB_WORKBENCH.md).
 ## License
 
 GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`).
+
+## Persistent patient workflows
+
+The workbench now includes a Patients workspace, immutable patient-case revisions,
+acquisition/evidence management, review/history and revision-bound scientific EP
+jobs. Scalar mechanics/circulation calibration and a reviewed Camps geometry
+workspace exporter reuse the specialist component contracts. See
+[patient lifecycle setup, API, deployment and remaining empirical gates](docs/PATIENT_LIFECYCLE.md).
+Patient infrastructure and successful software execution do not establish
+patient prediction accuracy or clinical qualification.
+
+Patient workflows now include visit/state tracking, guided scalar/curve imports,
+provenance-bearing native service plans, explicit cross-module handoffs and
+curve/labelled-field calibration. See [patient lifecycle](docs/PATIENT_LIFECYCLE.md#patient-native-workflow-completion)
+for bindings, the circulation task builder, and native solver boundaries.

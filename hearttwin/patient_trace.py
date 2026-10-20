@@ -5,6 +5,7 @@ and free-form source metadata are not copied into CardiTrace; hashes and stable
 pseudonymous IDs preserve integrity and lineage without duplicating potentially
 identifying filesystem/DICOM paths into the audit log.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -173,6 +174,7 @@ def record_patient_trace(
     workflow_result: PatientEPWorkflowResult | None = None,
     report: PatientModelReport | None = None,
     parameter_mapping: EPParameterMappingSpec | None = None,
+    lifecycle_binding: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Record the minimized patient workflow through the CardiTrace boundary."""
     envelope = build_patient_trace_payload(
@@ -182,6 +184,27 @@ def record_patient_trace(
         report=report,
         parameter_mapping=parameter_mapping,
     )
+    if lifecycle_binding is not None:
+        if set(lifecycle_binding) != {
+            "case_revision",
+            "case_fingerprint",
+            "request_sha256",
+        }:
+            raise ValueError("Trace lifecycle binding has unsupported fields")
+        if (
+            type(lifecycle_binding["case_revision"]) is not int
+            or lifecycle_binding["case_revision"] < 1
+        ):
+            raise ValueError("Trace case revision must be positive")
+        for key in ("case_fingerprint", "request_sha256"):
+            digest = lifecycle_binding[key]
+            if (
+                not isinstance(digest, str)
+                or len(digest) != 64
+                or any(c not in "0123456789abcdef" for c in digest)
+            ):
+                raise ValueError("Trace lifecycle hashes must be SHA-256")
+        envelope.context["patient_lifecycle"] = lifecycle_binding
     adapter = registry.capability("trace.record")
     if adapter is None:
         raise RuntimeError("No service advertises trace.record")
@@ -193,5 +216,7 @@ def record_patient_trace(
     if not output.get("run_id"):
         raise RuntimeError("CardiTrace response has no run_id")
     if str(output.get("status", "")).lower() not in {"succeeded", "success", "ok"}:
-        raise RuntimeError(f"CardiTrace did not report success: {output.get('status')!r}")
+        raise RuntimeError(
+            f"CardiTrace did not report success: {output.get('status')!r}"
+        )
     return output

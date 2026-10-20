@@ -1,0 +1,62 @@
+{
+  "source_commit": "d5bb8ac6928b732561944c746d4d199b7581dc2b",
+  "components": {
+    "Virelion-CardiEP": "f9bfcb78cdb857e5995ce244d8645f7370d6b3bb",
+    "Virelion-CardiAnatomy": "e3cc3450c49b84334dd2da696f33a75f4f61557f",
+    "Virelion-CardiInfer": "b4f0c3c30da5986c6a98dba6ceccf1e1de95c881",
+    "Virelion-CardiMech": "5dc14d886ccbda5a1398b863f9ae7821bbffa18b",
+    "Virelion-CardiFlow": "670d370635ba09b2908f7e6736299719e86fc36b",
+    "Virelion-ElectroTrace": "51adddec49efa182f9707524cb59a16b4be554d7"
+  },
+  "counts": {
+    "tests": 95,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "skips": [],
+  "checks": {
+    "scope": "software and synthetic infrastructure only",
+    "clinical_qualification": "not_established",
+    "components_requested": true,
+    "checks": [
+      {
+        "check": "python-compile",
+        "exit_code": 0,
+        "seconds": 0.06455321199996433
+      },
+      {
+        "check": "patient-and-workbench-tests",
+        "exit_code": 0,
+        "seconds": 27.970978908000006
+      },
+      {
+        "check": "patient-lint",
+        "exit_code": 0,
+        "seconds": 0.06450232300016978
+      },
+      {
+        "check": "javascript-syntax",
+        "exit_code": 0,
+        "seconds": 0.06466620399987733
+      },
+      {
+        "check": "geometry-tests",
+        "exit_code": 0,
+        "seconds": 0.5202603720001662
+      }
+    ],
+    "status": "SOFTWARE_PASSED",
+    "files": {
+      "geometry-tests.log": "073dc5c77bcb6c1935ee76ecbf1453b8326c2dfc31d4fe559cf3198c1178075d",
+      "javascript-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "patient-lint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "python-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "patient-tests.xml": "db4706b912e22b8a5c109714402dff9d81be8645761a2ccd443eb377f1b89785",
+      "patient-and-workbench-tests.log": "71984749d52c451ad114089a2c744bc6b565f5923d7a18fc4bc38cb4b390698d"
+    }
+  },
+  "archive_sha256": "5648f28bb52f6983beed63f42667f4f0cdf3b8535adfd9a522a39f111766ac75",
+  "execution_surface": "Google Colab, controlled through the user's connected Edge browser",
+  "ui_review": "Blocked: browser could not open the temporary Colab workbench URL (ERR_BLOCKED_BY_CLIENT). Visual UI review remains unverified."
+}

@@ -1,0 +1,94 @@
+{
+  "source_commit": "a99794a21f3ee3d0b84cf58d48a46732b7cd558a",
+  "retrieved_date": "2026-10-20",
+  "workflows": [
+    {
+      "run_id": 39407287576,
+      "workflow": "CI",
+      "jobs": [
+        {
+          "id": 118576185138,
+          "name": "test (3.11)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118576185303,
+          "name": "test (3.12)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118576185325,
+          "name": "test (3.10)",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_id": 39407287465,
+      "workflow": "HeartTwin current-main integration",
+      "jobs": [
+        {
+          "id": 118576302468,
+          "name": "Python 3.12 · live component mains",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118576302483,
+          "name": "Python 3.10 · live component mains",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118576302792,
+          "name": "Python 3.11 · live component mains",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_id": 39407287442,
+      "workflow": "HeartTwin integration",
+      "jobs": [
+        {
+          "id": 118576355971,
+          "name": "Python 3.11 · full Virelion stack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118576356289,
+          "name": "Python 3.10 · full Virelion stack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118576356507,
+          "name": "Python 3.12 · full Virelion stack",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "log_scope": "Full Python 3.12 job logs retained; all nine Python 3.10/3.11/3.12 jobs succeeded",
+  "test_summaries": {
+    "base_python312": {
+      "passed": 256,
+      "skipped": 55
+    },
+    "current_main_python312": {
+      "passed": 324,
+      "skipped": 1
+    },
+    "frozen_stack_python312": {
+      "passed": 324,
+      "skipped": 1
+    }
+  },
+  "qualification": "Software/integration only; patient accuracy and clinical benefit not established"
+}

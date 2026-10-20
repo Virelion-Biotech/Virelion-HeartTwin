@@ -32,6 +32,18 @@ def resolve_steps(value: Any, results: dict[str, Any]) -> Any:
 def execute(request: dict[str, Any], registry=None) -> Any:
     registry = registry or load_registry()
     kind, payload = request["kind"], request["payload"]
+    if kind == "patient_ep":
+        from .patient_execution import execute_patient_ep
+
+        return execute_patient_ep(payload, registry)
+    if kind == "patient_plan":
+        from .patient_personalization import execute_patient_plan
+
+        return execute_patient_plan(payload, registry)
+    if kind == "patient_domain":
+        from .patient_domain import execute_patient_domain
+
+        return execute_patient_domain(payload, registry)
     if kind == "capability":
         adapter = registry.capability(request["capability"])
         if adapter is None or not adapter.available():

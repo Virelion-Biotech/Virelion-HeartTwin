@@ -204,11 +204,17 @@ confirmation_backend = "opencarp-external-v1"
 
 A scientific-grade end-to-end workflow still requires a qualified fast ECG/inverse model, a reviewed mapping from that model into the selected openCARP experiment, an installed and independently checked openCARP wrapper/experiment, patient data, expert anatomical review, and held-out patient/cohort validation.
 
-## Next engineering gates
+## Current implementation and remaining gates
 
-1. Select and qualify a fast/inverse EP model suitable for patient ECG calibration.
-2. Define and scientifically review its mapping into a selected openCARP experiment using the existing mapping contract.
-3. Implement/qualify the external openCARP/carputils experiment wrapper behind `opencarp-external-v1`.
-4. Materialize measured and predicted ECG artifacts automatically into the held-out evaluator while preserving evidence IDs and hashes.
-5. Persist patient cases, mapping fingerprints, predictions, residuals, limitations, and validation reports through CardiTrace.
-6. Run one complete reviewed patient reconstruction + calibration + withheld prediction, then repeat across additional patients before broader claims.
+The earlier ECG artifact-materialization and CardiTrace boundaries now have
+implementations. Persistent case revisions, patient workbench execution and
+runtime/source binding are described in [Patient lifecycle](PATIENT_LIFECYCLE.md).
+CardiEP includes package-owned Camps runtime staging and concrete openCARP
+experiment profiles. Their existence does not qualify a patient experiment.
+
+The remaining gates are a complete reviewed patient workspace; independently
+checked external runtimes, lead fields and cross-backend semantics; measured
+held-out patient prediction; and patient-disjoint cohort/uncertainty evaluation.
+The recorded-electrode openCARP profile replays prescribed activation and does
+not independently solve propagation. Spatial mechanics, anatomical CFD and
+patient intervention-benefit validation remain separate scientific work.

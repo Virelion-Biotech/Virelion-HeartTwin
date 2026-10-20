@@ -1,0 +1,826 @@
+﻿2026-10-20T10:21:22.9565549Z Current runner version: '2.337.0'
+2026-10-20T10:21:22.9590132Z ##[group]Runner Image Provisioner
+2026-10-20T10:21:22.9591015Z Hosted Compute Agent
+2026-10-20T10:21:22.9591655Z Version: 20261012.601
+2026-10-20T10:21:22.9592356Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-20T10:21:22.9593572Z Build Date: 2026-10-12T17:48:21Z
+2026-10-20T10:21:22.9594296Z Worker ID: {68c37c7e-3a84-432c-9d7a-07a6db373a7d}
+2026-10-20T10:21:22.9595110Z Region: westus3
+2026-10-20T10:21:22.9595693Z Cloud: Azure
+2026-10-20T10:21:22.9596264Z ##[endgroup]
+2026-10-20T10:21:22.9597834Z ##[group]Operating System
+2026-10-20T10:21:22.9598485Z Ubuntu
+2026-10-20T10:21:22.9599144Z 24.04.5
+2026-10-20T10:21:22.9599697Z LTS
+2026-10-20T10:21:22.9600237Z ##[endgroup]
+2026-10-20T10:21:22.9600807Z ##[group]Runner Image
+2026-10-20T10:21:22.9601401Z Image: ubuntu-24.04
+2026-10-20T10:21:22.9602013Z Version: 20261012.334.1
+2026-10-20T10:21:22.9603529Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-20T10:21:22.9605174Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-20T10:21:22.9606130Z ##[endgroup]
+2026-10-20T10:21:22.9607304Z ##[group]GITHUB_TOKEN Permissions
+2026-10-20T10:21:22.9609188Z Contents: read
+2026-10-20T10:21:22.9609911Z Metadata: read
+2026-10-20T10:21:22.9610525Z ##[endgroup]
+2026-10-20T10:21:22.9612632Z Secret source: Actions
+2026-10-20T10:21:22.9614278Z Cache mode: write
+2026-10-20T10:21:22.9615002Z Prepare workflow directory
+2026-10-20T10:21:23.0010681Z Prepare all required actions
+2026-10-20T10:21:23.0058523Z Getting action download info
+2026-10-20T10:21:23.3291272Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-20T10:21:23.4311931Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-20T10:21:23.6139199Z Complete job name: Python 3.12 · full Virelion stack
+2026-10-20T10:21:23.6940643Z ##[group]Run actions/checkout@v4
+2026-10-20T10:21:23.6941561Z with:
+2026-10-20T10:21:23.6942082Z   repository: Virelion-Biotech/Virelion-HeartTwin
+2026-10-20T10:21:23.6946366Z   token: ***
+2026-10-20T10:21:23.6946814Z   ssh-strict: true
+2026-10-20T10:21:23.6947259Z   ssh-user: git
+2026-10-20T10:21:23.6947711Z   persist-credentials: true
+2026-10-20T10:21:23.6948200Z   clean: true
+2026-10-20T10:21:23.6948657Z   sparse-checkout-cone-mode: true
+2026-10-20T10:21:23.6949186Z   fetch-depth: 1
+2026-10-20T10:21:23.6949619Z   fetch-tags: false
+2026-10-20T10:21:23.6950069Z   show-progress: true
+2026-10-20T10:21:23.6950522Z   lfs: false
+2026-10-20T10:21:23.6950940Z   submodules: false
+2026-10-20T10:21:23.6951387Z   set-safe-directory: true
+2026-10-20T10:21:23.6951897Z   allow-unsafe-pr-checkout: false
+2026-10-20T10:21:23.6952828Z ##[endgroup]
+2026-10-20T10:21:23.7996102Z Syncing repository: Virelion-Biotech/Virelion-HeartTwin
+2026-10-20T10:21:23.7999164Z ##[group]Getting Git version info
+2026-10-20T10:21:23.8000755Z Working directory is '/home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin'
+2026-10-20T10:21:23.8002820Z [command]/usr/bin/git version
+2026-10-20T10:21:23.8087890Z git version 2.55.0
+2026-10-20T10:21:23.8117521Z ##[endgroup]
+2026-10-20T10:21:23.8141901Z Temporarily overriding HOME='/home/runner/work/_temp/4c33b5a4-d400-4e78-9492-83f19ea20112' before making global git config changes
+2026-10-20T10:21:23.8144522Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T10:21:23.8154660Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin
+2026-10-20T10:21:23.8204281Z Deleting the contents of '/home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin'
+2026-10-20T10:21:23.8209152Z ##[group]Initializing the repository
+2026-10-20T10:21:23.8214686Z [command]/usr/bin/git init /home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin
+2026-10-20T10:21:23.8355889Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-20T10:21:23.8358616Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-20T10:21:23.8360834Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-20T10:21:23.8362746Z hint: call:
+2026-10-20T10:21:23.8364163Z hint:
+2026-10-20T10:21:23.8365117Z hint: 	git config --global init.defaultBranch <name>
+2026-10-20T10:21:23.8366159Z hint:
+2026-10-20T10:21:23.8367152Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-20T10:21:23.8368662Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-20T10:21:23.8369858Z hint:
+2026-10-20T10:21:23.8370560Z hint: 	git branch -m <name>
+2026-10-20T10:21:23.8371387Z hint:
+2026-10-20T10:21:23.8372402Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-20T10:21:23.8374477Z Initialized empty Git repository in /home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin/.git/
+2026-10-20T10:21:23.8379289Z [command]/usr/bin/git remote add origin https://github.com/Virelion-Biotech/Virelion-HeartTwin
+2026-10-20T10:21:23.8430057Z ##[endgroup]
+2026-10-20T10:21:23.8431258Z ##[group]Disabling automatic garbage collection
+2026-10-20T10:21:23.8435641Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-20T10:21:23.8473839Z ##[endgroup]
+2026-10-20T10:21:23.8475073Z ##[group]Setting up auth
+2026-10-20T10:21:23.8482156Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T10:21:23.8520442Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T10:21:23.8911939Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T10:21:23.8951346Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T10:21:23.9178103Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T10:21:23.9215713Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T10:21:23.9462032Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-20T10:21:23.9503670Z ##[endgroup]
+2026-10-20T10:21:23.9504947Z ##[group]Fetching the repository
+2026-10-20T10:21:23.9513835Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0af6e2abc56afff65bfc99a3d3eac7e0bcd49f24:refs/remotes/pull/52/merge
+2026-10-20T10:21:24.9423429Z From https://github.com/Virelion-Biotech/Virelion-HeartTwin
+2026-10-20T10:21:24.9424768Z  * [new ref]         0af6e2abc56afff65bfc99a3d3eac7e0bcd49f24 -> pull/52/merge
+2026-10-20T10:21:24.9435002Z ##[endgroup]
+2026-10-20T10:21:24.9436348Z ##[group]Determining the checkout info
+2026-10-20T10:21:24.9437650Z ##[endgroup]
+2026-10-20T10:21:24.9440180Z [command]/usr/bin/git sparse-checkout disable
+2026-10-20T10:21:24.9500763Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-20T10:21:24.9545806Z ##[group]Checking out the ref
+2026-10-20T10:21:24.9550667Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/52/merge
+2026-10-20T10:21:24.9796484Z Note: switching to 'refs/remotes/pull/52/merge'.
+2026-10-20T10:21:24.9797436Z 
+2026-10-20T10:21:24.9798067Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-20T10:21:24.9799500Z changes and commit them, and you can discard any commits you make in this
+2026-10-20T10:21:24.9800881Z state without impacting any branches by switching back to a branch.
+2026-10-20T10:21:24.9801698Z 
+2026-10-20T10:21:24.9802293Z If you want to create a new branch to retain commits you create, you may
+2026-10-20T10:21:24.9803864Z do so (now or later) by using -c with the switch command. Example:
+2026-10-20T10:21:24.9804978Z 
+2026-10-20T10:21:24.9805341Z   git switch -c <new-branch-name>
+2026-10-20T10:21:24.9805929Z 
+2026-10-20T10:21:24.9806286Z Or undo this operation with:
+2026-10-20T10:21:24.9806826Z 
+2026-10-20T10:21:24.9807142Z   git switch -
+2026-10-20T10:21:24.9807577Z 
+2026-10-20T10:21:24.9808371Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-20T10:21:24.9809386Z 
+2026-10-20T10:21:24.9810583Z HEAD is now at 0af6e2a Merge a99794a21f3ee3d0b84cf58d48a46732b7cd558a into 59f91cb2ffa892ab8ceaf8af1b6c843efd7fd050
+2026-10-20T10:21:24.9815431Z ##[endgroup]
+2026-10-20T10:21:24.9863618Z [command]/usr/bin/git log -1 --format=%H
+2026-10-20T10:21:24.9890980Z 0af6e2abc56afff65bfc99a3d3eac7e0bcd49f24
+2026-10-20T10:21:25.0369645Z ##[group]Run actions/setup-python@v5
+2026-10-20T10:21:25.0370995Z with:
+2026-10-20T10:21:25.0371933Z   python-version: 3.12
+2026-10-20T10:21:25.0373286Z   cache: pip
+2026-10-20T10:21:25.0374244Z   check-latest: false
+2026-10-20T10:21:25.0385409Z   token: ***
+2026-10-20T10:21:25.0386383Z   update-environment: true
+2026-10-20T10:21:25.0387519Z   allow-prereleases: false
+2026-10-20T10:21:25.0388610Z   freethreaded: false
+2026-10-20T10:21:25.0389607Z ##[endgroup]
+2026-10-20T10:21:25.1745128Z ##[group]Installed versions
+2026-10-20T10:21:25.1840993Z (node:2310) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T10:21:25.1846425Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T10:21:25.1849337Z Successfully set up CPython (3.12.15)
+2026-10-20T10:21:25.1852610Z ##[endgroup]
+2026-10-20T10:21:25.2910908Z [command]/opt/hostedtoolcache/Python/3.12.15/x64/bin/pip cache dir
+2026-10-20T10:21:25.6064091Z /home/runner/.cache/pip
+2026-10-20T10:21:25.8337896Z Cache hit for: setup-python-Linux-x64-24.04-Ubuntu-python-3.12.15-pip-17d25ce4978eb2cfd81fb89b59b1d19d3350d077fe9c93c66da5602cdfef3cd1
+2026-10-20T10:21:25.8447647Z (node:2310) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-20T10:21:27.0398078Z Received 37748736 of 238836340 (15.8%), 36.0 MBs/sec
+2026-10-20T10:21:28.0409458Z Received 201326592 of 238836340 (84.3%), 95.9 MBs/sec
+2026-10-20T10:21:28.2158936Z Received 238836340 of 238836340 (100.0%), 104.6 MBs/sec
+2026-10-20T10:21:28.2160806Z Cache Size: ~228 MB (238836340 B)
+2026-10-20T10:21:28.2318666Z [command]/usr/bin/tar -xf /home/runner/work/_temp/49a08d07-45a7-4fb0-9840-4ce4664e024e/cache.tzst -P -C /home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin --use-compress-program unzstd
+2026-10-20T10:21:28.5566197Z Cache restored successfully
+2026-10-20T10:21:28.5676913Z Cache restored from key: setup-python-Linux-x64-24.04-Ubuntu-python-3.12.15-pip-17d25ce4978eb2cfd81fb89b59b1d19d3350d077fe9c93c66da5602cdfef3cd1
+2026-10-20T10:21:28.5875729Z ##[group]Run python -m pip install --upgrade pip setuptools wheel
+2026-10-20T10:21:28.5876304Z [36;1mpython -m pip install --upgrade pip setuptools wheel[0m
+2026-10-20T10:21:28.6150220Z shell: /usr/bin/bash -e {0}
+2026-10-20T10:21:28.6150585Z env:
+2026-10-20T10:21:28.6150940Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:28.6151566Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T10:21:28.6152202Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:28.6152725Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:28.6153561Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:28.6154104Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T10:21:28.6154546Z ##[endgroup]
+2026-10-20T10:21:29.2145190Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (26.2.1)
+2026-10-20T10:21:29.3931143Z Collecting setuptools
+2026-10-20T10:21:29.3946141Z   Using cached setuptools-84.2.0-py3-none-any.whl.metadata (6.6 kB)
+2026-10-20T10:21:29.4264633Z Collecting wheel
+2026-10-20T10:21:29.4277858Z   Using cached wheel-0.48.0-py3-none-any.whl.metadata (2.3 kB)
+2026-10-20T10:21:29.4415784Z Collecting packaging>=24.0 (from wheel)
+2026-10-20T10:21:29.4427807Z   Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+2026-10-20T10:21:29.4456474Z Using cached setuptools-84.2.0-py3-none-any.whl (875 kB)
+2026-10-20T10:21:29.4471010Z Using cached wheel-0.48.0-py3-none-any.whl (33 kB)
+2026-10-20T10:21:29.4482659Z Using cached packaging-26.3-py3-none-any.whl (129 kB)
+2026-10-20T10:21:29.4960861Z Installing collected packages: setuptools, packaging, wheel
+2026-10-20T10:21:30.1125571Z 
+2026-10-20T10:21:30.1137292Z Successfully installed packaging-26.3 setuptools-84.2.0 wheel-0.48.0
+2026-10-20T10:21:30.1667741Z ##[group]Run python -m pip install -e '.[dev]'
+2026-10-20T10:21:30.1668133Z [36;1mpython -m pip install -e '.[dev]'[0m
+2026-10-20T10:21:30.1734434Z shell: /usr/bin/bash -e {0}
+2026-10-20T10:21:30.1734698Z env:
+2026-10-20T10:21:30.1734988Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:30.1735465Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T10:21:30.1735939Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:30.1736349Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:30.1736759Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:30.1737175Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T10:21:30.1737533Z ##[endgroup]
+2026-10-20T10:21:30.5032750Z Obtaining file:///home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin
+2026-10-20T10:21:30.5049940Z   Installing build dependencies: started
+2026-10-20T10:21:31.0706206Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:31.0712139Z   Checking if build backend supports build_editable: started
+2026-10-20T10:21:31.4020051Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-10-20T10:21:31.4030630Z   Getting requirements to build editable: started
+2026-10-20T10:21:31.8905033Z   Getting requirements to build editable: finished with status 'done'
+2026-10-20T10:21:31.8915322Z   Preparing editable metadata (pyproject.toml): started
+2026-10-20T10:21:32.0998478Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:32.2760009Z Collecting pydantic<3,>=2.6 (from virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.2775754Z   Using cached pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+2026-10-20T10:21:32.3229586Z Collecting PyYAML<7,>=6.0 (from virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.3244199Z   Using cached pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-10-20T10:21:32.5391514Z Collecting numpy<3,>=1.26 (from virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.5405847Z   Using cached numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+2026-10-20T10:21:32.5721546Z Collecting pytest>=8 (from virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.5735805Z   Using cached pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+2026-10-20T10:21:32.9049881Z Collecting ruff>=0.6 (from virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.9064097Z   Using cached ruff-0.17.1-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (20 kB)
+2026-10-20T10:21:32.9326986Z Collecting jsonschema>=4.23 (from virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.9340501Z   Using cached jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+2026-10-20T10:21:32.9523950Z Collecting annotated-types>=0.6.0 (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:32.9537032Z   Using cached annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+2026-10-20T10:21:33.6251728Z Collecting pydantic-core==2.50.1 (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:33.6266077Z   Using cached pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+2026-10-20T10:21:33.6474223Z Collecting typing-extensions>=4.16.0 (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:33.6487152Z   Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-20T10:21:33.6731985Z Collecting typing-inspection>=0.4.4 (from pydantic<3,>=2.6->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:33.6746542Z   Using cached typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+2026-10-20T10:21:33.6950789Z Collecting attrs>=22.2.0 (from jsonschema>=4.23->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:33.6964557Z   Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+2026-10-20T10:21:33.7149972Z Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=4.23->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:33.7163258Z   Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+2026-10-20T10:21:33.7414349Z Collecting referencing>=0.28.4 (from jsonschema>=4.23->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:33.7429041Z   Using cached referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+2026-10-20T10:21:34.0294330Z Collecting rpds-py>=0.25.0 (from jsonschema>=4.23->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:34.0307918Z   Using cached rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+2026-10-20T10:21:34.0495952Z Collecting iniconfig>=1.0.1 (from pytest>=8->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:34.0508094Z   Using cached iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+2026-10-20T10:21:34.0529163Z Requirement already satisfied: packaging>=22 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pytest>=8->virelion-hearttwin==0.3.0) (26.3)
+2026-10-20T10:21:34.0711981Z Collecting pluggy<2,>=1.5 (from pytest>=8->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:34.0724794Z   Using cached pluggy-1.7.0-py3-none-any.whl.metadata (5.0 kB)
+2026-10-20T10:21:34.0952319Z Collecting pygments>=2.7.2 (from pytest>=8->virelion-hearttwin==0.3.0)
+2026-10-20T10:21:34.0965198Z   Using cached pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+2026-10-20T10:21:34.1058477Z Using cached numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+2026-10-20T10:21:34.1133408Z Using cached pydantic-2.14.1-py3-none-any.whl (488 kB)
+2026-10-20T10:21:34.1147329Z Using cached pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+2026-10-20T10:21:34.1167015Z Using cached pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-10-20T10:21:34.1181095Z Using cached annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-10-20T10:21:34.1192533Z Using cached jsonschema-4.26.0-py3-none-any.whl (90 kB)
+2026-10-20T10:21:34.1204451Z Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-10-20T10:21:34.1216135Z Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+2026-10-20T10:21:34.1227291Z Using cached pytest-9.1.1-py3-none-any.whl (386 kB)
+2026-10-20T10:21:34.1239873Z Using cached pluggy-1.7.0-py3-none-any.whl (27 kB)
+2026-10-20T10:21:34.1251170Z Using cached iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+2026-10-20T10:21:34.1262317Z Using cached pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-10-20T10:21:34.1278890Z Using cached referencing-0.37.0-py3-none-any.whl (26 kB)
+2026-10-20T10:21:34.1290703Z Using cached rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (371 kB)
+2026-10-20T10:21:34.1303454Z Using cached ruff-0.17.1-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.4 MB)
+2026-10-20T10:21:34.1351552Z Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-20T10:21:34.1363155Z Using cached typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-10-20T10:21:34.2084148Z Building wheels for collected packages: virelion-hearttwin
+2026-10-20T10:21:34.2091732Z   Building editable for virelion-hearttwin (pyproject.toml): started
+2026-10-20T10:21:34.4420027Z   Building editable for virelion-hearttwin (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:34.4427084Z   Created wheel for virelion-hearttwin: filename=virelion_hearttwin-0.3.0-0.editable-py3-none-any.whl size=4045 sha256=af357603ea3f9951964aa5ea2127a79c22b59ce068b686508ffd8105b4abfba8
+2026-10-20T10:21:34.4429462Z   Stored in directory: /tmp/pip-ephem-wheel-cache-ylyxc000/wheels/6a/ed/88/b882965384ae8a28ddeb32524b48d36e20ae23d0fd2defe27b
+2026-10-20T10:21:34.4445476Z Successfully built virelion-hearttwin
+2026-10-20T10:21:34.4952037Z Installing collected packages: typing-extensions, ruff, rpds-py, PyYAML, pygments, pluggy, numpy, iniconfig, attrs, annotated-types, typing-inspection, referencing, pytest, pydantic-core, pydantic, jsonschema-specifications, virelion-hearttwin, jsonschema
+2026-10-20T10:21:38.9550668Z 
+2026-10-20T10:21:38.9575261Z Successfully installed PyYAML-6.0.3 annotated-types-0.8.0 attrs-26.1.0 iniconfig-2.3.1 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 numpy-2.5.4 pluggy-1.7.0 pydantic-2.14.1 pydantic-core-2.50.1 pygments-2.21.0 pytest-9.1.1 referencing-0.37.0 rpds-py-2026.9.1 ruff-0.17.1 typing-extensions-4.16.0 typing-inspection-0.4.4 virelion-hearttwin-0.3.0
+2026-10-20T10:21:39.1151858Z ##[group]Run python -m pip install -r requirements-services.txt
+2026-10-20T10:21:39.1152367Z [36;1mpython -m pip install -r requirements-services.txt[0m
+2026-10-20T10:21:39.1216805Z shell: /usr/bin/bash -e {0}
+2026-10-20T10:21:39.1217063Z env:
+2026-10-20T10:21:39.1217356Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:39.1217838Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T10:21:39.1218305Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:39.1218725Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:39.1219142Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:21:39.1219565Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T10:21:39.1219929Z ##[endgroup]
+2026-10-20T10:21:39.4849832Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7 (from -r requirements-services.txt (line 5))
+2026-10-20T10:21:39.4858429Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git (to revision 7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7) to /tmp/pip-req-build-3nib7ui2
+2026-10-20T10:21:39.4882181Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git /tmp/pip-req-build-3nib7ui2
+2026-10-20T10:21:40.6161374Z   Running command git rev-parse -q --verify '7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7^{commit}'
+2026-10-20T10:21:40.6181477Z   7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7
+2026-10-20T10:21:40.6200697Z   Running command git checkout -q 7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7
+2026-10-20T10:21:40.9156562Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git to commit 7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7
+2026-10-20T10:21:40.9193534Z   Installing build dependencies: started
+2026-10-20T10:21:41.4768684Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:41.4777016Z   Getting requirements to build wheel: started
+2026-10-20T10:21:41.9634639Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:41.9645292Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:42.1726864Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:42.1759926Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@7eb4d418e907080f75a18972957683a9f6a97115 (from -r requirements-services.txt (line 6))
+2026-10-20T10:21:42.1766539Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git (to revision 7eb4d418e907080f75a18972957683a9f6a97115) to /tmp/pip-req-build-ohmdk9fp
+2026-10-20T10:21:42.1787567Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git /tmp/pip-req-build-ohmdk9fp
+2026-10-20T10:21:43.0871384Z   Running command git rev-parse -q --verify '7eb4d418e907080f75a18972957683a9f6a97115^{commit}'
+2026-10-20T10:21:43.0890605Z   7eb4d418e907080f75a18972957683a9f6a97115
+2026-10-20T10:21:43.0909588Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git to commit 7eb4d418e907080f75a18972957683a9f6a97115
+2026-10-20T10:21:43.0941328Z   Installing build dependencies: started
+2026-10-20T10:21:43.6455473Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:43.6461284Z   Getting requirements to build wheel: started
+2026-10-20T10:21:44.1323727Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:44.1331687Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:44.3291240Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:44.3311461Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@b521ad859969d6562aec9363b0b937bd01c73404 (from -r requirements-services.txt (line 7))
+2026-10-20T10:21:44.3317471Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiBench.git (to revision b521ad859969d6562aec9363b0b937bd01c73404) to /tmp/pip-req-build-_78uo84w
+2026-10-20T10:21:44.3336824Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiBench.git /tmp/pip-req-build-_78uo84w
+2026-10-20T10:21:45.9842786Z   Running command git rev-parse -q --verify 'b521ad859969d6562aec9363b0b937bd01c73404^{commit}'
+2026-10-20T10:21:45.9863225Z   b521ad859969d6562aec9363b0b937bd01c73404
+2026-10-20T10:21:45.9884465Z   Running command git checkout -q b521ad859969d6562aec9363b0b937bd01c73404
+2026-10-20T10:21:46.5579845Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiBench.git to commit b521ad859969d6562aec9363b0b937bd01c73404
+2026-10-20T10:21:46.5611836Z   Installing build dependencies: started
+2026-10-20T10:21:47.1343580Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:47.1349751Z   Getting requirements to build wheel: started
+2026-10-20T10:21:47.6123914Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:47.6133465Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:47.8046843Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:47.8066494Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@831156fd1605d70b7ff5ec25deaa3e784ca38a72 (from -r requirements-services.txt (line 8))
+2026-10-20T10:21:47.8072839Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiEval.git (to revision 831156fd1605d70b7ff5ec25deaa3e784ca38a72) to /tmp/pip-req-build-xxnzfy4g
+2026-10-20T10:21:47.8094239Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiEval.git /tmp/pip-req-build-xxnzfy4g
+2026-10-20T10:21:48.8119681Z   Running command git rev-parse -q --verify '831156fd1605d70b7ff5ec25deaa3e784ca38a72^{commit}'
+2026-10-20T10:21:48.8139981Z   831156fd1605d70b7ff5ec25deaa3e784ca38a72
+2026-10-20T10:21:48.8161203Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiEval.git to commit 831156fd1605d70b7ff5ec25deaa3e784ca38a72
+2026-10-20T10:21:48.8193967Z   Installing build dependencies: started
+2026-10-20T10:21:49.5769955Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:49.5775293Z   Getting requirements to build wheel: started
+2026-10-20T10:21:49.7355120Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:49.7364055Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:49.9102296Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:49.9125591Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@0f3b15a5ad53b4edc5d44cb5c38f06149bac4401 (from -r requirements-services.txt (line 9))
+2026-10-20T10:21:49.9131897Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiLearn.git (to revision 0f3b15a5ad53b4edc5d44cb5c38f06149bac4401) to /tmp/pip-req-build-s3eahkb5
+2026-10-20T10:21:49.9153644Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiLearn.git /tmp/pip-req-build-s3eahkb5
+2026-10-20T10:21:51.0417752Z   Running command git rev-parse -q --verify '0f3b15a5ad53b4edc5d44cb5c38f06149bac4401^{commit}'
+2026-10-20T10:21:51.0437074Z   0f3b15a5ad53b4edc5d44cb5c38f06149bac4401
+2026-10-20T10:21:51.0457442Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiLearn.git to commit 0f3b15a5ad53b4edc5d44cb5c38f06149bac4401
+2026-10-20T10:21:51.0490712Z   Installing build dependencies: started
+2026-10-20T10:21:51.6461221Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:51.6467191Z   Getting requirements to build wheel: started
+2026-10-20T10:21:52.1318904Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:52.1328286Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:52.3420655Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:52.3451613Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede (from -r requirements-services.txt (line 10))
+2026-10-20T10:21:52.3457182Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiEP.git (to revision a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede) to /tmp/pip-req-build-ahaij_ij
+2026-10-20T10:21:52.3476514Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiEP.git /tmp/pip-req-build-ahaij_ij
+2026-10-20T10:21:53.4177293Z   Running command git rev-parse -q --verify 'a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede^{commit}'
+2026-10-20T10:21:53.4196778Z   a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede
+2026-10-20T10:21:53.4216124Z   Running command git checkout -q a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede
+2026-10-20T10:21:53.4281758Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiEP.git to commit a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede
+2026-10-20T10:21:53.4313772Z   Installing build dependencies: started
+2026-10-20T10:21:53.9844644Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:53.9850769Z   Getting requirements to build wheel: started
+2026-10-20T10:21:54.4584384Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:54.4592940Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:54.6500548Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:54.6517533Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiFlow.git@670d370635ba09b2908f7e6736299719e86fc36b (from -r requirements-services.txt (line 11))
+2026-10-20T10:21:54.6523098Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiFlow.git (to revision 670d370635ba09b2908f7e6736299719e86fc36b) to /tmp/pip-req-build-3_bma7sm
+2026-10-20T10:21:54.6543217Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiFlow.git /tmp/pip-req-build-3_bma7sm
+2026-10-20T10:21:55.5092433Z   Running command git rev-parse -q --verify '670d370635ba09b2908f7e6736299719e86fc36b^{commit}'
+2026-10-20T10:21:55.5109415Z   670d370635ba09b2908f7e6736299719e86fc36b
+2026-10-20T10:21:55.5128533Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiFlow.git to commit 670d370635ba09b2908f7e6736299719e86fc36b
+2026-10-20T10:21:55.5159116Z   Installing build dependencies: started
+2026-10-20T10:21:56.0646380Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:56.0651520Z   Getting requirements to build wheel: started
+2026-10-20T10:21:56.5418462Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:56.5427859Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:56.7326231Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:56.7343909Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@5dc14d886ccbda5a1398b863f9ae7821bbffa18b (from -r requirements-services.txt (line 12))
+2026-10-20T10:21:56.7349294Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiMech.git (to revision 5dc14d886ccbda5a1398b863f9ae7821bbffa18b) to /tmp/pip-req-build-_yr2r_g3
+2026-10-20T10:21:56.7387750Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiMech.git /tmp/pip-req-build-_yr2r_g3
+2026-10-20T10:21:57.6394681Z   Running command git rev-parse -q --verify '5dc14d886ccbda5a1398b863f9ae7821bbffa18b^{commit}'
+2026-10-20T10:21:57.6412100Z   5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+2026-10-20T10:21:57.6432396Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiMech.git to commit 5dc14d886ccbda5a1398b863f9ae7821bbffa18b
+2026-10-20T10:21:57.6464860Z   Installing build dependencies: started
+2026-10-20T10:21:58.2005642Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:21:58.2011126Z   Getting requirements to build wheel: started
+2026-10-20T10:21:58.6751193Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:21:58.6760034Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:21:58.8671900Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:21:58.8689269Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiInfer.git@9aabf87bdbee4c70b98229baa3bbea3fb896b490 (from -r requirements-services.txt (line 13))
+2026-10-20T10:21:58.8695060Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiInfer.git (to revision 9aabf87bdbee4c70b98229baa3bbea3fb896b490) to /tmp/pip-req-build-3rr5s07p
+2026-10-20T10:21:58.8714385Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiInfer.git /tmp/pip-req-build-3rr5s07p
+2026-10-20T10:21:59.8631793Z   Running command git rev-parse -q --verify '9aabf87bdbee4c70b98229baa3bbea3fb896b490^{commit}'
+2026-10-20T10:21:59.8653301Z   9aabf87bdbee4c70b98229baa3bbea3fb896b490
+2026-10-20T10:21:59.8672051Z   Running command git checkout -q 9aabf87bdbee4c70b98229baa3bbea3fb896b490
+2026-10-20T10:21:59.8730278Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiInfer.git to commit 9aabf87bdbee4c70b98229baa3bbea3fb896b490
+2026-10-20T10:21:59.8762830Z   Installing build dependencies: started
+2026-10-20T10:22:00.4269700Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:00.4275563Z   Getting requirements to build wheel: started
+2026-10-20T10:22:00.9057423Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:00.9065973Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:01.0988336Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:01.1020915Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiSim.git@2cfe5c2261014ea4a95f2613ec9f3387b950c8fa (from -r requirements-services.txt (line 14))
+2026-10-20T10:22:01.1026901Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiSim.git (to revision 2cfe5c2261014ea4a95f2613ec9f3387b950c8fa) to /tmp/pip-req-build-33ic2m_g
+2026-10-20T10:22:01.1047066Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiSim.git /tmp/pip-req-build-33ic2m_g
+2026-10-20T10:22:03.7598189Z   Running command git rev-parse -q --verify '2cfe5c2261014ea4a95f2613ec9f3387b950c8fa^{commit}'
+2026-10-20T10:22:03.7618270Z   2cfe5c2261014ea4a95f2613ec9f3387b950c8fa
+2026-10-20T10:22:03.7638025Z   Running command git checkout -q 2cfe5c2261014ea4a95f2613ec9f3387b950c8fa
+2026-10-20T10:22:03.9419586Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiSim.git to commit 2cfe5c2261014ea4a95f2613ec9f3387b950c8fa
+2026-10-20T10:22:03.9456862Z   Installing build dependencies: started
+2026-10-20T10:22:04.5439054Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:04.5446513Z   Getting requirements to build wheel: started
+2026-10-20T10:22:05.0185383Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:05.0193477Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:05.2108781Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:05.2130026Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiVex.git@56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7 (from -r requirements-services.txt (line 15))
+2026-10-20T10:22:05.2137197Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiVex.git (to revision 56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7) to /tmp/pip-req-build-69z01xox
+2026-10-20T10:22:05.2158418Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiVex.git /tmp/pip-req-build-69z01xox
+2026-10-20T10:22:06.3468630Z   Running command git rev-parse -q --verify '56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7^{commit}'
+2026-10-20T10:22:06.3487915Z   56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7
+2026-10-20T10:22:06.3508839Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiVex.git to commit 56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7
+2026-10-20T10:22:06.3539988Z   Installing build dependencies: started
+2026-10-20T10:22:06.8944278Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:06.8949858Z   Getting requirements to build wheel: started
+2026-10-20T10:22:07.0507159Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:07.0516740Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:07.2260909Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:07.2281182Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiStudio.git@8a65e9927888734e91c6fe219645cd28fbe95334 (from -r requirements-services.txt (line 16))
+2026-10-20T10:22:07.2286955Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiStudio.git (to revision 8a65e9927888734e91c6fe219645cd28fbe95334) to /tmp/pip-req-build-eeqkyqsc
+2026-10-20T10:22:07.2306986Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiStudio.git /tmp/pip-req-build-eeqkyqsc
+2026-10-20T10:22:08.3345373Z   Running command git rev-parse -q --verify '8a65e9927888734e91c6fe219645cd28fbe95334^{commit}'
+2026-10-20T10:22:08.3365037Z   8a65e9927888734e91c6fe219645cd28fbe95334
+2026-10-20T10:22:08.3385555Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiStudio.git to commit 8a65e9927888734e91c6fe219645cd28fbe95334
+2026-10-20T10:22:08.3417639Z   Installing build dependencies: started
+2026-10-20T10:22:08.8888903Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:08.8894015Z   Getting requirements to build wheel: started
+2026-10-20T10:22:09.3642674Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:09.3651690Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:09.5574524Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:09.5600430Z Collecting git+https://github.com/Virelion-Biotech/Virelion-DCCP.git@6b05a9aab27809a7f3ec4cc9a9adb809c150a1f5 (from -r requirements-services.txt (line 17))
+2026-10-20T10:22:09.5606259Z   Cloning https://github.com/Virelion-Biotech/Virelion-DCCP.git (to revision 6b05a9aab27809a7f3ec4cc9a9adb809c150a1f5) to /tmp/pip-req-build-blxev6yf
+2026-10-20T10:22:09.5625807Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-DCCP.git /tmp/pip-req-build-blxev6yf
+2026-10-20T10:22:10.5104406Z   Running command git rev-parse -q --verify '6b05a9aab27809a7f3ec4cc9a9adb809c150a1f5^{commit}'
+2026-10-20T10:22:10.5124893Z   6b05a9aab27809a7f3ec4cc9a9adb809c150a1f5
+2026-10-20T10:22:10.5145033Z   Resolved https://github.com/Virelion-Biotech/Virelion-DCCP.git to commit 6b05a9aab27809a7f3ec4cc9a9adb809c150a1f5
+2026-10-20T10:22:10.5180093Z   Installing build dependencies: started
+2026-10-20T10:22:11.1169684Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:11.1175311Z   Getting requirements to build wheel: started
+2026-10-20T10:22:11.5951809Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:11.5961284Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:11.7869760Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:11.7890181Z Collecting git+https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git@51adddec49efa182f9707524cb59a16b4be554d7 (from -r requirements-services.txt (line 18))
+2026-10-20T10:22:11.7896098Z   Cloning https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git (to revision 51adddec49efa182f9707524cb59a16b4be554d7) to /tmp/pip-req-build-jk4sv311
+2026-10-20T10:22:11.7915385Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git /tmp/pip-req-build-jk4sv311
+2026-10-20T10:22:13.3094094Z   Running command git rev-parse -q --verify '51adddec49efa182f9707524cb59a16b4be554d7^{commit}'
+2026-10-20T10:22:13.3113281Z   51adddec49efa182f9707524cb59a16b4be554d7
+2026-10-20T10:22:13.3132832Z   Resolved https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git to commit 51adddec49efa182f9707524cb59a16b4be554d7
+2026-10-20T10:22:13.3167243Z   Installing build dependencies: started
+2026-10-20T10:22:13.8688696Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:13.8694478Z   Getting requirements to build wheel: started
+2026-10-20T10:22:14.3466111Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:14.3475109Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:14.5396363Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:14.5434469Z Collecting git+https://github.com/Virelion-Biotech/Virelion-MyoTrace.git@66a512d8ef7fc0c981d3d5bb804ff99528797ed3 (from -r requirements-services.txt (line 19))
+2026-10-20T10:22:14.5440154Z   Cloning https://github.com/Virelion-Biotech/Virelion-MyoTrace.git (to revision 66a512d8ef7fc0c981d3d5bb804ff99528797ed3) to /tmp/pip-req-build-mbwoh92n
+2026-10-20T10:22:14.5459581Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-MyoTrace.git /tmp/pip-req-build-mbwoh92n
+2026-10-20T10:22:15.8597341Z   Running command git rev-parse -q --verify '66a512d8ef7fc0c981d3d5bb804ff99528797ed3^{commit}'
+2026-10-20T10:22:15.8614153Z   66a512d8ef7fc0c981d3d5bb804ff99528797ed3
+2026-10-20T10:22:15.8632584Z   Running command git checkout -q 66a512d8ef7fc0c981d3d5bb804ff99528797ed3
+2026-10-20T10:22:15.8772711Z   Resolved https://github.com/Virelion-Biotech/Virelion-MyoTrace.git to commit 66a512d8ef7fc0c981d3d5bb804ff99528797ed3
+2026-10-20T10:22:15.8806412Z   Installing build dependencies: started
+2026-10-20T10:22:16.4275474Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:16.4281464Z   Getting requirements to build wheel: started
+2026-10-20T10:22:16.9036887Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:16.9045481Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:17.0959274Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:17.0983716Z Collecting git+https://github.com/Virelion-Biotech/Virelion-OptiCell.git@2b1a3337d7d13a8e6f67669b86fb3e9e63c430f6 (from -r requirements-services.txt (line 20))
+2026-10-20T10:22:17.0989281Z   Cloning https://github.com/Virelion-Biotech/Virelion-OptiCell.git (to revision 2b1a3337d7d13a8e6f67669b86fb3e9e63c430f6) to /tmp/pip-req-build-l6hqbhaj
+2026-10-20T10:22:17.1008809Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-OptiCell.git /tmp/pip-req-build-l6hqbhaj
+2026-10-20T10:22:18.3162062Z   Running command git rev-parse -q --verify '2b1a3337d7d13a8e6f67669b86fb3e9e63c430f6^{commit}'
+2026-10-20T10:22:18.3181705Z   2b1a3337d7d13a8e6f67669b86fb3e9e63c430f6
+2026-10-20T10:22:18.3201217Z   Resolved https://github.com/Virelion-Biotech/Virelion-OptiCell.git to commit 2b1a3337d7d13a8e6f67669b86fb3e9e63c430f6
+2026-10-20T10:22:18.3235965Z   Installing build dependencies: started
+2026-10-20T10:22:19.0012200Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:19.0019396Z   Getting requirements to build wheel: started
+2026-10-20T10:22:19.4854026Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:19.4862636Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:19.6879663Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:19.6910793Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardioScore.git@b1430cce48098e868a20b37326e258eff726a100 (from -r requirements-services.txt (line 21))
+2026-10-20T10:22:19.6916759Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardioScore.git (to revision b1430cce48098e868a20b37326e258eff726a100) to /tmp/pip-req-build-b0jecq6u
+2026-10-20T10:22:19.6936871Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardioScore.git /tmp/pip-req-build-b0jecq6u
+2026-10-20T10:22:20.8655926Z   Running command git rev-parse -q --verify 'b1430cce48098e868a20b37326e258eff726a100^{commit}'
+2026-10-20T10:22:20.8676144Z   b1430cce48098e868a20b37326e258eff726a100
+2026-10-20T10:22:20.8696650Z   Running command git checkout -q b1430cce48098e868a20b37326e258eff726a100
+2026-10-20T10:22:21.2110373Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardioScore.git to commit b1430cce48098e868a20b37326e258eff726a100
+2026-10-20T10:22:21.2146959Z   Installing build dependencies: started
+2026-10-20T10:22:21.8187756Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:21.8193826Z   Getting requirements to build wheel: started
+2026-10-20T10:22:22.3038143Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:22.3050504Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:22.5023767Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:22.5051500Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git@0a3186a7f16e3178a36ab2239322b300d9f9958a (from -r requirements-services.txt (line 22))
+2026-10-20T10:22:22.5057959Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git (to revision 0a3186a7f16e3178a36ab2239322b300d9f9958a) to /tmp/pip-req-build-hkevk75m
+2026-10-20T10:22:22.5078455Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git /tmp/pip-req-build-hkevk75m
+2026-10-20T10:22:23.3642382Z   Running command git rev-parse -q --verify '0a3186a7f16e3178a36ab2239322b300d9f9958a^{commit}'
+2026-10-20T10:22:23.3660049Z   0a3186a7f16e3178a36ab2239322b300d9f9958a
+2026-10-20T10:22:23.3680080Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git to commit 0a3186a7f16e3178a36ab2239322b300d9f9958a
+2026-10-20T10:22:23.3711609Z   Installing build dependencies: started
+2026-10-20T10:22:23.9223443Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:23.9228061Z   Getting requirements to build wheel: started
+2026-10-20T10:22:24.3946883Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:24.3956077Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:24.5854950Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:24.5872478Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@1564073b09c8497d976053a3afd7c7a9bd1dc584 (from -r requirements-services.txt (line 23))
+2026-10-20T10:22:24.5878485Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiTrace.git (to revision 1564073b09c8497d976053a3afd7c7a9bd1dc584) to /tmp/pip-req-build-avae5fu3
+2026-10-20T10:22:24.5899124Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiTrace.git /tmp/pip-req-build-avae5fu3
+2026-10-20T10:22:25.4966788Z   Running command git rev-parse -q --verify '1564073b09c8497d976053a3afd7c7a9bd1dc584^{commit}'
+2026-10-20T10:22:25.4986372Z   1564073b09c8497d976053a3afd7c7a9bd1dc584
+2026-10-20T10:22:25.5006777Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiTrace.git to commit 1564073b09c8497d976053a3afd7c7a9bd1dc584
+2026-10-20T10:22:25.5039456Z   Installing build dependencies: started
+2026-10-20T10:22:26.0507351Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:26.0514448Z   Getting requirements to build wheel: started
+2026-10-20T10:22:26.5235864Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:26.5245248Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:26.7156422Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:26.7173508Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@777ba1f0767e960070df0ceff0b2a2b55a0c4aff (from -r requirements-services.txt (line 24))
+2026-10-20T10:22:26.7179494Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiBridge.git (to revision 777ba1f0767e960070df0ceff0b2a2b55a0c4aff) to /tmp/pip-req-build-oogd14sq
+2026-10-20T10:22:26.7200616Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiBridge.git /tmp/pip-req-build-oogd14sq
+2026-10-20T10:22:27.6242479Z   Running command git rev-parse -q --verify '777ba1f0767e960070df0ceff0b2a2b55a0c4aff^{commit}'
+2026-10-20T10:22:27.6262450Z   777ba1f0767e960070df0ceff0b2a2b55a0c4aff
+2026-10-20T10:22:27.6283919Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiBridge.git to commit 777ba1f0767e960070df0ceff0b2a2b55a0c4aff
+2026-10-20T10:22:27.6316252Z   Installing build dependencies: started
+2026-10-20T10:22:28.2362907Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:28.2368696Z   Getting requirements to build wheel: started
+2026-10-20T10:22:28.7124067Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:28.7133543Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:28.9049502Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:28.9073288Z Collecting git+https://github.com/Virelion-Biotech/Virelion-CardiAgent.git@7ff1e8d2df1e4a3988c4000ae48694fdffdbba29 (from -r requirements-services.txt (line 25))
+2026-10-20T10:22:28.9079439Z   Cloning https://github.com/Virelion-Biotech/Virelion-CardiAgent.git (to revision 7ff1e8d2df1e4a3988c4000ae48694fdffdbba29) to /tmp/pip-req-build-lguq_sm9
+2026-10-20T10:22:28.9099746Z   Running command git clone --filter=blob:none --quiet https://github.com/Virelion-Biotech/Virelion-CardiAgent.git /tmp/pip-req-build-lguq_sm9
+2026-10-20T10:22:30.7238307Z   Running command git rev-parse -q --verify '7ff1e8d2df1e4a3988c4000ae48694fdffdbba29^{commit}'
+2026-10-20T10:22:30.7259567Z   7ff1e8d2df1e4a3988c4000ae48694fdffdbba29
+2026-10-20T10:22:30.7280441Z   Resolved https://github.com/Virelion-Biotech/Virelion-CardiAgent.git to commit 7ff1e8d2df1e4a3988c4000ae48694fdffdbba29
+2026-10-20T10:22:30.7313339Z   Installing build dependencies: started
+2026-10-20T10:22:31.2829417Z   Installing build dependencies: finished with status 'done'
+2026-10-20T10:22:31.2834557Z   Getting requirements to build wheel: started
+2026-10-20T10:22:31.7614543Z   Getting requirements to build wheel: finished with status 'done'
+2026-10-20T10:22:31.7623496Z   Preparing metadata (pyproject.toml): started
+2026-10-20T10:22:31.9542377Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:31.9596278Z Requirement already satisfied: pydantic<3,>=2.6 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5)) (2.14.1)
+2026-10-20T10:22:31.9603397Z Requirement already satisfied: numpy<3,>=1.26 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5)) (2.5.4)
+2026-10-20T10:22:32.1673475Z Collecting numpy<3,>=1.26 (from virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5))
+2026-10-20T10:22:32.1687944Z   Using cached numpy-2.2.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (62 kB)
+2026-10-20T10:22:32.3134068Z Collecting scikit-learn>=1.4 (from cardieval==1.5.0->-r requirements-services.txt (line 8))
+2026-10-20T10:22:32.3146302Z   Using cached scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.3 kB)
+2026-10-20T10:22:32.4337882Z Collecting scipy<1.15,>=1.12 (from cardieval==1.5.0->-r requirements-services.txt (line 8))
+2026-10-20T10:22:32.4349890Z   Using cached scipy-1.14.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+2026-10-20T10:22:32.5570696Z Collecting pandas<3,>=2.1 (from virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:32.5583219Z   Using cached pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-20T10:22:32.6077665Z Collecting joblib<2,>=1.3 (from virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:32.6089242Z   Using cached joblib-1.6.0-py3-none-any.whl.metadata (6.5 kB)
+2026-10-20T10:22:32.6223424Z Requirement already satisfied: jsonschema>=4.20 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from virelion-cardistudio==0.3.0->-r requirements-services.txt (line 16)) (4.26.0)
+2026-10-20T10:22:32.6801169Z Collecting opencv-python-headless<5,>=4.9 (from opticell==2.19.0->-r requirements-services.txt (line 20))
+2026-10-20T10:22:32.6813043Z   Using cached opencv_python_headless-4.14.0.94-cp37-abi3-manylinux_2_28_x86_64.whl.metadata (19 kB)
+2026-10-20T10:22:32.7277610Z Collecting tifffile<2027,>=2024.2 (from opticell==2.19.0->-r requirements-services.txt (line 20))
+2026-10-20T10:22:32.7937663Z   Downloading tifffile-2026.10.15-py3-none-any.whl.metadata (34 kB)
+2026-10-20T10:22:32.8280449Z Collecting defusedxml<0.8,>=0.7.1 (from opticell==2.19.0->-r requirements-services.txt (line 20))
+2026-10-20T10:22:32.8291789Z   Using cached defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)
+2026-10-20T10:22:32.9749112Z Collecting matplotlib>=3.7 (from virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:32.9761937Z   Using cached matplotlib-3.11.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (80 kB)
+2026-10-20T10:22:33.0071668Z Collecting seaborn>=0.12 (from virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.0083265Z   Using cached seaborn-0.13.2-py3-none-any.whl.metadata (5.4 kB)
+2026-10-20T10:22:33.0115244Z Requirement already satisfied: pyyaml>=6.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21)) (6.0.3)
+2026-10-20T10:22:33.0303022Z Collecting click>=8.1 (from virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.0315800Z   Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+2026-10-20T10:22:33.0492630Z Collecting jinja2>=3.1 (from virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.0504247Z   Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2026-10-20T10:22:33.0723985Z Collecting cloudpickle>=3.0 (from joblib<2,>=1.3->virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:33.0735453Z   Using cached cloudpickle-3.1.2-py3-none-any.whl.metadata (7.1 kB)
+2026-10-20T10:22:33.0763749Z Requirement already satisfied: attrs>=22.2.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from jsonschema>=4.20->virelion-cardistudio==0.3.0->-r requirements-services.txt (line 16)) (26.1.0)
+2026-10-20T10:22:33.0768959Z Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from jsonschema>=4.20->virelion-cardistudio==0.3.0->-r requirements-services.txt (line 16)) (2025.9.1)
+2026-10-20T10:22:33.0774335Z Requirement already satisfied: referencing>=0.28.4 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from jsonschema>=4.20->virelion-cardistudio==0.3.0->-r requirements-services.txt (line 16)) (0.37.0)
+2026-10-20T10:22:33.0779203Z Requirement already satisfied: rpds-py>=0.25.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from jsonschema>=4.20->virelion-cardistudio==0.3.0->-r requirements-services.txt (line 16)) (2026.9.1)
+2026-10-20T10:22:33.0992804Z Collecting python-dateutil>=2.8.2 (from pandas<3,>=2.1->virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:33.1004744Z   Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-20T10:22:33.1379661Z Collecting pytz>=2020.1 (from pandas<3,>=2.1->virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:33.1391447Z   Using cached pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-20T10:22:33.1583610Z Collecting tzdata>=2022.7 (from pandas<3,>=2.1->virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:33.1595073Z   Using cached tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-20T10:22:33.1633957Z Requirement already satisfied: annotated-types>=0.6.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5)) (0.8.0)
+2026-10-20T10:22:33.1638739Z Requirement already satisfied: pydantic-core==2.50.1 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5)) (2.50.1)
+2026-10-20T10:22:33.1643897Z Requirement already satisfied: typing-extensions>=4.16.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5)) (4.16.0)
+2026-10-20T10:22:33.1648818Z Requirement already satisfied: typing-inspection>=0.4.4 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0->-r requirements-services.txt (line 5)) (0.4.4)
+2026-10-20T10:22:33.2150451Z Collecting narwhals>=2.0.1 (from scikit-learn>=1.4->cardieval==1.5.0->-r requirements-services.txt (line 8))
+2026-10-20T10:22:33.2250121Z   Downloading narwhals-2.27.1-py3-none-any.whl.metadata (15 kB)
+2026-10-20T10:22:33.2452600Z Collecting threadpoolctl>=3.5.0 (from scikit-learn>=1.4->cardieval==1.5.0->-r requirements-services.txt (line 8))
+2026-10-20T10:22:33.2465316Z   Using cached threadpoolctl-3.7.0-py3-none-any.whl.metadata (24 kB)
+2026-10-20T10:22:33.3134137Z Collecting MarkupSafe>=2.0 (from jinja2>=3.1->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.3146760Z   Using cached markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+2026-10-20T10:22:33.3793243Z Collecting contourpy>=1.0.1 (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.3805675Z   Using cached contourpy-1.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-10-20T10:22:33.3969811Z Collecting cycler>=0.10 (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.3982564Z   Using cached cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+2026-10-20T10:22:33.5790523Z Collecting fonttools>=4.28.2 (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.5893671Z   Downloading fonttools-4.67.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (137 kB)
+2026-10-20T10:22:33.6828248Z Collecting kiwisolver>=1.3.1 (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.6840294Z   Using cached kiwisolver-1.5.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (5.2 kB)
+2026-10-20T10:22:33.6883310Z Requirement already satisfied: packaging>=20.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21)) (26.3)
+2026-10-20T10:22:33.8799960Z Collecting pillow>=9 (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.8899751Z   Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+2026-10-20T10:22:33.9211864Z Collecting pyparsing>=3 (from matplotlib>=3.7->virelion-cardioscore==0.1.2->-r requirements-services.txt (line 21))
+2026-10-20T10:22:33.9223270Z   Using cached pyparsing-3.3.3-py3-none-any.whl.metadata (5.9 kB)
+2026-10-20T10:22:33.9469988Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas<3,>=2.1->virelion-cardilearn==0.4.2->-r requirements-services.txt (line 9))
+2026-10-20T10:22:33.9482112Z   Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-20T10:22:33.9646869Z Using cached defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+2026-10-20T10:22:33.9658070Z Using cached joblib-1.6.0-py3-none-any.whl (306 kB)
+2026-10-20T10:22:33.9671026Z Using cached numpy-2.2.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.5 MB)
+2026-10-20T10:22:33.9741058Z Using cached opencv_python_headless-4.14.0.94-cp37-abi3-manylinux_2_28_x86_64.whl (62.0 MB)
+2026-10-20T10:22:33.9974149Z Using cached pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-20T10:22:34.0029650Z Using cached scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (9.2 MB)
+2026-10-20T10:22:34.0074182Z Using cached scipy-1.14.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (40.8 MB)
+2026-10-20T10:22:34.0320221Z Downloading tifffile-2026.10.15-py3-none-any.whl (276 kB)
+2026-10-20T10:22:34.0630899Z Using cached click-8.5.0-py3-none-any.whl (125 kB)
+2026-10-20T10:22:34.0642890Z Using cached cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+2026-10-20T10:22:34.0655094Z Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+2026-10-20T10:22:34.0667674Z Using cached markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+2026-10-20T10:22:34.0679289Z Using cached matplotlib-3.11.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (9.9 MB)
+2026-10-20T10:22:34.0726656Z Using cached contourpy-1.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (383 kB)
+2026-10-20T10:22:34.0739418Z Using cached cycler-0.12.1-py3-none-any.whl (8.3 kB)
+2026-10-20T10:22:34.0839645Z Downloading fonttools-4.67.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.4 MB)
+2026-10-20T10:22:34.3365845Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.4/5.4 MB 22.8 MB/s  0:00:00
+2026-10-20T10:22:34.3380400Z Using cached kiwisolver-1.5.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.5 MB)
+2026-10-20T10:22:34.3486007Z Downloading narwhals-2.27.1-py3-none-any.whl (483 kB)
+2026-10-20T10:22:34.3704069Z Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+2026-10-20T10:22:34.4944109Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.1/7.1 MB 58.2 MB/s  0:00:00
+2026-10-20T10:22:34.4957554Z Using cached pyparsing-3.3.3-py3-none-any.whl (126 kB)
+2026-10-20T10:22:34.4970435Z Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-20T10:22:34.4983338Z Using cached pytz-2026.5-py2.py3-none-any.whl (506 kB)
+2026-10-20T10:22:34.4996481Z Using cached seaborn-0.13.2-py3-none-any.whl (294 kB)
+2026-10-20T10:22:34.5008747Z Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-20T10:22:34.5020104Z Using cached threadpoolctl-3.7.0-py3-none-any.whl (26 kB)
+2026-10-20T10:22:34.5031541Z Using cached tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+2026-10-20T10:22:34.8075597Z Building wheels for collected packages: virelion-cardianatomy, virelion-cardi-atlas, virelion-cardi-bench, cardieval, virelion-cardilearn, virelion-cardiep, virelion-cardiflow, virelion-cardimech, virelion-cardiinfer, virelion-cardisim, virelion-cardivex, virelion-cardistudio, virelion-dccp, electrotrace, virelion-myotrace, opticell, virelion-cardioscore, virelion-carditherapy, virelion-cardi-trace, virelion-cardibridge, virelion-cardiagent
+2026-10-20T10:22:34.8121332Z   Building wheel for virelion-cardianatomy (pyproject.toml): started
+2026-10-20T10:22:35.0539845Z   Building wheel for virelion-cardianatomy (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:35.0546169Z   Created wheel for virelion-cardianatomy: filename=virelion_cardianatomy-0.5.0-py3-none-any.whl size=76509 sha256=760ce7b4303b0d44e7443e36697a729afb1729608e6f1faeb5450231a769cddf
+2026-10-20T10:22:35.0547945Z   Stored in directory: /home/runner/.cache/pip/wheels/5b/9c/de/6e20c3ee65cf41e1f6de447b5ff78aaaada21d9df242082aca
+2026-10-20T10:22:35.0617337Z   Building wheel for virelion-cardi-atlas (pyproject.toml): started
+2026-10-20T10:22:35.3107452Z   Building wheel for virelion-cardi-atlas (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:35.3114690Z   Created wheel for virelion-cardi-atlas: filename=virelion_cardi_atlas-0.9.0-py3-none-any.whl size=81311 sha256=98f03fe5098e3a3d1e8e67c991c3e612f289c0b2083ccf68adfa6d08e69cbb1e
+2026-10-20T10:22:35.3117156Z   Stored in directory: /home/runner/.cache/pip/wheels/fd/c7/e5/67c62e78f59ff60b4b5dd12f569fd4bb34ab7a6d007ee893a1
+2026-10-20T10:22:35.3180716Z   Building wheel for virelion-cardi-bench (pyproject.toml): started
+2026-10-20T10:22:35.5426126Z   Building wheel for virelion-cardi-bench (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:35.5432396Z   Created wheel for virelion-cardi-bench: filename=virelion_cardi_bench-0.10.0-py3-none-any.whl size=51055 sha256=beaa6e14c05b55282d7d3e795c0d49fffcdc9495a41eb05a91b55b1a5cb2fbf5
+2026-10-20T10:22:35.5434420Z   Stored in directory: /home/runner/.cache/pip/wheels/c3/4b/cc/16ca7e92cf7347abef6a282cec44ce219e987a26aae0445edc
+2026-10-20T10:22:35.5498048Z   Building wheel for cardieval (pyproject.toml): started
+2026-10-20T10:22:35.5881119Z   Building wheel for cardieval (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:35.5887859Z   Created wheel for cardieval: filename=cardieval-1.5.0-py3-none-any.whl size=52887 sha256=9d5a577c805d9db5fb50a3c7ec16a472dfa5b8a15ba23cd81b8f45c95e9ac8c5
+2026-10-20T10:22:35.5890395Z   Stored in directory: /home/runner/.cache/pip/wheels/bd/86/b7/ae8e13ea5b835df66dc95351ac99a7424604da7613b5d76f84
+2026-10-20T10:22:35.5950847Z   Building wheel for virelion-cardilearn (pyproject.toml): started
+2026-10-20T10:22:35.8642773Z   Building wheel for virelion-cardilearn (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:35.8650196Z   Created wheel for virelion-cardilearn: filename=virelion_cardilearn-0.4.2-py3-none-any.whl size=121573 sha256=69778dd85db30c701a8c8ed104cfabd3a60bd9bebf0028b3581e4850994fb386
+2026-10-20T10:22:35.8652689Z   Stored in directory: /home/runner/.cache/pip/wheels/05/09/f1/d590875bbd8ff0b28234d6ade7101b12b543807f3b7e39a67a
+2026-10-20T10:22:35.8718410Z   Building wheel for virelion-cardiep (pyproject.toml): started
+2026-10-20T10:22:36.1079648Z   Building wheel for virelion-cardiep (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:36.1086880Z   Created wheel for virelion-cardiep: filename=virelion_cardiep-0.3.0-py3-none-any.whl size=105354 sha256=41db80d03ba662a2b7975e03dfbb1b8f10c1668e35983b3f32a22500a85ac0d7
+2026-10-20T10:22:36.1089103Z   Stored in directory: /home/runner/.cache/pip/wheels/40/4b/94/56bf924bfc7d6d3124ce742bda05603d33685467b743e1fda7
+2026-10-20T10:22:36.1149336Z   Building wheel for virelion-cardiflow (pyproject.toml): started
+2026-10-20T10:22:36.3294462Z   Building wheel for virelion-cardiflow (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:36.3300681Z   Created wheel for virelion-cardiflow: filename=virelion_cardiflow-0.3.0-py3-none-any.whl size=20223 sha256=e26dfd85456e2d392418cc636add47e5e89fcb5098a602c1501581cbca6ee9c8
+2026-10-20T10:22:36.3303160Z   Stored in directory: /home/runner/.cache/pip/wheels/d4/e3/24/9ded30e0bb4c8a8cd54d1d632c4ae46381c233f584d47cd7e5
+2026-10-20T10:22:36.3361155Z   Building wheel for virelion-cardimech (pyproject.toml): started
+2026-10-20T10:22:36.5605270Z   Building wheel for virelion-cardimech (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:36.5612359Z   Created wheel for virelion-cardimech: filename=virelion_cardimech-0.4.0-py3-none-any.whl size=42368 sha256=3b61fb5e038c33e496f963649688409cdda06e251ad0b38873f49339e9d2f9bc
+2026-10-20T10:22:36.5614818Z   Stored in directory: /home/runner/.cache/pip/wheels/a7/c3/25/ffff5d674eb0eded52c78891ade6b5058a39663e9fdaf24bfc
+2026-10-20T10:22:36.5677154Z   Building wheel for virelion-cardiinfer (pyproject.toml): started
+2026-10-20T10:22:36.7988373Z   Building wheel for virelion-cardiinfer (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:36.7994496Z   Created wheel for virelion-cardiinfer: filename=virelion_cardiinfer-0.6.0-py3-none-any.whl size=58540 sha256=c8f51f53a307d588ddeb11bec7aef493d64c35539849678654747fc35ec1bed0
+2026-10-20T10:22:36.7996580Z   Stored in directory: /home/runner/.cache/pip/wheels/89/7a/dc/3d29fbb87a70a3e782edbcfdf3196cc640ffdbaa4bd36f2adf
+2026-10-20T10:22:36.8065267Z   Building wheel for virelion-cardisim (pyproject.toml): started
+2026-10-20T10:22:37.0313773Z   Building wheel for virelion-cardisim (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:37.0320320Z   Created wheel for virelion-cardisim: filename=virelion_cardisim-0.4.0-py3-none-any.whl size=57227 sha256=b16253679adeccc22923e5f57f74d62dd42351cbf352eba9315cbc0e83b4c546
+2026-10-20T10:22:37.0322547Z   Stored in directory: /home/runner/.cache/pip/wheels/5a/04/ef/1e61556f5e8dfbc4707c51cb946a8f2b58fd4e331fe79f2315
+2026-10-20T10:22:37.0385106Z   Building wheel for virelion-cardivex (pyproject.toml): started
+2026-10-20T10:22:37.0772068Z   Building wheel for virelion-cardivex (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:37.0779374Z   Created wheel for virelion-cardivex: filename=virelion_cardivex-0.4.0-py3-none-any.whl size=94217 sha256=67d76f23bf5be92169f3f336c871efafb7033142dfdb21e14e0490d539ff411a
+2026-10-20T10:22:37.0781240Z   Stored in directory: /home/runner/.cache/pip/wheels/d8/ce/20/d7f705f099746d30f8fbe366c7b85dc33215162c1989432339
+2026-10-20T10:22:37.0842924Z   Building wheel for virelion-cardistudio (pyproject.toml): started
+2026-10-20T10:22:37.3104964Z   Building wheel for virelion-cardistudio (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:37.3112241Z   Created wheel for virelion-cardistudio: filename=virelion_cardistudio-0.3.0-py3-none-any.whl size=33134 sha256=a5080763a2021a8d169a9802d9b55f14b97881df114791118edec8b7a135afe3
+2026-10-20T10:22:37.3114600Z   Stored in directory: /home/runner/.cache/pip/wheels/ad/24/11/b4fd7c6b7853529fa8c9a99aee64e632f2b00afdc3ac77949a
+2026-10-20T10:22:37.3177688Z   Building wheel for virelion-dccp (pyproject.toml): started
+2026-10-20T10:22:37.5579653Z   Building wheel for virelion-dccp (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:37.5586712Z   Created wheel for virelion-dccp: filename=virelion_dccp-0.4.0-py3-none-any.whl size=58683 sha256=67822c17839bd20695d64ad10082612af7d61562786b72583909df3ad826aac7
+2026-10-20T10:22:37.5588977Z   Stored in directory: /home/runner/.cache/pip/wheels/76/da/01/8ec489b6c70d33adf0e1a6704b1eba245cea32e895e5dc725f
+2026-10-20T10:22:37.5653716Z   Building wheel for electrotrace (pyproject.toml): started
+2026-10-20T10:22:37.8066343Z   Building wheel for electrotrace (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:37.8072022Z   Created wheel for electrotrace: filename=electrotrace-1.10.0-py3-none-any.whl size=101938 sha256=036feb886715c3cb370805a09cdd3dca8abc4a6839e70ec4bdea43f9997f6c18
+2026-10-20T10:22:37.8074002Z   Stored in directory: /home/runner/.cache/pip/wheels/b8/0e/67/8c4718ce54340d11b156f5c2ffeec9f807fcdd5e1ba36d3670
+2026-10-20T10:22:37.8143266Z   Building wheel for virelion-myotrace (pyproject.toml): started
+2026-10-20T10:22:38.0447809Z   Building wheel for virelion-myotrace (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:38.0466434Z   Created wheel for virelion-myotrace: filename=virelion_myotrace-0.5.0-py3-none-any.whl size=47084 sha256=9014e1d724a77fa949a1653c76c6d210f13c17d74a177b5bca936cad618720d6
+2026-10-20T10:22:38.0468277Z   Stored in directory: /home/runner/.cache/pip/wheels/56/47/6c/bf21fe0c030595dfdd7e6818d0cb95726d41029df81005b221
+2026-10-20T10:22:38.0523216Z   Building wheel for opticell (pyproject.toml): started
+2026-10-20T10:22:38.3316052Z   Building wheel for opticell (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:38.3322156Z   Created wheel for opticell: filename=opticell-2.19.0-py3-none-any.whl size=117717 sha256=6a8f81f5ce66cb913f68c25a8a2017aff4af60a1b516f563549b03b9c93b8ff3
+2026-10-20T10:22:38.3324027Z   Stored in directory: /home/runner/.cache/pip/wheels/64/3e/4b/d51f62e8e23b3e71e322f49f1531135d2cc6e6633c24ab4858
+2026-10-20T10:22:38.3392013Z   Building wheel for virelion-cardioscore (pyproject.toml): started
+2026-10-20T10:22:38.5963800Z   Building wheel for virelion-cardioscore (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:38.5970434Z   Created wheel for virelion-cardioscore: filename=virelion_cardioscore-0.1.2-py3-none-any.whl size=109214 sha256=943534d66821ddd78c8c3ea60838039b0002bfefa7d1bd2650420c2be86c14be
+2026-10-20T10:22:38.5972186Z   Stored in directory: /home/runner/.cache/pip/wheels/04/1a/cd/99c1a93ae191c71d612570a5577f0d7257fb84008cd81b2f09
+2026-10-20T10:22:38.6038731Z   Building wheel for virelion-carditherapy (pyproject.toml): started
+2026-10-20T10:22:38.8203615Z   Building wheel for virelion-carditherapy (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:38.8208800Z   Created wheel for virelion-carditherapy: filename=virelion_carditherapy-0.3.0-py3-none-any.whl size=25054 sha256=0b43ee90b32416ba2925ff77a2261d9abb02f3244800fc82a63deb45d75d38d1
+2026-10-20T10:22:38.8210568Z   Stored in directory: /home/runner/.cache/pip/wheels/4b/33/83/b536a6e5248039bfa9d030bd9533875c29c15a4fbab57f0699
+2026-10-20T10:22:38.8270077Z   Building wheel for virelion-cardi-trace (pyproject.toml): started
+2026-10-20T10:22:39.0602743Z   Building wheel for virelion-cardi-trace (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:39.0610013Z   Created wheel for virelion-cardi-trace: filename=virelion_cardi_trace-0.4.1-py3-none-any.whl size=73217 sha256=e8e2b34345420fddb9d66bcb4c8e850c04840c069854add004072bdad52eb3bc
+2026-10-20T10:22:39.0612482Z   Stored in directory: /home/runner/.cache/pip/wheels/03/7c/48/52b372e6c80108de39bd80ed061f64f27c08e09e9a8a2cd755
+2026-10-20T10:22:39.0677419Z   Building wheel for virelion-cardibridge (pyproject.toml): started
+2026-10-20T10:22:39.2932290Z   Building wheel for virelion-cardibridge (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:39.2937947Z   Created wheel for virelion-cardibridge: filename=virelion_cardibridge-0.3.1-py3-none-any.whl size=45426 sha256=e9dd56227a4b18b96853613e4b6ae250fa81c75d3874c8f57683dedd3b548349
+2026-10-20T10:22:39.2940195Z   Stored in directory: /home/runner/.cache/pip/wheels/07/4b/4f/09f01070b42a8d3baff76e9536b2490efc0a9415b5dcc15b76
+2026-10-20T10:22:39.3002598Z   Building wheel for virelion-cardiagent (pyproject.toml): started
+2026-10-20T10:22:39.5294260Z   Building wheel for virelion-cardiagent (pyproject.toml): finished with status 'done'
+2026-10-20T10:22:39.5300938Z   Created wheel for virelion-cardiagent: filename=virelion_cardiagent-0.6.0-py3-none-any.whl size=60066 sha256=b1bb4ef07cafcf53fa12d5c0438f75f4de034853537838050e21cf878b45b53d
+2026-10-20T10:22:39.5303258Z   Stored in directory: /home/runner/.cache/pip/wheels/f1/00/a5/a3488ec03ee29cce5ccf8303ec6c79e17bb90673e4a6e7dc28
+2026-10-20T10:22:39.5330153Z Successfully built virelion-cardianatomy virelion-cardi-atlas virelion-cardi-bench cardieval virelion-cardilearn virelion-cardiep virelion-cardiflow virelion-cardimech virelion-cardiinfer virelion-cardisim virelion-cardivex virelion-cardistudio virelion-dccp electrotrace virelion-myotrace opticell virelion-cardioscore virelion-carditherapy virelion-cardi-trace virelion-cardibridge virelion-cardiagent
+2026-10-20T10:22:39.7007643Z Installing collected packages: pytz, virelion-cardivex, virelion-cardiagent, virelion-cardi-trace, virelion-cardi-bench, virelion-cardi-atlas, tzdata, threadpoolctl, six, pyparsing, pillow, numpy, narwhals, MarkupSafe, kiwisolver, fonttools, defusedxml, cycler, cloudpickle, click, virelion-cardisim, tifffile, scipy, python-dateutil, opencv-python-headless, joblib, jinja2, contourpy, virelion-carditherapy, virelion-cardimech, virelion-cardiinfer, virelion-cardiflow, virelion-cardiep, virelion-cardianatomy, scikit-learn, pandas, matplotlib, virelion-myotrace, virelion-dccp, virelion-cardistudio, virelion-cardilearn, virelion-cardibridge, seaborn, opticell, electrotrace, cardieval, virelion-cardioscore
+2026-10-20T10:22:40.6428615Z   Attempting uninstall: numpy
+2026-10-20T10:22:40.6454621Z     Found existing installation: numpy 2.5.4
+2026-10-20T10:22:40.6915708Z     Uninstalling numpy-2.5.4:
+2026-10-20T10:22:40.7005323Z       Successfully uninstalled numpy-2.5.4
+2026-10-20T10:22:58.4611124Z 
+2026-10-20T10:22:58.4669512Z Successfully installed MarkupSafe-3.0.4 cardieval-1.5.0 click-8.5.0 cloudpickle-3.1.2 contourpy-1.4.0 cycler-0.12.1 defusedxml-0.7.1 electrotrace-1.10.0 fonttools-4.67.0 jinja2-3.1.6 joblib-1.6.0 kiwisolver-1.5.1 matplotlib-3.11.2 narwhals-2.27.1 numpy-2.2.6 opencv-python-headless-4.14.0.94 opticell-2.19.0 pandas-2.3.3 pillow-13.0.0 pyparsing-3.3.3 python-dateutil-2.9.0.post0 pytz-2026.5 scikit-learn-1.9.1 scipy-1.14.1 seaborn-0.13.2 six-1.17.0 threadpoolctl-3.7.0 tifffile-2026.10.15 tzdata-2026.5 virelion-cardi-atlas-0.9.0 virelion-cardi-bench-0.10.0 virelion-cardi-trace-0.4.1 virelion-cardiagent-0.6.0 virelion-cardianatomy-0.5.0 virelion-cardibridge-0.3.1 virelion-cardiep-0.3.0 virelion-cardiflow-0.3.0 virelion-cardiinfer-0.6.0 virelion-cardilearn-0.4.2 virelion-cardimech-0.4.0 virelion-cardioscore-0.1.2 virelion-cardisim-0.4.0 virelion-cardistudio-0.3.0 virelion-carditherapy-0.3.0 virelion-cardivex-0.4.0 virelion-dccp-0.4.0 virelion-myotrace-0.5.0
+2026-10-20T10:22:59.7848906Z ##[group]Run hearttwin doctor
+2026-10-20T10:22:59.7849268Z [36;1mhearttwin doctor[0m
+2026-10-20T10:22:59.7849525Z [36;1mpython - <<'PY'[0m
+2026-10-20T10:22:59.7849769Z [36;1mimport json[0m
+2026-10-20T10:22:59.7850000Z [36;1mimport subprocess[0m
+2026-10-20T10:22:59.7850434Z [36;1mdoctor = json.loads(subprocess.check_output(["hearttwin", "doctor"], text=True))[0m
+2026-10-20T10:22:59.7850886Z [36;1mrequired = [[0m
+2026-10-20T10:22:59.7851239Z [36;1m    "CardiAnatomy", "CardiAtlas", "CardiBench", "CardiEval", "CardiFlow",[0m
+2026-10-20T10:22:59.7851747Z [36;1m    "CardiLearn", "CardiEP", "CardiMech", "CardiInfer", "CardiSim",[0m
+2026-10-20T10:22:59.7852241Z [36;1m    "CardiTherapy", "CardiTrace", "CardiBridge", "CardiAgent", "CardiVex",[0m
+2026-10-20T10:22:59.7852737Z [36;1m    "CardiStudio", "DCCP", "ElectroTrace", "MyoTrace", "OptiCell",[0m
+2026-10-20T10:22:59.7853399Z [36;1m    "CardioScore",[0m
+2026-10-20T10:22:59.7853639Z [36;1m][0m
+2026-10-20T10:22:59.7853977Z [36;1mmissing = [name for name in required if not doctor.get(name)][0m
+2026-10-20T10:22:59.7854348Z [36;1mif missing:[0m
+2026-10-20T10:22:59.7854730Z [36;1m    raise SystemExit(f"Native services unavailable after installation: {missing}")[0m
+2026-10-20T10:22:59.7855158Z [36;1mPY[0m
+2026-10-20T10:22:59.7919407Z shell: /usr/bin/bash -e {0}
+2026-10-20T10:22:59.7919661Z env:
+2026-10-20T10:22:59.7919937Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:22:59.7920392Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T10:22:59.7920830Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:22:59.7921225Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:22:59.7921633Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:22:59.7922038Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T10:22:59.7922383Z   HEARTTWIN_REQUIRE_NATIVE: 1
+2026-10-20T10:22:59.7922814Z ##[endgroup]
+2026-10-20T10:23:01.7143705Z {
+2026-10-20T10:23:01.7144122Z   "CardiAnatomy": true,
+2026-10-20T10:23:01.7144538Z   "CardiAtlas": true,
+2026-10-20T10:23:01.7144911Z   "CardiBench": true,
+2026-10-20T10:23:01.7145271Z   "CardiEval": true,
+2026-10-20T10:23:01.7145626Z   "ElectroTrace": true,
+2026-10-20T10:23:01.7145982Z   "MyoTrace": true,
+2026-10-20T10:23:01.7146312Z   "OptiCell": true,
+2026-10-20T10:23:01.7146656Z   "CardioScore": true,
+2026-10-20T10:23:01.7147021Z   "CardiLearn": true,
+2026-10-20T10:23:01.7147366Z   "CardiEP": true,
+2026-10-20T10:23:01.7147695Z   "CardiFlow": true,
+2026-10-20T10:23:01.7148033Z   "CardiMech": true,
+2026-10-20T10:23:01.7148366Z   "CardiInfer": true,
+2026-10-20T10:23:01.7148708Z   "CardiSim": true,
+2026-10-20T10:23:01.7149048Z   "CardiSimNative": true,
+2026-10-20T10:23:01.7149426Z   "CardiTherapy": true,
+2026-10-20T10:23:01.7149779Z   "CardiTrace": true,
+2026-10-20T10:23:01.7150130Z   "CardiBridge": true,
+2026-10-20T10:23:01.7150509Z   "CardiAgent": true,
+2026-10-20T10:23:01.7150857Z   "CardiVex": true,
+2026-10-20T10:23:01.7151186Z   "CardiStudio": true,
+2026-10-20T10:23:01.7151521Z   "DCCP": true
+2026-10-20T10:23:01.7151860Z }
+2026-10-20T10:23:03.6036451Z ##[group]Run python -m pytest -q tests/test_stack_continuity_canary.py tests/test_native_service_connections.py tests/test_multimodal_workflow.py tests/test_cardiep_native_engine.py tests/test_ep_calibration_workflow.py tests/test_mechanistic_workflow.py tests/test_mechanistic_pipe.py
+2026-10-20T10:23:03.6038924Z [36;1mpython -m pytest -q tests/test_stack_continuity_canary.py tests/test_native_service_connections.py tests/test_multimodal_workflow.py tests/test_cardiep_native_engine.py tests/test_ep_calibration_workflow.py tests/test_mechanistic_workflow.py tests/test_mechanistic_pipe.py[0m
+2026-10-20T10:23:03.6102621Z shell: /usr/bin/bash -e {0}
+2026-10-20T10:23:03.6103200Z env:
+2026-10-20T10:23:03.6103550Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:23:03.6104131Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T10:23:03.6104718Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:23:03.6105269Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:23:03.6105772Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:23:03.6106278Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T10:23:03.6106727Z   HEARTTWIN_REQUIRE_NATIVE: 1
+2026-10-20T10:23:03.6107024Z ##[endgroup]
+2026-10-20T10:24:11.7297429Z .....................                                                    [100%]
+2026-10-20T10:24:11.7298273Z 21 passed in 67.80s (0:01:07)
+2026-10-20T10:24:11.9361296Z ##[group]Run python -m pytest -q
+2026-10-20T10:24:11.9361702Z [36;1mpython -m pytest -q[0m
+2026-10-20T10:24:11.9425386Z shell: /usr/bin/bash -e {0}
+2026-10-20T10:24:11.9425679Z env:
+2026-10-20T10:24:11.9426018Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:24:11.9426583Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T10:24:11.9427125Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:24:11.9427625Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:24:11.9428129Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T10:24:11.9428626Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T10:24:11.9429052Z   HEARTTWIN_REQUIRE_NATIVE: 1
+2026-10-20T10:24:11.9429337Z ##[endgroup]
+2026-10-20T10:24:15.2419910Z ........................................................................ [ 22%]
+2026-10-20T10:25:37.9834864Z ...........s............................................................ [ 44%]
+2026-10-20T10:25:38.3065755Z ........................................................................ [ 66%]
+2026-10-20T10:25:55.1372653Z ........................................................................ [ 88%]
+2026-10-20T10:26:49.9236847Z .....................................                                    [100%]
+2026-10-20T10:26:49.9238321Z =============================== warnings summary ===============================
+2026-10-20T10:26:49.9239826Z tests/test_integrity_regressions.py::test_pinned_cardilearn_uses_json_null_for_undefined_metrics
+2026-10-20T10:26:49.9243277Z   /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/sklearn/metrics/_classification.py:614: UserWarning: A single label was found in 'y_true' and 'y_pred'. For the confusion matrix to have the correct shape, use the 'labels' parameter to pass all known labels.
+2026-10-20T10:26:49.9245714Z     warnings.warn(
+2026-10-20T10:26:49.9245971Z 
+2026-10-20T10:26:49.9246628Z tests/test_integrity_regressions.py::test_pinned_cardilearn_uses_json_null_for_undefined_metrics
+2026-10-20T10:26:49.9248478Z   /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/sklearn/metrics/_ranking.py:469: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+2026-10-20T10:26:49.9249935Z     warnings.warn(
+2026-10-20T10:26:49.9250161Z 
+2026-10-20T10:26:49.9250672Z tests/test_integrity_regressions.py::test_pinned_cardilearn_uses_json_null_for_undefined_metrics
+2026-10-20T10:26:49.9252415Z   /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/sklearn/metrics/_regression.py:1295: UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+2026-10-20T10:26:49.9254028Z     warnings.warn(msg, UndefinedMetricWarning)
+2026-10-20T10:26:49.9254413Z 
+2026-10-20T10:26:49.9254783Z -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2026-10-20T10:26:49.9255607Z 324 passed, 1 skipped, 3 warnings in 157.68s (0:02:37)
+2026-10-20T10:26:50.1781039Z Post job cleanup.
+2026-10-20T10:26:50.2956636Z Cache hit occurred on the primary key setup-python-Linux-x64-24.04-Ubuntu-python-3.12.15-pip-17d25ce4978eb2cfd81fb89b59b1d19d3350d077fe9c93c66da5602cdfef3cd1, not saving cache.
+2026-10-20T10:26:50.2958542Z (node:4769) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T10:26:50.2960244Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T10:26:50.3116894Z Post job cleanup.
+2026-10-20T10:26:50.3959043Z [command]/usr/bin/git version
+2026-10-20T10:26:50.4004426Z git version 2.55.0
+2026-10-20T10:26:50.4048225Z Temporarily overriding HOME='/home/runner/work/_temp/835121f4-bbe1-4c83-ae77-dcb92ed7449a' before making global git config changes
+2026-10-20T10:26:50.4049754Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T10:26:50.4053805Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Virelion-HeartTwin/Virelion-HeartTwin
+2026-10-20T10:26:50.4093433Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T10:26:50.4130362Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T10:26:50.4376031Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T10:26:50.4405811Z http.https://github.com/.extraheader
+2026-10-20T10:26:50.4418020Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-20T10:26:50.4455126Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T10:26:50.4764466Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T10:26:50.4811850Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T10:26:50.5286448Z Cleaning up orphan processes
+2026-10-20T10:26:50.5618113Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
