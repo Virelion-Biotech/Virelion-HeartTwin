@@ -1,0 +1,134 @@
+{
+  "status": "GEOMETRY_AUDITED_SIGNALS_NOT_AVAILABLE",
+  "subject_id": "EDGAR-Bratislava-P034",
+  "surfaces": {
+    "EndoEpi": {
+      "vertices": 5758,
+      "triangles": 11528,
+      "minimum_face_index": 0,
+      "maximum_face_index": 5757,
+      "edges_without_two_faces": 6,
+      "inconsistent_directed_edges": 12,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 8,
+      "signed_volume_native_units_cubed": 522642.546083
+    },
+    "Epi": {
+      "vertices": 3458,
+      "triangles": 6912,
+      "minimum_face_index": 0,
+      "maximum_face_index": 3457,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 2,
+      "signed_volume_native_units_cubed": 1132005.5771761667
+    },
+    "R_lung": {
+      "vertices": 878,
+      "triangles": 1756,
+      "minimum_face_index": 0,
+      "maximum_face_index": 877,
+      "edges_without_two_faces": 2,
+      "inconsistent_directed_edges": 4,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 2696539.420475667
+    },
+    "L_lung": {
+      "vertices": 835,
+      "triangles": 1668,
+      "minimum_face_index": 0,
+      "maximum_face_index": 834,
+      "edges_without_two_faces": 1,
+      "inconsistent_directed_edges": 2,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 2036340.5978496668
+    },
+    "Torso": {
+      "vertices": 1773,
+      "triangles": 3542,
+      "minimum_face_index": 0,
+      "maximum_face_index": 1772,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 33117330.56184
+    },
+    "RV_RA": {
+      "vertices": 3339,
+      "triangles": 6680,
+      "minimum_face_index": 0,
+      "maximum_face_index": 3338,
+      "edges_without_two_faces": 3,
+      "inconsistent_directed_edges": 6,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 658196.9112478332
+    },
+    "LV_LA": {
+      "vertices": 2900,
+      "triangles": 5796,
+      "minimum_face_index": 0,
+      "maximum_face_index": 2899,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 624708.6218253333
+    }
+  },
+  "electrode_mapping": {
+    "electrodes": 128,
+    "torso_vertices": 1773,
+    "matrix_shape": [
+      128,
+      1773
+    ],
+    "formula": "p2 + a*(p1-p2) + b*(p3-p2); weights [a,1-a-b,b] in published triangle order",
+    "basis": "Publisher electrodesMappingPrinciple.jpg inspected in user Edge Colab; no fitted permutation or registration",
+    "triangle_indexing": "zero-based, explicitly documented",
+    "electrode_labels": "1..128 in numbered positions; no standard V1..V6 correspondence asserted",
+    "minimum_barycentric_weight": 0.00039999999999995595,
+    "maximum_barycentric_weight": 0.9695,
+    "rows_with_negative_weights": 0,
+    "constant_field_preservation_max_error": 1.1102230246251565e-16,
+    "coordinate_residual_RMS_native_units": 0.0011257608364662753,
+    "coordinate_residual_max_native_units": 0.00323834047000977,
+    "coordinate_units": "Unconfirmed in supplied P034 MAT/readme metadata; retain native units, do not silently label mm or convert to metres.",
+    "qualification": "Interpolation/geometry consistency, not ECG prediction accuracy."
+  },
+  "pacing_site_coordinates_supplied": true,
+  "electrical_data": {
+    "documented_channels": 131,
+    "documented_torso_channels": 128,
+    "documented_limb_signals": [
+      "R",
+      "L",
+      "F"
+    ],
+    "documented_sampling_Hz": 1000,
+    "documented_voltage_unit": "mV",
+    "documented_reference": "CMS (common mode sense), explicitly NOT WCT",
+    "documented_runs": [
+      "RV apex pacing at 100 bpm",
+      "Spontaneous rhythm/PVCs"
+    ],
+    "downloaded_waveform_records": 0,
+    "electrical_prediction_metrics": null
+  },
+  "blockers": [
+    "Signed-in P034 page lists only Documentation and Meshes; both archives were downloaded and contain no Run1/Run2 waveform arrays.",
+    "No tetrahedral torso/myocardium conductivity model: supplied MAT files contain surface pts/fac only. They are not directly compatible with native reciprocal P1 volume-conductor FEM.",
+    "Native coordinate unit, channel-to-electrode alignment, CMS-to-required reference handling and physiological parameters need explicit qualification before an electrical run.",
+    "CT identifies the pacing site according to readme; do not assume all geometry originated from MRI based on the broader catalogue description.",
+    "Run2 PVC ground truth is verbal description and a CARTO picture, not a precise numeric ablation target; do not manufacture a localisation-distance metric.",
+    "No cine motion, chamber pressures, individual ventricular fibre field, or paired mechanics reference was present in the two downloaded archives."
+  ],
+  "native_EP_validation": "NOT_RUN",
+  "clinical_qualification": "NOT_ESTABLISHED",
+  "next": "Obtain the missing Run1/Run2 waveform files from maintainers (do not infer unlisted download URLs), confirm units and montage, then freeze beat/site/channel splits before fitting.",
+  "runner_sha256": "59627f652c4200c3a3ef8c57b11720eda60dc018de4c26a87479388c89ee09cd"
+}

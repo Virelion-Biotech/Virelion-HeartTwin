@@ -1,0 +1,95 @@
+{
+  "selected_variant": {
+    "name": "original_three_parameter",
+    "phase": false,
+    "filling": false
+  },
+  "final_fit": {
+    "x": [
+      1.5133347528507455,
+      0.4909659778681586,
+      0.0010000000006146284
+    ],
+    "sse_mL2": 4334.3691339757,
+    "nfev": 6,
+    "termination_success": true,
+    "termination": "`ftol` termination condition is satisfied.",
+    "bound_fraction": [
+      0.17890313327224625,
+      0.46452004918186973,
+      3.0885847079914622e-12
+    ],
+    "scaled_jacobian_singular_values": [
+      1963.2166652672831,
+      1175.459992529899,
+      283.6589635587029
+    ]
+  },
+  "final_trials": [
+    {
+      "x": [
+        1.5133347528507455,
+        0.4909659778681586,
+        0.0010000000006146284
+      ],
+      "sse_mL2": 4334.3691339757,
+      "nfev": 6,
+      "termination_success": true,
+      "termination": "`ftol` termination condition is satisfied.",
+      "bound_fraction": [
+        0.17890313327224625,
+        0.46452004918186973,
+        3.0885847079914622e-12
+      ],
+      "scaled_jacobian_singular_values": [
+        1963.2166652672831,
+        1175.459992529899,
+        283.6589635587029
+      ]
+    },
+    {
+      "x": [
+        1.5133300842048423,
+        0.49096628640690404,
+        0.001000000000985174
+      ],
+      "sse_mL2": 4334.369176895898,
+      "nfev": 7,
+      "termination_success": true,
+      "termination": "`ftol` termination condition is satisfied.",
+      "bound_fraction": [
+        0.17890254230441038,
+        0.46451936354021317,
+        4.950622939579532e-12
+      ],
+      "scaled_jacobian_singular_values": [
+        1963.211847449475,
+        1175.4620300639979,
+        283.6607502278686
+      ]
+    }
+  ],
+  "prediction_sha256": "e18e690c068e01e736e21d2e749faffc6a421b5749a24d7036c40d30cd299217",
+  "calibration": {
+    "n": 23,
+    "rmse_mL": 13.727739504812364,
+    "mae_mL": 11.93678784624544,
+    "maximum_absolute_error_mL": 24.04256791399675
+  },
+  "archived_outer_development_reassessment": {
+    "n": 12,
+    "rmse_mL": 22.86854649759186,
+    "mae_mL": 19.152885408965385,
+    "maximum_absolute_error_mL": 35.7606118452814
+  },
+  "original_outer_rmse_mL": 22.86854649759186,
+  "persistence_outer_rmse_mL": 8.061338997774605,
+  "RV_reassessment": {
+    "observed_mL": 65.938406,
+    "predicted_mL": 87.81039733554829,
+    "absolute_error_mL": 21.871991335548287
+  },
+  "clinical_validation": "NOT_ESTABLISHED",
+  "new_independent_patient_data": false,
+  "interpretation": "Ablations test conditional assumptions on calibration data. Archived outer scores are development reassessment only, not a new validation pass."
+}

@@ -1,0 +1,11 @@
+Warning: you are leaving 1 commit behind, not connected to
+any of your branches:
+
+  dc6f627 Add independent circulation, transport, calibration-ablation and geometry diagnostics
+
+If you want to keep it by creating a new branch, this may be a good time
+to do so with:
+
+ git branch <new-branch-name> dc6f627
+
+HEAD is now at 2b5228d Clean diagnostic script lint without changing calculations

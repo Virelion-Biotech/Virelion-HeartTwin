@@ -1,0 +1,17 @@
+
+==================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_cpu_contracts.py _________________
+ImportError while importing test module '/content/HeartTwin_Diagnosis_20261020/Virelion-CardiInfer/tests/test_cpu_contracts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_cpu_contracts.py:9: in <module>
+    from hypothesis import given, settings
+E   ModuleNotFoundError: No module named 'hypothesis'
+- generated xml file: /content/HeartTwin_Diagnosis_20261020/results/Virelion-CardiInfer-suite.xml -
+=========================== short test summary info ============================
+ERROR tests/test_cpu_contracts.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 7.02s

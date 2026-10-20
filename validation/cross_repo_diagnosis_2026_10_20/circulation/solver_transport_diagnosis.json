@@ -1,0 +1,33 @@
+{
+  "independent_DOP853_max_volume_error_mL": 0.0013263732054440425,
+  "unit_metadata_patch_max_volume_change_mL": 0.0,
+  "registry_vs_direct_max_volume_error_mL": 0.0,
+  "command_forward_vs_direct_max_volume_error_mL": 0.0,
+  "direct_repository_call_trace": {
+    "hearttwin": [
+      "<genexpr>",
+      "flows",
+      "hemodynamic_observables",
+      "negative_volume",
+      "pressure",
+      "rhs",
+      "simulate_closed_loop",
+      "write_artifact"
+    ]
+  },
+  "source_file": "/content/HeartTwin_Diagnosis_20261020/HeartTwin-fixed/hearttwin/patient_closed_loop.py",
+  "initial_compartment_pressures_mmHg": {
+    "LA": 7.5,
+    "LV": 10.582225900000001,
+    "SA": 93.33333333333333,
+    "SV": 6.666666666666667,
+    "RA": 5.0,
+    "RV": 5.53636866,
+    "PA": 28.0,
+    "PV": 10.0
+  },
+  "initial_LV_net_flow_mL_per_s": 0.0,
+  "measured_first_interval_LV_rate_mL_per_s": -204.0772013372228,
+  "initial_state_interpretation": "Both LV valves initially closed in assumed model; observed first interval loses volume. Test activation-phase and filling assumptions, not an observation time shift.",
+  "scope": "Native 0D solver and two real HeartTwin transport paths. Other repository engines were not the numerical source of this KIT benchmark."
+}

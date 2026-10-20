@@ -1,0 +1,136 @@
+KIT_GEOMETRY {"reader": {"source_sha256": "b9b8f4777656fbf1a50d33d553c850f0262ec91614aa6f4beb774711f218aa29", "meshio_original": {"status": "failed", "type": "Error", "message": "Invalid base64-encoded string: number of data characters (8656165) cannot be 1 more than a multiple of 4"}, "VTK_reader": {"status": "read", "points": 32505, "tetrahedra": 128976}, "canonical_meshio_read": "PASS; point values and tetrahedral connectivity preserved", "canonical_sha256": "7b5703f8cec9198dacac03cec0e56473c62db02c810cc92c88200dd94e2cc4f1", "VTK_vs_TetGen_max_same_index_coordinate_error_mm": 3.808593746157385e-06, "VTK_vs_TetGen_equal_tetrahedral_indices": true, "diagnosis": "Publisher data is readable by VTK; failure in meshio's compressed appended encoding path is an I/O compatibility problem, not proof of corrupt anatomy.", "remedy": "Use official TetGen or this lossless VTK canonical export for meshio; retain both source hashes. This does not bypass native solver size limits."}, "frame": {"maximum_angular_correction_rad": 1.348250714468859e-05, "maximum_abs_dot": 2.220446049250313e-16, "declared_angular_bound_rad": 2e-05, "review_status": "pending", "maximum_normal_correction_rad": 1.6170938955133334e-05, "frame_handedness_counts": {"right": 51603, "left": 77373}, "qualification": "Numerical frame repair candidate, not measured patient microstructure", "candidate_sha256": "40c36ec7e7d4570d91a5c43041212bc37db3ab229342bff048dcc25384ea781a", "source_bases_sha256": "ca67691953a3b2db81020f91d3aedab5da2a0cbce734933b98fdb929c7000860", "original_normal_sign_counts": {"positive": 51603, "negative": 77373, "zero": 0}, "diagnosis": "Published finite-precision directions do not exactly meet the native orthogonality contract. Fibre/sheet projection is bounded explicitly; normal handedness is preserved rather than forced to another convention.", "native_size_gate": {"nodes": 32505, "node_limit": 5000, "tetrahedra": 128976, "element_limit": 20000, "status": "CAPACITY_LIMIT_UNCHANGED"}, "scientific_blockers": ["reference-state and boundary qualification", "cavity/material mapping", "activation and patient circulation measurements", "mesh-convergence and scalable solve validation"]}}
+{
+  "status": "GEOMETRY_AUDITED_SIGNALS_NOT_AVAILABLE",
+  "subject_id": "EDGAR-Bratislava-P034",
+  "surfaces": {
+    "EndoEpi": {
+      "vertices": 5758,
+      "triangles": 11528,
+      "minimum_face_index": 0,
+      "maximum_face_index": 5757,
+      "edges_without_two_faces": 6,
+      "inconsistent_directed_edges": 12,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 8,
+      "signed_volume_native_units_cubed": 522642.546083
+    },
+    "Epi": {
+      "vertices": 3458,
+      "triangles": 6912,
+      "minimum_face_index": 0,
+      "maximum_face_index": 3457,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 2,
+      "signed_volume_native_units_cubed": 1132005.5771761667
+    },
+    "R_lung": {
+      "vertices": 878,
+      "triangles": 1756,
+      "minimum_face_index": 0,
+      "maximum_face_index": 877,
+      "edges_without_two_faces": 2,
+      "inconsistent_directed_edges": 4,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 2696539.420475667
+    },
+    "L_lung": {
+      "vertices": 835,
+      "triangles": 1668,
+      "minimum_face_index": 0,
+      "maximum_face_index": 834,
+      "edges_without_two_faces": 1,
+      "inconsistent_directed_edges": 2,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 2036340.5978496668
+    },
+    "Torso": {
+      "vertices": 1773,
+      "triangles": 3542,
+      "minimum_face_index": 0,
+      "maximum_face_index": 1772,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 33117330.56184
+    },
+    "RV_RA": {
+      "vertices": 3339,
+      "triangles": 6680,
+      "minimum_face_index": 0,
+      "maximum_face_index": 3338,
+      "edges_without_two_faces": 3,
+      "inconsistent_directed_edges": 6,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 658196.9112478332
+    },
+    "LV_LA": {
+      "vertices": 2900,
+      "triangles": 5796,
+      "minimum_face_index": 0,
+      "maximum_face_index": 2899,
+      "edges_without_two_faces": 0,
+      "inconsistent_directed_edges": 0,
+      "duplicate_triangles": 0,
+      "degenerate_triangles": 0,
+      "signed_volume_native_units_cubed": 624708.6218253333
+    }
+  },
+  "electrode_mapping": {
+    "electrodes": 128,
+    "torso_vertices": 1773,
+    "matrix_shape": [
+      128,
+      1773
+    ],
+    "formula": "p2 + a*(p1-p2) + b*(p3-p2); weights [a,1-a-b,b] in published triangle order",
+    "basis": "Publisher electrodesMappingPrinciple.jpg inspected in user Edge Colab; no fitted permutation or registration",
+    "triangle_indexing": "zero-based, explicitly documented",
+    "electrode_labels": "1..128 in numbered positions; no standard V1..V6 correspondence asserted",
+    "minimum_barycentric_weight": 0.00039999999999995595,
+    "maximum_barycentric_weight": 0.9695,
+    "rows_with_negative_weights": 0,
+    "constant_field_preservation_max_error": 1.1102230246251565e-16,
+    "coordinate_residual_RMS_native_units": 0.0011257608364662753,
+    "coordinate_residual_max_native_units": 0.00323834047000977,
+    "coordinate_units": "Unconfirmed in supplied P034 MAT/readme metadata; retain native units, do not silently label mm or convert to metres.",
+    "qualification": "Interpolation/geometry consistency, not ECG prediction accuracy."
+  },
+  "pacing_site_coordinates_supplied": true,
+  "electrical_data": {
+    "documented_channels": 131,
+    "documented_torso_channels": 128,
+    "documented_limb_signals": [
+      "R",
+      "L",
+      "F"
+    ],
+    "documented_sampling_Hz": 1000,
+    "documented_voltage_unit": "mV",
+    "documented_reference": "CMS (common mode sense), explicitly NOT WCT",
+    "documented_runs": [
+      "RV apex pacing at 100 bpm",
+      "Spontaneous rhythm/PVCs"
+    ],
+    "downloaded_waveform_records": 0,
+    "electrical_prediction_metrics": null
+  },
+  "blockers": [
+    "Signed-in P034 page lists only Documentation and Meshes; both archives were downloaded and contain no Run1/Run2 waveform arrays.",
+    "No tetrahedral torso/myocardium conductivity model: supplied MAT files contain surface pts/fac only. They are not directly compatible with native reciprocal P1 volume-conductor FEM.",
+    "Native coordinate unit, channel-to-electrode alignment, CMS-to-required reference handling and physiological parameters need explicit qualification before an electrical run.",
+    "CT identifies the pacing site according to readme; do not assume all geometry originated from MRI based on the broader catalogue description.",
+    "Run2 PVC ground truth is verbal description and a CARTO picture, not a precise numeric ablation target; do not manufacture a localisation-distance metric.",
+    "No cine motion, chamber pressures, individual ventricular fibre field, or paired mechanics reference was present in the two downloaded archives."
+  ],
+  "native_EP_validation": "NOT_RUN",
+  "clinical_qualification": "NOT_ESTABLISHED",
+  "next": "Obtain the missing Run1/Run2 waveform files from maintainers (do not infer unlisted download URLs), confirm units and montage, then freeze beat/site/channel splits before fitting.",
+  "runner_sha256": "59627f652c4200c3a3ef8c57b11720eda60dc018de4c26a87479388c89ee09cd"
+}
+EDGAR_REPAIR {"status": "CANDIDATES_CREATED_REVIEW_PENDING", "surfaces": {"EndoEpi": {"removed_zero_area_face_ids": [5428, 5430, 5638, 5639, 11170, 11174, 11234, 11240], "before": {"points": 5758, "triangles": 11528, "exact_duplicate_coordinate_vertices": 4, "edge_incidence_counts": {"2": 17280, "4": 6}, "edges_without_two_faces": 6, "inconsistent_directed_edges": 12, "duplicate_indexed_triangles": 0, "zero_area_triangles": 8, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 5754, "triangles": 11520, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 17268, "4": 6}, "edges_without_two_faces": 6, "inconsistent_directed_edges": 12, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "afb624160dfa2a4aa9958c742afc3b3edb466d740de437e58a7979a38c146d38"}, "Epi": {"removed_zero_area_face_ids": [6626, 6684], "before": {"points": 3458, "triangles": 6912, "exact_duplicate_coordinate_vertices": 1, "edge_incidence_counts": {"2": 10368}, "edges_without_two_faces": 0, "inconsistent_directed_edges": 0, "duplicate_indexed_triangles": 0, "zero_area_triangles": 2, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 3457, "triangles": 6910, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 10365}, "edges_without_two_faces": 0, "inconsistent_directed_edges": 0, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": true, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "747bc31d2fd8dc5065d1371356480222bfd8fd71bd4fc114668d225cde0462f6"}, "R_lung": {"removed_zero_area_face_ids": [], "before": {"points": 878, "triangles": 1756, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 2630, "4": 2}, "edges_without_two_faces": 2, "inconsistent_directed_edges": 4, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 878, "triangles": 1756, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 2630, "4": 2}, "edges_without_two_faces": 2, "inconsistent_directed_edges": 4, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "cd64f2b1d26388970ee473ed5a1faf0e774147256a7d705207400073eb664785"}, "L_lung": {"removed_zero_area_face_ids": [], "before": {"points": 835, "triangles": 1668, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 2500, "4": 1}, "edges_without_two_faces": 1, "inconsistent_directed_edges": 2, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 835, "triangles": 1668, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 2500, "4": 1}, "edges_without_two_faces": 1, "inconsistent_directed_edges": 2, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "3e243581cf778fb4efe045409aa3e7a322e5b9d2d70425fe91c4517c1204a06c"}, "Torso": {"removed_zero_area_face_ids": [], "before": {"points": 1773, "triangles": 3542, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 5313}, "edges_without_two_faces": 0, "inconsistent_directed_edges": 0, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": true, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 1773, "triangles": 3542, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 5313}, "edges_without_two_faces": 0, "inconsistent_directed_edges": 0, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": true, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "fa0059c43c84ca2339b2dd6205f23db656ef337dd079affa4b4e92da750085e3"}, "RV_RA": {"removed_zero_area_face_ids": [], "before": {"points": 3339, "triangles": 6680, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 10014, "4": 3}, "edges_without_two_faces": 3, "inconsistent_directed_edges": 6, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 3339, "triangles": 6680, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 10014, "4": 3}, "edges_without_two_faces": 3, "inconsistent_directed_edges": 6, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": false, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "e43cff74f19ededd262fad12c2fb6402c51a2904902cc1c304540565e3bae17c"}, "LV_LA": {"removed_zero_area_face_ids": [], "before": {"points": 2900, "triangles": 5796, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 8694}, "edges_without_two_faces": 0, "inconsistent_directed_edges": 0, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": true, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "after": {"points": 2900, "triangles": 5796, "exact_duplicate_coordinate_vertices": 0, "edge_incidence_counts": {"2": 8694}, "edges_without_two_faces": 0, "inconsistent_directed_edges": 0, "duplicate_indexed_triangles": 0, "zero_area_triangles": 0, "closed_oriented_nondegenerate": true, "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"}, "maximum_coordinate_displacement_native_units": 0.0, "review_status": "pending", "solver_ready": false, "operations": ["exact-coordinate welding", "exactly zero-area face removal"], "remaining_requirements": ["expert review", "units/frame", "self-intersection/nesting checks", "conductivity/volume meshing where required"], "candidate_sha256": "29f2f516eda3959c9e6e303a4e3fac332173fc75e4cd56f6b233fd92d4cc3348"}}, "all_candidates_closed_oriented_nondegenerate": false, "original_source_modified": false, "waveform_records": 0, "electrical_prediction": "NOT_RUN_MISSING_WAVEFORMS", "candidate_policy": "Exact coordinate welding and zero-area removal only. No displacement, tolerance welding, arbitrary nonzero face deletion, hole filling or normal flips.", "remaining": ["expert review", "self-intersection/nesting checks", "coordinate units/frame", "volume conductor and conductivity qualification", "missing Run1/Run2 waveforms and reference metadata"], "redistribution": "Raw and derived coordinate candidates stay in the user's Colab; retain only audit statistics and hashes in the report.", "runner_sha256": "e6268854cd8304aa8a548a6ac792274e8296e6be4c73cad2a9da2ff10547fae6"}

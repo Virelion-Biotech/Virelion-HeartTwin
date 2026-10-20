@@ -1,0 +1,354 @@
+{
+  "status": "CANDIDATES_CREATED_REVIEW_PENDING",
+  "surfaces": {
+    "EndoEpi": {
+      "removed_zero_area_face_ids": [
+        5428,
+        5430,
+        5638,
+        5639,
+        11170,
+        11174,
+        11234,
+        11240
+      ],
+      "before": {
+        "points": 5758,
+        "triangles": 11528,
+        "exact_duplicate_coordinate_vertices": 4,
+        "edge_incidence_counts": {
+          "2": 17280,
+          "4": 6
+        },
+        "edges_without_two_faces": 6,
+        "inconsistent_directed_edges": 12,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 8,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 5754,
+        "triangles": 11520,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 17268,
+          "4": 6
+        },
+        "edges_without_two_faces": 6,
+        "inconsistent_directed_edges": 12,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "afb624160dfa2a4aa9958c742afc3b3edb466d740de437e58a7979a38c146d38"
+    },
+    "Epi": {
+      "removed_zero_area_face_ids": [
+        6626,
+        6684
+      ],
+      "before": {
+        "points": 3458,
+        "triangles": 6912,
+        "exact_duplicate_coordinate_vertices": 1,
+        "edge_incidence_counts": {
+          "2": 10368
+        },
+        "edges_without_two_faces": 0,
+        "inconsistent_directed_edges": 0,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 2,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 3457,
+        "triangles": 6910,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 10365
+        },
+        "edges_without_two_faces": 0,
+        "inconsistent_directed_edges": 0,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": true,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "747bc31d2fd8dc5065d1371356480222bfd8fd71bd4fc114668d225cde0462f6"
+    },
+    "R_lung": {
+      "removed_zero_area_face_ids": [],
+      "before": {
+        "points": 878,
+        "triangles": 1756,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 2630,
+          "4": 2
+        },
+        "edges_without_two_faces": 2,
+        "inconsistent_directed_edges": 4,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 878,
+        "triangles": 1756,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 2630,
+          "4": 2
+        },
+        "edges_without_two_faces": 2,
+        "inconsistent_directed_edges": 4,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "cd64f2b1d26388970ee473ed5a1faf0e774147256a7d705207400073eb664785"
+    },
+    "L_lung": {
+      "removed_zero_area_face_ids": [],
+      "before": {
+        "points": 835,
+        "triangles": 1668,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 2500,
+          "4": 1
+        },
+        "edges_without_two_faces": 1,
+        "inconsistent_directed_edges": 2,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 835,
+        "triangles": 1668,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 2500,
+          "4": 1
+        },
+        "edges_without_two_faces": 1,
+        "inconsistent_directed_edges": 2,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "3e243581cf778fb4efe045409aa3e7a322e5b9d2d70425fe91c4517c1204a06c"
+    },
+    "Torso": {
+      "removed_zero_area_face_ids": [],
+      "before": {
+        "points": 1773,
+        "triangles": 3542,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 5313
+        },
+        "edges_without_two_faces": 0,
+        "inconsistent_directed_edges": 0,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": true,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 1773,
+        "triangles": 3542,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 5313
+        },
+        "edges_without_two_faces": 0,
+        "inconsistent_directed_edges": 0,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": true,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "fa0059c43c84ca2339b2dd6205f23db656ef337dd079affa4b4e92da750085e3"
+    },
+    "RV_RA": {
+      "removed_zero_area_face_ids": [],
+      "before": {
+        "points": 3339,
+        "triangles": 6680,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 10014,
+          "4": 3
+        },
+        "edges_without_two_faces": 3,
+        "inconsistent_directed_edges": 6,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 3339,
+        "triangles": 6680,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 10014,
+          "4": 3
+        },
+        "edges_without_two_faces": 3,
+        "inconsistent_directed_edges": 6,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": false,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "e43cff74f19ededd262fad12c2fb6402c51a2904902cc1c304540565e3bae17c"
+    },
+    "LV_LA": {
+      "removed_zero_area_face_ids": [],
+      "before": {
+        "points": 2900,
+        "triangles": 5796,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 8694
+        },
+        "edges_without_two_faces": 0,
+        "inconsistent_directed_edges": 0,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": true,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "after": {
+        "points": 2900,
+        "triangles": 5796,
+        "exact_duplicate_coordinate_vertices": 0,
+        "edge_incidence_counts": {
+          "2": 8694
+        },
+        "edges_without_two_faces": 0,
+        "inconsistent_directed_edges": 0,
+        "duplicate_indexed_triangles": 0,
+        "zero_area_triangles": 0,
+        "closed_oriented_nondegenerate": true,
+        "scope": "Local topology only; self-intersection, nesting, units and anatomical validity are not established"
+      },
+      "maximum_coordinate_displacement_native_units": 0.0,
+      "review_status": "pending",
+      "solver_ready": false,
+      "operations": [
+        "exact-coordinate welding",
+        "exactly zero-area face removal"
+      ],
+      "remaining_requirements": [
+        "expert review",
+        "units/frame",
+        "self-intersection/nesting checks",
+        "conductivity/volume meshing where required"
+      ],
+      "candidate_sha256": "29f2f516eda3959c9e6e303a4e3fac332173fc75e4cd56f6b233fd92d4cc3348"
+    }
+  },
+  "all_candidates_closed_oriented_nondegenerate": false,
+  "original_source_modified": false,
+  "waveform_records": 0,
+  "electrical_prediction": "NOT_RUN_MISSING_WAVEFORMS",
+  "candidate_policy": "Exact coordinate welding and zero-area removal only. No displacement, tolerance welding, arbitrary nonzero face deletion, hole filling or normal flips.",
+  "remaining": [
+    "expert review",
+    "self-intersection/nesting checks",
+    "coordinate units/frame",
+    "volume conductor and conductivity qualification",
+    "missing Run1/Run2 waveforms and reference metadata"
+  ],
+  "redistribution": "Raw and derived coordinate candidates stay in the user's Colab; retain only audit statistics and hashes in the report.",
+  "runner_sha256": "e6268854cd8304aa8a548a6ac792274e8296e6be4c73cad2a9da2ff10547fae6"
+}

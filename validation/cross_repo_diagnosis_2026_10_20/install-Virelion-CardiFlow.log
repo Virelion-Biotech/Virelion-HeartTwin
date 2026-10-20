@@ -1,0 +1,22 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/Virelion-CardiFlow
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: pydantic<3,>=2.6 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardiflow==0.3.0) (2.12.3)
+Requirement already satisfied: annotated-types>=0.6.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiflow==0.3.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.41.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiflow==0.3.0) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiflow==0.3.0) (4.16.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardiflow==0.3.0) (0.4.4)
+Building wheels for collected packages: virelion-cardiflow
+  Building editable for virelion-cardiflow (pyproject.toml): started
+  Building editable for virelion-cardiflow (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-cardiflow: filename=virelion_cardiflow-0.3.0-0.editable-py3-none-any.whl size=2550 sha256=1d13c502b8daa7937e62f7c0fe991318e8c0e70c042336682f4cf26177958730
+  Stored in directory: /tmp/pip-ephem-wheel-cache-zptkzjt8/wheels/8e/c6/69/a508dec9c90ccb0c041914996bb9c5748475beccb9d60faf02
+Successfully built virelion-cardiflow
+Installing collected packages: virelion-cardiflow
+Successfully installed virelion-cardiflow-0.3.0

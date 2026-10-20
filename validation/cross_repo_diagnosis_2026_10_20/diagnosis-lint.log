@@ -1,0 +1,57 @@
+E731 Do not assign a `lambda` expression, use a `def`
+  --> HeartTwin_Diagnosis_20261020/HeartTwin-fixed/scripts/diagnose_kit_circulation.py:97:5
+   |
+95 |         raise RuntimeError(completed.stderr)
+96 |     forwarded = json.loads(completed.stdout)
+97 |     compare = lambda other: max(float(np.max(np.abs(np.asarray(other["volume_mL"][c]) - direct["volume_mL"][c]))) for c in COMPARTMENTS)
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+98 |     p0 = np.array([direct["pressure_mmHg"][c][0] for c in COMPARTMENTS])
+99 |     q0 = np.array([direct["flow_mL_per_s"][c + "_to_" + COMPARTMENTS[(i + 1) % 8]][0] for i, c in enumerate(COMPARTMENTS)])
+   |
+help: Rewrite `compare` as a `def`
+
+E702 Multiple statements on one line (semicolon)
+   --> HeartTwin_Diagnosis_20261020/HeartTwin-fixed/scripts/diagnose_kit_circulation.py:156:25
+    |
+154 |         starts = [[2., .5, .01], [.8, .4, .03]]
+155 |         if variant["phase"]:
+156 |             low += [-.2]; high += [.1]
+    |                         ^
+157 |             starts[0] += [-.06]; starts[1] += [-.12]
+158 |         if variant["filling"]:
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> HeartTwin_Diagnosis_20261020/HeartTwin-fixed/scripts/diagnose_kit_circulation.py:157:32
+    |
+155 |         if variant["phase"]:
+156 |             low += [-.2]; high += [.1]
+157 |             starts[0] += [-.06]; starts[1] += [-.12]
+    |                                ^
+158 |         if variant["filling"]:
+159 |             low += [30., 330.]; high += [120., 500.]
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> HeartTwin_Diagnosis_20261020/HeartTwin-fixed/scripts/diagnose_kit_circulation.py:159:31
+    |
+157 |             starts[0] += [-.06]; starts[1] += [-.12]
+158 |         if variant["filling"]:
+159 |             low += [30., 330.]; high += [120., 500.]
+    |                               ^
+160 |             starts[0] += [60., 400.]; starts[1] += [85., 450.]
+161 |         return low, high, starts
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> HeartTwin_Diagnosis_20261020/HeartTwin-fixed/scripts/diagnose_kit_circulation.py:160:37
+    |
+158 |         if variant["filling"]:
+159 |             low += [30., 330.]; high += [120., 500.]
+160 |             starts[0] += [60., 400.]; starts[1] += [85., 450.]
+    |                                     ^
+161 |         return low, high, starts
+    |
+
+Found 5 errors.
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

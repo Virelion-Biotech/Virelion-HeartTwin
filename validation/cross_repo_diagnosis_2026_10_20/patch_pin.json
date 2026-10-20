@@ -1,0 +1,14 @@
+{
+  "patch_commit": "dc6f6270ba0232e927edc448af2701e8d4ca9cc2",
+  "baseline": "0b26c52a23a6b13dd41b90caacd912dfc7ab8db6",
+  "components": {
+    "Virelion-HeartTwin": "0b26c52a23a6b13dd41b90caacd912dfc7ab8db6",
+    "Virelion-CardiMech": "5dc14d886ccbda5a1398b863f9ae7821bbffa18b",
+    "Virelion-CardiFlow": "670d370635ba09b2908f7e6736299719e86fc36b",
+    "Virelion-CardiInfer": "b4f0c3c30da5986c6a98dba6ceccf1e1de95c881",
+    "Virelion-CardiEP": "f9bfcb78cdb857e5995ce244d8645f7370d6b3bb",
+    "Virelion-CardiAnatomy": "e3cc3450c49b84334dd2da696f33a75f4f61557f",
+    "Virelion-ElectroTrace": "51adddec49efa182f9707524cb59a16b4be554d7"
+  },
+  "scope": "Unit regression, independent native/reference and transport checks, calibration-only model diagnosis, geometry candidates"
+}

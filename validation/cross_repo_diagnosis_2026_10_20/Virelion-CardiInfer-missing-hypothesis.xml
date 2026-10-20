@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="7.033" timestamp="2026-10-20T20:24:14.228914+00:00" hostname="4d47994c1915"><testcase classname="" name="tests.test_cpu_contracts" time="0.000"><error message="collection failure">ImportError while importing test module '/content/HeartTwin_Diagnosis_20261020/Virelion-CardiInfer/tests/test_cpu_contracts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_cpu_contracts.py:9: in &lt;module&gt;
+    from hypothesis import given, settings
+E   ModuleNotFoundError: No module named 'hypothesis'</error></testcase></testsuite></testsuites>

@@ -1,0 +1,23 @@
+Obtaining file:///content/HeartTwin_Diagnosis_20261020/Virelion-CardiAnatomy
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: pydantic<3,>=2.6 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardianatomy==0.5.0) (2.12.3)
+Requirement already satisfied: numpy<3,>=1.26 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from virelion-cardianatomy==0.5.0) (2.2.6)
+Requirement already satisfied: annotated-types>=0.6.0 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.41.4 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0) (4.16.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./HeartTwin_Diagnosis_20261020/venv/lib/python3.13/site-packages (from pydantic<3,>=2.6->virelion-cardianatomy==0.5.0) (0.4.4)
+Building wheels for collected packages: virelion-cardianatomy
+  Building editable for virelion-cardianatomy (pyproject.toml): started
+  Building editable for virelion-cardianatomy (pyproject.toml): finished with status 'done'
+  Created wheel for virelion-cardianatomy: filename=virelion_cardianatomy-0.5.0-0.editable-py3-none-any.whl size=11499 sha256=cedbf48cdca4e1291f07df25c65557d55e60c898d8a3d66199f7a740b67b2214
+  Stored in directory: /tmp/pip-ephem-wheel-cache-l6fj1g2z/wheels/cc/1d/58/cdbad13b24fc3116b50f84559560761a20ca90e35181594f66
+Successfully built virelion-cardianatomy
+Installing collected packages: virelion-cardianatomy
+Successfully installed virelion-cardianatomy-0.5.0
