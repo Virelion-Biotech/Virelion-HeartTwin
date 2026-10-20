@@ -1,0 +1,12 @@
+{
+  "source_commit": "a99794a21f3ee3d0b84cf58d48a46732b7cd558a",
+  "scope": "Desktop offline synthetic read-only UI fixture in Edge Colab; not live-worker E2E",
+  "observations": [
+    "Patient selection and revision displayed",
+    "Visit selection carries baseline into the generated patient_plan configuration",
+    "Patient workflow default identifies the opened case",
+    "Visit time, rhythm, medication and loading-condition fields displayed",
+    "Measurement import and model-input forms available"
+  ],
+  "live_worker_browser_e2e": "unverified; earlier Colab proxy navigation blocked and not bypassed"
+}

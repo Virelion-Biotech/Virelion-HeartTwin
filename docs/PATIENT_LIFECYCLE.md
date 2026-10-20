@@ -7,7 +7,7 @@ This adds a persistent patient workflow around the existing strict EP path. It d
 - SQLite `PatientCaseStore`: immutable, hash-linked revisions; optimistic concurrency; revision-specific reviews; reversible archive/restore; immutable job/request bindings; revision comparison; source/evidence readiness.
 - Patient workbench: case creation, acquisition attachment from uploaded files, evidence roles, case editing, revisions, reviews, comparison, archive/restore and patient run submission/results.
 - `patient_ep` worker: scientific declared-experiment facade; byte/hash and duplicate-source leakage checks; durable prediction before downstream held-out evaluation; every holdout report retained; optional CardiTrace recording. Failed downstream stages retain earlier artifacts and the queue reports failure.
-- `patient_domain` worker: explicit scalar mechanics/circulation targets, unit declarations, bounded MAP fitting through CardiInfer, fresh forward replay, downstream held-out residuals, source hashes and runtime source fingerprints. MAP is not a posterior and does not establish identifiability.
+- `patient_domain` worker: explicit scalar, curve and mesh-corresponded field mechanics/circulation targets, unit declarations, bounded MAP fitting through CardiInfer, fresh forward replay, downstream held-out residuals, source hashes and runtime source fingerprints. MAP is not a posterior and does not establish identifiability.
 - Camps workspace preparation: complete supplied geometry arrays, matching reviewed bundle/source bytes, explicit coordinates, indexing and electrode ordering; versioned manifest and deterministic staging through CardiEP.
 - Provisioned case-scoped reader/reviewer/operator credentials. Owner-only raw uploads, generic jobs and artifacts. No user self-registration or automatic access grants.
 - CLI revision management, comparison and consistent SQLite backup.
@@ -38,6 +38,12 @@ All endpoints retain the gateway Host, Origin and bearer authentication checks.
 | GET | `/api/patients/P1/history` | Revisions and review/lifecycle events |
 | GET | `/api/patients/P1/readiness` | Source metadata readiness and current-revision reviews |
 | POST | `/api/patients/P1/attach` | Attach an owner-uploaded acquisition, creating a revision |
+| POST | `/api/patients/P1/encounters` | Add visit and physiological state as a revision |
+| POST | `/api/patients/P1/observations` | Normalize owner-uploaded measurement/curve with source hashes |
+| POST | `/api/patients/P1/inputs` | Add/update a provenance-bearing model input |
+| POST | `/api/patients/P1/circulation-recipe` | Assemble a native task from declared case inputs |
+| POST | `/api/patients/P1/plan-preview` | Verify patient bindings and service availability |
+| POST | `/api/patients/P1/longitudinal` | Identify revision/state changes requiring a new run |
 | POST | `/api/patients/P1/review` | Record decision/rationale for a revision |
 | POST | `/api/patients/P1/compare` | Compare older/newer revisions |
 | POST | `/api/patients/P1/archive` or `/restore` | Reversible lifecycle state |
@@ -50,7 +56,7 @@ Case revisions are append-only through the application API. SQLite hashes detect
 
 ## Domain observations
 
-Each `ScalarTarget` links to acquisition-backed PatientCase evidence and one source file. The source must contain exactly:
+Scalar, curve and field targets use the backwards-compatible `ScalarTarget` schema. Each target links to acquisition-backed PatientCase evidence and one source file. A scalar source contains:
 
 ```json
 {"value": 82.0, "unit": "mmHg"}
@@ -58,7 +64,7 @@ Each `ScalarTarget` links to acquisition-backed PatientCase evidence and one sou
 
 A target specifies its exact model output path, matching unit, measurement noise SD and predeclared maximum absolute held-out error. Calibration/validation acquisition IDs and source content hashes cannot overlap. The forward template contains no observation arrays; target values are not injected into forward prediction. All fitted parameter paths must identify existing physiological values, with explicit bounds and units. Mechanics and circulation use their native request contracts, not a common guessed physiological model.
 
-Current v1 scope is scalar endpoints. Curves, displacement-field likelihoods, correlated errors, posterior uncertainty and cross-domain physiological calibration require separate qualified extensions. The native source observation unit must match the declared target unit. The selected model's output unit must be reviewed against its native contract; available result unit maps are checked at evaluation.
+Curves and explicit native FEM component likelihoods are supported as described below. Correlated-error models and posterior uncertainty are not supplied by the MAP workflow. The native source observation unit must match the declared target unit. The selected model's output unit must be reviewed against its native contract; available result unit maps are checked at evaluation.
 
 ## Camps workspace
 

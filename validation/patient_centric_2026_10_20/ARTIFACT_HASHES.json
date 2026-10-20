@@ -1,0 +1,12 @@
+{
+  "colab_pass.jpg": "34e44517796163ae18403ed6911e97f4b3321b95cf8b06bdc42755dbaec715da",
+  "ci_status.json": "48de3495c942ab9055cae01bfc81781ef2b179ce094030bdf8ff5751c91f1e07",
+  "colab_evidence.json": "fe2d219af0663bfe3811e166fd04f203f5230bd6f3dae335b4cd700dd917487e",
+  "ui_review.json": "5d90e5a7ac8ef8d61823c530800fa3ed2164439a018b8edc7c7412a4916f2ed2",
+  "patient_ui.jpg": "b9a911342eb5a7f9c5cd65884a9ced72e01ac5fcfd750231fdff8e8be1f0b176",
+  "HeartTwin_Patient_Centric_Colab_Results.zip": "6240e44ae2ca2b3aec130e94e9ca2e738546c8f1b560c237e76d5b0671ee2e06",
+  "README.md": "516091df182c6199b75054652cad7b2f728e945526a6846a89e855f1e4827791",
+  "ci/current-main-python312.log": "28bfce0748d24b677b6cab68ed5c6db8ffcdf48212fdf500d044136361fca8ba",
+  "ci/base-python312.log": "10d2305eb7c3f81544a5749a0f74546a9fe42e3f2aef65652f22504cd474a044",
+  "ci/frozen-stack-python312.log": "4e8a7dd68c9d5891f350797c58e398c004c6752adf621220925b3ddab6ff6033"
+}
