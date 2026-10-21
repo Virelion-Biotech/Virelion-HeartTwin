@@ -1,0 +1,9 @@
+{
+  "bytes": 465525,
+  "files": 41,
+  "sha256": "9311dadf37d5880f44b9c32c9bc6c215d05a2fee22ff8160173982fb566b5572",
+  "git_blob": "e641ae55bea2e742ff41c235792bd63b567b138e",
+  "transfer_verified": true,
+  "scope": "Complete three-family joint calibration with canonical verification output; extra per-call verification artifact copies excluded with hashes retained",
+  "clinical_validation": "NOT_ESTABLISHED"
+}

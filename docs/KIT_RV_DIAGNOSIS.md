@@ -60,13 +60,23 @@ The first core ZIP contains 61 files, 652339 bytes, SHA256 **138218ac575fe01e9f2
 
 Run `notebooks/HeartTwin_KIT_RV_Diagnosis.ipynb` in Edge Colab. The runner accepts the original request or an explicitly supplied complete candidate request, never a partially reconstructed summary. Optional constraint fitting is marked as development fitting and never overwrites the source request.
 
-Four earlier chamber families are being regenerated separately to restore the missing raw LV evidence. The original session's temporary directory was absent in the new runtime. A rerun is a new reproducibility record, not recovery of those lost files and not an unseen-data validation experiment.
+All four earlier chamber families were regenerated successfully, reproducing every recorded score exactly. Their raw evidence and exact selected request/prediction are now archived under `validation/kit_chamber_refinement_2026_10_21/colab_reconnected/`. The original temporary directory was absent; this is a new reproducibility record, not recovery of the lost files or unseen-data validation.
 
 ## Earlier failures and their resolution
 
 Before this retry, Edge had reconnected but Colab reported no active sessions and rejected two runtime allocations with “Failed to assign a backend,” suggesting a possible location restriction without establishing its cause. The actual screenshot is retained. On this retry allocation succeeded; no workaround or security setting change was applied by the agent.
 
 Colab also misparsed the slash-containing branch name as ref `diagnose`, producing a misleading Notebook not found error. The immutable commit URL loaded successfully. A branch-publication API error was corrected by creating the branch before opening the PR. These execution errors and their diagnoses are preserved in `EXECUTION_ATTEMPTS.json`; none were numerical model errors.
+
+## Joint follow-up and complete archives
+
+The exact reproduced LV candidate retained RV error 21.8724673 mL. Its independent dense solver comparison was 0.00197356 mL, falling to 0.0000126614 mL with tighter native settings; registry and command route differences remained zero.
+
+The isolated unit-resistance RV constraint raised LV development RMSE from 6.6323319 to 7.3797448 mL. A separate, predeclared joint experiment then fitted seven LV/RV coordinates under three loading controls. The inner-selected joint candidate achieved LV outer development RMSE **6.4999204 mL** and RV **calibration** residual **-0.4649360 mL**. The RV point was explicitly consumed for fitting. See [the joint report](KIT_JOINT_LV_RV_CALIBRATION.md) for all controls and limits; these are not new RV validation results or identified pressures.
+
+The full original RV archive is now saved as `KIT_RV_diagnosis_results_full.zip`: 8319966 bytes, 115 files, SHA256 **022df1e7a46503fdd7912ecbfe6b17497ed1607b5856a40d5c53eba0cf73297d**, verified Git blob **ad0fcdbf17fb1f68ec3179ee6659a833e3db65e3**. The original small core checkpoint remains intact.
+
+The chamber/selected-RV core archive is 1242304 bytes, 69 files, SHA256 **74a295fbbf8de47991d17e000f6a5a5ebb93dc9a7b3303ddfc24c110a15c326b**, verified Git blob **ddc03b0b6f15c343f67be1cbe7eb45a3121c2808**.
 
 ## Remaining limits
 

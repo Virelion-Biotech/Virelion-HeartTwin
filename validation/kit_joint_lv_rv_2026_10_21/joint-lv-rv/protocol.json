@@ -1,0 +1,72 @@
+{
+  "scope": "Conditional joint LV/RV development fit, not independent validation",
+  "source_candidate_sha256": "58a94f820c4fb61f78519dfd3fe4f0ba5665fbc82673c42b9a2b34b7e426cec3",
+  "runner_sha256": "c1fdf9b20e17d1e72fe652ffefb03006b0cf2e4969b9887c4b9be6b38f4fe75b",
+  "LV_calibration_count": 23,
+  "LV_inner_fit_count": 17,
+  "LV_inner_assessment_count": 6,
+  "RV_subsequent_point_role": "CALIBRATION; previously assessed point now consumed for fitting",
+  "RV_initial_point_role": "Measured initial condition, not validation",
+  "RV_outflow_resistance_factors": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "fixed_k_per_mL": 0.075,
+  "coordinates": [
+    "LV_emax",
+    "LV_duration",
+    "mitral_R",
+    "conditional_LV_passive_reference_pressure",
+    "LV_peak_fraction",
+    "LV_phase",
+    "RV_emax"
+  ],
+  "bounds": [
+    [
+      0.2,
+      0.25,
+      0.001,
+      0.5,
+      0.25,
+      -0.15,
+      0.1
+    ],
+    [
+      8.0,
+      0.7,
+      0.2,
+      40.0,
+      0.75,
+      0.05,
+      3.0
+    ]
+  ],
+  "starts": [
+    [
+      1.7609067367380635,
+      0.53608890138898,
+      0.007628692594055855,
+      17.532587648788812,
+      0.7499999999983654,
+      -0.06659688308945522,
+      0.7457
+    ],
+    [
+      1.8313430062075862,
+      0.5253671233612004,
+      0.008391561853461441,
+      15.779328883909931,
+      0.734999999998398,
+      -0.06659688308945522,
+      0.782985
+    ]
+  ],
+  "max_nfev": 45,
+  "objective": "LV volume residuals plus one RV volume residual, both in mL; unweighted developmental SSE, not a validated noise likelihood",
+  "selection": "Lowest RMSE on six inner LV samples; RV always calibration, outer LV never selection",
+  "pressure_scale": "Unidentified; all pressures/strengths conditional on assumed loading and other fixed parameters",
+  "prior_outer_values_seen": true,
+  "independent_patient_validation": false,
+  "clinical_validation": "NOT_ESTABLISHED"
+}
