@@ -1,0 +1,182 @@
+{
+  "P001-ts.mat": {
+    "ts": {
+      "pacingLoc": {
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "potvals": {
+        "shape": [
+          128,
+          1001
+        ],
+        "dtype": "float64"
+      },
+      "note": {
+        "shape": [
+          1
+        ],
+        "dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]"
+      }
+    }
+  },
+  "P001-ecg.mat": {
+    "ts": {
+      "pacingLoc": {
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "potvals": {
+        "shape": [
+          6,
+          1001
+        ],
+        "dtype": "float64"
+      },
+      "note": {
+        "shape": [
+          1
+        ],
+        "dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]"
+      },
+      "leadlabels": {
+        "shape": [
+          6
+        ],
+        "dtype": "object"
+      }
+    }
+  },
+  "P001_Epi.mat": {
+    "Epi": {
+      "node": {
+        "shape": [
+          2084,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "face": {
+        "shape": [
+          4164,
+          3
+        ],
+        "dtype": "uint16"
+      }
+    }
+  },
+  "P001_EndoEpi.mat": {
+    "EndoEpi": {
+      "node": {
+        "shape": [
+          4612,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "face": {
+        "shape": [
+          9236,
+          3
+        ],
+        "dtype": "uint16"
+      }
+    }
+  },
+  "P001_torso.mat": {
+    "torso": {
+      "node": {
+        "shape": [
+          2678,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "face": {
+        "shape": [
+          5352,
+          3
+        ],
+        "dtype": "uint16"
+      },
+      "leadlinks": {
+        "shape": [
+          128
+        ],
+        "dtype": "int32"
+      }
+    }
+  },
+  "P001_otherStructures.mat": {
+    "otherStructures": {
+      "Llung": {
+        "pts": {
+          "shape": [
+            3,
+            604
+          ],
+          "dtype": "float64"
+        },
+        "fac": {
+          "shape": [
+            3,
+            1204
+          ],
+          "dtype": "uint16"
+        }
+      },
+      "LV_AO": {
+        "pts": {
+          "shape": [
+            3,
+            1550
+          ],
+          "dtype": "float64"
+        },
+        "fac": {
+          "shape": [
+            3,
+            3096
+          ],
+          "dtype": "uint16"
+        }
+      },
+      "Rlung": {
+        "pts": {
+          "shape": [
+            3,
+            662
+          ],
+          "dtype": "float64"
+        },
+        "fac": {
+          "shape": [
+            3,
+            1320
+          ],
+          "dtype": "uint16"
+        }
+      },
+      "RV_PV": {
+        "pts": {
+          "shape": [
+            3,
+            1486
+          ],
+          "dtype": "float64"
+        },
+        "fac": {
+          "shape": [
+            3,
+            2968
+          ],
+          "dtype": "uint16"
+        }
+      }
+    }
+  }
+}

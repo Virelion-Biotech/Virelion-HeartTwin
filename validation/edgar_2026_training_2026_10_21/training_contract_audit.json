@@ -1,0 +1,2754 @@
+{
+  "purpose": "Training source and integration-contract audit only",
+  "challenge_test_data_downloaded": false,
+  "electrical_solve_executed": false,
+  "raw_data_redistributed": false,
+  "coordinate_or_signal_units_invented": false,
+  "archives": {
+    "geometries": {
+      "url": "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/Bratislava_Data/Geometries/TrainingGeometries.zip",
+      "sha256": "dc112818adfcff90219a5f3886f8ad30f5a4adce542e21f3b89e8ae6845f6faf",
+      "bytes": 2253471,
+      "entries": [
+        {
+          "path": "P027_Epi.mat",
+          "bytes": 22164,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P027_otherStructures.mat",
+          "bytes": 68254,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P027_torso.mat",
+          "bytes": 36447,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_EndoEpi.mat",
+          "bytes": 79923,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_Epi.mat",
+          "bytes": 32087,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_otherStructures.mat",
+          "bytes": 80900,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_torso.mat",
+          "bytes": 56100,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_EndoEpi.mat",
+          "bytes": 69650,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_Epi.mat",
+          "bytes": 31511,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_otherStructures.mat",
+          "bytes": 104500,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_torso.mat",
+          "bytes": 74785,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_EndoEpi.mat",
+          "bytes": 35428,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_Epi.mat",
+          "bytes": 29970,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_otherStructures.mat",
+          "bytes": 87347,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_torso.mat",
+          "bytes": 80054,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_EndoEpi.mat",
+          "bytes": 79680,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_Epi.mat",
+          "bytes": 44554,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_otherStructures.mat",
+          "bytes": 99522,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_torso.mat",
+          "bytes": 83129,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_EndoEpi.mat",
+          "bytes": 69746,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_Epi.mat",
+          "bytes": 30511,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_otherStructures.mat",
+          "bytes": 105776,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_torso.mat",
+          "bytes": 73852,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_EndoEpi.mat",
+          "bytes": 78150,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_Epi.mat",
+          "bytes": 30800,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_otherStructures.mat",
+          "bytes": 68047,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_torso.mat",
+          "bytes": 45562,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_EndoEpi.mat",
+          "bytes": 58201,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_Epi.mat",
+          "bytes": 24387,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_otherStructures.mat",
+          "bytes": 92059,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_torso.mat",
+          "bytes": 59897,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_EndoEpi.mat",
+          "bytes": 72164,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_Epi.mat",
+          "bytes": 37350,
+          "schema": [
+            {
+              "name": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_otherStructures.mat",
+          "bytes": 97772,
+          "schema": [
+            {
+              "name": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_torso.mat",
+          "bytes": 63915,
+          "schema": [
+            {
+              "name": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P027_EndoEpi.mat",
+          "bytes": 47600,
+          "schema": [
+            {
+              "name": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        }
+      ]
+    },
+    "signals": {
+      "url": "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/Bratislava_Data/Signals/AllTrainingSignals.zip",
+      "sha256": "824b4de2785fd8e29786854087f1a4143a1932aa9d71238abbe9be6060474462",
+      "bytes": 9204106,
+      "entries": [
+        {
+          "path": "P004-ts.mat",
+          "bytes": 973982,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P006-ecg.mat",
+          "bytes": 46815,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P006-ts.mat",
+          "bytes": 971443,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P010-ecg.mat",
+          "bytes": 46874,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P010-ts.mat",
+          "bytes": 984715,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P020-ecg.mat",
+          "bytes": 46651,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P020-ts.mat",
+          "bytes": 975849,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P023-ecg.mat",
+          "bytes": 46760,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P023-ts.mat",
+          "bytes": 974531,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P024-ecg.mat",
+          "bytes": 46889,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P024-ts.mat",
+          "bytes": 976529,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P027-ecg.mat",
+          "bytes": 46860,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P027-ts.mat",
+          "bytes": 977738,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P001-ecg.mat",
+          "bytes": 46681,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P001-ts.mat",
+          "bytes": 958699,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P002-ecg.mat",
+          "bytes": 46851,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P002-ts.mat",
+          "bytes": 983467,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P004-ecg.mat",
+          "bytes": 46921,
+          "schema": [
+            {
+              "name": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "name": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "subjects": {
+    "P001": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 4612,
+          "faces": 9236,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4611,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 4,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 10,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 2084,
+          "faces": 4164,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2083,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 604,
+          "faces": 1204,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 603,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1550,
+          "faces": 3096,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1549,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 662,
+          "faces": 1320,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 661,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1486,
+          "faces": 2968,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1485,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 2678,
+          "faces": 5352,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2677,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 419,
+        "maximum": 2233,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P002": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 4090,
+          "faces": 8202,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4089,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 7,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 10,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 2068,
+          "faces": 4132,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2067,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 881,
+          "faces": 1760,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 880,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1469,
+          "faces": 2936,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1468,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 964,
+          "faces": 1924,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 963,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 2047,
+          "faces": 4092,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2046,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 3610,
+          "faces": 7216,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3609,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 588,
+        "maximum": 2959,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P004": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            4,
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            4,
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 2078,
+          "faces": 4158,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2077,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 1,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 1942,
+          "faces": 3880,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1941,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 549,
+          "faces": 1096,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 548,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1756,
+          "faces": 3508,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1755,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 622,
+          "faces": 1240,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 621,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1806,
+          "faces": 3608,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1805,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 3783,
+          "faces": 7568,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3782,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 2,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 581,
+        "maximum": 3333,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P006": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3,
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 4588,
+          "faces": 9176,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4587,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 2894,
+          "faces": 5784,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2893,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 564,
+          "faces": 1132,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 563,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 1,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 5,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 2003,
+          "faces": 4004,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2002,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 706,
+          "faces": 1416,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 705,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 4,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 2377,
+          "faces": 4756,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2376,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 3,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 3549,
+          "faces": 7094,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3548,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 206,
+        "maximum": 3425,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P010": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            2,
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 4069,
+          "faces": 8146,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4068,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 1,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 2,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 2054,
+          "faces": 4104,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2053,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 957,
+          "faces": 1916,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 956,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 3,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1734,
+          "faces": 3464,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1733,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 965,
+          "faces": 1928,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 964,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1749,
+          "faces": 3496,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1748,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 3625,
+          "faces": 7248,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3624,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 515,
+        "maximum": 2938,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P020": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            2,
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            2,
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 4545,
+          "faces": 9090,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4544,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 2020,
+          "faces": 4036,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2019,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 516,
+          "faces": 1032,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 515,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 2,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1402,
+          "faces": 2800,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1401,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 553,
+          "faces": 1104,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 552,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1670,
+          "faces": 3336,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1669,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 3144,
+          "faces": 6284,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3143,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 617,
+        "maximum": 2680,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P023": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 3353,
+          "faces": 6714,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3352,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 2,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 1442,
+          "faces": 2880,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1441,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 850,
+          "faces": 1700,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 849,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 2,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 2002,
+          "faces": 4000,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2001,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 766,
+          "faces": 1532,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 765,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 2,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1979,
+          "faces": 3956,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1978,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 4236,
+          "faces": 8468,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4235,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 995,
+        "maximum": 3297,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P024": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3,
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "EndoEpi": {
+          "nodes": 4179,
+          "faces": 8380,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 4178,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 8,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 11,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Epi": {
+          "nodes": 2458,
+          "faces": 4912,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2457,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 870,
+          "faces": 1744,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 869,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 4,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1855,
+          "faces": 3708,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1854,
+          "index_base_from_range": 0,
+          "zero_area_faces": 2,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 1,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 794,
+          "faces": 1584,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 793,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1539,
+          "faces": 3076,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1538,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 3132,
+          "faces": 6260,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 3131,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 592,
+        "maximum": 2812,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    },
+    "P027": {
+      "signals": {
+        "ts": {
+          "channels": 128,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3,
+            3
+          ]
+        },
+        "ecg": {
+          "channels": 6,
+          "samples": 1001,
+          "finite_values": true,
+          "leadlabels": [
+            "I",
+            "II",
+            "III",
+            "aVL",
+            "aVR",
+            "aVF"
+          ],
+          "available_fields": [
+            "pacingLoc",
+            "potvals",
+            "note",
+            "leadlabels"
+          ],
+          "sampling_rate_Hz": null,
+          "amplitude_unit": null,
+          "reference": null,
+          "note_dtype": "[('s0', 'O'), ('s1', 'O'), ('s2', 'O'), ('arr', 'O')]",
+          "note_has_opaque_MATLAB_string": true,
+          "ablation_location_shape": [
+            3,
+            3
+          ]
+        }
+      },
+      "surfaces": {
+        "Epi": {
+          "nodes": 1440,
+          "faces": 2876,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1439,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Llung": {
+          "nodes": 691,
+          "faces": 1380,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 690,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "LV_AO": {
+          "nodes": 1410,
+          "faces": 2828,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1409,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 6,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "Rlung": {
+          "nodes": 722,
+          "faces": 1440,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 721,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": true,
+          "self_intersections_and_nesting_checked": false
+        },
+        "RV_PV": {
+          "nodes": 1366,
+          "faces": 2728,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 1365,
+          "index_base_from_range": 0,
+          "zero_area_faces": 4,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 2,
+          "boundary_edges": 0,
+          "overincident_edges": 0,
+          "maximum_edge_incidence": 2,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "torso": {
+          "nodes": 2549,
+          "faces": 5096,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2548,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 0,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 1,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        },
+        "EndoEpi": {
+          "nodes": 2849,
+          "faces": 5710,
+          "coordinate_units": null,
+          "finite_coordinates": true,
+          "minimum_face_index": 0,
+          "maximum_face_index": 2848,
+          "index_base_from_range": 0,
+          "zero_area_faces": 0,
+          "duplicate_faces": 1,
+          "exact_duplicate_vertices": 0,
+          "boundary_edges": 0,
+          "overincident_edges": 6,
+          "maximum_edge_incidence": 4,
+          "two_face_orientation_conflicts": 0,
+          "locally_closed_oriented": false,
+          "self_intersections_and_nesting_checked": false
+        }
+      },
+      "blockers": [
+        "Sampling rate, amplitude unit and reference need authoritative decoding/metadata",
+        "Only surface meshes supplied; native reciprocal operator needs a qualified tetrahedral volume conductor in metres",
+        "128 BSP channels cannot be relabelled as native nine electrodes or twelve ECG leads",
+        "ECG file is not a complete standard 12-lead recording; preserve actual labels",
+        "leadlinks index base is range-ambiguous; do not guess from other face arrays",
+        "At least one original surface fails local closed/oriented predicate"
+      ],
+      "electrical_solve_ready": false,
+      "leadlinks": {
+        "count": 128,
+        "integer": true,
+        "unique_count": 128,
+        "minimum": 289,
+        "maximum": 2192,
+        "range_compatible_index_bases": [
+          0,
+          1
+        ],
+        "signal_channel_count_matches": true,
+        "ordering_authority": "2026 challenge page; no independent per-electrode ordering verification"
+      }
+    }
+  },
+  "limitations": [
+    "Surface topology checks do not qualify a volume conductor",
+    "MATLAB MCOS string notes need an authoritative decoder or provider metadata",
+    "No sampling rate, amplitude unit, or reference inferred from numeric ranges",
+    "No P034 acquisition identity inferred from the new challenge"
+  ],
+  "summary": {
+    "subject_count": 9,
+    "P034_present": false,
+    "BSP_channels": {
+      "128": 9
+    },
+    "ECG_channels": {
+      "6": 9
+    },
+    "electrical_solve_ready_subjects": []
+  }
+}
