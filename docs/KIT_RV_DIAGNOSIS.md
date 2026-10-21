@@ -1,50 +1,73 @@
-# Sparse KIT RV diagnosis: pending Colab execution
+# KIT RV diagnosis: actual reconnected Colab results
 
-## Confirmed source findings
+Edge Colab successfully allocated a runtime on retry, 2026-10-21. The prepared diagnostic has now run. **The original 21.8719913 mL RV mismatch is not explained by numerical tolerance, time sampling or either tested HeartTwin transport route. RV and pulmonary-loading assumptions strongly affect the result, but the sparse data do not identify a unique correction.**
 
-The original RV assessment compares the model at 0.360882353 s with 65.938406 mL. The only other measured RV volume is 194.545622 mL at time zero, used as an initial condition. There is no RV waveform in this benchmark. Both measurements and timestamps remain unchanged.
+Implementation pin: `e6db5cc60ed95e233daeb01f53b59abbbc742d02`. Python 3.13.16, NumPy 2.2.6 and SciPy 1.16.3; all seven repository pins and package freeze are archived. **186 patient/workbench tests, all six lifecycle checks, runner compilation and lint passed in user Edge Colab.** These are software/synthetic checks, not clinical validation.
 
-The original fit optimized LV maximum elastance, LV activation duration and mitral resistance against LV calibration values only. RV maximum elastance (0.5 mmHg/mL), minimum elastance (0.03 mmHg/mL), activation duration (0.5 s), activation start (0 s), pulmonary loading and other initial states were analyst assumptions. Therefore LV error reduction is not evidence that RV parameters were personalized. The reported original RV error was 21.8719913 mL; the subsequent selected LV candidate retained approximately the same RV error.
+## Tests and findings
 
-One subsequent scalar RV value cannot identify several independent RV and loading parameters. Any fit to that already seen assessment point is a retrospective development constraint and consumes that point for fitting. It cannot be reported as held-out validation. Absolute pressure scale also remains unidentified by volumes.
+| Check | Observed result | Implication |
+|---|---:|---|
+| RV target sampled at exact measured time | Yes, 0.360882353 s | Interpolation or a shifted measurement clock does not explain this comparison |
+| Original RV prediction versus observed | 87.8103973 versus 65.938406 mL | Original error remains 21.8719913 mL |
+| Minimum RV volume over dense output | 87.8103579 mL | No sampling time within this simulated window reaches the observed volume |
+| Registry versus direct route | 0 mL maximum difference | No numerical mutation in this tested route |
+| Command-forward versus direct route | 0 mL maximum difference | No numerical mutation in this tested route |
+| Native versus separate DOP853, all dense volumes | 0.0101175 mL maximum, in LV at 0.452884 s | Small tolerance-dependent error, unrelated in scale to the RV discrepancy |
+| Native versus DOP853 at RV target | -0.00016024 mL | Negligible relative to the RV mismatch |
+| Tight native versus DOP853, all dense volumes | 0.000009361 mL maximum | Tolerance refinement explains the small dense-output discrepancy |
+| Tight native versus DOP853 at RV target | -0.000006110 mL | Numerical convergence supported |
+| Total-volume drift | 2.27e-12 mL | Conservation check passed |
 
-These source findings identify a gap in personalization, but do not by themselves prove that a particular assumed parameter caused the numerical discrepancy.
+The numerical thresholds (0.02 mL reference comparison; 1e-8 mL routing comparisons) were diagnostic criteria declared in the runner before this run. They are not clinical acceptance limits. The separate reference uses an incidence matrix, cosine activation, exprel passive pressure and DOP853. The native reference discrepancy was investigated rather than dismissed after passing its threshold.
 
-## Diagnostic runner
+These tests isolate this particular native 0D benchmark. They do not prove every engine in the stack is correct. CardiFlow, CardiMech and CardiEP are not secretly the numerical source of this native circulation solve. The earlier ElectroTrace constant-group statistics bugs were separate real cross-repository defects, fixed in PR #85; the earlier native unit-metadata defect was fixed in HeartTwin PR #55.
 
-`scripts/diagnose_kit_rv.py` accepts an immutable request and the original benchmark folder. It:
+## Why a unique RV repair cannot be claimed
 
-1. Checks the two RV measurements, units, initial-condition agreement and time support. Adds the exact target time and dense output samples without shifting measured timestamps.
-2. Compares native RK45 trajectories with a separate incidence-matrix DOP853 implementation using cosine activation and exprel passive pressure, including the new chamber laws.
-3. Exercises the real registry and command-forward routes and checks their outputs against direct execution. A mismatch halts physiological attribution.
-4. Perturbs six assumed RV/loading coordinates by ±20%, recording RV endpoint and LV trajectory effects and preserving any failed perturbation.
-5. Optionally fits RV strength at three fixed outflow resistances to the previously seen scalar. All candidate requests and predictions are separate development artifacts. A missing root bracket or failed solve is retained.
-6. Records source hashes, environment, conservation and status. The original request is never replaced.
+The source provides only RV volume 194.545622 mL at time zero and 65.938406 mL at the subsequent time. The first is an initial condition; only one subsequent scalar is available. The original fit optimized LV strength, LV duration and mitral resistance against LV measurements. RV strength/timing and pulmonary loading remained assumed.
 
-The 0.02 mL numerical solver comparison threshold and 1e-8 mL routing threshold are software diagnostic criteria, not clinical acceptance limits. Multiple numerical solutions, if found, demonstrate conditional ambiguity; they are not identified patient parameters. This runner does not perform a spatial mechanics or electrical solve, and does not silently replace HeartTwin's native 0D engine with another repository.
+Sensitivity to ±20% changes was substantial:
 
-## Current execution blocker, 2026-10-21
+| Assumed coordinate | RV endpoint change at -20% | RV endpoint change at +20% |
+|---|---:|---:|
+| RV maximum elastance | +14.4611 mL | -10.6347 mL |
+| RV activation duration | +3.1441 mL | -2.7957 mL |
+| RV minimum elastance | +0.1680 mL | -0.0570 mL |
+| Pulmonary vascular resistance | -2.9909 mL | +2.1730 mL |
+| RV outflow resistance | -0.3392 mL | +0.3799 mL |
+| Pulmonary arterial compliance | +8.8720 mL | -7.4227 mL |
 
-Edge reconnected successfully. Its open-tab inventory no longer included the original Colab tab. Colab's Manage sessions dialog reported **No active sessions**. Original temporary runtime files could not be inspected or recovered from an active session.
+Three distinct conditional strength/loading combinations were fitted to the **previously seen RV assessment point**, explicitly consuming it for development fitting:
 
-The pinned chamber rerun notebook was opened in the user's Edge. Two normal runtime-allocation attempts were rejected with **Failed to assign a backend**, with a message suggesting a possible location restriction. The exact cause is not established. The setup cell never executed. Browser automation also timed out during a subsequent page read; the later visible dialog and screenshot confirmed the allocation rejection.
+| RV outflow resistance factor | Conditional RV Emax, mmHg/mL | Fitted RV volume, mL | Maximum LV trajectory change, mL |
+|---|---:|---:|---:|
+| 0.5 | 0.7382893941 | 65.93840598 | 10.3120 |
+| 1.0 | 0.7457058835 | 65.93840599 | 10.1515 |
+| 2.0 | 0.7651195543 | 65.93840597 | 9.8782 |
 
-![Actual Colab allocation rejection](../validation/kit_rv_diagnosis_2026_10_21/colab_backend_failure.jpg)
+These fits show that the scalar can be matched in more than one way. **They are not held-out validation or uniquely identified patient parameters.** Their inferred RV peak pressures also differ and are not measured patient pressures. Global pressure scale remains unidentified by volume alone.
 
-No RV numerical results, new full lifecycle result, new independent-solver pass, or regenerated chamber bundle are claimed. The runner and its new notebook remain **unexecuted in Colab**. Keep this PR as a draft until execution and review of its retained results.
+Changing RV parameters changes LV filling through the closed loop. Therefore an isolated RV patch cannot preserve a previously fitted LV trajectory automatically; joint calibration and subsequent assessment are needed. Each conditional request/prediction is saved separately. The original request remains unchanged and the failed benchmark is retained.
 
-## Next executable steps
+![Actual Colab RV development comparison](../validation/kit_rv_diagnosis_2026_10_21/colab_reconnected/rv-results/RV_diagnosis.png)
 
-Once the user's Edge Colab can allocate a runtime, run `notebooks/HeartTwin_KIT_RV_Diagnosis.ipynb` against the original fitted request first. The notebook pins all seven repositories, saves software checks and exports hashes and a ZIP.
+## Evidence and reproduction
 
-To diagnose the improved LV candidate, regenerate the chamber results using `HeartTwin_KIT_Chamber_Refinement.ipynb`, then explicitly point the RV runner at its `selected_request.json`. Do not silently substitute a partial reconstructed request; the summary contains insufficient parameters for exact replay.
+Evidence: `validation/kit_rv_diagnosis_2026_10_21/colab_reconnected/`.
 
-If numerical/routing checks pass, inspect sensitivity and optional conditional solutions before proposing a parameter or model change. Obtain independent RV time-series or pressure/flow information for genuine personalization and subsequent validation. Keep the original benchmark, selected LV candidate and all negative results intact.
+The first core ZIP contains 61 files, 652339 bytes, SHA256 **138218ac575fe01e9f2d275b6e4bf82c9420734254a18c116439c04762b47b93**. Its Git blob **331bed463f9ad9c5de2fbf0e9a60c88fae983b21** matches the value independently computed in Colab before upload. It includes requests, predictions, protocol, logs, test XML and environment. Forty-nine native artifact copies from individual calls are excluded from the core ZIP, with their hashes retained separately. Tolerance refinement, plot source and figures were added after that checkpoint and are supplied separately.
 
-## Colab URL integration correction
+Run `notebooks/HeartTwin_KIT_RV_Diagnosis.ipynb` in Edge Colab. The runner accepts the original request or an explicitly supplied complete candidate request, never a partially reconstructed summary. Optional constraint fitting is marked as development fitting and never overwrites the source request.
 
-Colab initially parsed the slash-containing branch `diagnose/kit-rv-sparse` as ref `diagnose` and path `kit-rv-sparse/notebooks`, causing a misleading Notebook not found error. Opening the immutable notebook commit instead succeeded, without GitHub authorization changes:
+Four earlier chamber families are being regenerated separately to restore the missing raw LV evidence. The original session's temporary directory was absent in the new runtime. A rerun is a new reproducibility record, not recovery of those lost files and not an unseen-data validation experiment.
 
-[Open the pinned RV notebook in Colab](https://colab.research.google.com/github/Virelion-Biotech/Virelion-HeartTwin/blob/adb928a10b134e33048ad95ff84a903fca1a3c26/notebooks/HeartTwin_KIT_RV_Diagnosis.ipynb)
+## Earlier failures and their resolution
 
-This resolves notebook loading only. It does not resolve the earlier runtime-allocation rejection. The diagnostic remains unexecuted. Publication and browser errors with their diagnoses and resolutions are retained in `validation/kit_rv_diagnosis_2026_10_21/EXECUTION_ATTEMPTS.json`.
+Before this retry, Edge had reconnected but Colab reported no active sessions and rejected two runtime allocations with “Failed to assign a backend,” suggesting a possible location restriction without establishing its cause. The actual screenshot is retained. On this retry allocation succeeded; no workaround or security setting change was applied by the agent.
+
+Colab also misparsed the slash-containing branch name as ref `diagnose`, producing a misleading Notebook not found error. The immutable commit URL loaded successfully. A branch-publication API error was corrected by creating the branch before opening the PR. These execution errors and their diagnoses are preserved in `EXECUTION_ATTEMPTS.json`; none were numerical model errors.
+
+## Remaining limits
+
+One volunteer, previously seen data, no clinical qualification, no independent patient validation, no identified absolute pressure scale, no measured RV waveform or independent pressure/flow series, no steady-state claim, no spatial mechanics or EDGAR electrical validation. The current diagnosis narrows the RV discrepancy to conditional model/input assumptions after the tested numerical and routing explanations were eliminated; it does not establish a unique physiological cause.
