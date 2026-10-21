@@ -1,0 +1,22 @@
+{
+  "run_date": "2026-10-21",
+  "scope": "Actual reconnected Edge Colab reproduction; previously seen data",
+  "archives": [
+    {
+      "name": "KIT_chamber_reproduction_and_selected_RV_core.zip",
+      "bytes": 1242304,
+      "files": 69,
+      "sha256": "74a295fbbf8de47991d17e000f6a5a5ebb93dc9a7b3303ddfc24c110a15c326b",
+      "git_blob": "ddc03b0b6f15c343f67be1cbe7eb45a3121c2808",
+      "transfer_verified": true
+    },
+    {
+      "name": "KIT_RV_diagnosis_results_full.zip",
+      "bytes": 8319966,
+      "files": 115,
+      "sha256": "022df1e7a46503fdd7912ecbfe6b17497ed1607b5856a40d5c53eba0cf73297d",
+      "git_blob": "ad0fcdbf17fb1f68ec3179ee6659a833e3db65e3",
+      "transfer_verified": true
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "selected": {
+    "k": 0.1,
+    "inner_rmse_mL": 4.974428299440173,
+    "best": {
+      "x": [
+        1.78422513017594,
+        0.47575922393122366,
+        0.008120535145518621,
+        39.99999999848251,
+        0.5917354662050968
+      ],
+      "SSE": 1089.1362136879868,
+      "success": true,
+      "message": "Both `ftol` and `xtol` termination conditions are satisfied.",
+      "nfev": 8,
+      "scaled_jacobian_singular_values": [
+        1690.9840467802144,
+        943.9813329306879,
+        390.7956473071676,
+        107.50712508702665,
+        6.619408374900248
+      ]
+    },
+    "trials": [
+      {
+        "x": [
+          1.78422513017594,
+          0.47575922393122366,
+          0.008120535145518621,
+          39.99999999848251,
+          0.5917354662050968
+        ],
+        "SSE": 1089.1362136879868,
+        "success": true,
+        "message": "Both `ftol` and `xtol` termination conditions are satisfied.",
+        "nfev": 8,
+        "scaled_jacobian_singular_values": [
+          1690.9840467802144,
+          943.9813329306879,
+          390.7956473071676,
+          107.50712508702665,
+          6.619408374900248
+        ]
+      },
+      {
+        "x": [
+          1.7842330697393496,
+          0.47575675562897024,
+          0.008120974964924152,
+          39.99999998452078,
+          0.5917400222417989
+        ],
+        "SSE": 1089.1363774622305,
+        "success": true,
+        "message": "Both `ftol` and `xtol` termination conditions are satisfied.",
+        "nfev": 13,
+        "scaled_jacobian_singular_values": [
+          1690.806194339071,
+          944.0455681200165,
+          390.6130277902191,
+          107.63501671375636,
+          6.622844168934101
+        ]
+      }
+    ]
+  },
+  "final_fit": {
+    "x": [
+      1.7826867053173698,
+      0.4758039005057447,
+      0.0081774232127543,
+      24.857226158908425,
+      0.5902385906794098
+    ],
+    "SSE": 1133.8980317407852,
+    "success": true,
+    "message": "`ftol` termination condition is satisfied.",
+    "nfev": 7,
+    "scaled_jacobian_singular_values": [
+      1781.610505554111,
+      951.2214761225753,
+      401.693673134368,
+      108.88474414255374,
+      34.077889329193134
+    ]
+  },
+  "final_trials": [
+    {
+      "x": [
+        1.7827022306654918,
+        0.47579196619277264,
+        0.008178634157123046,
+        24.85560822691472,
+        0.5902197948787663
+      ],
+      "SSE": 1133.898040314569,
+      "success": true,
+      "message": "`ftol` termination condition is satisfied.",
+      "nfev": 8,
+      "scaled_jacobian_singular_values": [
+        1781.4794379101293,
+        951.1491252351685,
+        401.69635167492635,
+        108.76922924819337,
+        34.07141717446112
+      ]
+    },
+    {
+      "x": [
+        1.7826867053173698,
+        0.4758039005057447,
+        0.0081774232127543,
+        24.857226158908425,
+        0.5902385906794098
+      ],
+      "SSE": 1133.8980317407852,
+      "success": true,
+      "message": "`ftol` termination condition is satisfied.",
+      "nfev": 7,
+      "scaled_jacobian_singular_values": [
+        1781.610505554111,
+        951.2214761225753,
+        401.693673134368,
+        108.88474414255374,
+        34.077889329193134
+      ]
+    }
+  ],
+  "prediction_sha256": "1d4b92cfae20297fabeca6bebccdb49a5446f47455f640b4b9b4ab86faebee4a",
+  "calibration_rmse_mL": 7.021389778663358,
+  "archived_outer_development_rmse_mL": 6.019837866939785,
+  "original_outer_rmse_mL": 22.86854649759186,
+  "persistence_outer_rmse_mL": 8.061338997774605,
+  "clinical_validation": "NOT_ESTABLISHED",
+  "independent_validation": false,
+  "interpretation": "k chosen from calibration-only profile; original failed benchmark retained. No clinical pressure/parameter or new validation claim."
+}

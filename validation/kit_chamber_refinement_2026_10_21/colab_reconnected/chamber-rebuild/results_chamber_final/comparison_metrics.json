@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "Original failed LV fit": {
+      "calibration_RMSE_mL": 13.727739504812364,
+      "outer_development_RMSE_mL": 22.86854649759186,
+      "outer_bias_mL": 19.152885408965385,
+      "outer_MAE_mL": 19.152885408965385,
+      "outer_max_absolute_error_mL": 35.7606118452814
+    },
+    "Selected LV-only development fit": {
+      "calibration_RMSE_mL": 4.910494797174408,
+      "outer_development_RMSE_mL": 6.632331874923076,
+      "outer_bias_mL": 4.483964322538493,
+      "outer_MAE_mL": 6.220470250844708,
+      "outer_max_absolute_error_mL": 9.129923251030874
+    },
+    "RV constraint; no joint LV refit": {
+      "calibration_RMSE_mL": 5.011765041061766,
+      "outer_development_RMSE_mL": 7.379744771582504,
+      "outer_bias_mL": 5.539208898988242,
+      "outer_MAE_mL": 6.743567806379495,
+      "outer_max_absolute_error_mL": 10.148173822160999
+    }
+  },
+  "pressure_scale_checks": [
+    {
+      "scale": 0.5,
+      "maximum_volume_change_mL": 0.0,
+      "LV_peak_pressure_mmHg": 76.68136507419794
+    },
+    {
+      "scale": 2.0,
+      "maximum_volume_change_mL": 0.0,
+      "LV_peak_pressure_mmHg": 306.72546029679177
+    }
+  ],
+  "interpretation": "Same previously seen data. RV constraint fits its former assessment point; no LV refit. No independent or clinical validation."
+}

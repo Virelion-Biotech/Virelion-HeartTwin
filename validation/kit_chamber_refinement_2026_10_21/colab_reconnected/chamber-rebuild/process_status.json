@@ -1,0 +1,26 @@
+[
+  {
+    "family": "constitutive-first",
+    "folder": "results_chamber_laws",
+    "exit_code": 0,
+    "seconds": 256.5929722499999
+  },
+  {
+    "family": "bound-refinement",
+    "folder": "results_chamber_refinement",
+    "exit_code": 0,
+    "seconds": 284.516524603
+  },
+  {
+    "family": "profile-fixed-phase",
+    "folder": "results_stiffness_fixed_phase",
+    "exit_code": 0,
+    "seconds": 163.79380590000005
+  },
+  {
+    "family": "profile-phase",
+    "folder": "results_stiffness_profile",
+    "exit_code": 0,
+    "seconds": 212.52942378800003
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "scope": "Regeneration of prior development evidence; no unseen data",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "source_pin": "e6db5cc60ed95e233daeb01f53b59abbbc742d02",
+  "families": [
+    [
+      "constitutive-first",
+      "results_chamber_laws",
+      "diagnose_kit_chamber_laws.py",
+      []
+    ],
+    [
+      "bound-refinement",
+      "results_chamber_refinement",
+      "diagnose_kit_chamber_laws.py",
+      [
+        "--refine-calibration"
+      ]
+    ],
+    [
+      "profile-phase",
+      "results_stiffness_profile",
+      "profile_kit_passive_stiffness.py",
+      []
+    ],
+    [
+      "profile-fixed-phase",
+      "results_stiffness_fixed_phase",
+      "profile_kit_passive_stiffness.py",
+      [
+        "--fixed-phase"
+      ]
+    ]
+  ],
+  "workers": 2,
+  "selection": "Lowest inner calibration RMSE; never archived outer error",
+  "outer_values_previously_seen": true,
+  "independent_patient_validation": false,
+  "clinical_validation": "NOT_ESTABLISHED"
+}

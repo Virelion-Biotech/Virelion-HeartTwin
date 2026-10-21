@@ -1,0 +1,29 @@
+{
+  "rule": "Lowest inner RMSE across all recorded families; outer never used for choice",
+  "prior_outer_values_seen": true,
+  "independent_patient_validation": false,
+  "ranking": [
+    {
+      "family": "profile-phase",
+      "folder": "results_stiffness_profile",
+      "inner_rmse_mL": 3.634985610060714
+    },
+    {
+      "family": "profile-fixed-phase",
+      "folder": "results_stiffness_fixed_phase",
+      "inner_rmse_mL": 4.974428299440173
+    },
+    {
+      "family": "bound-refinement",
+      "folder": "results_chamber_refinement",
+      "inner_rmse_mL": 8.304358111633928
+    },
+    {
+      "family": "constitutive-first",
+      "folder": "results_chamber_laws",
+      "inner_rmse_mL": 8.661475387669027
+    }
+  ],
+  "selected_family": "profile-phase",
+  "prediction_sha256": "1e8f56a584226195f1d344396a670259bdf4f58bb3bada5b5acf683c76c409a0"
+}

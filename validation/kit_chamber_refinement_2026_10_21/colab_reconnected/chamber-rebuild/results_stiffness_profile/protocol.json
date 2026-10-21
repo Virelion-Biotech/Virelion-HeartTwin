@@ -1,0 +1,64 @@
+{
+  "kind": "Exploratory calibration-only stiffness profile; not new independent validation",
+  "prior_outer_values_seen": true,
+  "selection": "Fit first 17 calibration points; choose k by lowest RMSE on next six calibration points, then refit six remaining coordinates on all 23",
+  "k_grid_per_mL": [
+    0.005,
+    0.0125,
+    0.025,
+    0.05,
+    0.075,
+    0.1
+  ],
+  "fixed_phase": false,
+  "coordinates": [
+    "LV_emax",
+    "activation_duration",
+    "mitral_R",
+    "conditional_passive_pressure_at_initial_measured_LV_volume",
+    "peak_fraction",
+    "activation_start"
+  ],
+  "bounds": [
+    [
+      0.2,
+      0.25,
+      0.001,
+      0.5,
+      0.25,
+      -0.15
+    ],
+    [
+      8.0,
+      0.7,
+      0.2,
+      40.0,
+      0.75,
+      0.05
+    ]
+  ],
+  "starts": [
+    [
+      1.77,
+      0.48,
+      0.006,
+      10.0,
+      0.58,
+      0.0
+    ],
+    [
+      2.0,
+      0.5,
+      0.01,
+      15.0,
+      0.5,
+      -0.04
+    ]
+  ],
+  "max_nfev": 55,
+  "parameterization": "emin=P_ref*k/expm1(k*(V_ref-V0)); k=0 uses P_ref/(V_ref-V0). Algebraically identical exponential passive law.",
+  "reference_volume_mL": 221.644518,
+  "reference_pressure_is_measured": false,
+  "identifiability": "Pressure scale and physiology remain unvalidated. k is a development-selected shape, not an identified patient property.",
+  "motivation": "Prior calibration-only fits hit arbitrary k bounds; original emin/k coordinates had poor scaling. No selection against archived outer error."
+}

@@ -1,0 +1,123 @@
+{
+  "subject_id": "KIT-Gerach-10526554-volunteer",
+  "compartments": {
+    "LA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.15,
+      "emax_mmHg_per_mL": 0.35,
+      "activation_start_s": 1.05,
+      "activation_duration_s": 0.25
+    },
+    "LV": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 1.6341258950505893e-05,
+      "emax_mmHg_per_mL": 1.776988469998552,
+      "activation_start_s": 0.0,
+      "activation_duration_s": 0.4788051347586103,
+      "passive_exponent_per_mL": 0.04999999834083835,
+      "activation_peak_fraction": 0.5832772223188353
+    },
+    "RA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.1,
+      "emax_mmHg_per_mL": 0.25,
+      "activation_start_s": 1.05,
+      "activation_duration_s": 0.25
+    },
+    "RV": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "emin_mmHg_per_mL": 0.03,
+      "emax_mmHg_per_mL": 0.5,
+      "activation_start_s": 0.0,
+      "activation_duration_s": 0.5
+    },
+    "SA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 1.5
+    },
+    "SV": {
+      "unstressed_volume_mL": 2600.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 30.0
+    },
+    "PA": {
+      "unstressed_volume_mL": 10.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 5.0
+    },
+    "PV": {
+      "unstressed_volume_mL": 300.0,
+      "external_pressure_mmHg": 0.0,
+      "compliance_mL_per_mmHg": 10.0
+    }
+  },
+  "cycle_length_s": 1.3,
+  "initial_volumes_mL": [
+    60.0,
+    221.644518,
+    150.0,
+    2800.0,
+    60.0,
+    194.545622,
+    150.0,
+    400.0
+  ],
+  "edge_resistance_mmHg_s_per_mL": [
+    0.007234046394214515,
+    0.01,
+    1.0,
+    0.05,
+    0.01,
+    0.01,
+    0.1,
+    0.02
+  ],
+  "time_s": [
+    0.0,
+    0.036088234999999996,
+    0.072176471,
+    0.108264706,
+    0.14435294099999998,
+    0.180441176,
+    0.216529412,
+    0.252617647,
+    0.28870588199999997,
+    0.324794118,
+    0.36088235300000004,
+    0.396970588,
+    0.433058824,
+    0.46914705900000003,
+    0.505235294,
+    0.541323529,
+    0.5774117649999999,
+    0.6135,
+    0.6495882350000001,
+    0.685676471,
+    0.7217647060000001,
+    0.757852941,
+    0.793941176,
+    0.830029412,
+    0.866117647,
+    0.902205882,
+    0.9382941180000001,
+    0.974382353,
+    1.010470588,
+    1.0465588239999999,
+    1.082647059,
+    1.1187352940000002,
+    1.154823529,
+    1.190911765,
+    1.227
+  ],
+  "solver": {
+    "rtol": 1e-06,
+    "atol_mL": 1e-07,
+    "max_step_s": 0.003
+  },
+  "output_dir": "/content/HeartTwin_RV_Diagnosis_e6db5cc60ed9/chamber-rebuild/results_chamber_refinement/artifacts"
+}
