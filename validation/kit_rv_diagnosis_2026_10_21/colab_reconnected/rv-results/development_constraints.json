@@ -1,0 +1,53 @@
+[
+  {
+    "RV_outflow_resistance_factor": 0.5,
+    "assessment_status": "DEVELOPMENT_FIT_TO_PREVIOUSLY_SEEN_POINT",
+    "bracket": [
+      0.05,
+      3.0
+    ],
+    "bracket_residuals_mL": [
+      128.607216,
+      -40.77239896052215
+    ],
+    "status": "CONDITIONAL_SOLUTION",
+    "RV_emax_mmHg_per_mL": 0.738289394051949,
+    "RV_endpoint_mL": 65.9384059774468,
+    "RV_peak_pressure_mmHg": 44.66688593842806,
+    "max_LV_trajectory_delta_mL": 10.312038239862659
+  },
+  {
+    "RV_outflow_resistance_factor": 1.0,
+    "assessment_status": "DEVELOPMENT_FIT_TO_PREVIOUSLY_SEEN_POINT",
+    "bracket": [
+      0.05,
+      3.0
+    ],
+    "bracket_residuals_mL": [
+      128.607216,
+      -40.69518006334317
+    ],
+    "status": "CONDITIONAL_SOLUTION",
+    "RV_emax_mmHg_per_mL": 0.7457058835313207,
+    "RV_endpoint_mL": 65.93840598940594,
+    "RV_peak_pressure_mmHg": 48.534596751251925,
+    "max_LV_trajectory_delta_mL": 10.151474480231059
+  },
+  {
+    "RV_outflow_resistance_factor": 2.0,
+    "assessment_status": "DEVELOPMENT_FIT_TO_PREVIOUSLY_SEEN_POINT",
+    "bracket": [
+      0.05,
+      3.0
+    ],
+    "bracket_residuals_mL": [
+      128.607216,
+      -40.55507071152656
+    ],
+    "status": "CONDITIONAL_SOLUTION",
+    "RV_emax_mmHg_per_mL": 0.7651195542575352,
+    "RV_endpoint_mL": 65.93840597009195,
+    "RV_peak_pressure_mmHg": 57.27252394728626,
+    "max_LV_trajectory_delta_mL": 9.878168492180123
+  }
+]

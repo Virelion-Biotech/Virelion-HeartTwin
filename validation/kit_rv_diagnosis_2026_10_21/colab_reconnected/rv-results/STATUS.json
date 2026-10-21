@@ -1,0 +1,9 @@
+{
+  "status": "DIAGNOSIS_COMPLETED",
+  "software_checks_passed": true,
+  "RV_error_repaired": false,
+  "clinical_validation": "NOT_ESTABLISHED",
+  "independent_patient_validation": false,
+  "source_request_unchanged": true,
+  "interpretation": "Sensitivity and conditional solutions are diagnoses, not identified patient parameters or a validated RV repair"
+}

@@ -1,0 +1,16 @@
+{
+  "kind": "Sparse-RV diagnosis; previously seen data; development only",
+  "request_path": "/content/HeartTwin_RV_Diagnosis_e6db5cc60ed9/Virelion-HeartTwin/validation/kit_edgar_2026_10_20/fitted_model.json",
+  "request_sha256": "e262a53eddd9b10c07fba242acf08111c13e6ba69f598401610f53bd2a6b9a3d",
+  "RV_observation_sha256": "14c45bcc73ec97429c183c767c7466f74ceb30d7eda6c7155834ab54d0e08adf",
+  "runner_sha256": "5677e5c37b5cc8732be4134779e0e63db03a266bcd924dfc3fb6e0e8fe23b74a",
+  "native_module_sha256": "bc52568676bdf1a2ae260317eb1072409a7394323020f2d470912377e575e037",
+  "constraint_fit_requested": true,
+  "selection_policy": "No selection or replacement of the original or selected LV model",
+  "data_limit": "One initial condition and one subsequent RV point, not a waveform",
+  "identification_limit": "One scalar residual has Jacobian rank at most one; simultaneous RV/loading parameter identification is impossible from this target alone",
+  "clinical_validation": "NOT_ESTABLISHED",
+  "independent_patient_validation": false,
+  "no_steady_state_claim": true,
+  "output_time_policy": "Measured timestamps retained; exact RV target and dense diagnostic output points added without changing physiology"
+}
