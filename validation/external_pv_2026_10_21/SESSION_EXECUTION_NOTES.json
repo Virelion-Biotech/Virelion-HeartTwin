@@ -19,10 +19,11 @@
   },
   "frozen_models_sha256": "6b40c54ccef54ce4eeed6f02688c87ca0241d060211157fb788f1ca5cdb805e7",
   "reserved_subjects_values_opened": false,
-  "edgar_2026_training_download": "started after Edge recovered; outcomes pending",
+  "edgar_2026_training_download": "Both archives hash-verified; nine-subject audit and final replay exited 0; no electrical solve",
   "browser_blocker": "Recovered on user continuation by claiming fresh Colab tab from current inventory.",
   "consolidated_notebook": "assembled, not replayed end to end",
   "clinical_validation": false,
   "final_compile_returncode": 0,
-  "final_lint_returncode": 0
+  "final_lint_returncode": 0,
+  "edgar_raw_source_redistributed": false
 }

@@ -1,0 +1,17 @@
+{
+  "compile": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "lint": {
+    "returncode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  "replay": {
+    "returncode": 0,
+    "stdout": "{\n  \"subject_count\": 9,\n  \"P034_present\": false,\n  \"BSP_channels\": {\n    \"128\": 9\n  },\n  \"ECG_channels\": {\n    \"6\": 9\n  },\n  \"electrical_solve_ready_subjects\": []\n}\nP001 mesh_failures ['EndoEpi'] leadlink_bases [0, 1]\nP002 mesh_failures ['EndoEpi', 'Llung', 'LV_AO', 'RV_PV'] leadlink_bases [0, 1]\nP004 mesh_failures ['EndoEpi', 'torso'] leadlink_bases [0, 1]\nP006 mesh_failures ['Llung', 'LV_AO', 'Rlung', 'RV_PV'] leadlink_bases [0, 1]\nP010 mesh_failures ['EndoEpi', 'Llung', 'Rlung', 'RV_PV', 'torso'] leadlink_bases [0, 1]\nP020 mesh_failures ['Llung', 'Rlung'] leadlink_bases [0, 1]\nP023 mesh_failures ['EndoEpi', 'Llung', 'Rlung', 'RV_PV'] leadlink_bases [0, 1]\nP024 mesh_failures ['EndoEpi', 'Llung', 'LV_AO', 'RV_PV'] leadlink_bases [0, 1]\nP027 mesh_failures ['Llung', 'LV_AO', 'RV_PV', 'torso', 'EndoEpi'] leadlink_bases [0, 1]\n",
+    "stderr": ""
+  }
+}

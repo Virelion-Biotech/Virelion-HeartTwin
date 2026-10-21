@@ -1,0 +1,1 @@
+{"error": "TypeError: Object of type bytes is not JSON serializable", "cause": "MATLAB note struct includes byte strings; initial audit serializer did not decode them", "classification": "New diagnostic serializer, not an ElectroTrace or HeartTwin solver failure"}

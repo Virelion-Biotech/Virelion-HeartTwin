@@ -1,0 +1,922 @@
+{
+  "page": "https://edgar.sci.utah.edu/2026/05/02/2026-ecgi-data-challenge/",
+  "scope": "Bratislava training only; challenge testing NOT downloaded",
+  "p034_legacy_page": "still lists Documentation and Meshes only",
+  "rights": "No raw archives or recording values redistributed by this audit",
+  "archives": {
+    "geometries": {
+      "url": "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/Bratislava_Data/Geometries/TrainingGeometries.zip",
+      "bytes": 2253471,
+      "sha256": "dc112818adfcff90219a5f3886f8ad30f5a4adce542e21f3b89e8ae6845f6faf",
+      "entries": [
+        {
+          "path": "P027_Epi.mat",
+          "bytes": 22164,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P027_otherStructures.mat",
+          "bytes": 68254,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P027_torso.mat",
+          "bytes": 36447,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_EndoEpi.mat",
+          "bytes": 79923,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_Epi.mat",
+          "bytes": 32087,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_otherStructures.mat",
+          "bytes": 80900,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P001_torso.mat",
+          "bytes": 56100,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_EndoEpi.mat",
+          "bytes": 69650,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_Epi.mat",
+          "bytes": 31511,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_otherStructures.mat",
+          "bytes": 104500,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P002_torso.mat",
+          "bytes": 74785,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_EndoEpi.mat",
+          "bytes": 35428,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_Epi.mat",
+          "bytes": 29970,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_otherStructures.mat",
+          "bytes": 87347,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P004_torso.mat",
+          "bytes": 80054,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_EndoEpi.mat",
+          "bytes": 79680,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_Epi.mat",
+          "bytes": 44554,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_otherStructures.mat",
+          "bytes": 99522,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P006_torso.mat",
+          "bytes": 83129,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_EndoEpi.mat",
+          "bytes": 69746,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_Epi.mat",
+          "bytes": 30511,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_otherStructures.mat",
+          "bytes": 105776,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P010_torso.mat",
+          "bytes": 73852,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_EndoEpi.mat",
+          "bytes": 78150,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_Epi.mat",
+          "bytes": 30800,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_otherStructures.mat",
+          "bytes": 68047,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P020_torso.mat",
+          "bytes": 45562,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_EndoEpi.mat",
+          "bytes": 58201,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_Epi.mat",
+          "bytes": 24387,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_otherStructures.mat",
+          "bytes": 92059,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P023_torso.mat",
+          "bytes": 59897,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_EndoEpi.mat",
+          "bytes": 72164,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_Epi.mat",
+          "bytes": 37350,
+          "mat_schema": [
+            {
+              "variable": "Epi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_otherStructures.mat",
+          "bytes": 97772,
+          "mat_schema": [
+            {
+              "variable": "otherStructures",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P024_torso.mat",
+          "bytes": 63915,
+          "mat_schema": [
+            {
+              "variable": "torso",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        },
+        {
+          "path": "P027_EndoEpi.mat",
+          "bytes": 47600,
+          "mat_schema": [
+            {
+              "variable": "EndoEpi",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            }
+          ]
+        }
+      ]
+    },
+    "signals": {
+      "url": "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/Bratislava_Data/Signals/AllTrainingSignals.zip",
+      "bytes": 9204106,
+      "sha256": "824b4de2785fd8e29786854087f1a4143a1932aa9d71238abbe9be6060474462",
+      "entries": [
+        {
+          "path": "P004-ts.mat",
+          "bytes": 973982,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P006-ecg.mat",
+          "bytes": 46815,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P006-ts.mat",
+          "bytes": 971443,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P010-ecg.mat",
+          "bytes": 46874,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P010-ts.mat",
+          "bytes": 984715,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P020-ecg.mat",
+          "bytes": 46651,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P020-ts.mat",
+          "bytes": 975849,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P023-ecg.mat",
+          "bytes": 46760,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P023-ts.mat",
+          "bytes": 974531,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P024-ecg.mat",
+          "bytes": 46889,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P024-ts.mat",
+          "bytes": 976529,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P027-ecg.mat",
+          "bytes": 46860,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P027-ts.mat",
+          "bytes": 977738,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P001-ecg.mat",
+          "bytes": 46681,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P001-ts.mat",
+          "bytes": 958699,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P002-ecg.mat",
+          "bytes": 46851,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P002-ts.mat",
+          "bytes": 983467,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1112
+              ],
+              "class": "uint8"
+            }
+          ]
+        },
+        {
+          "path": "P004-ecg.mat",
+          "bytes": 46921,
+          "mat_schema": [
+            {
+              "variable": "ts",
+              "shape": [
+                1,
+                1
+              ],
+              "class": "struct"
+            },
+            {
+              "variable": "__function_workspace__",
+              "shape": [
+                1,
+                1120
+              ],
+              "class": "uint8"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
