@@ -78,7 +78,7 @@ def observation_matrix(record, n):
     """Reviewed linear electrode observations; every row is gauge invariant."""
     electrodes = record["node_ids"]
     if not isinstance(electrodes, dict):
-        raise ValueError("Named electrode node mapping required")
+        raise TypeError("Named electrode node mapping required")
     declared = record.get("observations")
     if declared is None:
         if (set(electrodes) != set(ELECTRODES)

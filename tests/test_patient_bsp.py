@@ -7,13 +7,17 @@ from copy import deepcopy
 
 import numpy as np
 import pytest
+from test_patient_native_preparation import image_request, read
 
 from hearttwin.patient_bsp import evaluate_bsp_holdout
 from hearttwin.patient_ecg_eval import ECGEvaluationSpec
 from hearttwin.patient_geometry import reconstruct_labels, write_artifact
 from hearttwin.patient_spatial_ep import simulate_spatial_ep
-from hearttwin.patient_volume_conductor import generate_leadfield, observation_matrix, tetra_operators
-from test_patient_native_preparation import image_request, read
+from hearttwin.patient_volume_conductor import (
+    generate_leadfield,
+    observation_matrix,
+    tetra_operators,
+)
 
 pytestmark = pytest.mark.skipif(importlib.util.find_spec("scipy") is None, reason="patient-native extra required")
 
