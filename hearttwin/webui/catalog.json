@@ -5,6 +5,7 @@
       "name": "PatientNative",
       "repository": "Virelion-Biotech/Virelion-HeartTwin",
       "capabilities": [
+        "patient.bsp.evaluate",
         "patient.geometry.reconstruct",
         "patient.leadfield.generate",
         "patient.spatial_ep.simulate",
