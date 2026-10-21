@@ -3,11 +3,11 @@
 Run numerics in Colab. This is NOT a circulation solve or human validation.
 Source: Colebank & Chesler 2023, doi:10.1007/s10439-023-03293-z.
 """
-from pathlib import Path
 import hashlib
 import json
 import platform
 import urllib.request
+from pathlib import Path
 
 import numpy as np
 import scipy
@@ -94,7 +94,7 @@ def main(out, chamber_pressure):
         calibration_p = pressure[:, :30].mean(axis=1)
         calibration_v = volume[:, :30].mean(axis=1)
 
-        def parameters(x, stiffness, asymmetric):
+        def parameters(x, stiffness, asymmetric, vref=vref):
             p = {"unstressed_volume_mL": 0., "external_pressure_mmHg": 0.,
                  "emin_mmHg_per_mL": float(x[0]), "emax_mmHg_per_mL": float(x[0] + x[1]),
                  "activation_duration_s": float(x[2] * cycle),
@@ -110,7 +110,7 @@ def main(out, chamber_pressure):
             return np.array([[chamber_pressure(t, v, p, cycle) for v in row]
                              for t, row in zip(times, np.atleast_2d(volumes.T).T, strict=True)])
 
-        def fit(stiffness, asymmetric, v, p):
+        def fit(stiffness, asymmetric, v, p, chamber=chamber):
             lo = [0.001, 0.001, 0.2, -0.2] + ([0.1] if asymmetric else [])
             hi = [5000, 20000, 1., 0.2] + ([0.9] if asymmetric else [])
             trials = []
@@ -175,6 +175,7 @@ def main(out, chamber_pressure):
 
 if __name__ == "__main__":
     import argparse
+
     from hearttwin.patient_closed_loop import chamber_pressure
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
