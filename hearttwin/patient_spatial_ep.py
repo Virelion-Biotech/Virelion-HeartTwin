@@ -8,7 +8,7 @@ import numpy as np
 
 from .patient_geometry import write_artifact
 from .patient_observations import verified_bytes
-from .patient_volume_conductor import tetra_operators
+from .patient_volume_conductor import LEADS, tetra_operators
 
 
 def simulate_spatial_ep(payload):
@@ -76,7 +76,7 @@ def simulate_spatial_ep(payload):
               "qualification": "Phenomenological excitation only; no human ion-channel or clinical qualification"}
     if payload.get("leadfield"):
         lf = json.loads(verified_bytes(payload["leadfield"]))
-        if (lf["schema"] != "hearttwin-reciprocal-p1-v1" or lf["subject_id"] != payload["subject_id"]
+        if (lf["schema"] not in {"hearttwin-reciprocal-p1-v1", "hearttwin-reciprocal-p1-v2"} or lf["subject_id"] != payload["subject_id"]
                 or lf["coordinate_frame"] != payload["coordinate_frame"]):
             raise ValueError("Lead-field patient and coordinate frame must match exactly")
         torso = json.loads(verified_bytes(lf["mesh"]))
@@ -90,8 +90,23 @@ def simulate_spatial_ep(payload):
         if mapped_cells != heart_cells:
             raise ValueError("Propagation mesh must equal the conductor's myocardial elements; torso propagation is forbidden")
         operator = np.asarray(lf["operator_V_per_V"], dtype=float)
-        if operator.shape != (12, len(torso["nodes"])) or not np.isfinite(operator).all():
+        names = lf["lead_names"]
+        generalized = lf["schema"] == "hearttwin-reciprocal-p1-v2"
+        if (not isinstance(names, list) or not 1 <= len(names) <= 512
+                or any(not isinstance(x, str) or not x.strip() for x in names)
+                or len(set(names)) != len(names)
+                or (not generalized and names != LEADS)
+                or operator.shape != (len(names), len(torso["nodes"]))
+                or not np.isfinite(operator).all()):
             raise ValueError("Invalid native lead-field operator")
-        output.update(leadfield=payload["leadfield"], leadfield_node_ids=mapping,
-                      lead_names=lf["lead_names"], ecg_V=(voltage @ operator[:, mapping].T).tolist())
+        values = (voltage @ operator[:, mapping].T).tolist()
+        output.update(leadfield=payload["leadfield"], leadfield_node_ids=mapping, lead_names=names)
+        if generalized:
+            if (not isinstance(lf.get("measurement_reference"), str)
+                    or not lf["measurement_reference"].strip() or lf.get("signal_unit") != "V"):
+                raise ValueError("Explicit generalized observation reference and V units required")
+            output.update(bsp_V=values, measurement_reference=lf["measurement_reference"],
+                          signal_kind="body_surface_potentials", signal_unit="V")
+        else:
+            output["ecg_V"] = values
     return {"spatial_ep": write_artifact(payload["output_dir"], "spatial-ep", output)}
