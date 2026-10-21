@@ -53,3 +53,6 @@ No challenge test data are downloaded by the supplied audit. Training archive va
 | Full patient lifecycle | HeartTwin plus all services and real hospital integration | Live-worker/browser review, real import and reconstruction qualification, new patient/condition evidence |
 
 The model still lacks a validated noise model, uncertainty qualification and a fully personalized whole-heart demonstration. Software CI and small constitutive errors cannot close those gaps.
+
+
+The [Colab result screenshot](../validation/external_pv_2026_10_21/colab_results.jpg) records the successful replay, negative baseline comparison and EDGAR summary. The final consolidated notebook at `2bcda5205b786ba7c40c80650fabaacc79cbe0b7` compiled all five code cells in Colab (SHA-256 `04d793e59f8a14dc12824be96f6e98c4281b39ba7f475acab16fca640eb2deb8`); no end-to-end replay of that consolidated notebook is claimed.
