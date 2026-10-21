@@ -11,16 +11,18 @@
     "B023 vref and chamber closure bindings"
   ],
   "correction": "Import reordering and default-bound vref/chamber, no numerical formula changes",
-  "final_replay": "launched; completion not retrieved",
-  "raw_result_bundle": "not retrieved; documented numbers transcribed from visible Colab output",
+  "final_replay": "exit 0; frozen models byte-identical",
+  "raw_result_bundle": "external_pv_evidence.zip; exact Git blob verified",
   "native_formula_max_difference_mmHg": {
     "LV": 2.842170943040401e-14,
     "RV": 2.1316282072803006e-14
   },
   "frozen_models_sha256": "6b40c54ccef54ce4eeed6f02688c87ca0241d060211157fb788f1ca5cdb805e7",
   "reserved_subjects_values_opened": false,
-  "edgar_2026_training_download": "Code prepared; editor click failed before execution; acquisition NOT RUN",
-  "browser_blocker": "Existing Colab tab changed ID. Fresh get/claim repeatedly timed out on Emulation.setFocusEmulationEnabled; browser enumeration and signed-in EDGAR page inspection worked.",
+  "edgar_2026_training_download": "started after Edge recovered; outcomes pending",
+  "browser_blocker": "Recovered on user continuation by claiming fresh Colab tab from current inventory.",
   "consolidated_notebook": "assembled, not replayed end to end",
-  "clinical_validation": false
+  "clinical_validation": false,
+  "final_compile_returncode": 0,
+  "final_lint_returncode": 0
 }
