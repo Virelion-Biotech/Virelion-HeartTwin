@@ -1,5 +1,5 @@
 {
-  "lock_version": 8,
+  "lock_version": 9,
   "generated_from": "requirements-services.txt",
   "repositories": [
     {
@@ -39,7 +39,7 @@
     },
     {
       "name": "Virelion-CardiMech",
-      "sha": "4fbae07eb0f76bfabba443a8d00f6889fea6c6af",
+      "sha": "a0887e289daf47a5f801d6c376f0aa073156d3dd",
       "role": "command"
     },
     {

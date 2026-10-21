@@ -1,6 +1,6 @@
 # Software completion using synthetic data
 
-This change completes two software blocks without acquiring or consuming patient data:
+The first completion pass implemented two software blocks without acquiring or consuming patient data:
 
 1. Explicit named/reference-weighted BSP reciprocal operators, native propagation and immutable held-out metric evaluation, including a real native-registry capability and CLI entrypoint. The legacy standard-ECG path remains tested. See [SYNTHETIC_BSP_WORKFLOW.md](SYNTHETIC_BSP_WORKFLOW.md).
 2. Bounded spatial mechanics assembly and residual-only Newton line searches in CardiMech [PR #4](https://github.com/Virelion-Biotech/Virelion-CardiMech/pull/4), pinned into HeartTwin's compatibility matrix version 8.
@@ -31,13 +31,23 @@ The [verified raw evidence archive](../validation/synthetic_completion_2026_10_2
 
 None of these setup/transfer failures establishes a clinical or component numerical defect. No pre-existing failed benchmark result was erased.
 
+## Larger-mesh mechanics follow-up
+
+Compatibility matrix version 9 advances CardiMech to `a0887e289daf47a5f801d6c376f0aa073156d3dd` ([PR #5](https://github.com/Virelion-Biotech/Virelion-CardiMech/pull/5)). It adds exact material/follower-pressure tangent actions and a bounded GMRES solve with true-residual acceptance. Existing `mechanics.simulate` requests can explicitly select `settings.linear_solver="matrix_free_gmres"` and `settings.mesh_profile="large_experimental"`; all reviewed anatomy, units, material, boundary and subject/hash requirements still apply. The standard profile remains 5,000 nodes/20,000 tets. The experimental profile permits at most 40,000 nodes/200,000 tets and requires the matrix-free solver.
+
+**114 CardiMech tests passed without skips in Edge Colab**, including CardiInfer integration, rotated anisotropic/finite-difference checks, follower-pressure actions, nonlinear direct/GMRES agreement for both materials with active tension, and rejection of incorrect/nonconverged linear solves. Three synthetic fixed-outer shells refined from 1,032 to 6,156 to 32,784 nodes (4,608 / 30,720 / 172,032 tets). Mean inner radial displacement error against an independent small-strain Lamé reference decreased from 3.188% to 1.152% to 0.546%. All converged in two Newton iterations with positive Jacobians and equilibrium residuals below 1.2e-14 N. The largest case used about 906 MiB peak process RSS and 358 seconds wall time; part of the run overlapped other Colab checks, so this is not general performance evidence.
+
+The tested source bodies are CardiMech `b6f048e3a50b8affe7a13bfe666edd143075372e`; the pinned follow-up adds documentation/evidence. [Controls, replay and limitations](https://github.com/Virelion-Biotech/Virelion-CardiMech/blob/a0887e289daf47a5f801d6c376f0aa073156d3dd/docs/MATRIX_FREE_MECHANICS.md) and [verified evidence](https://github.com/Virelion-Biotech/Virelion-CardiMech/blob/a0887e289daf47a5f801d6c376f0aa073156d3dd/validation/matrix_free_2026_10_21/matrix_free_evidence.zip) retain exact source identities, initial failures and all raw nodal coordinates/displacements. Archive SHA-256 `28f16137b659b81f1aab85a6af4c2e9898dd2c649836f50b7860cff77c0615eb`. Bulky complete field/mesh JSON is hashed but omitted. The initial run's overly broad tolerance-call edit and an unused test variable were corrected; no acceptance guard was loosened. Final notebook consolidation was interrupted; its compilation/replay is not claimed.
+
+Large-scale evidence covers a constrained compressible neo-Hookean shell at 1 Pa. Guccione/active tension have small-mesh tests. KIT has different geometry and constraints and still needs reference-state, material, fibre and cavity qualification. Jacobi robustness and P1 incompressibility locking remain engineering limitations; physiological and clinical qualification remain absent.
+
 ## What remains
 | Area | Status after this change |
 |---|---|
 | Standard ECG and explicit BSP software contracts | Implemented and synthetically verified |
 | Reference-aware frozen BSP scoring | Implemented; explicit held-out declarations do not prove independent acquisition |
-| Spatial assembly memory | Reduced on the tested synthetic mesh; total solver memory is not qualified |
-| Full KIT spatial capacity | Still unfinished: 5,000-node/20,000-tet guards remain; scalable solve and larger-domain convergence qualification are engineering work, not a patient-data-only blocker |
+| Spatial assembly memory | Assembly temporaries reduced; matrix-free follow-up records total peak process RSS for one larger synthetic configuration |
+| Full KIT spatial capacity | Experimental matrix-free profile passed a 32,784-node/172,032-tet synthetic shell; standard guards remain. Actual KIT geometry, reference state, material/fibre/cavity and solve qualification remain unfinished |
 | Human pressure/flow and waveform accuracy | Requires qualified independent measurements; the earlier murine PV model still loses to its waveform baseline |
 | EDGAR solve readiness | Actual export metadata, electrode indexing/order, reviewed geometry and a compatible conductor remain unqualified; this change does not assign defaults to those exports |
 | Broader physiology / clinical use | Native cubic propagation is phenomenological, P1 mechanics may lock near incompressibility, and whole-heart clinical qualification remains absent |
