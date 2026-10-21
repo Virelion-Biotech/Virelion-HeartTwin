@@ -18,12 +18,10 @@ from scipy.io import loadmat, whosmat
 
 SOURCES = {
     "geometries": (
-        "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/"
-        "Bratislava_Data/Geometries/TrainingGeometries.zip",
+        "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/Bratislava_Data/Geometries/TrainingGeometries.zip",
         "dc112818adfcff90219a5f3886f8ad30f5a4adce542e21f3b89e8ae6845f6faf"),
     "signals": (
-        "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/"
-        "Bratislava_Data/Signals/AllTrainingSignals.zip",
+        "https://edgar.sci.utah.edu/datasets/2026_ECGI_Challenge/Training_Data/Bratislava_Data/Signals/AllTrainingSignals.zip",
         "824b4de2785fd8e29786854087f1a4143a1932aa9d71238abbe9be6060474462"),
 }
 
