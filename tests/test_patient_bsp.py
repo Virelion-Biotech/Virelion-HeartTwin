@@ -103,8 +103,8 @@ def test_invalid_observation_conventions_fail_closed(tmp_path, mutation):
         observation_matrix(r, len(read(p["mesh"])["nodes"]))
 
 
-def bsp_prediction(tmp_path):
-    p = bsp_request(tmp_path, 4)
+def bsp_prediction(tmp_path, count=4):
+    p = bsp_request(tmp_path, count)
     lf = generate_leadfield(p)["leadfield"]
     mesh = read(p["mesh"])
     n = len(mesh["nodes"])
@@ -126,13 +126,20 @@ def bsp_prediction(tmp_path):
     return predicted, observation
 
 
-def test_native_bsp_propagation_and_explicit_evaluation(tmp_path):
-    pred, obs = bsp_prediction(tmp_path)
+@pytest.mark.parametrize("count", [4, 128])
+def test_native_bsp_propagation_and_explicit_evaluation(tmp_path, count):
+    pred, obs = bsp_prediction(tmp_path, count)
     spec = ECGEvaluationSpec(expected_leads=obs["lead_names"], require_standard_12_lead=False)
     report = evaluate_bsp_holdout(pred, write_artifact(tmp_path, "manufactured-bsp", obs), spec=spec)
     assert report.mean_nrmse == 0
     assert report.n_samples_compared == len(obs["time_s"])
     assert report.evidence_id == "manufactured-no-patient-data"
+    from hearttwin.config import load_registry
+    measured = write_artifact(tmp_path, "registry-bsp", obs)
+    adapter = load_registry().capability("patient.bsp.evaluate")
+    result = adapter.invoke("patient.bsp.evaluate", {
+        "prediction": pred, "observation": measured, "protocol": spec.model_dump(mode="json")})
+    assert result["mean_nrmse"] == 0
 
 
 @pytest.mark.parametrize("mutation", ["subject", "reference", "frame", "time", "holdout", "channel", "unit", "hash"])

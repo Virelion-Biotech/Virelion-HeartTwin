@@ -23,6 +23,12 @@ def invoke(capability, payload):
     if capability == "patient.geometry.reconstruct":
         from .patient_geometry import reconstruct_labels
         return reconstruct_labels(payload)
+    if capability == "patient.bsp.evaluate":
+        from .patient_bsp import evaluate_bsp_holdout
+        from .patient_ecg_eval import ECGEvaluationSpec
+        return evaluate_bsp_holdout(
+            payload["prediction"], payload["observation"],
+            spec=ECGEvaluationSpec.model_validate(payload["protocol"])).model_dump(mode="json")
     if capability == "patient.leadfield.generate":
         from .patient_volume_conductor import generate_leadfield
         return generate_leadfield(payload)

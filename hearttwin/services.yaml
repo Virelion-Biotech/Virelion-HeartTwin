@@ -1,7 +1,7 @@
 services:
   - name: PatientNative
     repository: Virelion-Biotech/Virelion-HeartTwin
-    capabilities: [patient.geometry.reconstruct, patient.leadfield.generate, patient.spatial_ep.simulate, patient.circulation.simulate, patient.coupled.simulate, patient.images.segment, patient.images.nnunet]
+    capabilities: [patient.bsp.evaluate, patient.geometry.reconstruct, patient.leadfield.generate, patient.spatial_ep.simulate, patient.circulation.simulate, patient.coupled.simulate, patient.images.segment, patient.images.nnunet]
     builtin: patient_native
   - name: CardiAnatomy
     repository: Virelion-Biotech/Virelion-CardiAnatomy
