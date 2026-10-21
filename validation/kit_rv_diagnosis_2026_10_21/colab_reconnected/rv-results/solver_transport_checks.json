@@ -1,0 +1,14 @@
+{
+  "RV_target_time_s": 0.36088235300000004,
+  "RV_observed_mL": 65.938406,
+  "RV_predicted_mL": 87.81039733554829,
+  "RV_signed_error_mL": 21.871991335548287,
+  "target_is_exact_output_sample": true,
+  "dense_RV_minimum_mL": 87.81035787705417,
+  "dense_RV_minimum_time_s": 0.2826137339055794,
+  "native_vs_DOP853_max_all_volume_difference_mL": 0.01011745138393394,
+  "registry_vs_direct_max_volume_difference_mL": 0.0,
+  "command_vs_direct_max_volume_difference_mL": 0.0,
+  "mass_drift_mL": 2.2737367544323206e-12,
+  "scope": "HeartTwin native solver, registry and command routes; other numerical engines are not silently substituted"
+}

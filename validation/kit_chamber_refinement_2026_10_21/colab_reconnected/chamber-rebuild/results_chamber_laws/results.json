@@ -1,0 +1,158 @@
+{
+  "selected": {
+    "variant": [
+      true,
+      true
+    ],
+    "inner_rmse_mL": 8.661475387669027,
+    "best": {
+      "x": [
+        1.7627695112299722,
+        0.48260636414093144,
+        0.004510525068297538,
+        0.0073079026691618195,
+        0.012247233735472774,
+        0.5734160278505701
+      ],
+      "SSE": 1355.9040882108675,
+      "success": true,
+      "message": "`xtol` termination condition is satisfied.",
+      "nfev": 58,
+      "scaled_jacobian_singular_values": [
+        1833.5300449260935,
+        995.8353164037463,
+        478.26654994694985,
+        206.79479718389362,
+        120.11346381240162,
+        4.423281255635381
+      ]
+    },
+    "trials": [
+      {
+        "x": [
+          1.7622939162900777,
+          0.48271061599869347,
+          0.004438781651790552,
+          0.007695171561468903,
+          0.01188660141940107,
+          0.5731759451324189
+        ],
+        "SSE": 1360.6107662130191,
+        "success": true,
+        "message": "`xtol` termination condition is satisfied.",
+        "nfev": 57,
+        "scaled_jacobian_singular_values": [
+          1840.3092939936162,
+          995.6895528537505,
+          476.41927501455956,
+          212.04039734272598,
+          119.84126420711027,
+          3.585555015902467
+        ]
+      },
+      {
+        "x": [
+          1.7627695112299722,
+          0.48260636414093144,
+          0.004510525068297538,
+          0.0073079026691618195,
+          0.012247233735472774,
+          0.5734160278505701
+        ],
+        "SSE": 1355.9040882108675,
+        "success": true,
+        "message": "`xtol` termination condition is satisfied.",
+        "nfev": 58,
+        "scaled_jacobian_singular_values": [
+          1833.5300449260935,
+          995.8353164037463,
+          478.26654994694985,
+          206.79479718389362,
+          120.11346381240162,
+          4.423281255635381
+        ]
+      }
+    ]
+  },
+  "final_fit": {
+    "x": [
+      1.7679524156572595,
+      0.4822054436770667,
+      0.005518841904293607,
+      0.0011968259614087426,
+      0.024999990687634067,
+      0.5762799872483236
+    ],
+    "SSE": 1453.8488638600566,
+    "success": true,
+    "message": "`ftol` termination condition is satisfied.",
+    "nfev": 19,
+    "scaled_jacobian_singular_values": [
+      5827.105622017158,
+      1532.0888052913933,
+      980.6539851575643,
+      415.32248309167005,
+      117.72110308568317,
+      9.7584698283338
+    ]
+  },
+  "final_trials": [
+    {
+      "x": [
+        1.7692658039578797,
+        0.4820908059660518,
+        0.005522892492427748,
+        0.0011966312792027463,
+        0.024999980356257383,
+        0.5768934839310217
+      ],
+      "SSE": 1453.8839030633949,
+      "success": true,
+      "message": "`ftol` termination condition is satisfied.",
+      "nfev": 19,
+      "scaled_jacobian_singular_values": [
+        5808.615108070334,
+        1528.5579788813197,
+        986.5731177680608,
+        416.7654539043784,
+        120.0108494099688,
+        9.813367693038336
+      ]
+    },
+    {
+      "x": [
+        1.7679524156572595,
+        0.4822054436770667,
+        0.005518841904293607,
+        0.0011968259614087426,
+        0.024999990687634067,
+        0.5762799872483236
+      ],
+      "SSE": 1453.8488638600566,
+      "success": true,
+      "message": "`ftol` termination condition is satisfied.",
+      "nfev": 19,
+      "scaled_jacobian_singular_values": [
+        5827.105622017158,
+        1532.0888052913933,
+        980.6539851575643,
+        415.32248309167005,
+        117.72110308568317,
+        9.7584698283338
+      ]
+    }
+  ],
+  "prediction_sha256": "b53f843d028d65f277c7a4044a55b318d0afb370bf353d8710a8d3bdbefd0296",
+  "calibration_rmse_mL": 7.950523263823959,
+  "archived_outer_development_rmse_mL": 16.26202745238227,
+  "original_outer_rmse_mL": 22.86854649759186,
+  "persistence_outer_rmse_mL": 8.061338997774605,
+  "atrial_support": {
+    "structural_screen": "Structurally inactive emax parameters in calibration horizon: LA_emax",
+    "LA_emax_50pct_change_max_calibration_LV_delta_mL": 0.0,
+    "LA_emax_50pct_change_max_outer_LV_delta_mL": 5.519072483146061
+  },
+  "clinical_validation": "NOT_ESTABLISHED",
+  "independent_validation": false,
+  "interpretation": "Development constitutive-law comparison; no outer tuning and no pressure identification."
+}

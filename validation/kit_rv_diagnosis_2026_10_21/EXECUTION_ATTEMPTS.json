@@ -1,0 +1,55 @@
+{
+  "record_date": "2026-10-21",
+  "numerical_code_executed": false,
+  "events": [
+    {
+      "action": "Reconnect Browser",
+      "result": "SUCCESS",
+      "browser": "Edge"
+    },
+    {
+      "action": "Inspect open tabs and Manage sessions",
+      "result": "Original Colab tab absent; Colab reported No active sessions",
+      "limitation": "No original temporary runtime artifacts recovered"
+    },
+    {
+      "action": "Run pinned setup cell",
+      "result": "FAILED_BEFORE_EXECUTION",
+      "observed_error": "Failed to assign a backend",
+      "diagnosis": "Colab allocation rejection; displayed message suggests possible location restriction; root cause unconfirmed"
+    },
+    {
+      "action": "Normal runtime reconnect",
+      "result": "FAILED_BEFORE_EXECUTION",
+      "observed_error": "Failed to assign a backend",
+      "diagnosis": "Allocation rejection persisted; no model code was implicated"
+    },
+    {
+      "action": "Read Colab page after reconnect",
+      "result": "Browser connector request timed out",
+      "resolution": "Read documented troubleshooting and switched to visible DOM; confirmed allocation error and saved screenshot"
+    },
+    {
+      "action": "Publish new branch via update_ref",
+      "result": "HTTP 422 Reference does not exist",
+      "diagnosis": "Update-ref operation did not create the new ref",
+      "resolution": "Used create_branch successfully"
+    },
+    {
+      "action": "Create PR before branch existed",
+      "result": "HTTP 422 invalid head",
+      "diagnosis": "Dependent on failed ref publication",
+      "resolution": "Created branch, then created draft PR #57 successfully"
+    },
+    {
+      "action": "Open Colab notebook by slash-containing branch",
+      "result": "Notebook not found",
+      "diagnosis": "Colab parsed diagnose/kit-rv-sparse as ref diagnose and path kit-rv-sparse/notebooks",
+      "resolution": "Used verified immutable commit SHA URL",
+      "verified_result": "HeartTwin_KIT_RV_Diagnosis.ipynb loaded successfully"
+    }
+  ],
+  "status": "PREPARED_NOT_NUMERICALLY_VALIDATED",
+  "draft_pr": 57,
+  "notebook_pin": "adb928a10b134e33048ad95ff84a903fca1a3c26"
+}

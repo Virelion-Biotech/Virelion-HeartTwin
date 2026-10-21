@@ -1,0 +1,12 @@
+E702 Multiple statements on one line (semicolon)
+   --> /content/HeartTwin_RV_Diagnosis_e6db5cc60ed9/fit_kit_joint_lv_rv.py:122:48
+    |
+120 |             factor=row["RV_outflow_resistance_factor"]
+121 |             best,trials=fit(factor,cal["time_s"],cal["values"],temp)
+122 |             folder=out/("loading-"+str(factor));folder.mkdir(exist_ok=True)
+    |                                                ^
+123 |             request=payload(best["x"],factor,schedule,folder/"artifacts")
+124 |             pred=simulate_closed_loop(request)
+    |
+
+Found 1 error.

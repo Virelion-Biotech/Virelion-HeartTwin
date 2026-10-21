@@ -1,0 +1,17 @@
+{
+  "status": "PASSED",
+  "notebook_commit": "a07a5fdf62a7cb44af4ac910a3881f83eba0c643",
+  "checks": [
+    {
+      "notebook": "HeartTwin_KIT_RV_Diagnosis_consolidated.ipynb",
+      "code_cells_compiled": 7,
+      "sha256": "d7f10a2a17bff1e7d6307cd3bf215436a5e1c44c197e200bc9bf034e7cd022a9"
+    },
+    {
+      "notebook": "HeartTwin_KIT_Chamber_Refinement.ipynb",
+      "code_cells_compiled": 6,
+      "sha256": "f47c4d29d3d52353fbc0bc10ed7b8387dc3318be1ae6f8bd816443717d7ab40c"
+    }
+  ],
+  "full_consolidated_notebook_replayed_after_consolidation": false
+}

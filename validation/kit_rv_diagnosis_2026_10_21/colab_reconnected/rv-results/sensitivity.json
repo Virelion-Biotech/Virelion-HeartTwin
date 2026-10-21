@@ -1,0 +1,110 @@
+[
+  {
+    "parameter": "emax_mmHg_per_mL",
+    "base_value": 0.5,
+    "trials": [
+      {
+        "factor": 0.8,
+        "RV_endpoint_mL": 102.27146564412607,
+        "RV_endpoint_delta_mL": 14.46106830857778,
+        "max_LV_trajectory_delta_mL": 6.628518052930502
+      },
+      {
+        "factor": 1.2,
+        "RV_endpoint_mL": 77.17574194977499,
+        "RV_endpoint_delta_mL": -10.6346553857733,
+        "max_LV_trajectory_delta_mL": 4.91453969242184
+      }
+    ]
+  },
+  {
+    "parameter": "activation_duration_s",
+    "base_value": 0.5,
+    "trials": [
+      {
+        "factor": 0.8,
+        "RV_endpoint_mL": 90.95451745451366,
+        "RV_endpoint_delta_mL": 3.1441201189653754,
+        "max_LV_trajectory_delta_mL": 0.9106705175599359
+      },
+      {
+        "factor": 1.2,
+        "RV_endpoint_mL": 85.01469489645538,
+        "RV_endpoint_delta_mL": -2.7957024390929064,
+        "max_LV_trajectory_delta_mL": 0.7413053784835313
+      }
+    ]
+  },
+  {
+    "parameter": "emin_mmHg_per_mL",
+    "base_value": 0.03,
+    "trials": [
+      {
+        "factor": 0.8,
+        "RV_endpoint_mL": 87.97841727283638,
+        "RV_endpoint_delta_mL": 0.1680199372880935,
+        "max_LV_trajectory_delta_mL": 0.11973618433756883
+      },
+      {
+        "factor": 1.2,
+        "RV_endpoint_mL": 87.75340129267633,
+        "RV_endpoint_delta_mL": -0.05699604287195825,
+        "max_LV_trajectory_delta_mL": 0.04646787165955857
+      }
+    ]
+  },
+  {
+    "parameter": "pulmonary_resistance",
+    "base_value": 0.1,
+    "trials": [
+      {
+        "factor": 0.8,
+        "RV_endpoint_mL": 84.81947512229746,
+        "RV_endpoint_delta_mL": -2.990922213250826,
+        "max_LV_trajectory_delta_mL": 7.055564566278008
+      },
+      {
+        "factor": 1.2,
+        "RV_endpoint_mL": 89.98336658146361,
+        "RV_endpoint_delta_mL": 2.1729692459153256,
+        "max_LV_trajectory_delta_mL": 6.418683937782589
+      }
+    ]
+  },
+  {
+    "parameter": "RV_outflow_resistance",
+    "base_value": 0.01,
+    "trials": [
+      {
+        "factor": 0.8,
+        "RV_endpoint_mL": 87.4711581649687,
+        "RV_endpoint_delta_mL": -0.33923917057958874,
+        "max_LV_trajectory_delta_mL": 0.2160267620997729
+      },
+      {
+        "factor": 1.2,
+        "RV_endpoint_mL": 88.19032686807367,
+        "RV_endpoint_delta_mL": 0.37992953252538086,
+        "max_LV_trajectory_delta_mL": 0.23120661513615914
+      }
+    ]
+  },
+  {
+    "parameter": "PA_compliance",
+    "base_value": 5.0,
+    "trials": [
+      {
+        "factor": 0.8,
+        "RV_endpoint_mL": 96.6824137661543,
+        "RV_endpoint_delta_mL": 8.87201643060601,
+        "max_LV_trajectory_delta_mL": 7.847616566722564
+      },
+      {
+        "factor": 1.2,
+        "RV_endpoint_mL": 80.38767364717874,
+        "RV_endpoint_delta_mL": -7.422723688369544,
+        "max_LV_trajectory_delta_mL": 7.710845605678514
+      }
+    ]
+  }
+]

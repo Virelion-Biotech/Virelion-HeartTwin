@@ -1,0 +1,54 @@
+{
+  "selection": "First 17 original calibration points fit, next six inner temporal validation; lowest inner RMSE",
+  "variants": [
+    {
+      "nonlinear_passive": true,
+      "asymmetric_activation": true,
+      "phase": false
+    },
+    {
+      "nonlinear_passive": true,
+      "asymmetric_activation": true,
+      "phase": true
+    }
+  ],
+  "refinement": true,
+  "refinement_trigger": "Calibration curvature hit its predeclared upper bound; early calibration ejection remains delayed. Prior outer results already seen; still development only.",
+  "development_only": true,
+  "original_outer_previously_seen": true,
+  "max_nfev": 65,
+  "starts": 2,
+  "no_new_independent_validation": true,
+  "constitutive_law": "P=external+(1-a)*emin*expm1(k*(V-V0))/k+a*emax*(V-V0); k=0 retains linear model",
+  "pressure_scale": "Not identified from volumes; conditional parameters only",
+  "bounds": {
+    "emax": [
+      0.2,
+      8.0
+    ],
+    "duration": [
+      0.25,
+      0.7
+    ],
+    "mitral_R": [
+      0.001,
+      0.2
+    ],
+    "emin": [
+      1e-06,
+      0.1
+    ],
+    "k": [
+      0.0,
+      0.05
+    ],
+    "peak_fraction": [
+      0.25,
+      0.75
+    ],
+    "phase": [
+      -0.15,
+      0.05
+    ]
+  }
+}

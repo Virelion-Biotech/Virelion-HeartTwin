@@ -1,0 +1,10 @@
+{
+  "original_native_vs_reference_max_mL": 0.003583296827372351,
+  "maximum_error_compartment": "LV",
+  "maximum_error_time_s": 0.054416309012875544,
+  "RV_at_target_native_minus_reference_mL": -0.0003683511296372899,
+  "tight_native_vs_reference_max_mL": 1.4260282554801051e-05,
+  "tight_vs_original_max_mL": 0.0035842711467921617,
+  "RV_at_target_tight_minus_reference_mL": -1.3206089590767078e-06,
+  "interpretation": "Dense-output tolerance error is checked separately from 21.87 mL RV model discrepancy; this is numerical consistency, not patient validation"
+}
