@@ -307,11 +307,11 @@ def native_parameter_unit(capability, path):
             return "V"
         match = re.fullmatch(r"vessels\.(SA|SV|PA|PV)\.(compliance_mL_per_mmHg|unstressed_volume_mL|external_pressure_mmHg)", path)
     else:
-        match = re.fullmatch(r"compartments\.(LA|LV|RA|RV|SA|SV|PA|PV)\.(compliance_mL_per_mmHg|unstressed_volume_mL|external_pressure_mmHg|emin_mmHg_per_mL|emax_mmHg_per_mL|activation_start_s|activation_duration_s)", path)
+        match = re.fullmatch(r"compartments\.(LA|LV|RA|RV|SA|SV|PA|PV)\.(compliance_mL_per_mmHg|unstressed_volume_mL|external_pressure_mmHg|emin_mmHg_per_mL|emax_mmHg_per_mL|activation_start_s|activation_duration_s|passive_exponent_per_mL|activation_peak_fraction)", path)
     if match:
         field = match.group(2)
         return {"compliance_mL_per_mmHg": "mL/mmHg", "unstressed_volume_mL": "mL", "external_pressure_mmHg": "mmHg",
-                "emin_mmHg_per_mL": "mmHg/mL", "emax_mmHg_per_mL": "mmHg/mL", "activation_start_s": "s", "activation_duration_s": "s"}[field]
+                "emin_mmHg_per_mL": "mmHg/mL", "emax_mmHg_per_mL": "mmHg/mL", "activation_start_s": "s", "activation_duration_s": "s", "passive_exponent_per_mL": "1/mL", "activation_peak_fraction": "1"}[field]
     return None
 
 
@@ -438,6 +438,15 @@ def execute_patient_domain(payload, registry, *, output_dir="patient-domain"):
                     "metadata": {"observation_path": observation_path},
                 }
             )
+    if job.native_capability == "patient.circulation.simulate":
+        from .patient_closed_loop import validate_activation_support
+
+        # Scalar/field projections may consume the complete simulation schedule.
+        scalar_or_field = any(t.observation_kind != "curve" and source_for_target(job, t)[0].role == "calibration" for t in job.targets)
+        horizon = template["time_s"][-1] if scalar_or_field else max(t for spec in sampling for t in spec["time_s"])
+        support = validate_activation_support(template, job.parameter_paths, horizon)
+        write_stage(root / "activation-support.json", {"calibration_horizon_s": horizon, "parameters": support,
+                                                      "scope": "Structural zero-activation screen only; not a sensitivity-rank or identifiability claim"})
     context = {
         "forward_model": {
             "mode": "command",

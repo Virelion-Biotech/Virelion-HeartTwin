@@ -1,0 +1,42 @@
+{
+  "record_type": "prior_colab_session_summary_transcription",
+  "implementation_pin": "ea7cafa7328900cfd4ae02d49e73a3f63faced20",
+  "raw_bundle_attached": false,
+  "final_colab_lifecycle_completion": "unconfirmed_due_to_browser_connector_timeouts",
+  "clinical_validation": "NOT_ESTABLISHED",
+  "independent_patient_validation": false,
+  "prior_outer_values_seen": true,
+  "selection_rule": "lowest inner calibration RMSE across recorded families",
+  "selected_family": "profile-phase",
+  "original_outer_rmse_mL": 22.86854649759186,
+  "persistence_outer_rmse_mL": 8.061338997774605,
+  "rounds": [
+    {
+      "family": "constitutive-first",
+      "inner_rmse_mL": 8.661475387669027,
+      "calibration_rmse_mL": 7.950523263823959,
+      "outer_development_rmse_mL": 16.26202745238227
+    },
+    {
+      "family": "bound-refinement",
+      "inner_rmse_mL": 8.304358111633928,
+      "calibration_rmse_mL": 7.343698974288988,
+      "outer_development_rmse_mL": 8.751463811624596
+    },
+    {
+      "family": "profile-phase",
+      "inner_rmse_mL": 3.634985610060714,
+      "calibration_rmse_mL": 4.910494797174408,
+      "outer_development_rmse_mL": 6.632331874923076
+    },
+    {
+      "family": "profile-fixed-phase",
+      "inner_rmse_mL": 4.974428299440173,
+      "calibration_rmse_mL": 7.021389778663358,
+      "outer_development_rmse_mL": 6.019837866939785
+    }
+  ],
+  "remaining_RV_ES_error_mL": 21.872467285916116,
+  "selected_reference_solver_max_volume_delta_mL": 0.001219811218589939,
+  "pressure_scale_identified": false
+}
