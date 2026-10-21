@@ -40,3 +40,11 @@ Once the user's Edge Colab can allocate a runtime, run `notebooks/HeartTwin_KIT_
 To diagnose the improved LV candidate, regenerate the chamber results using `HeartTwin_KIT_Chamber_Refinement.ipynb`, then explicitly point the RV runner at its `selected_request.json`. Do not silently substitute a partial reconstructed request; the summary contains insufficient parameters for exact replay.
 
 If numerical/routing checks pass, inspect sensitivity and optional conditional solutions before proposing a parameter or model change. Obtain independent RV time-series or pressure/flow information for genuine personalization and subsequent validation. Keep the original benchmark, selected LV candidate and all negative results intact.
+
+## Colab URL integration correction
+
+Colab initially parsed the slash-containing branch `diagnose/kit-rv-sparse` as ref `diagnose` and path `kit-rv-sparse/notebooks`, causing a misleading Notebook not found error. Opening the immutable notebook commit instead succeeded, without GitHub authorization changes:
+
+[Open the pinned RV notebook in Colab](https://colab.research.google.com/github/Virelion-Biotech/Virelion-HeartTwin/blob/adb928a10b134e33048ad95ff84a903fca1a3c26/notebooks/HeartTwin_KIT_RV_Diagnosis.ipynb)
+
+This resolves notebook loading only. It does not resolve the earlier runtime-allocation rejection. The diagnostic remains unexecuted. Publication and browser errors with their diagnoses and resolutions are retained in `validation/kit_rv_diagnosis_2026_10_21/EXECUTION_ATTEMPTS.json`.
