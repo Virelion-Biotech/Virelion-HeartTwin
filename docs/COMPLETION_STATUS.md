@@ -7,18 +7,18 @@ This is the scope supported by the recorded runs. Passing software/operational c
 | Patient workflow contracts | Subject/hash/frame/unit checks, reviewed artifacts and patient-workflow regressions are implemented; earlier Colab evidence has 195 passing patient-workflow tests | Real source, anatomy and parameter qualification; contracts alone do not establish personalization accuracy |
 | Explicit BSP workflow | Named/reference-weighted reciprocal operators, propagation and frozen held-out scoring are synthetically verified | EDGAR channel/reference/index/export conventions and reviewed conductor/geometry |
 | Spatial mechanics capacity | Experimental matrix-free profile passed a 32,784-node/172,032-tet constrained, compressible synthetic shell; default guards remain | Actual KIT reference state, geometry, fibres, material/cavity/boundary qualification and solve |
-| Solver robustness / reproducibility | Cached material actions, optional block Jacobi, true linear-residual checks; 128 Colab tests without skips; published notebook executed end to end | Broader mesh/material/constraint robustness; no multigrid/domain-decomposition solution |
-| Nearly incompressible mechanics | Direct-solver characterization exposes failure; warnings/provenance and raw negative evidence are retained | **Unfixed:** finest tested P1 case had about 80.2% displacement error. A locking-resistant formulation and independent verification are needed |
+| Solver robustness / reproducibility | Cached material actions, optional block Jacobi, true linear-residual checks; 146 Colab tests without skips; mixed/direct and original matrix-free paths checked; published notebook executed end to end | Broader mesh/material/constraint robustness; no multigrid/domain-decomposition solution |
+| Nearly incompressible mechanics | Mixed MINI reduced the unchanged finest shell error from 80.19% to 2.53%; all frozen Colab gates passed. Original P1 failures remain archived | Three coarse mixed meshes still fail the 15% screen; standard/direct profile only; broader mesh/interface stability and scalable mixed solvers remain unqualified |
 | Pressure/flow and broader physiology | Research models and coupling infrastructure exist; native cubic EP is phenomenological | Human cellular, conduction, valve/circulation and whole-heart physiological qualification; earlier murine PV model still loses to its waveform baseline |
 | Hospital workflow | Synthetic import/model contracts and operational workflows exist | Actual hospital access, reviewed exports and workflow qualification |
 | Clinical prediction | No clinical accuracy qualification established | Qualified independent measurements and a prospective validation design |
 
 ## Engineering that still does not require patient data
 
-1. Implement and verify a locking-resistant mechanics formulation: stability/pressure modes, incompressible patch/objectivity, consistent tangent and analytical refinement. Freeze numerical acceptance criteria before implementing it.
+1. Broaden mixed-mechanics qualification beyond the verified homogeneous shell and affine patches: distorted meshes, material contrast/interfaces, finite-strain pressure modes and physiological loads. The demonstrated P1 locking defect now has a qualified synthetic correction; exact incompressibility and broad stability are not established.
 2. Extend scalable preconditioning and robustness tests beyond the current shell: mesh quality, material contrast, anisotropy, constraints and load ranges. Preserve failures and true-residual checks.
 3. Extend the physiological model and verify conservation/coupling and model-specific benchmarks before claiming whole-heart prediction.
 
 The remaining items above are substantial development work. They are not solved by more patient data or by a green CI run. Data/access-dependent qualification is a separate requirement.
 
-[Detailed run history and evidence](NONPATIENT_COMPLETION.md). Compatibility matrix v10 advances only CardiMech to `4855bc13fe411e0dd904c7733e43535930b96ff1`; other v9 component pins are preserved.
+[Detailed run history and evidence](NONPATIENT_COMPLETION.md). Compatibility matrix v11 advances only CardiMech to `2ed9d194706ec0e2df00310c8f3b0a14313581de`; other v10 component pins are preserved.

@@ -474,7 +474,8 @@ def test_native_spatial_field_requires_pinned_mesh_correspondence(tmp_path):
         sample_prediction(prediction, {**spec, "field_anatomy_sha256": "c" * 64})
 
 
-def test_real_fem_field_replay_keeps_native_settings_and_mesh_binding(tmp_path):
+@pytest.mark.parametrize("kappa", [1000., 1e7])
+def test_real_fem_field_replay_keeps_native_settings_and_mesh_binding(tmp_path, kappa):
     pytest.importorskip("cardimech")
     pytest.importorskip("scipy")
     from cardimech.fem_examples import cube_mesh
@@ -498,12 +499,13 @@ def test_real_fem_field_replay_keeps_native_settings_and_mesh_binding(tmp_path):
         evidence.append({"evidence_id": name, "subject_id": "P1", "acquisition_id": name, "role": role, "data_kind": "strain", "withheld_from_fit": role == "validation"})
         targets.append({"evidence_id": name, "source_file_id": name, "observation_kind": "field", "field_quantity": "green_strain_xx", "field_anatomy_sha256": mesh_hash, "model_output": "native-field", "unit": "1", "noise_sd": .01, "max_abs_error": .001})
     boundaries = [{"boundary_id": str(i), "kind": "fixed", "region": "boundary", "unit": "m", "metadata": {"nodes": [i], "displacement": [.02*x[0], -.01*x[1], .03*x[2]]}} for i, x in enumerate(mesh["nodes"])]
-    template = {"subject_id": "P1", "backend": "scipy-tetra-v1", "anatomy_ref": anatomy, "parameters": {"material_model": "neo_hookean", "active_model": "constant_fiber", "passive": {"mu": 1000., "kappa": 1000.}, "units": {"mu": "Pa", "kappa": "Pa"}}, "boundary_conditions": boundaries, "settings": {"load_steps": 1}}
+    template = {"subject_id": "P1", "backend": "scipy-tetra-v1", "anatomy_ref": anatomy, "parameters": {"material_model": "neo_hookean", "active_model": "constant_fiber", "passive": {"mu": 1000., "kappa": kappa}, "units": {"mu": "Pa", "kappa": "Pa"}}, "boundary_conditions": boundaries, "settings": {"load_steps": 1}}
     actual = load_registry()
     inference = SimpleNamespace(available=lambda: True, invoke=lambda *_: {"subject_id": "P1", "diagnostics": {"best_parameters": {"mu": 1000.}}})
     registry = SimpleNamespace(capability=lambda name: inference if name == "infer.run" else actual.capability(name))
     payload = {"case": {"patient_id": "P1", "acquisitions": acquisitions, "evidence": evidence}, "case_revision": 1, "case_fingerprint": "a"*64, "domain": "mechanics", "forward_template": template, "parameter_paths": {"mu": "parameters.passive.mu"}, "parameter_bounds": {"mu": [500., 1500.]}, "parameter_units": {"mu": "Pa"}, "targets": targets}
     report = execute_patient_domain(payload, registry, output_dir=tmp_path / "fem-replay")
+    assert report["prediction"]["provenance"]["formulation"] == ("mixed_mini" if kappa == 1e7 else "displacement_p1")
     assert report["heldout_acceptance_passed"]
     assert report["heldout_residuals"][0]["predicted"][0] == pytest.approx(.0202)
     # This fixture tests native FEM replay and observation correspondence, not material identifiability.

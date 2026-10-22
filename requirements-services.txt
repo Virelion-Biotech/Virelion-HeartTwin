@@ -1,6 +1,6 @@
-# Exact component commits for compatibility matrix v10.
-# v10 advances CardiMech to cached actions, optional block Jacobi and material-regime qualification.
-# All other component pins are unchanged from matrix v9.
+# Exact component commits for compatibility matrix v11.
+# v11 advances CardiMech to the synthetically qualified mixed MINI locking correction.
+# All other component pins are unchanged from matrix v10.
 # Transitive Python dependencies remain governed by component constraints.
 git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7
 git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@7eb4d418e907080f75a18972957683a9f6a97115
@@ -9,7 +9,7 @@ git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@831156fd1605d70b7
 git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@0f3b15a5ad53b4edc5d44cb5c38f06149bac4401
 git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@a4bbcdacf2ccd35dc80c7f4ba2b14c7712af2ede
 git+https://github.com/Virelion-Biotech/Virelion-CardiFlow.git@670d370635ba09b2908f7e6736299719e86fc36b
-git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@4855bc13fe411e0dd904c7733e43535930b96ff1
+git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@2ed9d194706ec0e2df00310c8f3b0a14313581de
 git+https://github.com/Virelion-Biotech/Virelion-CardiInfer.git@9aabf87bdbee4c70b98229baa3bbea3fb896b490
 git+https://github.com/Virelion-Biotech/Virelion-CardiSim.git@2cfe5c2261014ea4a95f2613ec9f3387b950c8fa
 git+https://github.com/Virelion-Biotech/Virelion-CardiVex.git@56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7
