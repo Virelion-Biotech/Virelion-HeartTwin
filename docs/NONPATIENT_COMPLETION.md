@@ -67,3 +67,16 @@ The near-incompressible formulation remains an engineering defect requiring a lo
 | Real hospital workflow qualification | Synthetic contracts are tested; actual hospital/import/model qualification still requires the relevant access and data |
 
 The new [Colab recipe](../notebooks/HeartTwin_Synthetic_Stack_Completion.ipynb) preserves implementation pins and synthetic generators. Compilation of its cells is recorded separately; constituent runs do not equal an end-to-end execution of a newly assembled notebook.
+
+
+## 2026-10-22 — demonstrated locking correction qualified
+
+The unchanged 1,548-node/7,680-tet near-incompressible shell improved from 80.1939% P1 displacement error to 2.5347% with mixed MINI (31.64-fold). The independent linear-elastic diagnostic reproduced 80.1945% P1 error without nonlinear material evaluation/Newton/GMRES. The same geometry, loads, material and original 15% screen were retained.
+
+The pinned Edge Colab notebook completed end to end: 146 tests without failures or skips, 89.41% coverage; all 23 solves converged and all eight frozen gates passed. All three finest material regimes passed; quadrature, lower/finite-load and 100-times-higher-bulk checks passed. Three coarse MINI meshes still failed and remain recorded. The prior failed P1 evidence above is historical and remains valid for that approximation.
+
+CardiMech auto now selects standard/direct mixed MINI for neo-Hookean nu>=0.49, or rejects unsupported solver/profile combinations. Explicit legacy P1 preserves comparisons/warnings; Guccione requires explicit mixed selection. Mixed/direct and large-profile matrix-free P1 are distinct. Field outputs retain nodal pressure, bubble amplitudes, quadrature-averaged strain/stress and true mixed residuals. HeartTwin's native field-replay regression now exercises both the ordinary and near-incompressible auto paths and verifies the selected formulation and held-out strain correspondence.
+
+[Executed results and remaining limits](https://github.com/Virelion-Biotech/Virelion-CardiMech/blob/2ed9d194706ec0e2df00310c8f3b0a14313581de/docs/MIXED_MINI_RESULTS.md). The verified compact evidence contains all 23 raw states, logs/JUnit, exact source and full-field hashes; SHA-256 `c8e1de7580c046e68e8541040230cf84286c1db64aace5a3173481a79bf3cb36`. No patient or clinical accuracy qualification follows. Broad mesh/interface stability, exact incompressibility, scalable mixed preconditioning and whole-heart physiology remain engineering/validation gates.
+
+Matrix v11 changes only CardiMech's pin; all other v10 component revisions are preserved.
