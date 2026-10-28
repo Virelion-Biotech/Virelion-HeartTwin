@@ -999,6 +999,7 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         "/": "index.html",
                         "/index.html": "index.html",
                         "/app.js": "app.js",
+                        "/tasks.js": "tasks.js",
                         "/viewer.js": "viewer.js",
                         "/heart-reference.json": "heart-reference.json",
                         "/styles.css": "styles.css",
