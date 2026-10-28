@@ -27,7 +27,7 @@ WORKDIR /app
 COPY . /app
 
 RUN python -m pip install --upgrade pip setuptools wheel \
-    && python -m pip install --no-cache-dir -e '.[dev]' \
+    && python -m pip install --no-cache-dir -e . \
     && python -m pip install --no-cache-dir -r requirements-services.txt \
     && python -m compileall -q hearttwin
 
