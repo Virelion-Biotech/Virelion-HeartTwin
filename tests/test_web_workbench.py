@@ -283,3 +283,36 @@ def test_uploaded_ecg_runs_through_real_command_adapter(tmp_path):
         job = completed(app, json.loads(body)["job_id"])
         assert job["status"] == "ok", job
         assert job["result"]["entity_id"] == "software-fixture-only"
+
+
+def test_hosted_password_login_issues_revocable_short_lived_session(tmp_path, monkeypatch):
+    password = "test-private-heart-twin-password"
+    monkeypatch.setenv("HEARTTWIN_WEB_PASSWORD", password)
+    with gateway(tmp_path) as (_, port):
+        bad_status, _, _ = request(
+            port, "POST", "/api/auth/login", {"password": "wrong-password"}, auth=False
+        )
+        assert bad_status == 401
+
+        status, _, body = request(
+            port, "POST", "/api/auth/login", {"password": password}, auth=False
+        )
+        assert status == 200
+        session_token = json.loads(body)["token"]
+        session_headers = {"Authorization": "Bearer " + session_token}
+
+        assert request(
+            port, "GET", "/api/auth/session", auth=False, headers=session_headers
+        )[0] == 200
+        status, _, body = request(
+            port, "GET", "/api/catalog", auth=False, headers=session_headers
+        )
+        assert status == 200
+        assert json.loads(body)["worker"] == "online"
+
+        assert request(
+            port, "POST", "/api/auth/logout", auth=False, headers=session_headers
+        )[0] == 200
+        assert request(
+            port, "GET", "/api/catalog", auth=False, headers=session_headers
+        )[0] == 401

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -66,6 +67,12 @@ class Workbench:
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.token, self.origins = token, set(origins)
+        self.hosted_password = os.environ.get("HEARTTWIN_WEB_PASSWORD", "")
+        if self.hosted_password and len(self.hosted_password) < 16:
+            raise ValueError("HEARTTWIN_WEB_PASSWORD must be at least 16 characters")
+        self.sessions = {}
+        self.sessions_lock = threading.Lock()
+        self.login_attempts = {}
         self.access = PatientAccess(token, patient_credentials)
         self.patients = PatientCaseStore(self.root / "patients.sqlite3")
         self.timeout, self.max_upload = timeout, max_upload
@@ -80,6 +87,46 @@ class Workbench:
             db.execute(
                 "CREATE TABLE IF NOT EXISTS uploads (id TEXT PRIMARY KEY, name TEXT, size INTEGER, sha256 TEXT, path TEXT)"
             )
+
+    def issue_hosted_session(self, password: str, client_ip: str):
+        """Issue a short-lived in-memory bearer session for the private hosted UI."""
+        if not self.hosted_password:
+            return None, "disabled"
+        now = time.time()
+        with self.sessions_lock:
+            attempts = self.login_attempts.get(client_ip)
+            if attempts is not None and now - attempts[0] >= 600:
+                attempts = None
+                self.login_attempts.pop(client_ip, None)
+            if attempts is not None and attempts[1] >= 8:
+                return None, "rate_limited"
+            supplied = password if isinstance(password, str) else ""
+            if not hmac.compare_digest(supplied.encode("utf-8"), self.hosted_password.encode("utf-8")):
+                started = attempts[0] if attempts is not None else now
+                count = attempts[1] + 1 if attempts is not None else 1
+                self.login_attempts[client_ip] = (started, count)
+                return None, "invalid"
+            self.login_attempts.pop(client_ip, None)
+            token = secrets.token_urlsafe(32)
+            self.sessions[token] = now + 12 * 60 * 60
+            return token, None
+
+    def revoke_hosted_session(self, token: str):
+        with self.sessions_lock:
+            return self.sessions.pop(token, None) is not None
+
+    def authenticate(self, authorization: str):
+        """Authenticate either an expiring hosted session or an existing local credential."""
+        if isinstance(authorization, str) and authorization.startswith("Bearer "):
+            supplied = authorization.removeprefix("Bearer ").strip()
+            now = time.time()
+            with self.sessions_lock:
+                expiry = self.sessions.get(supplied)
+                if expiry is not None and expiry > now:
+                    return self.access.authenticate("Bearer " + self.token)
+                if expiry is not None:
+                    self.sessions.pop(supplied, None)
+        return self.access.authenticate(authorization)
 
     def catalog(self):
         output = []
@@ -1021,7 +1068,25 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         mime,
                     )
                 supplied = self.headers.get("Authorization", "")
-                principal = app.access.authenticate(supplied)
+                if path == "/api/auth/login" and self.command == "POST":
+                    if not app.hosted_password:
+                        return self.json(404, {"error": "Hosted sign-in is not configured"})
+                    value = self.read_json()
+                    token, reason = app.issue_hosted_session(value.get("password"), self.client_address[0])
+                    if reason == "rate_limited":
+                        return self.json(429, {"error": "Too many sign-in attempts. Try again in ten minutes."})
+                    if reason == "disabled":
+                        return self.json(404, {"error": "Hosted sign-in is not configured"})
+                    if token is None:
+                        return self.json(401, {"error": "Incorrect HeartTwin password"})
+                    return self.json(200, {"token": token, "expires_in": 43200})
+                if path == "/api/auth/session" and self.command == "GET":
+                    return self.json(200, {"authenticated": app.authenticate(supplied) is not None})
+                if path == "/api/auth/logout" and self.command == "POST":
+                    if not supplied.startswith("Bearer ") or not app.revoke_hosted_session(supplied.removeprefix("Bearer ").strip()):
+                        return self.json(401, {"error": "No active hosted session"})
+                    return self.json(200, {"ok": True})
+                principal = app.authenticate(supplied)
                 if principal is None:
                     return self.json(
                         401, {"error": "A valid workbench token is required"}
