@@ -43,36 +43,13 @@ and per-job `runs/`. Preserve the entire directory to retain input identities, r
 requests, logs and results. Choose another directory with `--workspace /absolute/path`.
 Backups and retention are your worker operator's responsibility.
 
-## Use the private hosted interface
+## Use the hosted HeartTwin application
 
-The hosted website is the same frontend. Static hosting does not provide Python,
-installed scientific modules, GPU execution or permanent storage for research jobs.
-To run from that website, connect it to a persistent worker you operate over HTTPS.
-A temporary development runtime is not a permanent compute deployment.
+The repository now includes a one-origin hosted deployment path: the same service serves the interactive workbench and its API, runs the job worker, and persists cases, uploads and run artifacts on a mounted disk. End users do not enter a worker URL or install Python.
 
-Put the gateway behind an HTTPS reverse proxy and configure its exact frontend origin
-and worker hostname. For example, after setting a strong `HEARTTWIN_WEB_TOKEN` environment
-variable of at least 32 characters through your server's secret manager:
+For the one-time owner deployment, use [HOSTED_HEARTTWIN.md](HOSTED_HEARTTWIN.md). It creates a private single-owner research instance and adds a password sign-in flow with expiring browser sessions. The Render service uses the repository’s pinned component stack and a persistent disk; its available-module list remains the source of truth for what actually runs.
 
-```bash
-hearttwin-web --host 127.0.0.1 --port 8787 \
-  --public-host worker.example.org \
-  --allow-origin https://virelion-hearttwin-workbench.poeticridge35.chatgpt.site \
-  --workspace /srv/hearttwin/workspace
-```
-
-Forward `https://worker.example.org` to `127.0.0.1:8787`, preserving the public Host
-header. In the website, enter that HTTPS URL and your token. A separate frontend domain
-requires its own exact `--allow-origin`. Do not put tokens in URLs, source files or
-frontend bundles. Remote binding without an explicitly supplied token is rejected.
-A browser may impose local-network restrictions when a hosted page accesses localhost;
-use the local interface for local execution, or a properly secured HTTPS worker.
-
-This gateway trusts one owner. Its adapters can access that owner's worker files and
-execute installed numerical programs. Subprocess isolation is for job lifetime/logs,
-not an operating-system security sandbox. Do not expose it as a shared public or
-multi-tenant service. Public/private website access does not authenticate the worker;
-the worker requires its own bearer token for every API call.
+This is not a multi-tenant sandbox. Do not share the owner password or use the default hosted instance for identifiable clinical data. Remote use must remain HTTPS, and the hosted app is not clinically qualified. GitHub Pages is an entry point only: it cannot run Python or native scientific solvers, so it opens the full application on the hosted Python service.
 
 ## Workflow configuration
 
