@@ -32,4 +32,4 @@ RUN python -m pip install --upgrade pip setuptools wheel \
     && python -m compileall -q hearttwin
 
 EXPOSE 10000
-CMD ["sh", "-c", "exec hearttwin-web --host 0.0.0.0 --port \"${PORT:-10000}\" --workspace \"${HEARTTWIN_WORKSPACE:-/var/data/workspace}\" --public-host \"${RENDER_EXTERNAL_HOSTNAME:-localhost}\" --allow-origin \"https://${RENDER_EXTERNAL_HOSTNAME:-localhost}\""]
+CMD ["sh", "-c", "exec hearttwin-web --host 0.0.0.0 --port \"${PORT:-10000}\" --workspace \"${HEARTTWIN_WORKSPACE:-/var/data/workspace}\" --public-host \"${RENDER_EXTERNAL_HOSTNAME:-localhost}\" --allow-origin \"https://${RENDER_EXTERNAL_HOSTNAME:-localhost}\" --allow-origin \"https://virelion-biotech.github.io\""]
