@@ -2,7 +2,7 @@ services:
   - type: web
     name: hearttwin-virelion
     runtime: docker
-    plan: standard
+    plan: 1c-2g
     region: frankfurt
     dockerfilePath: ./Dockerfile
     autoDeployTrigger: commit
