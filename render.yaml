@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: hearttwin-virelion
+    runtime: docker
+    plan: 1c-2g
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /
+    disk:
+      name: hearttwin-data
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: HEARTTWIN_WEB_TOKEN
+        generateValue: true
+      - key: HEARTTWIN_WEB_PASSWORD
+        sync: false
+      - key: HEARTTWIN_WORKSPACE
+        value: /var/data/workspace
