@@ -41,7 +41,8 @@ test('both role paths offer the same three model contexts',()=>{
 
 test('reference-phenotype choices are explicit context, not a false claim of qualified anatomy',()=>{
   assert.match(html,/does not load sex-specific geometry/);
-  assert.match(html,/A verified adult-female anatomical\/physiological model is not currently bundled/);
+  assert.match(html,/A verified female anatomical\/physiological model is not currently bundled/);
+  assert.match(app,/3D viewer still shows the bundled simplified adult-male surface, not a female model/i);
   assert.match(html,/not a qualified simulation-ready physiological model/);
   assert.match(app,/Doctor-facing research tools only: outputs are not validated for diagnosis or treatment decisions/);
 });
