@@ -169,3 +169,32 @@ for delivery and verified before decoding; it works without a compute connection
 
 See [UI design references](UI_DESIGN_REFERENCES.md) for the public commercial materials
 used to inform the workstation layout.
+
+
+## Researcher and Doctor entry paths
+
+The first screen separates **Researcher** and **Doctor** workspaces. Both roles can choose
+one of three contexts: a patient-specific case, a typical adult male reference context,
+or a typical adult female reference context. The selected role and context are shown in
+the workspace banner and included in run labels for traceability; this UI context does
+not alter solver inputs or silently assign physiology.
+
+The patient-specific path opens **Patient models**, where users create/open a pseudonymous
+case, attach reviewed acquisitions and record whether model inputs are measured, estimated,
+assumed, population priors or unknown. User-provided source data and the actual selected
+geometry/solver configuration remain authoritative.
+
+The typical adult male/female options are **reference-context choices**, not a claim that
+two validated sex-specific physiological digital twins are packaged. The current bundled
+anatomy display is a simplified adult-male source surface; it is not a simulation-ready
+volume mesh. A validated adult-female anatomical/physiological model is not bundled.
+Before simulation, import a compatible, appropriately licensed model and supply explicit
+physiological parameters. Selecting a reference phenotype alone never modifies mesh,
+conductivities, conduction velocities or other model parameters.
+
+The Doctor path is for organizing research cases and exploring model-based hypotheses.
+**HeartTwin is not validated for clinical diagnosis or treatment decisions**, and a patient-
+specific record is not automatically a clinically qualified digital twin. Use only an
+appropriately authorized deployment for sensitive data; remove direct identifiers from
+research uploads and follow local governance requirements.
+
