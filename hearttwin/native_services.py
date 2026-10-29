@@ -260,7 +260,6 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("query and text disagree")
         if not has_query and not has_text:
             return {"contract_version": "1.0", "query": "", "records": [], "count": 0}
-
         query = payload.get("query", payload.get("text", ""))
         if not isinstance(query, str):
             raise ValueError("query/text must be a string")
@@ -277,15 +276,21 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("limit must be an integer")
         if not 0 <= limit <= 1000:
             raise ValueError("limit must be between 0 and 1000")
-
         result = api.search(text=query, record_type=record_type, tags=tuple(tags), limit=limit)
         records = [item["record"] for item in result["results"]]
-        return {
-            "contract_version": "1.0",
-            "query": query,
-            "records": records,
-            "count": len(records),
-        }
+        return {"contract_version": "1.0", "query": query, "records": records, "count": len(records)}
+
+    if capability == "atlas.retrieve":
+        query = payload.get("query", payload.get("text", ""))
+        if not isinstance(query, str):
+            raise ValueError("query/text must be a string")
+        record_type = payload.get("record_type")
+        if record_type is not None and not isinstance(record_type, str):
+            raise ValueError("record_type must be a string or null")
+        limit = payload.get("limit", 20)
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 0 <= limit <= 1000:
+            raise ValueError("limit must be an integer between 0 and 1000")
+        return api.retrieve(query, record_type=record_type, limit=limit)
 
     if capability == "atlas.context":
         record_ids = payload.get("record_ids", [])
@@ -296,7 +301,6 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             context_id = f"ctx-{payload.get('entity_id', 'unknown')}"
         if not isinstance(context_id, str) or not context_id:
             raise ValueError("context_id must be a non-empty string")
-
         raw = api.context(record_ids=record_ids, context_id=context_id).to_dict()
         normalized, provenance = _normalize_atlas_context(raw, record_ids)
         return {
@@ -305,6 +309,57 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             "record_ids": list(record_ids),
             "context": normalized,
             "provenance": provenance,
+        }
+
+    if capability == "atlas.explain":
+        record_id = payload.get("record_id")
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("record_id must be a non-empty string")
+        return api.explain(record_id)
+
+    if capability == "atlas.claim":
+        claim_id = payload.get("claim_id")
+        if not isinstance(claim_id, str) or not claim_id.strip():
+            raise ValueError("claim_id must be a non-empty string")
+        method = getattr(api, "claim", None)
+        if not callable(method):
+            raise RuntimeError("Upgrade CardiAtlas to the claim-persistence release before using this capability")
+        return method(claim_id)
+
+    if capability == "atlas.claims":
+        method = getattr(api, "claims", None)
+        if not callable(method):
+            raise RuntimeError("Upgrade CardiAtlas to the claim-persistence release before using this capability")
+        return method()
+
+    if capability == "atlas.dataset.readiness":
+        study_id, dataset_id = payload.get("study_id"), payload.get("dataset_id")
+        if not isinstance(study_id, str) or not study_id.strip() or not isinstance(dataset_id, str) or not dataset_id.strip():
+            raise ValueError("study_id and dataset_id must be non-empty strings")
+        method = getattr(api, "dataset_readiness", None)
+        if not callable(method):
+            method = getattr(api, "study_benchmark_readiness", None)
+        if not callable(method):
+            raise RuntimeError("Installed CardiAtlas does not expose dataset readiness")
+        return method(study_id, dataset_id)
+
+    if capability == "atlas.graph":
+        record_id = payload.get("record_id")
+        hops = payload.get("hops", 1)
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("record_id must be a non-empty string")
+        if isinstance(hops, bool) or not isinstance(hops, int) or not 0 <= hops <= 10:
+            raise ValueError("hops must be an integer between 0 and 10")
+        method = getattr(api, "graph", None)
+        if callable(method):
+            return method(record_id, hops=hops)
+        record = api.service.registry.get(record_id)
+        if record is None:
+            raise KeyError(record_id)
+        return {
+            "record": record.to_dict(),
+            "context": api.service.context(record_id, hops=hops),
+            "explanation": api.explain(record_id),
         }
 
     raise ValueError(f"CardiAtlas does not support {capability}")

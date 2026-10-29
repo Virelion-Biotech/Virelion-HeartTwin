@@ -1119,6 +1119,30 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                             "error": "Use assigned patient endpoints with this credential"
                         },
                     )
+                # CardiAtlas research reads are synchronous, read-only and owner-authenticated.
+                if path == "/api/cardiatlas/health" and self.command == "GET":
+                    try:
+                        from .native_services import _cardiatlas_api
+                        return self.json(200, _cardiatlas_api({}).health())
+                    except RuntimeError as exc:
+                        return self.json(503, {"error": str(exc)})
+                    except Exception:
+                        return self.json(503, {"error": "CardiAtlas is unavailable; verify the installed package and CARDIATLAS_DB configuration."})
+                atlas_routes = {
+                    "/api/cardiatlas/search": "atlas.retrieve",
+                    "/api/cardiatlas/explain": "atlas.explain",
+                    "/api/cardiatlas/claim": "atlas.claim",
+                    "/api/cardiatlas/claims": "atlas.claims",
+                    "/api/cardiatlas/readiness": "atlas.dataset.readiness",
+                    "/api/cardiatlas/graph": "atlas.graph",
+                }
+                if path in atlas_routes and self.command == "POST":
+                    try:
+                        from .native_services import _cardiatlas
+                        payload = self.read_json()
+                        return self.json(200, _cardiatlas(atlas_routes[path], payload))
+                    except RuntimeError as exc:
+                        return self.json(503, {"error": str(exc)})
                 if self.command == "GET" and path == "/api/catalog":
                     return self.json(200, app.catalog())
                 if self.command == "GET" and path == "/api/files":

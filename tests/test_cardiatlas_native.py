@@ -4,7 +4,7 @@ import pytest
 
 cardiatlas = pytest.importorskip("cardiatlas")
 
-from cardiatlas import MarkerRecord, SQLiteAtlasStore
+from cardiatlas import EvidenceRecord, MarkerRecord, SQLiteAtlasStore
 
 from hearttwin.native_services import _cardiatlas
 
@@ -68,10 +68,14 @@ def test_cardiatlas_native_omitted_inputs_do_not_fabricate_context_or_dump_recor
 
 def test_cardiatlas_native_validates_payload_types(monkeypatch) -> None:
     monkeypatch.delenv("CARDIATLAS_DB", raising=False)
+
     invalid = [
         ("atlas.search", {"query": 123}),
         ("atlas.search", {"query": "POSTN", "tags": "fibrosis"}),
         ("atlas.search", {"query": "POSTN", "limit": True}),
+        ("atlas.retrieve", {"query": "POSTN", "limit": True}),
+        ("atlas.explain", {"record_id": ""}),
+        ("atlas.graph", {"record_id": "marker:postn", "hops": True}),
         ("atlas.context", {"record_ids": "marker:postn"}),
         ("atlas.context", {"record_ids": [1]}),
         ("atlas.context", {"records": ["not-an-object"]}),
@@ -86,3 +90,44 @@ def test_cardiatlas_native_missing_configured_db_fails_closed(tmp_path, monkeypa
     monkeypatch.setenv("CARDIATLAS_DB", str(missing))
     with pytest.raises(RuntimeError, match="CARDIATLAS_DB does not exist"):
         _cardiatlas("atlas.context", {"record_ids": []})
+
+
+def test_cardiatlas_native_retrieval_and_explanation(tmp_path, monkeypatch) -> None:
+    db = tmp_path / "atlas.sqlite"
+    with SQLiteAtlasStore(db) as store:
+        store.upsert(_marker())
+    monkeypatch.setenv("CARDIATLAS_DB", str(db))
+    retrieved = _cardiatlas("atlas.retrieve", {"query": "POSTN", "limit": 5})
+    assert retrieved["results"][0]["record"]["id"] == "marker:postn"
+    assert 0 < retrieved["results"][0]["lexical_score"] <= 1
+    explained = _cardiatlas("atlas.explain", {"record_id": "marker:postn"})
+    assert explained["record"]["id"] == "marker:postn"
+
+
+def test_cardiatlas_claim_capabilities_use_versioned_api_when_installed(tmp_path, monkeypatch) -> None:
+    from cardiatlas.api import AtlasAPI
+    if not hasattr(AtlasAPI, "claim"):
+        pytest.skip("Requires CardiAtlas claim-persistence release")
+    db = tmp_path / "atlas.sqlite"
+    with SQLiteAtlasStore(db) as store:
+        service = store.load_service()
+        service.add(MarkerRecord(id="marker:postn", name="POSTN", entity_id="POSTN"))
+        service.add(EvidenceRecord(id="evidence:1", name="PMID 1", source_type="pubmed", source_identifier="1"))
+        citation = cardiatlas.ClaimEvidence(
+            evidence_id="evidence:1",
+            source_locator="https://pubmed.ncbi.nlm.nih.gov/1/",
+            locator_type="abstract",
+            review_status="source_verified",
+        )
+        service.add_claim(cardiatlas.Claim(
+            id="claim:example", subject="marker:postn", predicate="associated_with",
+            object="state:activated_fibroblast", polarity="supports",
+            evidence_ids=("evidence:1",), citations=(citation,),
+        ))
+        store.save_service(service)
+    monkeypatch.setenv("CARDIATLAS_DB", str(db))
+    claim = _cardiatlas("atlas.claim", {"claim_id": "claim:example"})
+    assert claim["claim"]["id"] == "claim:example"
+    assert claim["assessment"]["status"] == "supported"
+    assert claim["citations"][0]["source_locator"] == "https://pubmed.ncbi.nlm.nih.gov/1/"
+    assert _cardiatlas("atlas.claims", {})["count"] == 1
