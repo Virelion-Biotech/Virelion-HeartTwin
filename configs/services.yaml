@@ -10,7 +10,7 @@ services:
     endpoint: ${CARDIANATOMY_URL}
   - name: CardiAtlas
     repository: Virelion-Biotech/Virelion-CardiAtlas
-    capabilities: [atlas.context, atlas.search]
+    capabilities: [atlas.context, atlas.search, atlas.retrieve, atlas.explain, atlas.claim, atlas.claims, atlas.dataset.readiness, atlas.graph]
     builtin: cardiatlas
     endpoint: ${CARDIATLAS_URL}
   - name: CardiBench
