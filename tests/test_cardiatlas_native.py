@@ -113,7 +113,7 @@ def test_cardiatlas_claim_capabilities_use_versioned_api_when_installed(tmp_path
     with SQLiteAtlasStore(db) as store:
         service = store.load_service()
         service.add(MarkerRecord(id="marker:postn", name="POSTN", entity_id="POSTN"))
-        service.add(EvidenceRecord(id="evidence:1", name="PMID 1", source_type="pubmed", source_identifier="1"))
+        service.add(EvidenceRecord(id="evidence:1", name="PMID 1", source_type="pubmed", source_identifier="1", polarity="supports", evidence_level="primary"))
         citation = cardiatlas.ClaimEvidence(
             evidence_id="evidence:1",
             source_locator="https://pubmed.ncbi.nlm.nih.gov/1/",
