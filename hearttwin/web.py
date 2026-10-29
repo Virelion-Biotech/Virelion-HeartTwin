@@ -1126,8 +1126,8 @@ def make_server(app: Workbench, host="127.0.0.1", port=8787):
                         return self.json(200, _cardiatlas_api({}).health())
                     except RuntimeError as exc:
                         return self.json(503, {"error": str(exc)})
-                    except Exception:
-                        return self.json(503, {"error": "CardiAtlas is unavailable; verify the installed package and CARDIATLAS_DB configuration."})
+                    except (ImportError, ValueError, TypeError, KeyError, OSError) as exc:
+                        return self.json(503, {"error": "CardiAtlas is unavailable or misconfigured: " + str(exc)})
                 atlas_routes = {
                     "/api/cardiatlas/search": "atlas.retrieve",
                     "/api/cardiatlas/explain": "atlas.explain",
