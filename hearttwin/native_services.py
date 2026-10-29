@@ -6,8 +6,10 @@ HeartTwin ServiceAdapter boundary remains backwards-compatible.
 """
 from __future__ import annotations
 
+import json
 import math
 import os
+from importlib.resources import files
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
@@ -202,6 +204,44 @@ _ATLAS_CONTEXT_ID_FIELDS = (
 )
 
 
+def _bootstrap_cardiatlas_seed(store, record_from_dict) -> None:
+    """Seed a new, empty Atlas store with the small source-linked research reference bundle.
+
+    This runs only for a new empty persistent store. Existing user records are
+    never overwritten, and the bundled records contain metadata/provenance only,
+    not expression matrices or patient-identifiable source data.
+    """
+    from cardiatlas import Claim, Relation
+
+    root = files("hearttwin").joinpath("data", "cardiatlas_seed")
+
+    def read_jsonl(name: str) -> list[dict[str, Any]]:
+        text = root.joinpath(name).read_text(encoding="utf-8")
+        output = []
+        for line_number, line in enumerate(text.splitlines(), 1):
+            if not line.strip():
+                continue
+            value = json.loads(line)
+            if not isinstance(value, dict):
+                raise ValueError(f"Invalid CardiAtlas seed row {name}:{line_number}: expected an object")
+            output.append(value)
+        return output
+
+    # Validate every bundled row before the first database mutation.
+    records = [record_from_dict(item) for item in read_jsonl("cardiatlas_gse132880.jsonl")]
+    relations = []
+    for item in read_jsonl("cardiatlas_gse132880_relationships.jsonl"):
+        item["evidence_ids"] = tuple(item.get("evidence_ids", ()))
+        relations.append(Relation(**item))
+    claims = [Claim.from_dict(item) for item in read_jsonl("cardiatlas_gse132880_claims.jsonl")]
+
+    store.upsert_many(records)
+    for relation in relations:
+        store.put_relation(relation)
+    for claim in claims:
+        store.upsert_claim(claim)
+
+
 def _cardiatlas_api(payload: dict[str, Any]):
     try:
         from cardiatlas import AtlasAPI, AtlasService, SQLiteAtlasStore, record_from_dict
@@ -211,9 +251,11 @@ def _cardiatlas_api(payload: dict[str, Any]):
     db_path = os.getenv("CARDIATLAS_DB")
     if db_path:
         path = Path(db_path).expanduser()
-        if not path.is_file():
-            raise RuntimeError(f"CARDIATLAS_DB does not exist or is not a file: {path}")
+        # The configured path should live on the deployment's persistent disk.
+        path.parent.mkdir(parents=True, exist_ok=True)
         with SQLiteAtlasStore(path) as store:
+            if store.count() == 0 and not store.all_relations() and not store.all_claims():
+                _bootstrap_cardiatlas_seed(store, record_from_dict)
             service = store.load_service()
     else:
         service = AtlasService.empty()

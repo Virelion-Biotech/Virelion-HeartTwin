@@ -85,11 +85,12 @@ def test_cardiatlas_native_validates_payload_types(monkeypatch) -> None:
             _cardiatlas(capability, payload)
 
 
-def test_cardiatlas_native_missing_configured_db_fails_closed(tmp_path, monkeypatch) -> None:
-    missing = tmp_path / "missing.sqlite"
+def test_cardiatlas_missing_configured_db_bootstraps_seed(tmp_path, monkeypatch) -> None:
+    missing = tmp_path / "nested" / "missing.sqlite"
     monkeypatch.setenv("CARDIATLAS_DB", str(missing))
-    with pytest.raises(RuntimeError, match="CARDIATLAS_DB does not exist"):
-        _cardiatlas("atlas.context", {"record_ids": []})
+    result = _cardiatlas("atlas.retrieve", {"query": "GSE132880", "limit": 10})
+    assert missing.is_file()
+    assert any(item["record"]["id"] == "dataset:gse132880" for item in result["results"])
 
 
 def test_cardiatlas_native_retrieval_and_explanation(tmp_path, monkeypatch) -> None:

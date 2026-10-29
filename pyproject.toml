@@ -24,4 +24,4 @@ build-backend = "setuptools.build_meta"
 include = ["hearttwin*"]
 
 [tool.setuptools.package-data]
-hearttwin = ["services.yaml", "webui/*.html", "webui/*.css", "webui/*.js", "webui/*.json", "webui/*.png"]
+hearttwin = ["services.yaml", "webui/*.html", "webui/*.css", "webui/*.js", "webui/*.json", "webui/*.png", "data/cardiatlas_seed/*.jsonl"]
