@@ -1,0 +1,17 @@
+{"subject":"study:gse132880","predicate":"has_dataset","object":"dataset:gse132880","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895566","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895567","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895568","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895569","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895570","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895571","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895572","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"study:gse132880","predicate":"has_sample","object":"sample:gsm3895573","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895566","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895567","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895568","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895569","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895570","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895571","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895572","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}
+{"subject":"dataset:gse132880","predicate":"has_sample","object":"sample:gsm3895573","evidence_ids":["evidence:geo:gse132880"],"confidence":1,"source":"cardiatlas:source-verified-reference"}

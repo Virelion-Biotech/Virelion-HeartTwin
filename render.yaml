@@ -18,3 +18,5 @@ services:
         sync: false
       - key: HEARTTWIN_WORKSPACE
         value: /var/data/workspace
+      - key: CARDIATLAS_DB
+        value: /var/data/workspace/cardiatlas/atlas.sqlite

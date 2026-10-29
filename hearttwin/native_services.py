@@ -6,8 +6,10 @@ HeartTwin ServiceAdapter boundary remains backwards-compatible.
 """
 from __future__ import annotations
 
+import json
 import math
 import os
+from importlib.resources import files
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
@@ -202,6 +204,50 @@ _ATLAS_CONTEXT_ID_FIELDS = (
 )
 
 
+def _bootstrap_cardiatlas_seed(store, record_from_dict, *, support_claims: bool) -> None:
+    """Seed a new, empty Atlas store with the small source-linked research reference bundle.
+
+    This runs only for a new empty persistent store. Existing user records are
+    never overwritten, and the bundled records contain metadata/provenance only,
+    not expression matrices or patient-identifiable source data.
+    """
+    from cardiatlas import Relation
+
+    root = files("hearttwin").joinpath("data", "cardiatlas_seed")
+
+    def read_jsonl(name: str) -> list[dict[str, Any]]:
+        text = root.joinpath(name).read_text(encoding="utf-8")
+        output = []
+        for line_number, line in enumerate(text.splitlines(), 1):
+            if not line.strip():
+                continue
+            value = json.loads(line)
+            if not isinstance(value, dict):
+                raise ValueError(f"Invalid CardiAtlas seed row {name}:{line_number}: expected an object")
+            output.append(value)
+        return output
+
+    # Validate every bundled row before the first database mutation.
+    records = [record_from_dict(item) for item in read_jsonl("cardiatlas_gse132880.jsonl")]
+    relations = []
+    for item in read_jsonl("cardiatlas_gse132880_relationships.jsonl"):
+        item["evidence_ids"] = tuple(item.get("evidence_ids", ()))
+        relations.append(Relation(**item))
+    if support_claims:
+        from cardiatlas import Claim
+        claims = [Claim.from_dict(item) for item in read_jsonl("cardiatlas_gse132880_claims.jsonl")]
+    else:
+        # Older CardiAtlas installs can still serve the metadata/graph portion
+        # of the workspace; claim endpoints explain that upgrade is required.
+        claims = []
+
+    store.upsert_many(records)
+    for relation in relations:
+        store.put_relation(relation)
+    for claim in claims:
+        store.upsert_claim(claim)
+
+
 def _cardiatlas_api(payload: dict[str, Any]):
     try:
         from cardiatlas import AtlasAPI, AtlasService, SQLiteAtlasStore, record_from_dict
@@ -211,9 +257,15 @@ def _cardiatlas_api(payload: dict[str, Any]):
     db_path = os.getenv("CARDIATLAS_DB")
     if db_path:
         path = Path(db_path).expanduser()
-        if not path.is_file():
-            raise RuntimeError(f"CARDIATLAS_DB does not exist or is not a file: {path}")
+        # The configured path should live on the deployment's persistent disk.
+        path.parent.mkdir(parents=True, exist_ok=True)
         with SQLiteAtlasStore(path) as store:
+            list_claims = getattr(store, "all_claims", None)
+            existing_claims = list_claims() if callable(list_claims) else []
+            if store.count() == 0 and not store.all_relations() and not existing_claims:
+                from cardiatlas import Claim
+                support_claims = callable(getattr(store, "upsert_claim", None)) and callable(getattr(Claim, "from_dict", None))
+                _bootstrap_cardiatlas_seed(store, record_from_dict, support_claims=support_claims)
             service = store.load_service()
     else:
         service = AtlasService.empty()
@@ -260,7 +312,6 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("query and text disagree")
         if not has_query and not has_text:
             return {"contract_version": "1.0", "query": "", "records": [], "count": 0}
-
         query = payload.get("query", payload.get("text", ""))
         if not isinstance(query, str):
             raise ValueError("query/text must be a string")
@@ -277,15 +328,21 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("limit must be an integer")
         if not 0 <= limit <= 1000:
             raise ValueError("limit must be between 0 and 1000")
-
         result = api.search(text=query, record_type=record_type, tags=tuple(tags), limit=limit)
         records = [item["record"] for item in result["results"]]
-        return {
-            "contract_version": "1.0",
-            "query": query,
-            "records": records,
-            "count": len(records),
-        }
+        return {"contract_version": "1.0", "query": query, "records": records, "count": len(records)}
+
+    if capability == "atlas.retrieve":
+        query = payload.get("query", payload.get("text", ""))
+        if not isinstance(query, str):
+            raise ValueError("query/text must be a string")
+        record_type = payload.get("record_type")
+        if record_type is not None and not isinstance(record_type, str):
+            raise ValueError("record_type must be a string or null")
+        limit = payload.get("limit", 20)
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 0 <= limit <= 1000:
+            raise ValueError("limit must be an integer between 0 and 1000")
+        return api.retrieve(query, record_type=record_type, limit=limit)
 
     if capability == "atlas.context":
         record_ids = payload.get("record_ids", [])
@@ -296,7 +353,6 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             context_id = f"ctx-{payload.get('entity_id', 'unknown')}"
         if not isinstance(context_id, str) or not context_id:
             raise ValueError("context_id must be a non-empty string")
-
         raw = api.context(record_ids=record_ids, context_id=context_id).to_dict()
         normalized, provenance = _normalize_atlas_context(raw, record_ids)
         return {
@@ -305,6 +361,57 @@ def _cardiatlas(capability: str, payload: dict[str, Any]) -> dict[str, Any]:
             "record_ids": list(record_ids),
             "context": normalized,
             "provenance": provenance,
+        }
+
+    if capability == "atlas.explain":
+        record_id = payload.get("record_id")
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("record_id must be a non-empty string")
+        return api.explain(record_id)
+
+    if capability == "atlas.claim":
+        claim_id = payload.get("claim_id")
+        if not isinstance(claim_id, str) or not claim_id.strip():
+            raise ValueError("claim_id must be a non-empty string")
+        method = getattr(api, "claim", None)
+        if not callable(method):
+            raise RuntimeError("Upgrade CardiAtlas to the claim-persistence release before using this capability")
+        return method(claim_id)
+
+    if capability == "atlas.claims":
+        method = getattr(api, "claims", None)
+        if not callable(method):
+            raise RuntimeError("Upgrade CardiAtlas to the claim-persistence release before using this capability")
+        return method()
+
+    if capability == "atlas.dataset.readiness":
+        study_id, dataset_id = payload.get("study_id"), payload.get("dataset_id")
+        if not isinstance(study_id, str) or not study_id.strip() or not isinstance(dataset_id, str) or not dataset_id.strip():
+            raise ValueError("study_id and dataset_id must be non-empty strings")
+        method = getattr(api, "dataset_readiness", None)
+        if not callable(method):
+            method = getattr(api, "study_benchmark_readiness", None)
+        if not callable(method):
+            raise RuntimeError("Installed CardiAtlas does not expose dataset readiness")
+        return method(study_id, dataset_id)
+
+    if capability == "atlas.graph":
+        record_id = payload.get("record_id")
+        hops = payload.get("hops", 1)
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("record_id must be a non-empty string")
+        if isinstance(hops, bool) or not isinstance(hops, int) or not 0 <= hops <= 10:
+            raise ValueError("hops must be an integer between 0 and 10")
+        method = getattr(api, "graph", None)
+        if callable(method):
+            return method(record_id, hops=hops)
+        record = api.service.registry.get(record_id)
+        if record is None:
+            raise KeyError(record_id)
+        return {
+            "record": record.to_dict(),
+            "context": api.service.context(record_id, hops=hops),
+            "explanation": api.explain(record_id),
         }
 
     raise ValueError(f"CardiAtlas does not support {capability}")

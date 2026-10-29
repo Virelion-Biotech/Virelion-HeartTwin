@@ -57,11 +57,17 @@
       "repository": "Virelion-Biotech/Virelion-CardiAtlas",
       "capabilities": [
         "atlas.context",
-        "atlas.search"
+        "atlas.search",
+        "atlas.retrieve",
+        "atlas.explain",
+        "atlas.claim",
+        "atlas.claims",
+        "atlas.dataset.readiness",
+        "atlas.graph"
       ],
       "group": "Infrastructure",
-      "description": "Retrieve metadata and evidence context.",
-      "scope": "Retrieved citations and records require claim-level review and biological-identity reconciliation.",
+      "description": "Search cardiac literature and datasets, inspect source-linked claims, explore evidence relationships, and check benchmark readiness.",
+      "scope": "Source citations, claim review status, data readiness and scientific/clinical limitations remain explicit; results are research metadata, not clinical advice.",
       "runnable": false,
       "installed": null,
       "gate": null
