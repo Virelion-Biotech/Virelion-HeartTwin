@@ -132,3 +132,37 @@ def test_cardiatlas_claim_capabilities_use_versioned_api_when_installed(tmp_path
     assert claim["assessment"]["status"] == "supported"
     assert claim["citations"][0]["source_locator"] == "https://pubmed.ncbi.nlm.nih.gov/1/"
     assert _cardiatlas("atlas.claims", {})["count"] == 1
+
+
+def test_cardiatlas_empty_persistent_store_seeds_metadata_graph_and_claims_when_supported(tmp_path, monkeypatch) -> None:
+    from cardiatlas.api import AtlasAPI
+
+    db = tmp_path / "persistent" / "cardiatlas" / "atlas.sqlite"
+    monkeypatch.setenv("CARDIATLAS_DB", str(db))
+
+    result = _cardiatlas("atlas.retrieve", {"query": "GSE132880 cardiac endothelial", "limit": 10})
+    assert any(item["record"]["id"] == "dataset:gse132880" for item in result["results"])
+
+    with SQLiteAtlasStore(db) as store:
+        assert store.count() == 11
+        assert len(store.all_relations()) == 17
+        store.upsert(_marker("marker:local-note", "LOCALNOTE"))
+        if hasattr(AtlasAPI, "claim"):
+            assert [item.id for item in store.all_claims()] == ["claim:gse132880:design"]
+
+    # Reopening must preserve the curated reference and user data without reseeding.
+    reopened = _cardiatlas_api_for_test()
+    assert reopened.health()["record_count"] == 12
+    if hasattr(AtlasAPI, "claim"):
+        claim = _cardiatlas("atlas.claim", {"claim_id": "claim:gse132880:design"})
+        assert claim["assessment"]["status"] == "supported"
+        readiness = _cardiatlas("atlas.dataset.readiness", {
+            "study_id": "study:gse132880", "dataset_id": "dataset:gse132880"
+        })
+        assert readiness["ready"] is True
+        assert readiness["checks"]["subject_mapping_provenance"] is True
+
+
+def _cardiatlas_api_for_test():
+    from hearttwin.native_services import _cardiatlas_api
+    return _cardiatlas_api({})

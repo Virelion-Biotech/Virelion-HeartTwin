@@ -204,14 +204,14 @@ _ATLAS_CONTEXT_ID_FIELDS = (
 )
 
 
-def _bootstrap_cardiatlas_seed(store, record_from_dict) -> None:
+def _bootstrap_cardiatlas_seed(store, record_from_dict, *, support_claims: bool) -> None:
     """Seed a new, empty Atlas store with the small source-linked research reference bundle.
 
     This runs only for a new empty persistent store. Existing user records are
     never overwritten, and the bundled records contain metadata/provenance only,
     not expression matrices or patient-identifiable source data.
     """
-    from cardiatlas import Claim, Relation
+    from cardiatlas import Relation
 
     root = files("hearttwin").joinpath("data", "cardiatlas_seed")
 
@@ -233,7 +233,13 @@ def _bootstrap_cardiatlas_seed(store, record_from_dict) -> None:
     for item in read_jsonl("cardiatlas_gse132880_relationships.jsonl"):
         item["evidence_ids"] = tuple(item.get("evidence_ids", ()))
         relations.append(Relation(**item))
-    claims = [Claim.from_dict(item) for item in read_jsonl("cardiatlas_gse132880_claims.jsonl")]
+    if support_claims:
+        from cardiatlas import Claim
+        claims = [Claim.from_dict(item) for item in read_jsonl("cardiatlas_gse132880_claims.jsonl")]
+    else:
+        # Older CardiAtlas installs can still serve the metadata/graph portion
+        # of the workspace; claim endpoints explain that upgrade is required.
+        claims = []
 
     store.upsert_many(records)
     for relation in relations:
@@ -254,8 +260,12 @@ def _cardiatlas_api(payload: dict[str, Any]):
         # The configured path should live on the deployment's persistent disk.
         path.parent.mkdir(parents=True, exist_ok=True)
         with SQLiteAtlasStore(path) as store:
-            if store.count() == 0 and not store.all_relations() and not store.all_claims():
-                _bootstrap_cardiatlas_seed(store, record_from_dict)
+            list_claims = getattr(store, "all_claims", None)
+            existing_claims = list_claims() if callable(list_claims) else []
+            if store.count() == 0 and not store.all_relations() and not existing_claims:
+                from cardiatlas import Claim
+                support_claims = callable(getattr(store, "upsert_claim", None)) and callable(getattr(Claim, "from_dict", None))
+                _bootstrap_cardiatlas_seed(store, record_from_dict, support_claims=support_claims)
             service = store.load_service()
     else:
         service = AtlasService.empty()
