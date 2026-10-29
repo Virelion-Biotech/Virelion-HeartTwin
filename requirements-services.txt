@@ -3,7 +3,7 @@
 # All other component pins are unchanged from matrix v11.
 # Transitive Python dependencies remain governed by component constraints.
 git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@7ec3b75b6aeda4604030dbe59a0dfa4751bdb3b7
-git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@c668130ab0e54731e8f8ccb99b32d5ac8fc50e5d
+git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@d7c5ba1e9dda96a64a5a59dee6fa9f40a92d8de9
 git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@b521ad859969d6562aec9363b0b937bd01c73404
 git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@831156fd1605d70b7ff5ec25deaa3e784ca38a72
 git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@0f3b15a5ad53b4edc5d44cb5c38f06149bac4401
