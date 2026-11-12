@@ -22,3 +22,7 @@ htmlcov/
 
 # OS / editor
 .DS_Store
+
+# Local run artifacts written by tests
+.carditrace/
+cardiinfer_runs/
