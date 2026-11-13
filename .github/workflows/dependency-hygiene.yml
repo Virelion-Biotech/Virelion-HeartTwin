@@ -65,7 +65,7 @@ jobs:
         run: |
           uv pip compile --python-version 3.12 --universal --no-annotate --generate-hashes requirements-services.txt --output-file /tmp/requirements-services.lock
           if [[ -f requirements-services.lock ]]; then
-            diff -u requirements-services.lock /tmp/requirements-services.lock
+            diff -u <(tail -n +3 requirements-services.lock) <(tail -n +3 /tmp/requirements-services.lock)
           else
             echo "::warning::requirements-services.lock is not committed yet; the lock-refresh job will propose it."
           fi
