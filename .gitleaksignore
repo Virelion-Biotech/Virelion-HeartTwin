@@ -1,0 +1,8 @@
+# Exact false-positive fingerprints: SHA-256 provenance digests and deterministic public Actions cache keys.
+# These matches were manually inspected at the original commit/path/line and are not credentials.
+7d0a0391c8bb1a620f474f3f87d8a784a646562f:validation/integration_refresh_2026_10_18/source_sha256.json:generic-api-key:4
+c101d9cd3a9658f49e0fea7892a478477dca5568:validation/colab_argo_v2_2026_10_18/SOURCE_SNAPSHOT.json:generic-api-key:7
+c101d9cd3a9658f49e0fea7892a478477dca5568:validation/colab_argo_v2_2026_10_18/local_v3_smoke/SOURCE_SNAPSHOT.json:generic-api-key:7
+1634ef7eb7f4e632cc11dbcd4066df23bfe8066e:validation/colab_argo_2026_10_18/source_snapshots.json:generic-api-key:31
+f64dd8de2f37c3c4758a86b4c90743072974b0c7:.github/workflows/cdt-reference.yml:generic-api-key:67
+f64dd8de2f37c3c4758a86b4c90743072974b0c7:.github/workflows/cdt-reference.yml:generic-api-key:81
