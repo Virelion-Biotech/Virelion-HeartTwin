@@ -63,7 +63,12 @@ jobs:
         if: hashFiles('requirements-services.txt') != ''
         shell: bash
         run: |
-          uv pip compile --python-version 3.12 --universal --no-annotate requirements-services.txt --output-file /tmp/requirements-services.lock
+          uv pip compile --python-version 3.12 --universal --no-annotate --generate-hashes requirements-services.txt --output-file /tmp/requirements-services.lock
+          if [[ -f requirements-services.lock ]]; then
+            diff -u requirements-services.lock /tmp/requirements-services.lock
+          else
+            echo "::warning::requirements-services.lock is not committed yet; the lock-refresh job will propose it."
+          fi
           grep -vE '^[[:space:]]*[^[:space:]]+[[:space:]]+@[[:space:]]+git\+' /tmp/requirements-services.lock > /tmp/requirements-services-pypi.txt || true
           test -s /tmp/requirements-services-pypi.txt
           uvx --python 3.12 --from pip-audit pip-audit --strict --requirement /tmp/requirements-services-pypi.txt
@@ -103,7 +108,7 @@ jobs:
 
       - name: Resolve latest compatible HeartTwin service dependencies
         if: hashFiles('requirements-services.txt') != ''
-        run: uv pip compile --python-version 3.12 --universal --no-annotate requirements-services.txt --output-file requirements-services.lock
+        run: uv pip compile --python-version 3.12 --universal --no-annotate --generate-hashes requirements-services.txt --output-file requirements-services.lock
 
       - name: Export candidate Python dependency graph
         run: uv export --locked --python 3.12 --all-extras --all-groups --no-emit-project --format requirements-txt --output-file /tmp/virelion-candidate-dependencies.txt
@@ -150,7 +155,7 @@ jobs:
           body: |
             ## Summary
             - Refresh the universal Python resolver lock with uv 0.13.6.
-            - Resolve HeartTwin service dependencies separately when declared.
+            - Resolve HeartTwin service dependencies with hashes when declared.
 
             ## Security review
             This PR is intentionally draft. Review the Dependency hygiene run summary; any failed audit is a merge blocker.
