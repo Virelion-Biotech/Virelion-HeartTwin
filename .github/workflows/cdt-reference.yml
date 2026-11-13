@@ -61,7 +61,7 @@ jobs:
           python-version: "3.11"
       - name: Restore published CDT data cache
         id: cdt-data-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .cdt_reference/data
           key: cdt-zenodo-14034739-geometry-v2
@@ -79,7 +79,7 @@ jobs:
       - name: Save published CDT data cache
         if: steps.cdt-data-cache.outputs.cache-hit != 'true'
         continue-on-error: true
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .cdt_reference/data
           key: cdt-zenodo-14034739-geometry-v2
