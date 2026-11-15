@@ -115,7 +115,7 @@ jobs:
             --mismatch-fraction-tol 0
       - name: Upload equivalence artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cdt-forward-equivalence
           path: .cdt_reference/
@@ -146,7 +146,7 @@ jobs:
             --subject "${{ github.event.inputs.subject || 'DTI004' }}"
       - name: Upload personalization artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cdt-full-personalisation
           path: .cdt_reference/full_reference/
