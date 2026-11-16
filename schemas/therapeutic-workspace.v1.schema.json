@@ -9,7 +9,7 @@
   "generated_at":{"type":"string","format":"date-time"},
   "component_versions":{"type":"object"},
   "evidence_items":{"type":"array"},
-  "by_stratum":{"type":"object","required":["myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering"]},
+  "by_stratum":{"type":"object","required":["myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering","immune_modulation"]},
   "genotype_profiles":{"type":"array"},
   "maturity_profiles":{"type":"array"},
   "synthetic_challenges":{"type":"array"},
