@@ -237,6 +237,8 @@ def adapt_cardi_atlas_record(
     if not _text(record_id) or not _text(component_version):
         raise TherapeuticWorkspaceError("CardiAtlas record id and component_version are required")
     source_ids = record.get("evidence_ids") or record.get("source_ids") or []
+    if not isinstance(source_ids, list):
+        raise TherapeuticWorkspaceError("CardiAtlas evidence_ids/source_ids must be an array")
     interpretation = record.get("proposed_mechanism") or "Interpretation not supplied; no efficacy inference."
     item = {
         "record_id": record_id,
@@ -296,8 +298,10 @@ def adapt_cardiep_disease_context(context: dict[str, Any]) -> dict[str, Any]:
     """Map CardiEP genotype_status to the shared HeartTwin genotype status field."""
     if not isinstance(context, dict):
         raise TherapeuticWorkspaceError("CardiEP disease context must be an object")
+    if "genotype_status" not in context:
+        raise TherapeuticWorkspaceError("CardiEP disease context must explicitly include genotype_status")
     adapted = dict(context)
-    adapted["status"] = adapted.pop("genotype_status", "unknown")
+    adapted["status"] = adapted.pop("genotype_status")
     adapted["source_component"] = "CardiEP"
     errors = validate_genotype_context(adapted)
     if errors:
