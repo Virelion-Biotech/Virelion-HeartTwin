@@ -9,7 +9,7 @@ or establish clinical validity.
 
 | Source component | Adapter | Conversion |
 |---|---|---|
-| CardiAtlas | `adapt_cardi_atlas_record` | Maps repair and preservation to the benchmark's combined repair/preservation stratum; keeps immune modulation separate. Unknown classes fail closed. The caller must supply the evidence state, component version, and source provenance. |
+| CardiAtlas | `adapt_cardi_atlas_record` | Maps repair and preservation to the benchmark's combined repair/preservation stratum; keeps immune modulation separate. Unknown classes fail closed. The caller must supply the evidence state, component version, and source provenance. A record can only be labelled `curated` when CardiAtlas `curation_status` is `source_checked` or `expert_reviewed`. |
 | CardiEval | `adapt_cardi_eval_assessment` | Maps CardiEval's cardiomyocyte-number/lineage and off-target-toxicity domain keys to HeartTwin's stable names. All eight domains are required; duplicates and unknown domains fail closed. |
 | ElectroTrace | `adapt_electrotrace_genotype_profile` | Extracts the supplied nested genotype context. Reported/curated assertions require source IDs and complete source provenance. |
 | CardiEP | `adapt_cardiep_disease_context` | Maps `genotype_status` to the shared `status` field without changing variant assertions. ECG-inferred genotype is rejected. |
