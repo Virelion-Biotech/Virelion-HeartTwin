@@ -1,0 +1,18 @@
+{
+ "matrix_id":"hearttwin-regenerative-evidence-snapshot",
+ "matrix_version":"1.0.0",
+ "captured_at":"2026-11-16",
+ "target":"main-branch source contract snapshot",
+ "components":{
+  "CardiAtlas":{"repository":"Virelion-Biotech/Virelion-CardiAtlas","version":"0.9.0","commit":"f42eb2fce337e135fdaf9b1e4f313e653b4f44c4"},
+  "CardiBench":{"repository":"Virelion-Biotech/Virelion-CardiBench","version":"0.10.0","commit":"6ce29fca287c30a4170b54c3fb46d6067bda6ea1"},
+  "CardiEval":{"repository":"Virelion-Biotech/Virelion-CardiEval","version":"1.5.0","commit":"7d51e2d5b45f7b54a5f066ccf46c1bf0eb3edc7d"},
+  "CardiSim":{"repository":"Virelion-Biotech/Virelion-CardiSim","version":"0.4.0","commit":"1e1726707c94a91657818a5e556040c6958a72fc"},
+  "ElectroTrace":{"repository":"Virelion-Biotech/Virelion-ElectroTrace","version":"1.10.0","commit":"8d12323bc9ced4cc6201eefad2421ef7693504de"},
+  "MyoTrace":{"repository":"Virelion-Biotech/Virelion-MyoTrace","version":"0.5.0","commit":"08ed2cbdee67e9aea147b2f953f9ca31c09acb80"},
+  "CardiTherapy":{"repository":"Virelion-Biotech/Virelion-CardiTherapy","version":"0.3.0","commit":"5e6f07f379ba89880837d97191a527adfe385c59"},
+  "CardiTrace":{"repository":"Virelion-Biotech/Virelion-CardiTrace","version":"0.4.1","commit":"28e2f1c1baaa6cf5eebbe5d648953cc04faee525"}
+ },
+ "qualification":"source pins only; cross-component runtime qualification pending",
+ "warning":"The CardiAtlas, CardiBench, CardiEval and CardiTrace therapeutic feature branches in flight are not represented by these main-branch pins until merged and repinned."
+}
