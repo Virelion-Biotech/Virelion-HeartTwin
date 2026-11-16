@@ -47,7 +47,7 @@ def validate_genotype_context(profile:dict[str,Any])->list[str]:
             errors.append("non-unknown genotype requires source_record_ids")
         if not profile.get("source_provenance"):
             errors.append("non-unknown genotype requires source_provenance")
-    if profile.get("inferred_by_hearttwin") is True:
+    if profile.get("inferred_by_hearttwin") is True or profile.get("inferred_from_ecg") is True:
         errors.append("HeartTwin must not infer genotype")
     return errors
 
@@ -179,3 +179,50 @@ def adapt_cardi_eval_assessment(assessment: dict[str, Any]) -> dict[str, dict[st
         missing = sorted(EVAL_DOMAINS - set(mapped))
         raise TherapeuticWorkspaceError("CardiEval assessment is incomplete after mapping: " + ", ".join(missing))
     return mapped
+
+
+def adapt_electrotrace_genotype_profile(profile: dict[str, Any]) -> dict[str, Any]:
+    """Extract caller-supplied genotype context from an ElectroTrace profile."""
+    if not isinstance(profile, dict) or not isinstance(profile.get("genotype_context"), dict):
+        raise TherapeuticWorkspaceError("ElectroTrace profile requires genotype_context")
+    context = dict(profile["genotype_context"])
+    context["source_component"] = "ElectroTrace"
+    context["profile_version"] = profile.get("profile_version")
+    errors = validate_genotype_context(context)
+    if errors:
+        raise TherapeuticWorkspaceError("; ".join(errors))
+    return context
+
+def adapt_cardiep_disease_context(context: dict[str, Any]) -> dict[str, Any]:
+    """Map CardiEP genotype_status to the shared HeartTwin genotype status field."""
+    if not isinstance(context, dict):
+        raise TherapeuticWorkspaceError("CardiEP disease context must be an object")
+    adapted = dict(context)
+    adapted["status"] = adapted.pop("genotype_status", "unknown")
+    adapted["source_component"] = "CardiEP"
+    errors = validate_genotype_context(adapted)
+    if errors:
+        raise TherapeuticWorkspaceError("; ".join(errors))
+    return adapted
+
+def adapt_cardisim_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
+    """Flatten the CardiSim result envelope while preserving its synthetic manifest."""
+    if not isinstance(scenario, dict) or not isinstance(scenario.get("manifest"), dict):
+        raise TherapeuticWorkspaceError("CardiSim scenario requires a manifest object")
+    manifest = scenario["manifest"]
+    if manifest.get("evidence_state") not in {"synthetic", "simulated"}:
+        raise TherapeuticWorkspaceError("CardiSim manifest must declare synthetic or simulated evidence_state")
+    if manifest.get("seed") is None or not _text(manifest.get("generator_version")):
+        raise TherapeuticWorkspaceError("CardiSim manifest requires seed and generator_version")
+    return {
+        "scenario_id": scenario.get("scenario_id"),
+        "axes": scenario.get("axes"),
+        "time_days": scenario.get("time_days"),
+        "fingerprint": scenario.get("fingerprint"),
+        "evidence_state": manifest["evidence_state"],
+        "seed": manifest["seed"],
+        "generator_version": manifest["generator_version"],
+        "scenario_version": manifest.get("scenario_version"),
+        "calibration_status": manifest.get("calibration_status"),
+        "clinical_or_therapeutic_efficacy_inference": manifest.get("clinical_or_therapeutic_efficacy_inference"),
+    }
