@@ -126,5 +126,11 @@
       "head_commit": "877ac5acd947d2283cd6f69e04d69b1e1811fcb2",
       "base_commit": "4a96aa77087ed98341d877c4a026f7ecdfb92fb7"
     }
-  ]
+  ],
+  "candidate_integration_matrix": {
+    "requirements_file": "requirements-services-regenerative-prs.txt",
+    "workflow_file": ".github/workflows/regenerative-pr-stack.yml",
+    "coverage": "All nine open regenerative/precision-cardiology PR head commits are installed together; remaining components stay on frozen matrix v14.",
+    "qualification": "CI pending; passing this workflow would establish software/interface compatibility for this exact candidate stack only, not scientific or clinical validity."
+  }
 }
