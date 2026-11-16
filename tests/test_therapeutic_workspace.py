@@ -152,7 +152,7 @@ def test_cardisim_manifest_is_flattened_for_workspace_contract():
         "scenario_id": "post_mi_transient_proliferation",
         "axes": {"cell_cycle_entry": [[0.1, 0.2]]},
         "time_days": [0.0, 1.0],
-        "fingerprint": "abc",
+        "fingerprint": "f" * 64,
         "manifest": {
             "evidence_state": "synthetic", "seed": 7,
             "generator_version": "cardisim-regenerative-scenarios/1.0.0",
@@ -181,3 +181,46 @@ def test_boolean_seed_and_non_http_provenance_url_are_rejected():
     bad = item(source_provenance=[{"source_identifier":"x", "source_type":"paper", "source_url":"javascript:alert(1)", "source_sha256":"a" * 64}])
     with pytest.raises(TherapeuticWorkspaceError, match="HTTP\(S\) URL"):
         build_therapeutic_workspace(evidence_items=[bad])
+
+
+def test_cardiep_disease_label_requires_independent_phenotype_provenance():
+    context = {
+        "genotype_status": "unknown",
+        "disease_label": "PLN_cardiomyopathy",
+        "baseline_definition": {"status": "not_reported"},
+        "comparator_definition": {"status": "not_reported"},
+        "uncertainty_reference": {"status": "not_reported"},
+    }
+    with pytest.raises(TherapeuticWorkspaceError, match="phenotype_label_source_record_ids"):
+        adapt_cardiep_disease_context(context)
+
+
+def test_unknown_cardiep_genotype_cannot_carry_asserted_variants():
+    with pytest.raises(TherapeuticWorkspaceError, match="unknown genotype cannot contain asserted variant records"):
+        adapt_cardiep_disease_context({
+            "genotype_status": "unknown",
+            "variants": [{"gene_symbol": "PLN", "variant_nomenclature": "c.40_42del"}],
+        })
+
+
+def test_cardi_eval_adapter_rejects_unknown_domain_status():
+    names = [
+        "cell_cycle_entry", "mitosis_cytokinesis", "cardiomyocyte_number_lineage",
+        "functional_maturation", "ventricular_function_remodelling", "fibrosis_scar",
+        "arrhythmia_safety", "off_target_toxicity",
+    ]
+    assessment = {"domains": [{"domain": name, "status": "invented_status" if name == "cell_cycle_entry" else "not_reported"} for name in names]}
+    with pytest.raises(TherapeuticWorkspaceError, match="unsupported or missing status"):
+        adapt_cardi_eval_assessment(assessment)
+
+
+def test_cardisim_adapter_rejects_invalid_fingerprint_and_time_axis():
+    scenario = {
+        "scenario_id": "post_mi_transient_proliferation",
+        "axes": {"cell_cycle_entry": [[0.1, 0.2]]},
+        "time_days": [0.0, 1.0],
+        "fingerprint": "not-a-digest",
+        "manifest": {"evidence_state": "synthetic", "seed": 7, "generator_version": "fixture/1"},
+    }
+    with pytest.raises(TherapeuticWorkspaceError, match="SHA-256"):
+        adapt_cardisim_scenario(scenario)
