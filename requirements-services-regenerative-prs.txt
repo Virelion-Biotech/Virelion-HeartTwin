@@ -1,0 +1,28 @@
+# Candidate integration matrix for the nine open regenerative/precision-cardiology PRs.
+# All nine feature branches are pinned by immutable commit SHA; other components remain on frozen matrix v14.
+# This is a candidate compatibility test, not a released or clinically qualified dependency set.
+# Exact component commits for compatibility matrix v14.
+# v14 refreshes all 21 component pins against their current main-branch heads as of 2026-11-13.
+# Changed since v13: CardiAtlas, CardiBench, CardiEval, CardiLearn, CardiMech, CardiStudio, DCCP, MyoTrace, OptiCell, CardiTherapy, CardiTrace, CardiBridge.
+# Transitive Python dependencies remain governed by component constraints.
+git+https://github.com/Virelion-Biotech/Virelion-CardiAnatomy.git@df7d81c6954843c7860893f1beec1cad7d18d385
+git+https://github.com/Virelion-Biotech/Virelion-CardiAtlas.git@176df831c347149b999104a73f5034e00ebbc7c7
+git+https://github.com/Virelion-Biotech/Virelion-CardiBench.git@7eb6fee859bc03c483c4a5febbb2dd1f761a3bb0
+git+https://github.com/Virelion-Biotech/Virelion-CardiEval.git@deae7f41b41101b2ca1c8abbc9c1b9cf27b560fe
+git+https://github.com/Virelion-Biotech/Virelion-CardiLearn.git@101849559b09d989d8e3f4e94bdd9be80bf78907
+git+https://github.com/Virelion-Biotech/Virelion-CardiEP.git@877ac5acd947d2283cd6f69e04d69b1e1811fcb2
+git+https://github.com/Virelion-Biotech/Virelion-CardiFlow.git@670d370635ba09b2908f7e6736299719e86fc36b
+git+https://github.com/Virelion-Biotech/Virelion-CardiMech.git@dad23ccac03928490d478c14b580cf0d2153a300
+git+https://github.com/Virelion-Biotech/Virelion-CardiInfer.git@b4f0c3c30da5986c6a98dba6ceccf1e1de95c881
+git+https://github.com/Virelion-Biotech/Virelion-CardiSim.git@1eba0e811088bccb0bb74152840cceb85d6f7621
+git+https://github.com/Virelion-Biotech/Virelion-CardiVex.git@56c3a0d333adb4d6f2bedcc88e5e8a3e00ba8db7
+git+https://github.com/Virelion-Biotech/Virelion-CardiStudio.git@3d22ebae682184c0d1e06b7b231fc203834a5525
+git+https://github.com/Virelion-Biotech/Virelion-DCCP.git@4b7706e91c02f7f79ee8df24582b42ac34c71003
+git+https://github.com/Virelion-Biotech/Virelion-ElectroTrace.git@0e34821e3e8cc3245dec92cff62b9018fc57f909
+git+https://github.com/Virelion-Biotech/Virelion-MyoTrace.git@bdf3ee7ad9a0cead89a4e3c81bf31483ba3fb2bc
+git+https://github.com/Virelion-Biotech/Virelion-OptiCell.git@3250270bbe3fb7941b2b74bee28ae7c33a6d1b52
+git+https://github.com/Virelion-Biotech/Virelion-CardioScore.git@290883ab536012be19c3132b5dcfcab8e5abd42c
+git+https://github.com/Virelion-Biotech/Virelion-CardiTherapy.git@ab44184bd4f6a9b1a361661ee16f4a012123801d
+git+https://github.com/Virelion-Biotech/Virelion-CardiTrace.git@536769dd8b16898f9936fd4d6c3f673f37194cb4
+git+https://github.com/Virelion-Biotech/Virelion-CardiBridge.git@41cd7361358c5e53466aa5ddc284f396318a16d1
+git+https://github.com/Virelion-Biotech/Virelion-CardiAgent.git@7ff1e8d2df1e4a3988c4000ae48694fdffdbba29
