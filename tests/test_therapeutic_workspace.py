@@ -235,3 +235,10 @@ def test_cardiatlas_adapter_rejects_string_instead_of_source_id_array():
 def test_cardiep_adapter_requires_explicit_genotype_status_field():
     with pytest.raises(TherapeuticWorkspaceError, match="explicitly include genotype_status"):
         adapt_cardiep_disease_context({"source_record_ids": [], "source_provenance": []})
+
+
+def test_unreviewed_cardiatlas_record_cannot_be_promoted_to_curated():
+    record = {"record_type": "therapeutic_evidence", "id": "atlas-unreviewed", "evidence_class": "myocardial_regeneration", "evidence_ids": ["source-1"], "curation_status": "unreviewed"}
+    provenance = [{"source_identifier": "DOI:example", "source_type": "peer_reviewed", "source_url": "https://example.org/source", "source_sha256": "a" * 64}]
+    with pytest.raises(TherapeuticWorkspaceError, match="cannot be labelled curated"):
+        adapt_cardi_atlas_record(record, evidence_state="curated", component_version="1.0.0", source_provenance=provenance)
