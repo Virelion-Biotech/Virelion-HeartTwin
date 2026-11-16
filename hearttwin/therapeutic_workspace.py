@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-STRATA={"myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering"}
+STRATA={"myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering","immune_modulation"}
 EVIDENCE_STATES={"observed","curated","synthetic","simulated"}
 EVAL_DOMAINS={"cell_cycle_entry","mitosis_cytokinesis","lineage_cell_number","functional_maturation","ventricular_function_remodelling","fibrosis_scar","arrhythmia_safety","off_target_proliferation_toxicity"}
 
@@ -41,9 +41,12 @@ def validate_evidence_item(item:dict[str,Any])->list[str]:
 def validate_genotype_context(profile:dict[str,Any])->list[str]:
     errors=[]
     status=profile.get("status")
-    if status not in {"confirmed","reported","unknown"}: errors.append("genotype status must be confirmed, reported or unknown")
-    if status in {"confirmed","reported"} and not profile.get("source_record_ids"):
-        errors.append("non-unknown genotype requires source_record_ids")
+    if status not in {"confirmed","reported","curated","unknown"}: errors.append("genotype status must be confirmed, reported, curated or unknown")
+    if status in {"confirmed","reported","curated"}:
+        if not profile.get("source_record_ids"):
+            errors.append("non-unknown genotype requires source_record_ids")
+        if not profile.get("source_provenance"):
+            errors.append("non-unknown genotype requires source_provenance")
     if profile.get("inferred_by_hearttwin") is True:
         errors.append("HeartTwin must not infer genotype")
     return errors
@@ -96,3 +99,78 @@ def build_therapeutic_workspace(*, evidence_items:list[dict[str,Any]], genotype_
             "clinical_efficacy_claim":False
         }
     }
+
+
+# Explicit adapters keep upstream component vocabularies visible and prevent
+# silent semantic coercion at the HeartTwin boundary.
+_ATLAS_STRATA = {
+    "myocardial_regeneration": "myocardial_regeneration",
+    "myocardial_repair": "myocardial_repair_preservation",
+    "myocardial_preservation": "myocardial_repair_preservation",
+    "genetic_disease_modification": "genetic_disease_modification",
+    "vascular_tissue_engineering": "vascular_tissue_engineering",
+    "immune_modulation": "immune_modulation",
+}
+_CARDIEVAL_DOMAINS = {
+    "cell_cycle_entry": "cell_cycle_entry",
+    "mitosis_cytokinesis": "mitosis_cytokinesis",
+    "cardiomyocyte_number_lineage": "lineage_cell_number",
+    "functional_maturation": "functional_maturation",
+    "ventricular_function_remodelling": "ventricular_function_remodelling",
+    "fibrosis_scar": "fibrosis_scar",
+    "arrhythmia_safety": "arrhythmia_safety",
+    "off_target_toxicity": "off_target_proliferation_toxicity",
+}
+
+def adapt_cardi_atlas_record(
+    record: dict[str, Any], *, evidence_state: str, component_version: str,
+    source_provenance: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Convert one CardiAtlas therapeutic record without inferring evidence state."""
+    if not isinstance(record, dict) or record.get("record_type") != "therapeutic_evidence":
+        raise TherapeuticWorkspaceError("CardiAtlas adapter requires a therapeutic_evidence record")
+    evidence_class = record.get("evidence_class")
+    if evidence_class not in _ATLAS_STRATA:
+        raise TherapeuticWorkspaceError(f"CardiAtlas evidence_class is not mappable: {evidence_class!r}")
+    record_id = record.get("id")
+    if not _text(record_id) or not _text(component_version):
+        raise TherapeuticWorkspaceError("CardiAtlas record id and component_version are required")
+    source_ids = record.get("evidence_ids") or record.get("source_ids") or []
+    interpretation = record.get("proposed_mechanism") or "Interpretation not supplied; no efficacy inference."
+    item = {
+        "record_id": record_id,
+        "stratum": _ATLAS_STRATA[evidence_class],
+        "evidence_state": evidence_state,
+        "source_component": "CardiAtlas",
+        "component_version": component_version,
+        "interpretation": interpretation,
+        "source_record_ids": list(source_ids),
+        "source_provenance": source_provenance,
+        "atlas_modality": record.get("modality"),
+        "target_or_genotype": record.get("target_or_genotype"),
+        "model_system": record.get("model_system"),
+        "species": record.get("species"),
+        "endpoints": record.get("endpoints", []),
+        "curation_status": record.get("curation_status", "unreviewed"),
+    }
+    errors = validate_evidence_item(item)
+    if errors:
+        raise TherapeuticWorkspaceError("; ".join(errors))
+    return item
+
+def adapt_cardi_eval_assessment(assessment: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Map CardiEval's domain vocabulary to HeartTwin's stable workspace keys."""
+    if not isinstance(assessment, dict) or not isinstance(assessment.get("domains"), list):
+        raise TherapeuticWorkspaceError("CardiEval adapter requires an assessment with a domains array")
+    mapped: dict[str, dict[str, Any]] = {}
+    for domain in assessment["domains"]:
+        if not isinstance(domain, dict) or domain.get("domain") not in _CARDIEVAL_DOMAINS:
+            raise TherapeuticWorkspaceError("CardiEval assessment contains an unknown or malformed domain")
+        key = _CARDIEVAL_DOMAINS[domain["domain"]]
+        if key in mapped:
+            raise TherapeuticWorkspaceError(f"duplicate CardiEval domain after mapping: {key}")
+        mapped[key] = {k: v for k, v in domain.items() if k != "domain"}
+    if set(mapped) != EVAL_DOMAINS:
+        missing = sorted(EVAL_DOMAINS - set(mapped))
+        raise TherapeuticWorkspaceError("CardiEval assessment is incomplete after mapping: " + ", ".join(missing))
+    return mapped
