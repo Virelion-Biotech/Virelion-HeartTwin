@@ -61,12 +61,12 @@ def validate_evidence_item(item: dict[str, Any]) -> list[str]:
     state = item.get("evidence_state")
     if not isinstance(state, str) or state not in EVIDENCE_STATES:
         errors.append("evidence_state is unsupported")
-    if state in {"observed", "curated"}:
+    if isinstance(state, str) and state in {"observed", "curated"}:
         if not _valid_source_ids(item.get("source_record_ids")):
             errors.append("observed/curated evidence requires non-empty string source_record_ids")
         if not _valid_source_provenance(item.get("source_provenance")):
             errors.append("observed/curated evidence requires complete source_provenance with identifier, type, HTTP(S) URL and SHA-256")
-    if state in {"synthetic", "simulated"}:
+    if isinstance(state, str) and state in {"synthetic", "simulated"}:
         if not _valid_seed(item.get("seed")) or not _text(item.get("generator_version")):
             errors.append("synthetic/simulated evidence requires an integer seed and generator_version")
     if item.get("evaluation_dimensions") is not None:
@@ -86,7 +86,7 @@ def validate_genotype_context(profile: dict[str, Any]) -> list[str]:
     status = profile.get("status")
     if not isinstance(status, str) or status not in {"confirmed", "reported", "curated", "unknown"}:
         errors.append("genotype status must be confirmed, reported, curated or unknown")
-    if status in {"confirmed", "reported", "curated"}:
+    if isinstance(status, str) and status in {"confirmed", "reported", "curated"}:
         if not _valid_source_ids(profile.get("source_record_ids")):
             errors.append("non-unknown genotype requires non-empty string source_record_ids")
         if not _valid_source_provenance(profile.get("source_provenance")):
