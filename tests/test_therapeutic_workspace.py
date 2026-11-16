@@ -32,13 +32,15 @@ def test_synthetic_challenge_requires_seed_and_generator_version():
         build_therapeutic_workspace(evidence_items=[],synthetic_challenges=[{"evidence_state":"synthetic"}])
 
 def test_unsupported_therapy_backend_is_rejected():
-    with pytest.raises(TherapeuticWorkspaceError,match="not explicitly registered"):
-        validate_intervention_request({"backend":"future_backend","backend_status":"unknown"})
-    validate_intervention_request({"backend":"cardiep_pacing","backend_status":"supported","modality":"pacing","execution_authorized":True})
+    with pytest.raises(TherapeuticWorkspaceError, match="trusted registered-backend allow-list"):
+        validate_intervention_request({"backend":"cardiep_pacing","backend_status":"supported","modality":"pacing","execution_authorized":True})
+    with pytest.raises(TherapeuticWorkspaceError, match="trusted registered-backend allow-list"):
+        validate_intervention_request({"backend":"future_backend","backend_status":"supported"}, registered_backends={"cardiep_pacing"})
+    validate_intervention_request({"backend":"cardiep_pacing","backend_status":"untrusted caller text","modality":"pacing","execution_authorized":True}, registered_backends={"cardiep_pacing"})
 
 def test_regenerative_intervention_requires_explicit_authorization():
     with pytest.raises(TherapeuticWorkspaceError,match="explicit supported-backend authorization"):
-        validate_intervention_request({"backend":"supported","backend_status":"supported","modality":"cell_therapy","execution_authorized":False})
+        validate_intervention_request({"backend":"supported","backend_status":"supported","modality":"cell_therapy","execution_authorized":False}, registered_backends={"supported"})
 
 
 def test_cardi_eval_domains_are_mapped_without_losing_independent_fields():
@@ -162,3 +164,20 @@ def test_cardisim_manifest_is_flattened_for_workspace_contract():
     assert adapted["evidence_state"] == "synthetic"
     workspace = build_therapeutic_workspace(evidence_items=[], synthetic_challenges=[adapted])
     assert workspace["synthetic_challenges"][0]["seed"] == 7
+
+
+def test_malformed_workspace_inputs_fail_with_domain_errors():
+    with pytest.raises(TherapeuticWorkspaceError, match="evidence item must be an object"):
+        build_therapeutic_workspace(evidence_items=[None])
+    with pytest.raises(TherapeuticWorkspaceError, match="genotype context must be an object"):
+        build_therapeutic_workspace(evidence_items=[], genotype_profiles=[None])
+    with pytest.raises(TherapeuticWorkspaceError, match="profile must be an object"):
+        build_therapeutic_workspace(evidence_items=[], maturity_profiles=[None])
+
+
+def test_boolean_seed_and_non_http_provenance_url_are_rejected():
+    with pytest.raises(TherapeuticWorkspaceError, match="integer seed"):
+        build_therapeutic_workspace(evidence_items=[item(evidence_state="synthetic", seed=True, generator_version="fixture/1")])
+    bad = item(source_provenance=[{"source_identifier":"x", "source_type":"paper", "source_url":"javascript:alert(1)", "source_sha256":"a" * 64}])
+    with pytest.raises(TherapeuticWorkspaceError, match="HTTP\(S\) URL"):
+        build_therapeutic_workspace(evidence_items=[bad])
