@@ -1,0 +1,19 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "$id":"https://virelionbiotech.org/schemas/therapeutic-workspace.v1.schema.json",
+ "title":"HeartTwin therapeutic evidence workspace projection",
+ "type":"object",
+ "required":["contract_version","generated_at","component_versions","evidence_items","by_stratum","genotype_profiles","maturity_profiles","synthetic_challenges","interpretation_policy"],
+ "properties":{
+  "contract_version":{"const":"1.0.0"},
+  "generated_at":{"type":"string","format":"date-time"},
+  "component_versions":{"type":"object"},
+  "evidence_items":{"type":"array"},
+  "by_stratum":{"type":"object","required":["myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering"]},
+  "genotype_profiles":{"type":"array"},
+  "maturity_profiles":{"type":"array"},
+  "synthetic_challenges":{"type":"array"},
+  "interpretation_policy":{"type":"object","required":["evidence_states_remain_distinct","evaluation_dimensions_are_not_collapsed","missing_maturity_is_not_zero","genotype_is_never_inferred","unsupported_interventions_fail_closed","clinical_decision_support","clinical_efficacy_claim"]}
+ },
+ "additionalProperties":false
+}
