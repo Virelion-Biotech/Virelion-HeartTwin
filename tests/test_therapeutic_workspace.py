@@ -2,6 +2,7 @@ import pytest
 from hearttwin.therapeutic_workspace import (
     TherapeuticWorkspaceError, build_therapeutic_workspace,
     validate_intervention_request, adapt_cardi_atlas_record, adapt_cardi_eval_assessment,
+    adapt_electrotrace_genotype_profile, adapt_cardiep_disease_context, adapt_cardisim_scenario,
 )
 
 def item(**kw):
@@ -110,3 +111,54 @@ def test_native_myotrace_profile_shape_is_accepted_without_fake_global_modality(
     }
     workspace = build_therapeutic_workspace(evidence_items=[], maturity_profiles=[profile])
     assert workspace["maturity_profiles"][0]["dimensions"]["contractility_beat_mechanics"]["modality"] == "mechanical"
+
+
+def test_electrotrace_nested_genotype_context_is_adapted():
+    profile = {
+        "profile_version": "electrotrace-genotype-ep-phenotype/1.0.0",
+        "genotype_context": {
+            "status": "curated", "variants": [],
+            "source_record_ids": ["variant-1"],
+            "source_provenance": [{"source_identifier": "ClinVar:1"}],
+        },
+    }
+    adapted = adapt_electrotrace_genotype_profile(profile)
+    assert adapted["status"] == "curated"
+    assert adapted["source_component"] == "ElectroTrace"
+
+
+def test_cardiep_genotype_status_is_mapped_without_inference():
+    context = {
+        "genotype_status": "reported", "source_record_ids": ["variant-2"],
+        "source_provenance": [{"source_identifier": "registry:2"}],
+        "inferred_from_ecg": False,
+    }
+    adapted = adapt_cardiep_disease_context(context)
+    assert adapted["status"] == "reported"
+    assert adapted["source_component"] == "CardiEP"
+
+
+def test_genotype_adapter_rejects_ecg_inferred_status():
+    with pytest.raises(TherapeuticWorkspaceError, match="must not infer genotype"):
+        adapt_cardiep_disease_context({
+            "genotype_status": "unknown", "inferred_from_ecg": True,
+        })
+
+
+def test_cardisim_manifest_is_flattened_for_workspace_contract():
+    scenario = {
+        "scenario_id": "post_mi_transient_proliferation",
+        "axes": {"cell_cycle_entry": [[0.1, 0.2]]},
+        "time_days": [0.0, 1.0],
+        "fingerprint": "abc",
+        "manifest": {
+            "evidence_state": "synthetic", "seed": 7,
+            "generator_version": "cardisim-regenerative-scenarios/1.0.0",
+            "scenario_version": "1.0.0", "calibration_status": "uncalibrated_synthetic",
+            "clinical_or_therapeutic_efficacy_inference": False,
+        },
+    }
+    adapted = adapt_cardisim_scenario(scenario)
+    assert adapted["evidence_state"] == "synthetic"
+    workspace = build_therapeutic_workspace(evidence_items=[], synthetic_challenges=[adapted])
+    assert workspace["synthetic_challenges"][0]["seed"] == 7
