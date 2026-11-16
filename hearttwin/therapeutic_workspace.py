@@ -55,10 +55,11 @@ def validate_evidence_item(item: dict[str, Any]) -> list[str]:
     for key in required:
         if not _text(item.get(key)):
             errors.append(f"{key} is required")
-    if item.get("stratum") not in STRATA:
+    stratum = item.get("stratum")
+    if not isinstance(stratum, str) or stratum not in STRATA:
         errors.append("stratum is unsupported")
     state = item.get("evidence_state")
-    if state not in EVIDENCE_STATES:
+    if not isinstance(state, str) or state not in EVIDENCE_STATES:
         errors.append("evidence_state is unsupported")
     if state in {"observed", "curated"}:
         if not _valid_source_ids(item.get("source_record_ids")):
@@ -83,7 +84,7 @@ def validate_genotype_context(profile: dict[str, Any]) -> list[str]:
         return ["genotype context must be an object"]
     errors = []
     status = profile.get("status")
-    if status not in {"confirmed", "reported", "curated", "unknown"}:
+    if not isinstance(status, str) or status not in {"confirmed", "reported", "curated", "unknown"}:
         errors.append("genotype status must be confirmed, reported, curated or unknown")
     if status in {"confirmed", "reported", "curated"}:
         if not _valid_source_ids(profile.get("source_record_ids")):
@@ -107,7 +108,8 @@ def validate_intervention_request(
         or backend not in registered_backends
     ):
         raise TherapeuticWorkspaceError("virtual intervention rejected: backend is not in HeartTwin's trusted registered-backend allow-list")
-    if request.get("modality") in {"regenerative_gene_therapy", "cell_therapy", "myocardial_regeneration"} and request.get("execution_authorized") is not True:
+    modality = request.get("modality")
+    if isinstance(modality, str) and modality in {"regenerative_gene_therapy", "cell_therapy", "myocardial_regeneration"} and request.get("execution_authorized") is not True:
         raise TherapeuticWorkspaceError("regenerative intervention execution requires an explicit supported-backend authorization")
 
 def build_therapeutic_workspace(*, evidence_items:list[dict[str,Any]], genotype_profiles:list[dict[str,Any]]|None=None, maturity_profiles:list[dict[str,Any]]|None=None, synthetic_challenges:list[dict[str,Any]]|None=None, component_versions:dict[str,dict[str,str]]|None=None)->dict[str,Any]:
@@ -207,7 +209,7 @@ def adapt_cardi_atlas_record(
     if not isinstance(record, dict) or record.get("record_type") != "therapeutic_evidence":
         raise TherapeuticWorkspaceError("CardiAtlas adapter requires a therapeutic_evidence record")
     evidence_class = record.get("evidence_class")
-    if evidence_class not in _ATLAS_STRATA:
+    if not isinstance(evidence_class, str) or evidence_class not in _ATLAS_STRATA:
         raise TherapeuticWorkspaceError(f"CardiAtlas evidence_class is not mappable: {evidence_class!r}")
     record_id = record.get("id")
     if not _text(record_id) or not _text(component_version):
@@ -241,7 +243,7 @@ def adapt_cardi_eval_assessment(assessment: dict[str, Any]) -> dict[str, dict[st
         raise TherapeuticWorkspaceError("CardiEval adapter requires an assessment with a domains array")
     mapped: dict[str, dict[str, Any]] = {}
     for domain in assessment["domains"]:
-        if not isinstance(domain, dict) or domain.get("domain") not in _CARDIEVAL_DOMAINS:
+        if not isinstance(domain, dict) or not isinstance(domain.get("domain"), str) or domain.get("domain") not in _CARDIEVAL_DOMAINS:
             raise TherapeuticWorkspaceError("CardiEval assessment contains an unknown or malformed domain")
         key = _CARDIEVAL_DOMAINS[domain["domain"]]
         if key in mapped:
@@ -282,7 +284,7 @@ def adapt_cardisim_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(scenario, dict) or not isinstance(scenario.get("manifest"), dict):
         raise TherapeuticWorkspaceError("CardiSim scenario requires a manifest object")
     manifest = scenario["manifest"]
-    if manifest.get("evidence_state") not in {"synthetic", "simulated"}:
+    if not isinstance(manifest.get("evidence_state"), str) or manifest.get("evidence_state") not in {"synthetic", "simulated"}:
         raise TherapeuticWorkspaceError("CardiSim manifest must declare synthetic or simulated evidence_state")
     if not _valid_seed(manifest.get("seed")) or not _text(manifest.get("generator_version")):
         raise TherapeuticWorkspaceError("CardiSim manifest requires an integer seed and generator_version")
