@@ -23,8 +23,8 @@ def test_genotype_is_not_inferred():
         build_therapeutic_workspace(evidence_items=[],genotype_profiles=[{"status":"confirmed","source_record_ids":["x"],"inferred_by_hearttwin":True}])
 
 def test_missing_maturity_is_preserved_not_zeroed():
-    w=build_therapeutic_workspace(evidence_items=[],maturity_profiles=[{"modality":"video","dimensions":{"sarcomere_alignment":{"status":"not_measured"}}}])
-    assert w["maturity_profiles"][0]["dimensions"]["sarcomere_alignment"]["status"]=="not_measured"
+    w=build_therapeutic_workspace(evidence_items=[],maturity_profiles=[{"sample_id":"sample-1","timepoint":"day-7","dimensions":{"sarcomeric_organization":{"dimension":"sarcomeric_organization","status":"not_measured"}}}])
+    assert w["maturity_profiles"][0]["dimensions"]["sarcomeric_organization"]["status"]=="not_measured"
 
 def test_synthetic_challenge_requires_seed_and_generator_version():
     with pytest.raises(TherapeuticWorkspaceError,match="seed"):
@@ -90,3 +90,23 @@ def test_genotype_curated_status_matches_electrotrace_and_cardiep_contracts():
         "source_provenance": [{"source_identifier": "ClinVar:example"}],
     }
     assert build_therapeutic_workspace(evidence_items=[], genotype_profiles=[profile])["genotype_profiles"] == [profile]
+
+
+def test_native_myotrace_profile_shape_is_accepted_without_fake_global_modality():
+    profile = {
+        "profile_version": "myotrace-maturity-profile/1.0.0",
+        "sample_id": "sample-1",
+        "timepoint": "day-14",
+        "dimensions": {
+            "sarcomeric_organization": {
+                "dimension": "sarcomeric_organization", "status": "not_measured",
+                "value": None, "modality": None,
+            },
+            "contractility_beat_mechanics": {
+                "dimension": "contractility_beat_mechanics", "status": "proxy",
+                "value": 12.0, "unit": "motion_index", "modality": "mechanical",
+            },
+        },
+    }
+    workspace = build_therapeutic_workspace(evidence_items=[], maturity_profiles=[profile])
+    assert workspace["maturity_profiles"][0]["dimensions"]["contractility_beat_mechanics"]["modality"] == "mechanical"
