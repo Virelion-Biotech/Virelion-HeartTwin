@@ -167,5 +167,5 @@ class VirelionServices:
         return build_therapeutic_workspace(**payload)
 
     def validate_therapeutic_intervention(self, request: dict[str, Any]) -> None:
-        """Fail closed unless CardiTherapy explicitly registers the requested backend."""
+        """Fail closed: no trusted CardiTherapy backend registry is wired into this facade."""
         return validate_intervention_request(request)
