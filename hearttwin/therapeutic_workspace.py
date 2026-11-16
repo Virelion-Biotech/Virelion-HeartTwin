@@ -7,6 +7,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 import re
+import math
 from urllib.parse import urlsplit
 
 STRATA={"myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering","immune_modulation"}
@@ -91,6 +92,27 @@ def validate_genotype_context(profile: dict[str, Any]) -> list[str]:
             errors.append("non-unknown genotype requires non-empty string source_record_ids")
         if not _valid_source_provenance(profile.get("source_provenance")):
             errors.append("non-unknown genotype requires complete source_provenance with identifier, type, HTTP(S) URL and SHA-256")
+    variants = profile.get("variants", [])
+    if not isinstance(variants, list):
+        errors.append("genotype variants must be an array")
+    elif status == "unknown" and variants:
+        errors.append("unknown genotype cannot contain asserted variant records")
+    elif status in {"reported", "curated", "confirmed"}:
+        for index, variant in enumerate(variants):
+            if not isinstance(variant, dict) or not _text(variant.get("gene_symbol")) or not _text(variant.get("variant_nomenclature")):
+                errors.append(f"variants[{index}] requires gene_symbol and variant_nomenclature")
+    disease_label = profile.get("disease_label", "unknown")
+    allowed_disease_labels = {"PKP2_ACM", "PLN_cardiomyopathy", "BAG3_DCM", "LAMP2_Danon", "CASQ2_arrhythmia", "other", "unknown"}
+    if not isinstance(disease_label, str) or disease_label not in allowed_disease_labels:
+        errors.append("disease_label is unsupported")
+    if disease_label != "unknown" or profile.get("phenotype_label") is not None:
+        if not _valid_source_ids(profile.get("phenotype_label_source_record_ids")):
+            errors.append("known disease/phenotype labels require phenotype_label_source_record_ids")
+        if not _valid_source_provenance(profile.get("phenotype_label_source_provenance")):
+            errors.append("known disease/phenotype labels require complete phenotype_label_source_provenance")
+        for key in ("baseline_definition", "comparator_definition", "uncertainty_reference"):
+            if not isinstance(profile.get(key), dict) or not profile[key]:
+                errors.append(f"known disease context requires {key}")
     if profile.get("inferred_by_hearttwin") is True or profile.get("inferred_from_ecg") is True:
         errors.append("HeartTwin must not infer genotype")
     return errors
@@ -248,6 +270,9 @@ def adapt_cardi_eval_assessment(assessment: dict[str, Any]) -> dict[str, dict[st
         key = _CARDIEVAL_DOMAINS[domain["domain"]]
         if key in mapped:
             raise TherapeuticWorkspaceError(f"duplicate CardiEval domain after mapping: {key}")
+        status = domain.get("status")
+        if not isinstance(status, str) or status not in {"direct_support", "surrogate_support", "no_support", "adverse_signal", "mixed", "not_reported", "not_assessed"}:
+            raise TherapeuticWorkspaceError(f"CardiEval domain {domain['domain']!r} has an unsupported or missing status")
         mapped[key] = {k: v for k, v in domain.items() if k != "domain"}
     if set(mapped) != EVAL_DOMAINS:
         missing = sorted(EVAL_DOMAINS - set(mapped))
@@ -288,11 +313,28 @@ def adapt_cardisim_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
         raise TherapeuticWorkspaceError("CardiSim manifest must declare synthetic or simulated evidence_state")
     if not _valid_seed(manifest.get("seed")) or not _text(manifest.get("generator_version")):
         raise TherapeuticWorkspaceError("CardiSim manifest requires an integer seed and generator_version")
+    scenario_id = scenario.get("scenario_id")
+    axes = scenario.get("axes")
+    time_days = scenario.get("time_days")
+    fingerprint = scenario.get("fingerprint")
+    if not _text(scenario_id) or not isinstance(axes, dict) or not axes:
+        raise TherapeuticWorkspaceError("CardiSim scenario requires scenario_id and non-empty axes object")
+    if not isinstance(time_days, list) or not time_days or any(isinstance(t, bool) or not isinstance(t, (int, float)) or not math.isfinite(t) for t in time_days):
+        raise TherapeuticWorkspaceError("CardiSim time_days must be a non-empty finite numeric array")
+    if any(right <= left for left, right in zip(time_days, time_days[1:])):
+        raise TherapeuticWorkspaceError("CardiSim time_days must be strictly increasing")
+    for axis_name, samples in axes.items():
+        if not _text(axis_name) or not isinstance(samples, list) or not samples:
+            raise TherapeuticWorkspaceError("CardiSim axes must map names to non-empty sample arrays")
+        if any(not isinstance(row, list) or len(row) != len(time_days) or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in row) for row in samples):
+            raise TherapeuticWorkspaceError(f"CardiSim axis {axis_name!r} has malformed sample/time dimensions")
+    if not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", fingerprint):
+        raise TherapeuticWorkspaceError("CardiSim fingerprint must be a 64-character SHA-256 digest")
     return {
-        "scenario_id": scenario.get("scenario_id"),
-        "axes": scenario.get("axes"),
-        "time_days": scenario.get("time_days"),
-        "fingerprint": scenario.get("fingerprint"),
+        "scenario_id": scenario_id,
+        "axes": axes,
+        "time_days": time_days,
+        "fingerprint": fingerprint,
         "evidence_state": manifest["evidence_state"],
         "seed": manifest["seed"],
         "generator_version": manifest["generator_version"],
