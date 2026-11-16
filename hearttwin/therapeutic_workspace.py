@@ -240,7 +240,7 @@ def adapt_cardi_atlas_record(
     if not isinstance(source_ids, list):
         raise TherapeuticWorkspaceError("CardiAtlas evidence_ids/source_ids must be an array")
     curation_status = record.get("curation_status", "unreviewed")
-    if curation_status not in {"unreviewed", "source_checked", "expert_reviewed"}:
+    if not isinstance(curation_status, str) or curation_status not in {"unreviewed", "source_checked", "expert_reviewed"}:
         raise TherapeuticWorkspaceError("CardiAtlas curation_status is unsupported")
     if evidence_state == "curated" and curation_status not in {"source_checked", "expert_reviewed"}:
         raise TherapeuticWorkspaceError("CardiAtlas record cannot be labelled curated before source_checked or expert_reviewed curation")
