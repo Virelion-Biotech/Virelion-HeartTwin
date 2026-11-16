@@ -1,0 +1,66 @@
+name: Regenerative PR stack integration
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regenerative-pr-stack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  candidate-stack:
+    name: Python ${{ matrix.python-version }} · nine PR candidate stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout HeartTwin
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade packaging tools
+        run: python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install HeartTwin
+        run: python -m pip install -e '.[dev]'
+
+      - name: Install immutable candidate component PR commits
+        run: python -m pip install --no-cache-dir -r requirements-services-regenerative-prs.txt
+
+      - name: Validate candidate service registry
+        env:
+          HEARTTWIN_REQUIRE_NATIVE: "1"
+        run: hearttwin doctor
+
+      - name: Run regenerative workspace adapter tests
+        run: python -m pytest -q tests/test_therapeutic_workspace.py
+
+      - name: Run full Virelion stack integration tests
+        env:
+          HEARTTWIN_REQUIRE_NATIVE: "1"
+        run: |
+          python -m pytest -q \
+            tests/test_stack_continuity_canary.py \
+            tests/test_native_service_connections.py \
+            tests/test_multimodal_workflow.py \
+            tests/test_cardiep_native_engine.py \
+            tests/test_ep_calibration_workflow.py \
+            tests/test_mechanistic_workflow.py \
+            tests/test_mechanistic_pipe.py
+
+      - name: Run complete HeartTwin test suite
+        env:
+          HEARTTWIN_REQUIRE_NATIVE: "1"
+        run: python -m pytest -q
