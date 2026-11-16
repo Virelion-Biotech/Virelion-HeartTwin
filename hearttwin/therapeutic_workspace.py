@@ -71,9 +71,14 @@ def build_therapeutic_workspace(*, evidence_items:list[dict[str,Any]], genotype_
     for i,p in enumerate(genotypes):
         errors.extend(f"genotype_profiles[{i}]: {e}" for e in validate_genotype_context(p))
     for i,p in enumerate(maturity_profiles or []):
-        if not _text(p.get("modality")) or not isinstance(p.get("dimensions"),dict):
-            errors.append(f"maturity_profiles[{i}]: modality and dimensions are required")
-        # Missing dimensions stay missing; never coerce to zero.
+        if not isinstance(p.get("dimensions"),dict) or not p.get("dimensions"):
+            errors.append(f"maturity_profiles[{i}]: non-empty dimensions object is required")
+        if not _text(p.get("sample_id")) or not _text(p.get("timepoint")):
+            errors.append(f"maturity_profiles[{i}]: sample_id and timepoint are required")
+        for name, measurement in (p.get("dimensions") or {}).items():
+            if not isinstance(measurement,dict) or measurement.get("dimension") != name:
+                errors.append(f"maturity_profiles[{i}]: malformed dimension record {name!r}")
+        # MyoTrace stores modality per dimension; missing dimensions stay missing and are never coerced to zero.
     for i,c in enumerate(synthetic_challenges or []):
         if c.get("evidence_state") not in {"synthetic","simulated"} or c.get("seed") is None or not _text(c.get("generator_version")):
             errors.append(f"synthetic_challenges[{i}]: synthetic/simulated state, seed and generator_version are required")
