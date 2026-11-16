@@ -6,7 +6,7 @@ from hearttwin.therapeutic_workspace import (
 )
 
 def item(**kw):
-    v={"record_id":"atlas-ev-1","stratum":"myocardial_regeneration","evidence_state":"curated","source_component":"CardiAtlas","component_version":"0.9.0","interpretation":"division-supporting evidence; maturation not established","source_record_ids":["ev-1"],"source_provenance":[{"source_type":"peer_reviewed","source_identifier":"DOI:10.1000/x"}],"evaluation_dimensions":{"cell_cycle_entry":{"status":"assessed"},"functional_maturation":{"status":"not_assessed"}}}
+    v={"record_id":"atlas-ev-1","stratum":"myocardial_regeneration","evidence_state":"curated","source_component":"CardiAtlas","component_version":"0.9.0","interpretation":"division-supporting evidence; maturation not established","source_record_ids":["ev-1"],"source_provenance":[{"source_type":"peer_reviewed","source_identifier":"DOI:10.1000/x","source_url":"https://example.org/x","source_sha256":"a"*64}],"evaluation_dimensions":{"cell_cycle_entry":{"status":"assessed"},"functional_maturation":{"status":"not_assessed"}}}
     v.update(kw); return v
 
 def test_workspace_keeps_strata_and_evidence_state_separate():
@@ -70,7 +70,7 @@ def test_cardi_atlas_strata_are_mapped_explicitly():
     }
     adapted = adapt_cardi_atlas_record(
         record, evidence_state="curated", component_version="1.0.0",
-        source_provenance=[{"source_identifier": "DOI:example"}],
+        source_provenance=[{"source_identifier": "DOI:example", "source_type": "peer_reviewed", "source_url": "https://example.org/doi", "source_sha256": "b" * 64}],
     )
     assert adapted["stratum"] == "myocardial_repair_preservation"
     assert adapted["evidence_state"] == "curated"
@@ -88,7 +88,7 @@ def test_cardi_atlas_adapter_does_not_coerce_other_class():
 def test_genotype_curated_status_matches_electrotrace_and_cardiep_contracts():
     profile = {
         "status": "curated", "source_record_ids": ["variant-1"],
-        "source_provenance": [{"source_identifier": "ClinVar:example"}],
+        "source_provenance": [{"source_identifier": "ClinVar:example", "source_type": "clinical_registry", "source_url": "https://example.org/clinvar", "source_sha256": "c" * 64}],
     }
     assert build_therapeutic_workspace(evidence_items=[], genotype_profiles=[profile])["genotype_profiles"] == [profile]
 
@@ -119,7 +119,7 @@ def test_electrotrace_nested_genotype_context_is_adapted():
         "genotype_context": {
             "status": "curated", "variants": [],
             "source_record_ids": ["variant-1"],
-            "source_provenance": [{"source_identifier": "ClinVar:1"}],
+            "source_provenance": [{"source_identifier": "ClinVar:1", "source_type": "clinical_registry", "source_url": "https://example.org/clinvar/1", "source_sha256": "d" * 64}],
         },
     }
     adapted = adapt_electrotrace_genotype_profile(profile)
@@ -130,7 +130,7 @@ def test_electrotrace_nested_genotype_context_is_adapted():
 def test_cardiep_genotype_status_is_mapped_without_inference():
     context = {
         "genotype_status": "reported", "source_record_ids": ["variant-2"],
-        "source_provenance": [{"source_identifier": "registry:2"}],
+        "source_provenance": [{"source_identifier": "registry:2", "source_type": "clinical_registry", "source_url": "https://example.org/registry/2", "source_sha256": "e" * 64}],
         "inferred_from_ecg": False,
     }
     adapted = adapt_cardiep_disease_context(context)
