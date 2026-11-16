@@ -97,7 +97,7 @@ def validate_genotype_context(profile: dict[str, Any]) -> list[str]:
         errors.append("genotype variants must be an array")
     elif status == "unknown" and variants:
         errors.append("unknown genotype cannot contain asserted variant records")
-    elif status in {"reported", "curated", "confirmed"}:
+    elif isinstance(status, str) and status in {"reported", "curated", "confirmed"}:
         for index, variant in enumerate(variants):
             if not isinstance(variant, dict) or not _text(variant.get("gene_symbol")) or not _text(variant.get("variant_nomenclature")):
                 errors.append(f"variants[{index}] requires gene_symbol and variant_nomenclature")
@@ -176,7 +176,7 @@ def build_therapeutic_workspace(*, evidence_items:list[dict[str,Any]], genotype_
         if not isinstance(challenge, dict):
             errors.append(f"synthetic_challenges[{i}]: challenge must be an object")
             continue
-        if challenge.get("evidence_state") not in {"synthetic", "simulated"} or not _valid_seed(challenge.get("seed")) or not _text(challenge.get("generator_version")):
+        if not isinstance(challenge.get("evidence_state"), str) or challenge.get("evidence_state") not in {"synthetic", "simulated"} or not _valid_seed(challenge.get("seed")) or not _text(challenge.get("generator_version")):
             errors.append(f"synthetic_challenges[{i}]: synthetic/simulated state, integer seed and generator_version are required")
     if errors: raise TherapeuticWorkspaceError("\n".join(errors))
     by_stratum={s:[] for s in sorted(STRATA)}
