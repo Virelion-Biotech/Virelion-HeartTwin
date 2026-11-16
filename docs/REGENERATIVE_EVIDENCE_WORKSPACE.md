@@ -5,12 +5,12 @@ HeartTwin's therapeutic workspace is a read-model boundary over component output
 ## Boundaries
 
 - Evidence state is explicit: observed, curated, synthetic or simulated. These labels remain visible in the returned projection.
-- Four therapeutic strata remain separate: myocardial regeneration, myocardial repair/preservation, genetic disease modification and vascular tissue engineering.
+- CardiBench's four benchmark strata remain separate: myocardial regeneration, myocardial repair/preservation, genetic disease modification and vascular tissue engineering. CardiAtlas's `immune_modulation` class is retained as a separate HeartTwin workspace-only grouping; it is not represented as a fifth CardiBench benchmark stratum.
 - CardiEval dimensions remain independent: cell-cycle entry, mitosis/cytokinesis, lineage/cell number, functional maturation, ventricular function/remodelling, fibrosis/scar, arrhythmia safety and off-target proliferation/toxicity. No default composite score is computed.
 - MyoTrace modality-specific missingness is preserved; a missing maturity dimension is not zero.
 - Genotype is only accepted as confirmed/reported with source record IDs, or unknown. HeartTwin never infers a genotype from phenotype.
 - Synthetic challenge records require a seed and generator version and remain labelled synthetic/simulated.
-- Virtual interventions are rejected unless CardiTherapy explicitly reports a supported backend; regenerative intervention execution additionally requires explicit authorization.
+- Virtual interventions fail closed unless the backend name is present in a trusted, service-configured allow-list; caller-supplied `backend_status` is not trusted. The current `VirelionServices` facade does not inject such a registry, so all intervention requests are rejected. CardiTherapy's pending feature PR declares no regenerative or vascular execution backend. Regenerative execution would additionally require explicit authorization.
 
 ## API
 
