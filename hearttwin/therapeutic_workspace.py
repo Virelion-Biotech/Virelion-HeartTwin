@@ -6,6 +6,7 @@ infer genotype, score clinical efficacy, or execute unsupported virtual therapie
 from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
+import re
 
 STRATA={"myocardial_regeneration","myocardial_repair_preservation","genetic_disease_modification","vascular_tissue_engineering","immune_modulation"}
 EVIDENCE_STATES={"observed","curated","synthetic","simulated"}
@@ -15,6 +16,20 @@ class TherapeuticWorkspaceError(ValueError):
     """Raised when an evidence item cannot be represented without unsafe inference."""
 
 def _text(v): return isinstance(v,str) and bool(v.strip())
+
+def _valid_source_provenance(sources: Any) -> bool:
+    if not isinstance(sources, list) or not sources:
+        return False
+    for source in sources:
+        if not isinstance(source, dict):
+            return False
+        source_url = source.get("source_url") or source.get("canonical_source_url")
+        digest = source.get("source_sha256")
+        if not all(_text(source.get(key)) for key in ("source_identifier", "source_type")):
+            return False
+        if not _text(source_url) or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+            return False
+    return True
 
 def validate_evidence_item(item:dict[str,Any])->list[str]:
     errors=[]
@@ -26,7 +41,7 @@ def validate_evidence_item(item:dict[str,Any])->list[str]:
     if state not in EVIDENCE_STATES: errors.append("evidence_state is unsupported")
     if state in {"observed","curated"}:
         if not item.get("source_record_ids"): errors.append("observed/curated evidence requires source_record_ids")
-        if not item.get("source_provenance"): errors.append("observed/curated evidence requires source_provenance")
+        if not _valid_source_provenance(item.get("source_provenance")): errors.append("observed/curated evidence requires complete source_provenance with identifier, type, URL and SHA-256")
     if state in {"synthetic","simulated"}:
         if item.get("seed") is None or not _text(item.get("generator_version")):
             errors.append("synthetic/simulated evidence requires seed and generator_version")
@@ -45,8 +60,8 @@ def validate_genotype_context(profile:dict[str,Any])->list[str]:
     if status in {"confirmed","reported","curated"}:
         if not profile.get("source_record_ids"):
             errors.append("non-unknown genotype requires source_record_ids")
-        if not profile.get("source_provenance"):
-            errors.append("non-unknown genotype requires source_provenance")
+        if not _valid_source_provenance(profile.get("source_provenance")):
+            errors.append("non-unknown genotype requires complete source_provenance with identifier, type, URL and SHA-256")
     if profile.get("inferred_by_hearttwin") is True or profile.get("inferred_from_ecg") is True:
         errors.append("HeartTwin must not infer genotype")
     return errors
