@@ -224,3 +224,14 @@ def test_cardisim_adapter_rejects_invalid_fingerprint_and_time_axis():
     }
     with pytest.raises(TherapeuticWorkspaceError, match="SHA-256"):
         adapt_cardisim_scenario(scenario)
+
+
+def test_cardiatlas_adapter_rejects_string_instead_of_source_id_array():
+    record = {"record_type": "therapeutic_evidence", "id": "atlas-3", "evidence_class": "myocardial_regeneration", "evidence_ids": "source-1"}
+    with pytest.raises(TherapeuticWorkspaceError, match="must be an array"):
+        adapt_cardi_atlas_record(record, evidence_state="curated", component_version="1.0.0", source_provenance=[])
+
+
+def test_cardiep_adapter_requires_explicit_genotype_status_field():
+    with pytest.raises(TherapeuticWorkspaceError, match="explicitly include genotype_status"):
+        adapt_cardiep_disease_context({"source_record_ids": [], "source_provenance": []})
