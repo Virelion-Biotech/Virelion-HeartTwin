@@ -112,9 +112,11 @@ from .cardiac_twin import (
 )
 
 from .patient_store import PatientCaseStore, RevisionConflict
+from .therapeutic_workspace import (TherapeuticWorkspaceError, adapt_cardi_atlas_record, adapt_cardi_eval_assessment, adapt_cardiep_disease_context, adapt_cardisim_scenario, adapt_electrotrace_genotype_profile, build_therapeutic_workspace, validate_evidence_item, validate_genotype_context, validate_intervention_request)
 
 __all__ = [
     "PatientCaseStore", "RevisionConflict",
+    "TherapeuticWorkspaceError", "adapt_cardi_atlas_record", "adapt_cardi_eval_assessment", "adapt_cardiep_disease_context", "adapt_cardisim_scenario", "adapt_electrotrace_genotype_profile", "build_therapeutic_workspace", "validate_evidence_item", "validate_genotype_context", "validate_intervention_request",
     "HeartTwin", "VirelionServices", "load_registry",
     "CardiacState", "Observation", "AlignmentPolicy", "AlignmentReport",
     "Provenance", "ServiceResult", "TwinRun",

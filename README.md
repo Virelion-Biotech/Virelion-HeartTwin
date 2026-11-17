@@ -458,3 +458,8 @@ Patient workflows now include visit/state tracking, guided scalar/curve imports,
 provenance-bearing native service plans, explicit cross-module handoffs and
 curve/labelled-field calibration. See [patient lifecycle](docs/PATIENT_LIFECYCLE.md#patient-native-workflow-completion)
 for bindings, the circulation task builder, and native solver boundaries.
+
+
+## Regenerative evidence workspace (contract v1)
+
+HeartTwin exposes a source-labelled therapeutic evidence projection through `VirelionServices.therapeutic_workspace(...)`. It keeps CardiAtlas-curated evidence, CardiBench's four therapeutic strata, CardiEval's independent regeneration dimensions, MyoTrace modality-specific missingness, ElectroTrace genotype provenance and CardiSim synthetic challenges distinct. Genotype is never inferred, synthetic records require seed/generator provenance, and unsupported CardiTherapy backends fail closed. This projection does not alter canonical CardiacState 1.4.0 or imply clinical decision support. See [workspace contract](docs/REGENERATIVE_EVIDENCE_WORKSPACE.md) and [version-pinned source snapshot](docs/REGENERATIVE_EVIDENCE_COMPATIBILITY_V1.json).

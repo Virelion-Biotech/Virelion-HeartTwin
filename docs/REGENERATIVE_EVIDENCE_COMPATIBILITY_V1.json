@@ -1,0 +1,136 @@
+{
+  "matrix_id": "hearttwin-regenerative-evidence-snapshot",
+  "matrix_version": "1.0.0",
+  "captured_at": "2026-11-16",
+  "target": "main-branch source contract snapshot",
+  "components": {
+    "CardiAtlas": {
+      "repository": "Virelion-Biotech/Virelion-CardiAtlas",
+      "version": "0.9.0",
+      "commit": "f42eb2fce337e135fdaf9b1e4f313e653b4f44c4"
+    },
+    "CardiBench": {
+      "repository": "Virelion-Biotech/Virelion-CardiBench",
+      "version": "0.10.0",
+      "commit": "6ce29fca287c30a4170b54c3fb46d6067bda6ea1"
+    },
+    "CardiEval": {
+      "repository": "Virelion-Biotech/Virelion-CardiEval",
+      "version": "1.5.0",
+      "commit": "7d51e2d5b45f7b54a5f066ccf46c1bf0eb3edc7d"
+    },
+    "CardiSim": {
+      "repository": "Virelion-Biotech/Virelion-CardiSim",
+      "version": "0.4.0",
+      "commit": "1e1726707c94a91657818a5e556040c6958a72fc"
+    },
+    "ElectroTrace": {
+      "repository": "Virelion-Biotech/Virelion-ElectroTrace",
+      "version": "1.10.0",
+      "commit": "8d12323bc9ced4cc6201eefad2421ef7693504de"
+    },
+    "MyoTrace": {
+      "repository": "Virelion-Biotech/Virelion-MyoTrace",
+      "version": "0.5.0",
+      "commit": "08ed2cbdee67e9aea147b2f953f9ca31c09acb80"
+    },
+    "CardiTherapy": {
+      "repository": "Virelion-Biotech/Virelion-CardiTherapy",
+      "version": "0.3.0",
+      "commit": "5e6f07f379ba89880837d97191a527adfe385c59"
+    },
+    "CardiTrace": {
+      "repository": "Virelion-Biotech/Virelion-CardiTrace",
+      "version": "0.4.1",
+      "commit": "28e2f1c1baaa6cf5eebbe5d648953cc04faee525"
+    },
+    "CardiEP": {
+      "repository": "Virelion-Biotech/Virelion-CardiEP",
+      "version": "0.3.0",
+      "commit": "4a96aa77087ed98341d877c4a026f7ecdfb92fb7"
+    }
+  },
+  "qualification": "baseline source commits only; pending feature branches are separately identified and are not yet qualified as one integrated runtime matrix",
+  "warning": "The pending feature branches listed below are not represented by the baseline component pins until merged, released and repinned. Passing CI in individual repositories does not establish cross-repository runtime compatibility.",
+  "audited_at": "2026-11-17",
+  "pending_feature_branches": [
+    {
+      "component": "CardiAtlas",
+      "repository": "Virelion-Biotech/Virelion-CardiAtlas",
+      "pr": 19,
+      "branch": "feat/modality-aware-therapeutic-evidence",
+      "head_commit": "176df831c347149b999104a73f5034e00ebbc7c7",
+      "base_commit": "f42eb2fce337e135fdaf9b1e4f313e653b4f44c4"
+    },
+    {
+      "component": "CardiEval",
+      "repository": "Virelion-Biotech/Virelion-CardiEval",
+      "pr": 23,
+      "branch": "feat/regeneration-repair-evidence-assessment",
+      "head_commit": "deae7f41b41101b2ca1c8abbc9c1b9cf27b560fe",
+      "base_commit": "7d51e2d5b45f7b54a5f066ccf46c1bf0eb3edc7d"
+    },
+    {
+      "component": "CardiBench",
+      "repository": "Virelion-Biotech/Virelion-CardiBench",
+      "pr": 17,
+      "branch": "feat/cardiac-therapeutics-benchmark-v1",
+      "head_commit": "7eb6fee859bc03c483c4a5febbb2dd1f761a3bb0",
+      "base_commit": "6ce29fca287c30a4170b54c3fb46d6067bda6ea1"
+    },
+    {
+      "component": "CardiTrace",
+      "repository": "Virelion-Biotech/Virelion-CardiTrace",
+      "pr": 14,
+      "branch": "feat/therapeutic-claim-provenance",
+      "head_commit": "536769dd8b16898f9936fd4d6c3f673f37194cb4",
+      "base_commit": "28e2f1c1baaa6cf5eebbe5d648953cc04faee525"
+    },
+    {
+      "component": "CardiSim",
+      "repository": "Virelion-Biotech/Virelion-CardiSim",
+      "pr": 16,
+      "branch": "feat/regenerative-challenge-presets",
+      "head_commit": "1eba0e811088bccb0bb74152840cceb85d6f7621",
+      "base_commit": "1e1726707c94a91657818a5e556040c6958a72fc"
+    },
+    {
+      "component": "ElectroTrace",
+      "repository": "Virelion-Biotech/Virelion-ElectroTrace",
+      "pr": 100,
+      "branch": "feat/genotype-aware-ep-phenotypes",
+      "head_commit": "0e34821e3e8cc3245dec92cff62b9018fc57f909",
+      "base_commit": "8d12323bc9ced4cc6201eefad2421ef7693504de"
+    },
+    {
+      "component": "MyoTrace",
+      "repository": "Virelion-Biotech/Virelion-MyoTrace",
+      "pr": 18,
+      "branch": "feat/multidimensional-maturity-profile",
+      "head_commit": "bdf3ee7ad9a0cead89a4e3c81bf31483ba3fb2bc",
+      "base_commit": "08ed2cbdee67e9aea147b2f953f9ca31c09acb80"
+    },
+    {
+      "component": "CardiTherapy",
+      "repository": "Virelion-Biotech/Virelion-CardiTherapy",
+      "pr": 16,
+      "branch": "feat/regenerative-intervention-contracts",
+      "head_commit": "ab44184bd4f6a9b1a361661ee16f4a012123801d",
+      "base_commit": "5e6f07f379ba89880837d97191a527adfe385c59"
+    },
+    {
+      "component": "CardiEP",
+      "repository": "Virelion-Biotech/Virelion-CardiEP",
+      "pr": 37,
+      "branch": "feat/genotype-aware-ep-disease-context",
+      "head_commit": "877ac5acd947d2283cd6f69e04d69b1e1811fcb2",
+      "base_commit": "4a96aa77087ed98341d877c4a026f7ecdfb92fb7"
+    }
+  ],
+  "candidate_integration_matrix": {
+    "requirements_file": "requirements-services-regenerative-prs.txt",
+    "workflow_file": ".github/workflows/regenerative-pr-stack.yml",
+    "coverage": "All nine open regenerative/precision-cardiology PR head commits are installed together; remaining components stay on frozen matrix v14.",
+    "qualification": "CI pending; passing this workflow would establish software/interface compatibility for this exact candidate stack only, not scientific or clinical validity."
+  }
+}

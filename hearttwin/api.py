@@ -13,6 +13,7 @@ from .patient_model import PatientCase, PatientEPWorkflowSpec
 from .patient_ecg_artifacts import evaluate_patient_ep_holdouts
 from .patient_report import build_patient_model_report
 from .patient_trace import record_patient_trace
+from .therapeutic_workspace import build_therapeutic_workspace, validate_intervention_request
 
 
 class VirelionServices:
@@ -160,3 +161,11 @@ class VirelionServices:
     def benchmark_admission(self, **p: Any): return self._invoke("benchmark.admission.assess", p)
     def benchmark_record_result(self, entity_id: str, **p: Any): return self.call("benchmark.result.record", entity_id, **p)
     def benchmark_results(self, **p: Any): return self._invoke("benchmark.results", p)
+
+    def therapeutic_workspace(self, **payload: Any) -> dict[str, Any]:
+        """Build a source-labelled regenerative evidence workspace from curated component outputs."""
+        return build_therapeutic_workspace(**payload)
+
+    def validate_therapeutic_intervention(self, request: dict[str, Any]) -> None:
+        """Fail closed: no trusted CardiTherapy backend registry is wired into this facade."""
+        return validate_intervention_request(request)
